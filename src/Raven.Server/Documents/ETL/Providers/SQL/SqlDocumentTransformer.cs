@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using Jint;
 using Jint.Native;
 using Raven.Client.Documents.Attachments;
@@ -72,29 +73,29 @@ namespace Raven.Server.Documents.ETL.Providers.SQL
             for (var i = 0; i < blittableJsonReaderObject.Count; i++)
             {
                 blittableJsonReaderObject.GetPropertyByIndex(i, ref prop);
-                
+
+                var sqlColumn = new SqlColumn
+                {
+                    Key = prop.Name,
+                    Value = prop.Value,
+                    Type = prop.Token
+                };
+
                 if (_config.HasLoadAttachment && prop.Token == BlittableJsonToken.String && IsLoadAttachment(prop.Value as LazyStringValue, out var attachmentName))
                 {
-                    var stream =
-                        _database.DocumentsStorage.AttachmentsStorage.GetAttachment(Context, Current.DocumentKey, attachmentName, AttachmentType.Document,
-                            Current.Document.ChangeVector).Stream;
+                    var attachmentStream = _database.DocumentsStorage.AttachmentsStorage.GetAttachment(
+                                                   Context,
+                                                   Current.DocumentKey,
+                                                   attachmentName,
+                                                   AttachmentType.Document,
+                                                   Current.Document.ChangeVector)
+                                               ?.Stream ?? Stream.Null;
 
-                    columns.Add(new SqlColumn
-                    {
-                        Key = prop.Name,
-                        Value = stream,
-                        Type = 0,
-                    });
+                    sqlColumn.Type = 0;
+                    sqlColumn.Value = attachmentStream;
                 }
-                else
-                {
-                    columns.Add(new SqlColumn
-                    {
-                        Key = prop.Name,
-                        Value = prop.Value,
-                        Type = prop.Token,
-                    });
-                }
+
+                columns.Add(sqlColumn);
             }
             
             GetOrAdd(tableName).Inserts.Add(new ToSqlItem(Current)
@@ -113,18 +114,8 @@ namespace Raven.Server.Documents.ETL.Providers.SQL
 
             var buffer = value.Buffer;
 
-            if (buffer[0] != (byte)'$' ||
-                buffer[1] != (byte)'a' ||
-                buffer[2] != (byte)'t' ||
-                buffer[3] != (byte)'t' ||
-                buffer[4] != (byte)'a' ||
-                buffer[5] != (byte)'c' ||
-                buffer[6] != (byte)'h' ||
-                buffer[7] != (byte)'m' ||
-                buffer[8] != (byte)'e' ||
-                buffer[9] != (byte)'n' ||
-                buffer[10] != (byte)'t' ||
-                buffer[11] != (byte)'/')
+            if (*(long*)buffer != 7883660417928814884 || // $attachm
+                *(int*)(buffer + 8) != 796159589) // ent/
             {
                 attachmentName = null;
                 return false;
@@ -137,11 +128,6 @@ namespace Raven.Server.Documents.ETL.Providers.SQL
 
         private string LoadAttachmentFunction(string attachmentName)
         {
-            //var attachment = _database.DocumentsStorage.AttachmentsStorage.GetAttachment(Context, Current.DocumentKey, attachmentName, AttachmentType.Document,
-            //    Current.Document.ChangeVector);
-
-           // attachment.Stream = null;
-
             return $"{AttachmentMarker}{attachmentName}";
         }
 
