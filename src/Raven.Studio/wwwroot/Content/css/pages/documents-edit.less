@@ -1,4 +1,10 @@
 .editDocument {
+    display: flex;
+    .absolute-fill;
+
+    .docEditor {
+        flex-grow: 1;
+    }
 
     .documentId {
         font-weight: 300;
@@ -84,18 +90,34 @@
     .btn-tabs {
         .doc-related {
             color: #9466d5;
+
+            .badge {
+                background-color: #9466d5;
+            }
         }
 
         .doc-attachments {
             color: #50b068;
+
+            .badge {
+                background-color: #50b068;
+            }
         }
 
         .doc-recent {
             color: #198fd1;
+
+            .badge {
+                background-color: #198fd1;
+            }
         }
 
         .doc-revisions {
             color: #cfa125;
+
+            .badge {
+                background-color: #cfa125;
+            }
         }
     }
 

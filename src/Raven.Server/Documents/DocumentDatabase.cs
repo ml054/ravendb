@@ -15,6 +15,7 @@ using Raven.Server.Documents.Replication;
 using Raven.Server.Documents.Subscriptions;
 using Raven.Server.Documents.TcpHandlers;
 using Raven.Server.Documents.Transformers;
+using Raven.Server.NotificationCenter.Notifications;
 using Raven.Server.ServerWide;
 using Raven.Server.Utils;
 using Sparrow;
@@ -31,6 +32,7 @@ namespace Raven.Server.Documents
 {
     public class DocumentDatabase : IResourceStore
     {
+        private readonly ServerStore _serverStore;
         private readonly Logger _logger;
 
         private readonly CancellationTokenSource _databaseShutdown = new CancellationTokenSource();
@@ -51,35 +53,63 @@ namespace Raven.Server.Documents
             _lastIdleTicks = DateTime.MinValue.Ticks;
         }
 
+        internal void HandleNonDurableFileSystemError(object sender, NonDurabilitySupportEventArgs e)
+        {
+            _serverStore?.NotificationCenter.Add(AlertRaised.Create($"Non Durable File System - {Name ?? "Unknown Database"}",
+                e.Message,
+                AlertType.NonDurableFileSystem,
+                NotificationSeverity.Warning,
+                Name));
+        }
+
+        internal void HandleOnRecoveryError(object sender, RecoveryErrorEventArgs e)
+        {
+            _serverStore?.NotificationCenter.Add(AlertRaised.Create($"Database Recovery Error - {Name ?? "Unknown Database"}",
+                e.Message,
+                AlertType.RecoveryError,
+                NotificationSeverity.Error,
+                Name));
+        }
+
         public DocumentDatabase(string name, RavenConfiguration configuration, ServerStore serverStore)
         {
+            _logger = LoggingSource.Instance.GetLogger<DocumentDatabase>(Name);
+            _serverStore = serverStore;
             StartTime = SystemTime.UtcNow;
             Name = name;
             ResourceName = "db/" + name;
             Configuration = configuration;
-            _logger = LoggingSource.Instance.GetLogger<DocumentDatabase>(Name);
-            IoChanges = new IoChangesNotifications();
-            Changes = new DocumentsChanges();
-            DocumentsStorage = new DocumentsStorage(this);
-            IndexStore = new IndexStore(this, _indexAndTransformerLocker);
-            TransformerStore = new TransformerStore(this, _indexAndTransformerLocker);
-            EtlLoader = new EtlLoader(this);
-            DocumentReplicationLoader = new DocumentReplicationLoader(this);
-            DocumentTombstoneCleaner = new DocumentTombstoneCleaner(this);
-            SubscriptionStorage = new SubscriptionStorage(this);
-            Operations = new DatabaseOperations(this);
-            Metrics = new MetricsCountersManager();
-            Patcher = new DocumentPatcher(this);
-            TxMerger = new TransactionOperationsMerger(this, DatabaseShutdown);
-            HugeDocuments = new HugeDocuments(configuration.PerformanceHints.HugeDocumentsCollectionSize,
-                configuration.PerformanceHints.HugeDocumentSize.GetValue(SizeUnit.Bytes));
-            ConfigurationStorage = new ConfigurationStorage(this);
-            NotificationCenter = new NotificationCenter.NotificationCenter(ConfigurationStorage.NotificationsStorage, Name, _databaseShutdown.Token);
-            DatabaseInfoCache = serverStore?.DatabaseInfoCache;
-            CatastrophicFailureNotification = new CatastrophicFailureNotification(e =>
+
+            try
             {
-                serverStore?.DatabasesLandlord.UnloadResourceOnCatastrophicFailue(name, e);
-            });
+                IoChanges = new IoChangesNotifications();
+                Changes = new DocumentsChanges();
+                DocumentsStorage = new DocumentsStorage(this);
+                IndexStore = new IndexStore(this, _indexAndTransformerLocker);
+                TransformerStore = new TransformerStore(this, _indexAndTransformerLocker);
+                EtlLoader = new EtlLoader(this);
+                ReplicationLoader = new ReplicationLoader(this);
+                DocumentTombstoneCleaner = new DocumentTombstoneCleaner(this);
+                SubscriptionStorage = new SubscriptionStorage(this);
+                Operations = new DatabaseOperations(this);
+                Metrics = new MetricsCountersManager();
+                Patcher = new DocumentPatcher(this);
+                TxMerger = new TransactionOperationsMerger(this, DatabaseShutdown);
+                HugeDocuments = new HugeDocuments(configuration.PerformanceHints.HugeDocumentsCollectionSize,
+                    configuration.PerformanceHints.HugeDocumentSize.GetValue(SizeUnit.Bytes));
+                ConfigurationStorage = new ConfigurationStorage(this);
+                NotificationCenter = new NotificationCenter.NotificationCenter(ConfigurationStorage.NotificationsStorage, Name, _databaseShutdown.Token);
+                DatabaseInfoCache = serverStore?.DatabaseInfoCache;
+                CatastrophicFailureNotification = new CatastrophicFailureNotification(e =>
+                {
+                    serverStore?.DatabasesLandlord.UnloadResourceOnCatastrophicFailure(name, e);
+                });
+            }
+            catch (Exception)
+            {
+                Dispose();
+                throw;
+            }
         }
 
         public DateTime LastIdleTime => new DateTime(_lastIdleTicks);
@@ -132,7 +162,7 @@ namespace Raven.Server.Documents
 
         public IndexesEtagsStorage IndexMetadataPersistence => ConfigurationStorage.IndexesEtagsStorage;
 
-        public DocumentReplicationLoader DocumentReplicationLoader { get; private set; }
+        public ReplicationLoader ReplicationLoader { get; private set; }
 
         public EtlLoader EtlLoader { get; private set; }
 
@@ -248,7 +278,7 @@ namespace Raven.Server.Documents
             //so replication of both documents and indexes/transformers can be made within one transaction
             ConfigurationStorage.Initialize(IndexStore, TransformerStore);
 
-            DocumentReplicationLoader.Initialize();
+            ReplicationLoader.Initialize();
 
             NotificationCenter.Initialize(this);
         }
@@ -264,9 +294,19 @@ namespace Raven.Server.Documents
                     return; // double dispose?
 
                 //before we dispose of the database we take its latest info to be displayed in the studio
-                var databaseInfo = GenerateDatabaseInfo();
-                if (databaseInfo != null)
-                    DatabaseInfoCache?.InsertDatabaseInfo(databaseInfo, Name);
+                try
+                {
+                    var databaseInfo = GenerateDatabaseInfo();
+                    if (databaseInfo != null)
+                        DatabaseInfoCache?.InsertDatabaseInfo(databaseInfo, Name);
+                }
+                catch (Exception e)
+                {
+                    // if we encountered a catastrophic failure we might not be able to retrieve database info
+                    
+                    if (_logger.IsInfoEnabled)
+                        _logger.Info("Failed to generate and store database info", e);
+                }
 
                 _databaseShutdown.Cancel();
 
@@ -295,7 +335,7 @@ namespace Raven.Server.Documents
 
                 exceptionAggregator.Execute(() =>
                 {
-                    TxMerger.Dispose();
+                    TxMerger?.Dispose();
                 });
 
                 if (_indexStoreTask != null)
@@ -336,8 +376,8 @@ namespace Raven.Server.Documents
 
                 exceptionAggregator.Execute(() =>
                 {
-                    DocumentReplicationLoader?.Dispose();
-                    DocumentReplicationLoader = null;
+                    ReplicationLoader?.Dispose();
+                    ReplicationLoader = null;
                 });
 
                 exceptionAggregator.Execute(() =>
@@ -390,6 +430,7 @@ namespace Raven.Server.Documents
         }
 
         private static readonly string CachedDatabaseInfo = "CachedDatabaseInfo";
+
         public DynamicJsonValue GenerateDatabaseInfo()
         {
             var envs = GetAllStoragesEnvironment();
@@ -407,7 +448,7 @@ namespace Raven.Server.Documents
                     [nameof(Size.HumaneSize)] = size.HumaneSize,
                     [nameof(Size.SizeInBytes)] = size.SizeInBytes
                 },
-                [nameof(DatabaseInfo.Errors)] = IndexStore.GetIndexes().Sum(index => index.GetErrors().Count),
+                [nameof(DatabaseInfo.IndexingErrors)] = IndexStore.GetIndexes().Sum(index => index.GetErrorCount()),
                 [nameof(DatabaseInfo.Alerts)] = NotificationCenter.GetAlertCount(),
                 [nameof(DatabaseInfo.UpTime)] = null, //it is shutting down
                 [nameof(DatabaseInfo.BackupInfo)] = BundleLoader.GetBackupInfo(),
@@ -499,6 +540,13 @@ namespace Raven.Server.Documents
         {
             BackupMethods.Incremental.ToFile(GetAllStoragesEnvironmentInformation(), backupPath);
         }
+
+        public IEnumerable<DatabasePerformanceMetrics> GetAllPerformanceMetrics()
+        {
+            yield return TxMerger.GeneralWaitPerformanceMetrics;
+            yield return TxMerger.TransactionPerformanceMetrics;
+        }
+
     }
 
     public class StorageEnvironmentWithType

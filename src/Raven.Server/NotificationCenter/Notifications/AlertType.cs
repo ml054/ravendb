@@ -10,7 +10,6 @@ namespace Raven.Server.NotificationCenter.Notifications
         SqlEtl_ConnectionError,
         SqlEtl_ProviderError,
         SqlEtl_SlowSql,
-        SqlEtl_ConnectionStringMissing,
         
         Etl_WriteErrorRatio,
         
@@ -18,10 +17,14 @@ namespace Raven.Server.NotificationCenter.Notifications
         Replication,
         Server_NewVersionAvailable,
         LicenseManager_InitializationError,
+        LicenseManager_LeaseLicenseError,
+        LicenseManager_LicenseUpdated,
         IndexStore_IndexCouldNotBeOpened,
         TransformerStore_TransformerCouldNotBeOpened,
         WarnIndexOutputsPerDocument,
         ErrorSavingReduceOutputDocuments,
-        CatastrophicDatabaseFailue
+        CatastrophicDatabaseFailure,
+        NonDurableFileSystem,
+        RecoveryError
     }
 }

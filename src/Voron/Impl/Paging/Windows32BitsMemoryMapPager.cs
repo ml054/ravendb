@@ -241,7 +241,7 @@ namespace Voron.Impl.Paging
                 ThrowAlreadyDisposedException();
 
             if (pageNumber > NumberOfAllocatedPages || pageNumber < 0)
-                ThrowOnInvalidPageNumber(pageNumber, tx.Environment);
+                ThrowOnInvalidPageNumber(pageNumber);
 
             var state = GetTransactionState(tx);
 
@@ -533,7 +533,7 @@ namespace Voron.Impl.Paging
             using (var metric = Options.IoMetrics.MeterIoRate(FileName, IoMetrics.MeterType.DataSync, 0))
             {
                 metric.IncrementSize(totalUnsynced);
-                metric.IncrementFileSize(_totalAllocationSize);
+                metric.SetFileSize(_totalAllocationSize);
 
                 if (Win32MemoryMapNativeMethods.FlushFileBuffers(_handle) == false)
                 {
@@ -551,7 +551,7 @@ namespace Voron.Impl.Paging
             return "MemMap: " + _fileInfo.FullName;
         }
 
-        protected override PagerState AllocateMorePages(long newLength)
+        protected internal override PagerState AllocateMorePages(long newLength)
         {
             var newLengthAfterAdjustment = NearestSizeToAllocationGranularity(newLength);
 

@@ -20,15 +20,19 @@ import killOperationCommand = require("commands/operations/killOperationCommand"
 import showDataDialog = require("viewmodels/common/showDataDialog");
 import collectionsTracker = require("common/helpers/database/collectionsTracker");
 
-import smugglerDatabaseDetails = require("viewmodels/common/notificationCenter/detailViewer/smugglerDatabaseDetails");
+import smugglerDatabaseDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/smugglerDatabaseDetails");
+import patchDocumentsDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/patchDocumentsDetails");
+import deleteDocumentsDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/deleteDocumentsDetails");
+import indexingDetails = require("viewmodels/common/notificationCenter/detailViewer/performanceHint/indexingDetails");
+import pagingDetails = require("viewmodels/common/notificationCenter/detailViewer/performanceHint/pagingDetails");
 
 interface customDetailsProvider {
-    supportsDetailsFor(op: operation): boolean;
-    showDetailsFor(op: operation, killFunc: () => void): void;
+    supportsDetailsFor(notification: abstractNotification): boolean;
+    showDetailsFor(notification: abstractNotification, notificationCenter: notificationCenter): JQueryPromise<void>;
 }
 
 interface customOperationMerger {
-    merge(existing: operation, incoming: Raven.Server.NotificationCenter.Notifications.OperationChanged): boolean;
+    merge(existing: operation, incoming: Raven.Server.NotificationCenter.Notifications.OperationChanged): void;
 }
 
 class notificationCenter {
@@ -53,7 +57,7 @@ class notificationCenter {
     databaseNotifications = ko.observableArray<abstractNotification>();
 
     globalOperationsWatch = new notificationCenterOperationsWatch();
-    databseOperationsWatch = new notificationCenterOperationsWatch();
+    databaseOperationsWatch = new notificationCenterOperationsWatch();
 
     allNotifications: KnockoutComputed<abstractNotification[]>;
 
@@ -80,7 +84,16 @@ class notificationCenter {
 
     private initializeObservables() {
 
-        this.customDetailsProviders.push(smugglerDatabaseDetails);
+        this.customDetailsProviders.push(
+            // operations:
+            smugglerDatabaseDetails,
+            patchDocumentsDetails,
+            deleteDocumentsDetails,
+
+            // performance hints:
+            indexingDetails,
+            pagingDetails
+        );
 
         this.customOperationMerger.push(smugglerDatabaseDetails);
 
@@ -90,7 +103,7 @@ class notificationCenter {
 
             const mergedNotifications = globalNotifications.concat(databaseNotifications);
 
-            return _.sortBy(mergedNotifications, x => -1 * x.createdAt().unix());
+            return _.sortBy(mergedNotifications, x => -1 * x.displayDate().unix());
         });
 
         this.totalItemsCount = ko.pureComputed(() => this.allNotifications().length);
@@ -126,7 +139,7 @@ class notificationCenter {
 
     configureForDatabase(client: databaseNotificationCenterClient): changeSubscription[] {
         const db = client.getDatabase();
-        this.databseOperationsWatch.configureFor(db);
+        this.databaseOperationsWatch.configureFor(db);
 
         return [
             client.watchAllAlerts(e => this.onAlertReceived(e, this.databaseNotifications, db)),
@@ -212,7 +225,7 @@ class notificationCenter {
     }
 
     private getOperationsWatch(db: database) {
-        return db ? this.databseOperationsWatch : this.globalOperationsWatch;
+        return db ? this.databaseOperationsWatch : this.globalOperationsWatch;
     }
 
     monitorOperation<TProgress extends Raven.Client.Documents.Operations.IOperationProgress,
@@ -258,7 +271,7 @@ class notificationCenter {
         this.databaseNotifications.remove(notification);
     }
 
-    killOperation(operationToKill: operation) {
+    killOperation(operationToKill: operation): void {
         const notificationId = operationToKill.id;
 
         this.spinners.kill.push(notificationId);
@@ -291,12 +304,23 @@ class notificationCenter {
     }
 
     openDetails(notification: abstractNotification) {
-        //TODO: it is only temporary solution to display progress/details as JSON in dialog 
+        //TODO: it is only temporary solution to display progress/details as JSON in dialog
         const notificationCenterOpened = this.showNotifications();
+
+        for (let i = 0; i < this.customDetailsProviders.length; i++) {
+            const provider = this.customDetailsProviders[i];
+            if (provider.supportsDetailsFor(notification)) {
+                provider.showDetailsFor(notification, this)
+                    .done(() => {
+                        this.showNotifications(notificationCenterOpened);
+                    });
+                return;
+            }
+        }
 
         if (notification instanceof alert) {
             const currentAlert = notification as alert;
-            const text = JSON.stringify(currentAlert.details, null, 4);
+            const text = JSON.stringify(currentAlert.details(), null, 4);
 
             app.showBootstrapDialog(new showDataDialog("Alert", text, "javascript"))
                 .done(() => {
@@ -304,13 +328,23 @@ class notificationCenter {
                 });
         } else if (notification instanceof performanceHint) {
             const currentHint = notification as performanceHint;
-            const text = JSON.stringify(currentHint.details, null, 4);
+            const text = JSON.stringify(currentHint.details(), null, 4);
             app.showBootstrapDialog(new showDataDialog("Performance Hint", text, "javascript"))
                 .done(() => {
                     this.showNotifications(notificationCenterOpened);
                 });
         } else if (notification instanceof operation) {
-            this.handleOperationDetails(notification, notificationCenterOpened);
+            const op = notification as operation;
+            
+            const dialogText = ko.pureComputed(() => {
+                const completed = op.isCompleted();
+
+                return completed ? op.result() : op.progress();
+            });
+            app.showBootstrapDialog(new tempStatDialog(dialogText))
+                .done(() => {
+                    this.showNotifications(notificationCenterOpened);
+                });
         } else if (notification instanceof recentError) {
             const error = notification as recentError;
             const recentErrorDetails = {
@@ -325,34 +359,6 @@ class notificationCenter {
         } else {
             throw new Error("Unable to handle details for: " + notification);
         }
-    }
-
-    private handleOperationDetails(op: operation, notificationCenterOpened: boolean) {
-        let alreadyHandled = false;
-        for (let i = 0; i < this.customDetailsProviders.length; i++) {
-            const provider = this.customDetailsProviders[i];
-            if (provider.supportsDetailsFor(op)) {
-                provider.showDetailsFor(op, () => this.killOperation(op));
-
-                alreadyHandled = true;
-                break;
-            }
-        }
-
-        if (!alreadyHandled) {
-            console.warn("Using temporary provider for: " + op.title());
-
-            const dialogText = ko.pureComputed(() => {
-                const completed = op.isCompleted();
-
-                return completed ? op.result() : op.progress();
-            });
-            app.showBootstrapDialog(new tempStatDialog(dialogText))
-                .done(() => {
-                    this.showNotifications(notificationCenterOpened);
-                });
-        }
-        
     }
 
     private shouldConsumeHideEvent(e: Event) {

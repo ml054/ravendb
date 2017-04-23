@@ -36,13 +36,14 @@ class connectedDocuments {
 
     // static field to remember current tab between navigation
     static currentTab = ko.observable<connectedDocsTabs>("attachments"); 
-    static readonly currentDocument = 'Current Document';
 
     loadDocumentAction: (docId: string) => void;
     document: KnockoutObservable<document>;
     db: KnockoutObservable<database>;
     inReadOnlyMode: KnockoutObservable<boolean>;
-    searchInput = ko.observable<string>(""); //TODO: not yet working!
+    searchInput = ko.observable<string>("");
+    searchInputVisible: KnockoutObservable<boolean>;
+    clearSearchInputSubscription: KnockoutSubscription;
 
     docsColumns: virtualColumn[];
     attachmentsColumns: virtualColumn[];
@@ -99,16 +100,18 @@ class connectedDocuments {
             const readOnly = inReadOnlyMode();
             return onAttachmentsPane && readOnly;
         });
+
+        this.searchInputVisible = ko.pureComputed(() => !this.isRevisionsActive() && !this.isRecentActive());
+        this.searchInput.throttle(250).subscribe(() => {
+            this.gridController().reset(false);
+        });
+
+        this.clearSearchInputSubscription = connectedDocuments.currentTab.subscribe(() => this.searchInput(""));
     }
 
     private initColumns() {
         this.docsColumns = [
-            new hyperlinkColumn<connectedDocument>(x => x.id, x => x.href, "", "100%",
-            {
-                extraClass: (item) => {
-                    return item.id === connectedDocuments.currentDocument ? 'current-document' : '';
-                }
-            })
+            new hyperlinkColumn<connectedDocument>(x => x.id, x => x.href, "", "100%")
         ];
 
         this.attachmentsColumns = [
@@ -148,6 +151,10 @@ class connectedDocuments {
         connectedDocuments.currentTab.subscribe(() => this.gridController().reset());
     }
 
+    dispose() {
+        this.clearSearchInputSubscription.dispose();
+    }
+
     private fetchCurrentTabItems(skip: number, take: number): JQueryPromise<pagedResult<connectedDocument | attachmentItem>> {
         const doc = this.document();
         if (!doc) {
@@ -169,8 +176,14 @@ class connectedDocuments {
 
     fetchRelatedDocs(skip: number, take: number): JQueryPromise<pagedResult<connectedDocument>> {
         const deferred = $.Deferred<pagedResult<connectedDocument>>();
+        const search = this.searchInput().toLocaleLowerCase();
 
-        const relatedDocumentsCandidates: string[] = documentHelpers.findRelatedDocumentsCandidates(this.document());
+        let relatedDocumentsCandidates: string[] = documentHelpers.findRelatedDocumentsCandidates(this.document());
+
+        if (search) {
+            relatedDocumentsCandidates = relatedDocumentsCandidates.filter(x => x.includes(search));
+        }
+
         const docIDsVerifyCommand = new verifyDocumentsIDsCommand(relatedDocumentsCandidates, this.db());
         docIDsVerifyCommand.execute()
             .done((verifiedIDs: string[]) => {
@@ -186,8 +199,14 @@ class connectedDocuments {
 
     fetchAttachments(skip: number, take: number): JQueryPromise<pagedResult<attachmentItem>> {
         const doc = this.document();
+        const search = this.searchInput().toLocaleLowerCase();
 
-        const attachments: Raven.Client.Documents.Operations.AttachmentResult[] = (doc.__metadata as any)["@attachments"] || [];
+        let attachments: documentAttachmentDto[] = doc.__metadata.attachments || [];
+
+        if (search) {
+            attachments = attachments.filter(file => file.Name.includes(search));
+        }
+
         const mappedFiles = attachments.map(file => ({
             documentId: doc.getId(),
             name: file.Name,
@@ -212,23 +231,11 @@ class connectedDocuments {
     }
 
     fetchRevisionDocs(skip: number, take: number): JQueryPromise<pagedResult<connectedDocument>> {
-        //TODO: should endpoint return results in different order - newest first?
         const doc = this.document();
 
         if (!doc.__metadata.hasFlag("Versioned")) {
             return connectedDocuments.emptyDocResult<connectedDocument>();
         }
-
-        const includeLatestFakeItem = skip === 0;
-
-        const fakeCurrentItem = {
-            id: connectedDocuments.currentDocument,
-            href: appUrl.forEditDoc(doc.getId(), this.db())
-        } as connectedDocument;
-
-        // shift by one item, to serve fake item properly
-        if (skip > 0) { skip--; }
-        take--;
 
         const fetchTask = $.Deferred<pagedResult<connectedDocument>>();
         new getDocumentRevisionsCommand(doc.getId(), this.db(), skip, take, true)
@@ -236,9 +243,18 @@ class connectedDocuments {
             .done(result => {
                 const mappedResults = result.items.map(x => this.revisionToConnectedDocument(x));
                 fetchTask.resolve({
-                    items: includeLatestFakeItem ? [fakeCurrentItem].concat(...mappedResults) : mappedResults,
-                    totalResultCount: result.totalResultCount + 1 // include latest item
+                    items: mappedResults,
+                    totalResultCount: result.totalResultCount
                 });
+
+                if (doc.__metadata.hasFlag("Revision")) {
+                    const etag = doc.__metadata.etag();
+                    const resultIdx = result.items.findIndex(x => x.__metadata.etag() === etag);
+                    if (resultIdx >= 0) {
+                        this.gridController().setSelectedItems([mappedResults[resultIdx]]);    
+                    }
+                    
+                }
             })
             .fail(xhr => fetchTask.reject(xhr));
 
@@ -265,8 +281,33 @@ class connectedDocuments {
             name: file.name
         };
 
-        const url = endpoints.databases.attachment.attachments + appUrl.urlEncodeArgs(args);
-        this.downloader.download(this.db(), url);
+        const doc = this.document();
+        if (doc.__metadata.hasFlag("Revision")) {
+            this.downloadAttachmentAtRevision(doc, args);
+        } else {
+            const url = endpoints.databases.attachment.attachments + appUrl.urlEncodeArgs(args);
+            this.downloader.download(this.db(), url);    
+        }
+    }
+
+    private downloadAttachmentAtRevision(doc: document, file: { id: string; name: string }) {
+        //TODO: single auth token ?
+
+        const $form = $("#downloadAttachmentAtRevisionForm");
+        const $changeVector = $("[name=ChangeVectorAndType]", $form);
+        const changeVector = (doc.__metadata as any)['@change-vector'];
+
+        const payload = {
+            ChangeVector: changeVector,
+            Type: "Revision"
+        };
+
+        const url = endpoints.databases.attachment.attachments + appUrl.urlEncodeArgs(file);
+
+        $form.attr("action", appUrl.forDatabaseQuery(this.db()) + url);
+        
+        $changeVector.val(JSON.stringify(payload));
+        $form.submit();
     }
 
     private deleteAttachment(file: attachmentItem) {
@@ -284,6 +325,7 @@ class connectedDocuments {
     }
 
     private afterUpload() {
+        this.searchInput("");
         this.loadDocumentAction(this.document().getId());
     }
 

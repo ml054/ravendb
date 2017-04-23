@@ -13,10 +13,8 @@ using Raven.Client.Documents.Transformers;
 using Raven.Client.Server;
 using Raven.Client.Server.Operations;
 using Raven.Server.Commercial;
-using Raven.Server.Documents;
 using Raven.Server.Documents.ETL;
 using Raven.Server.Documents.ETL.Providers.SQL;
-using Raven.Server.Documents.ETL.Providers.SQL.Connections;
 using Raven.Server.Documents.ETL.Providers.SQL.RelationalWriters;
 using Raven.Server.Documents.Handlers;
 using Raven.Server.Documents.Indexes.Debugging;
@@ -24,9 +22,12 @@ using Raven.Server.Documents.Operations;
 using Raven.Server.Documents.Patch;
 using Raven.Server.Documents.Versioning;
 using Raven.Server.Documents.PeriodicExport;
+using Raven.Server.Documents.Studio;
 using Raven.Server.Documents.Subscriptions;
+using Raven.Server.Documents.Replication;
 using Raven.Server.Web.System;
 using Raven.Server.NotificationCenter.Notifications;
+using Raven.Server.NotificationCenter.Notifications.Details;
 using Raven.Server.NotificationCenter.Notifications.Server;
 using Raven.Server.Smuggler.Documents.Data;
 using Sparrow;
@@ -48,7 +49,7 @@ namespace TypingsGenerator
         {
             Directory.CreateDirectory(TargetDirectory);
 
-            var scripter = new Scripter()
+            var scripter = new CustomScripter()
                 .UsingFormatter(new TsFormatter
                 {
                     EnumsAsString = true
@@ -60,6 +61,7 @@ namespace TypingsGenerator
                 .WithTypeMapping(new TsInterface(new TsName("Array")), typeof(HashSet<>))
                 .WithTypeMapping(new TsInterface(new TsName("Array")), typeof(List<>))
                 .WithTypeMapping(new TsInterface(new TsName("Array")), typeof(IEnumerable<>))
+                .WithTypeMapping(new TsInterface(new TsName("Array")), typeof(Queue<>))
                 .WithTypeMapping(new TsInterface(new TsName("Array")), typeof(IReadOnlyList<>))
                 .WithTypeMapping(new TsInterface(new TsName("Array")), typeof(IReadOnlyCollection<>))
                 .WithTypeMapping(TsPrimitive.Any, typeof(TreePage))
@@ -91,6 +93,7 @@ namespace TypingsGenerator
 
             scripter.AddType(typeof(DatabaseDocument));
             scripter.AddType(typeof(DatabaseStatistics));
+            scripter.AddType(typeof(FooterStatistics));
             scripter.AddType(typeof(IndexDefinition));
             scripter.AddType(typeof(PutIndexResult));
 
@@ -104,6 +107,7 @@ namespace TypingsGenerator
             scripter.AddType(typeof(DatabaseChanged));
             scripter.AddType(typeof(DatabaseStatsChanged));
             scripter.AddType(typeof(PerformanceHint));
+            scripter.AddType(typeof(PagingPerformanceDetails));
 
             // subscriptions
             scripter.AddType(typeof(SubscriptionCriteria));
@@ -114,6 +118,7 @@ namespace TypingsGenerator
             scripter.AddType(typeof(OperationStatusChange));
             scripter.AddType(typeof(DeterminateProgress));
             scripter.AddType(typeof(IndeterminateProgress));
+            scripter.AddType(typeof(BulkOperationResult));
             scripter.AddType(typeof(OperationExceptionResult));
             scripter.AddType(typeof(DocumentChange));
             scripter.AddType(typeof(IndexChange));
@@ -126,6 +131,8 @@ namespace TypingsGenerator
             scripter.AddType(typeof(IndexPerformanceStats));
             scripter.AddType(typeof(IndexDefinition));
             scripter.AddType(typeof(TermsQueryResult));
+            scripter.AddType(typeof(IndexProgress));
+            scripter.AddType(typeof(IndexErrors));
 
             // query 
             scripter.AddType(typeof(QueryResult<>));
@@ -150,9 +157,8 @@ namespace TypingsGenerator
             // replication 
             scripter.AddType(typeof(ReplicationDocument<>));
 
-            // sql replication 
-            scripter.AddType(typeof(SqlConnections));
-            scripter.AddType(typeof(SqlEtlConfiguration));
+            // etl
+            scripter.AddType(typeof(SqlDestination));
             scripter.AddType(typeof(EtlProcessStatistics));
             scripter.AddType(typeof(SimulateSqlEtl));
 
@@ -171,17 +177,25 @@ namespace TypingsGenerator
             scripter.AddType(typeof(UserRegistrationInfo));
             scripter.AddType(typeof(LicenseStatus));
 
+            // feedback form
+            scripter.AddType(typeof(FeedbackForm));
+
             // database admin
             scripter.AddType(typeof(DatabaseDeleteResult));
 
             // io metrics stats
             scripter.AddType(typeof(IOMetricsHistoryStats));
             scripter.AddType(typeof(IOMetricsRecentStats));
+            scripter.AddType(typeof(IOMetricsRecentStatsAdditionalTypes));
             scripter.AddType(typeof(IOMetricsFileStats));
             scripter.AddType(typeof(IOMetricsEnvironment));
             scripter.AddType(typeof(IOMetricsResponse));
             scripter.AddType(typeof(FileStatus));
             scripter.AddType(typeof(IoMetrics.MeterType));
+
+            // replication stats
+            scripter.AddType(typeof(LiveReplicationPerformanceCollector.OutgoingPerformanceStats));
+            scripter.AddType(typeof(LiveReplicationPerformanceCollector.IncomingPerformanceStats));
 
             return scripter;
         }

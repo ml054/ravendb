@@ -39,6 +39,7 @@ class editDocument extends viewModelBase {
     metadata: KnockoutComputed<documentMetadata>;
     lastModifiedAsAgo: KnockoutComputed<string>;
     latestRevisionUrl: KnockoutComputed<string>;
+    attachmentsCount: KnockoutComputed<number>;
 
     isCreatingNewDocument = ko.observable(false);
     collectionForNewDocument = ko.observable<string>();
@@ -67,7 +68,7 @@ class editDocument extends viewModelBase {
 
     private changeNotification: changeSubscription;
 
-    connectedDocuments = new connectedDocuments(this.document, this.activeDatabase, (docId) => this.loadDocument(docId), this.isCreatingNewDocument, this.inReadOnlyMode);
+    connectedDocuments = new connectedDocuments(this.document, this.activeDatabase, (docId) => this.loadDocument(docId, true), this.isCreatingNewDocument, this.inReadOnlyMode);
 
     isSaveEnabled: KnockoutComputed<boolean>;
     documentSize: KnockoutComputed<string>;
@@ -130,9 +131,14 @@ class editDocument extends viewModelBase {
         this.focusOnEditor();
     }
 
+    detached() {
+        super.detached();
+        this.connectedDocuments.dispose();
+    }
+
     private activateById(id: string) {
         const canActivateResult = $.Deferred<canActivateResultDto>();
-        this.loadDocument(id)
+        this.loadDocument(id, false)
             .done(() => {
                 canActivateResult.resolve({ can: true });
             })
@@ -191,7 +197,7 @@ class editDocument extends viewModelBase {
         
         this.dirtyFlag = new ko.DirtyFlag([this.documentText, this.userSpecifiedId], false, jsonUtil.newLineNormalizingHashFunction); 
           
-        this.isSaveEnabled = ko.pureComputed(() => {            
+        this.isSaveEnabled = ko.pureComputed(() => {
             const isSaving = this.isSaving();
             const isDirty = this.dirtyFlag().isDirty();
             const etag = this.metadata().etag();
@@ -203,6 +209,15 @@ class editDocument extends viewModelBase {
             return true;
         });         
 
+        this.attachmentsCount = ko.pureComputed(() => {
+            const doc = this.document();
+            if (!doc || !doc.__metadata || !doc.__metadata.attachments) {
+                return 0;
+            }
+
+            return doc.__metadata.attachments.length;
+        });
+
         this.document.subscribe(doc => {
             if (doc) {
                 if (this.isConflictDocument()) {
@@ -212,7 +227,6 @@ class editDocument extends viewModelBase {
                     const metaDto = docDto["@metadata"];
                     if (metaDto) {
                         this.metaPropsToRestoreOnSave.length = 0;
-
                         documentMetadata.filterMetadata(metaDto, this.metaPropsToRestoreOnSave);
                     }
 
@@ -393,14 +407,23 @@ class editDocument extends viewModelBase {
     }
 
     createClone() {
-        // Show current document as a new document..
+        // 1. Show current document as a new document..
         this.isCreatingNewDocument(true);
 
         this.syncChangeNotification();
 
-        // Clear data..
-        this.userSpecifiedId("");
+        // 2. Remove the '@change-vector' from metadata view
+        const docDto = this.document().toDto(true);
+        const metaDto = docDto["@metadata"];
+        if (metaDto) {
+            documentMetadata.filterMetadata(metaDto, this.metaPropsToRestoreOnSave, true);
+            const docText = this.stringify(docDto);
+            this.documentText(docText);
+        }
+
+        // 3. Clear data..
         this.metadata().etag(null);
+        this.userSpecifiedId("");
     }
 
     saveDocument() {       
@@ -479,7 +502,7 @@ class editDocument extends viewModelBase {
     private onDocumentSaved(saveResult: saveDocumentResponseDto) {
         const savedDocumentDto: saveDocumentResponseItemDto = saveResult.Results[0];
         const currentSelection = this.docEditor.getSelectionRange();
-        this.loadDocument(savedDocumentDto.Key)
+        this.loadDocument(savedDocumentDto.Key, true)
             .always(() => {
                 this.updateNewlineLayoutInDocument(this.isNewLineFriendlyMode());
 
@@ -509,7 +532,7 @@ class editDocument extends viewModelBase {
         return JSON.stringify(obj, null, prettifySpacing);
     }
 
-    loadDocument(id: string): JQueryPromise<document> {
+    loadDocument(id: string, redirectToDocumentsOnNotFound: boolean): JQueryPromise<document> {
         this.isBusy(true);
 
         return new getDocumentWithMetadataCommand(id, this.activeDatabase())
@@ -524,7 +547,11 @@ class editDocument extends viewModelBase {
                     this.foldAll();
                 }
             })
-            .fail(() => messagePublisher.reportError("Could not find " + id + " document"))
+            .fail(() => {
+                this.dirtyFlag().reset();
+                messagePublisher.reportError("Could not find document: " + id);
+                router.navigate(appUrl.forDocuments(null, this.activeDatabase()));
+            })
             .always(() => this.isBusy(false));
     }
 
@@ -553,16 +580,16 @@ class editDocument extends viewModelBase {
     refreshDocument() {
         eventsCollector.default.reportEvent("document", "refresh");
         this.canContinueIfNotDirty("Refresh", "You have unsaved data. Are you sure you want to continue?")
-        .done(() => {
-            const docId = this.editedDocId();
-            this.userSpecifiedId("");
-                this.loadDocument(docId)
-                    .done(() => {
-                        this.connectedDocuments.gridController().reset(true);
-                    });
+            .done(() => {
+                const docId = this.editedDocId();
+                this.userSpecifiedId("");
+                    this.loadDocument(docId, true)
+                        .done(() => {
+                            this.connectedDocuments.gridController().reset(true);
+                        });
 
-            this.displayDocumentChange(false);
-        });
+                this.displayDocumentChange(false);
+            });
     }
 
     deleteDocument() {

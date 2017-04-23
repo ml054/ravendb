@@ -59,7 +59,7 @@ namespace Voron
 
         internal LowLevelTransaction.WriteTransactionPool WriteTransactionPool =
             new LowLevelTransaction.WriteTransactionPool();
-        internal ExceptionDispatchInfo CatastrophicFailure;
+
         private readonly WriteAheadJournal _journal;
         private readonly SemaphoreSlim _transactionWriter = new SemaphoreSlim(1, 1);
         private NativeMemory.ThreadStats _currentTransactionHolder;
@@ -78,12 +78,12 @@ namespace Voron
         private EndOfDiskSpaceEvent _endOfDiskSpace;
         internal int SizeOfUnflushedTransactionsInJournalFile;
 
+        public long LastSyncCounter;
         public long LastSyncTimeInTicks = DateTime.MinValue.Ticks;
 
         internal DateTime LastFlushTime;
 
-        private long _lastWorkTimeTicks;
-        public DateTime LastWorkTime => new DateTime(_lastWorkTimeTicks);
+        public DateTime LastWorkTime;
 
         private readonly Queue<TemporaryPage> _tempPagesPool = new Queue<TemporaryPage>();
         public bool Disposed;
@@ -113,7 +113,7 @@ namespace Voron
                 var remainingBits = _dataPager.NumberOfAllocatedPages % (8 * sizeof(long));
 
                 _validPages = new long[_dataPager.NumberOfAllocatedPages / (8 * sizeof(long)) + (remainingBits == 0 ? 0 : 1)];
-                _validPages[_validPages.Length - 1] |= unchecked (((long)ulong.MaxValue << (int)remainingBits));
+                _validPages[_validPages.Length - 1] |= unchecked(((long)ulong.MaxValue << (int)remainingBits));
 
                 _decompressionBuffers = new DecompressionBuffersPool(options);
                 var isNew = _headerAccessor.Initialize();
@@ -412,9 +412,9 @@ namespace Voron
                 var errors = new List<Exception>();
                 foreach (var disposable in new IDisposable[]
                 {
+                    _journal,
                     _headerAccessor,
                     _scratchBufferPool,
-                    _journal,
                     _decompressionBuffers,
                     _options.OwnsPagers ? _options : null
                 }.Concat(_tempPagesPool))
@@ -589,8 +589,6 @@ namespace Voron
         internal void WriteTransactionStarted()
         {
             _writeTransactionRunning.SetInAsyncMannerFireAndForget();
-
-            _lastWorkTimeTicks = DateTime.UtcNow.Ticks;
         }
 
         private void ThrowOnTimeoutWaitingForWriteTxLock(TimeSpan wait)
@@ -601,9 +599,11 @@ namespace Voron
                 throw new InvalidOperationException("A write transaction is already opened by this thread");
             }
 
-            throw new TimeoutException("Waited for " + wait +
-                                       " for transaction write lock, but could not get it, the tx is currenly owned by " +
-                                       $"thread {copy.Id} - {copy.Name}");
+            var message = $"Waited for {wait} for transaction write lock, but could not get it";
+            if (copy != null)
+                message += $", the tx is currenly owned by thread {copy.Id} - {copy.Name}";
+
+            throw new TimeoutException(message);
         }
 
         public long CurrentReadTransactionId => Volatile.Read(ref _transactionsCounter);
@@ -650,6 +650,7 @@ namespace Voron
 
             using (PreventNewReadTransactions())
             {
+                Journal.Applicator.OnTransactionCommitted(tx);
                 ScratchBufferPool.UpdateCacheForPagerStatesOfAllScratches();
                 Journal.UpdateCacheForJournalSnapshots();
 
@@ -869,15 +870,6 @@ namespace Voron
                 Debugger.IsAttached ? TimeSpan.FromMinutes(30) : TimeSpan.FromSeconds(30));
         }
 
-        internal void AssertNoCatastrophicFailure()
-        {
-            if (CatastrophicFailure == null)
-                return;
-
-            _options.CatastrophicFailureNotification.RaiseNotificationOnce(CatastrophicFailure.SourceException);
-            CatastrophicFailure.Throw(); // force re-throw of error
-        }
-
         internal void HandleDataDiskFullException(DiskFullException exception)
         {
             if (_options.ManualFlushing)
@@ -955,18 +947,18 @@ namespace Voron
                 $"Invalid overflow size for page {pageNumber}, current offset is {pageNumber * Constants.Storage.PageSize} and overflow size is {current->OverflowSize}. Page length is beyond the file length {_dataPager.TotalAllocationSize}");
         }
 
-        public unsafe void AddChecksumToPageHeader(PageHeader* current)
+        public unsafe ulong CalculatePageChecksum(byte* ptr, long pageNumber, PageFlags flags, int overflowSize)
         {
             var dataLength = Constants.Storage.PageSize - (PageHeader.ChecksumOffset + sizeof(ulong));
-            if ((current->Flags & PageFlags.Overflow) == PageFlags.Overflow)
-                dataLength = current->OverflowSize - (PageHeader.ChecksumOffset + sizeof(ulong));
+            if ((flags & PageFlags.Overflow) == PageFlags.Overflow)
+                dataLength = overflowSize - (PageHeader.ChecksumOffset + sizeof(ulong));
 
-            var ctx = Hashing.Streamed.XXHash64.BeginProcess((ulong)current->PageNumber);
+            var ctx = Hashing.Streamed.XXHash64.BeginProcess((ulong)pageNumber);
 
-            Hashing.Streamed.XXHash64.Process(ctx, (byte*)current, PageHeader.ChecksumOffset);
-            Hashing.Streamed.XXHash64.Process(ctx, (byte*)current + PageHeader.ChecksumOffset + sizeof(ulong), dataLength);
+            Hashing.Streamed.XXHash64.Process(ctx, ptr, PageHeader.ChecksumOffset);
+            Hashing.Streamed.XXHash64.Process(ctx, ptr + PageHeader.ChecksumOffset + sizeof(ulong), dataLength);
 
-            current->Checksum = Hashing.Streamed.XXHash64.EndProcess(ctx);
+            return Hashing.Streamed.XXHash64.EndProcess(ctx);
         }
 
         public IDisposable GetTemporaryPage(LowLevelTransaction tx, out TemporaryPage tmp)
@@ -1096,7 +1088,7 @@ namespace Voron
 
         public void ResetLastWorkTime()
         {
-            _lastWorkTimeTicks = DateTime.MinValue.Ticks;
+            LastWorkTime = DateTime.MinValue;
         }
 
         internal void AllowDisposeWithLazyTransactionRunning(LowLevelTransaction tx)

@@ -2,7 +2,6 @@ import viewModelBase = require("viewmodels/viewModelBase");
 import shell = require("viewmodels/shell");
 import license = require("models/auth/license");
 import registration = require("viewmodels/shell/registration");
-import moment = require("moment");
 
 class about extends viewModelBase {
 
@@ -10,36 +9,41 @@ class about extends viewModelBase {
     serverVersion = shell.serverBuildVersion;
     licenseStatus = license.licenseStatus;
 
-    expiration = ko.pureComputed(() => {
+    formattedExpiration = ko.pureComputed(() => {
         const licenseStatus = this.licenseStatus();
 
-        if (!licenseStatus) {
+        if (!licenseStatus || !licenseStatus.FormattedExpiration) {
             return null;
         }
 
-        if (licenseStatus.LicenseType === "Commercial" || licenseStatus.LicenseType === "PreRelease" || licenseStatus.LicenseType === "Dev") {
-            const expiration = licenseStatus.Attributes["expiration"];
-
-            if (expiration) {
-                return moment(expiration).format("LL");
-            }
-        }
-
-        return null;
+        return licenseStatus.FormattedExpiration;
     });
 
     licenseType = ko.pureComputed(() => {
         const licenseStatus = this.licenseStatus();
-        if (!licenseStatus || licenseStatus.LicenseType === "None") {
+        if (!licenseStatus || licenseStatus.Type === "None") {
             return "No license";
         }
 
-        if (licenseStatus.LicenseType === "Invalid") {
+        if (licenseStatus.Type === "Invalid") {
             return "Invalid license";
         }
 
-        return licenseStatus.LicenseType + " License";
+        let licenseType = licenseStatus.Type;
+        if (licenseType === "Free") {
+            licenseType += " Single Node";
+        }
 
+        return licenseType + " License";
+    });
+
+    shortDescription = ko.pureComputed(() => {
+        const licenseStatus = this.licenseStatus();
+        if (!licenseStatus || !licenseStatus.ShortDescription) {
+            return null;
+        }
+
+        return licenseStatus.ShortDescription;
     });
 
     registered = ko.pureComputed(() => {
@@ -48,15 +52,16 @@ class about extends viewModelBase {
             return false;
         }
 
-        return licenseStatus.LicenseType === "PreRelease" ||
-            licenseStatus.LicenseType === "Commercial" ||
-            licenseStatus.LicenseType === "Dev";
+        return licenseStatus.Type !== "None" && licenseStatus.Type !== "Invalid";
     });
 
     register() {
         registration.showRegistrationDialog(this.licenseStatus(), true);
     }
 
+    openFeedbackForm() {
+        shell.openFeedbackForm();
+    }
 }
 
 export = about;

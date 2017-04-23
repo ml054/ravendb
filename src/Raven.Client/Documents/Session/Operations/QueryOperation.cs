@@ -52,6 +52,7 @@ namespace Raven.Client.Documents.Session.Operations
             _indexEntriesOnly = indexEntriesOnly;
 
             AssertNotQueryById();
+            AssertPageSizeSet();
         }
 
         public QueryCommand CreateRequest()
@@ -88,6 +89,17 @@ namespace Raven.Client.Documents.Session.Operations
             var value = match.Groups[1].Value;
 
             throw new InvalidOperationException("Attempt to query by id only is blocked, you should use call session.Load(\"" + value + "\"); instead of session.Query().Where(x=>x.Id == \"" + value + "\");" + Environment.NewLine + "You can turn this error off by specifying documentStore.Conventions.AllowQueriesOnId = true;, but that is not recommend and provided for backward compatibility reasons only.");
+        }
+
+        private void AssertPageSizeSet()
+        {
+            if (_session.Conventions.ThrowIfQueryPageSizeIsNotSet == false)
+                return;
+
+            if (_indexQuery.PageSizeSet)
+                return;
+
+            throw new InvalidOperationException("Attempt to query without explicitly specifying a page size. You can use .Take() methods to set maximum number of results. By default the page size is set to int.MaxValue and can cause severe performance degradation.");
         }
 
         private void StartTiming()
@@ -209,19 +221,6 @@ namespace Raven.Client.Documents.Session.Operations
 
             _currentQueryResults = result;
             _currentQueryResults.EnsureSnapshot();
-
-            if (_session.Conventions.ThrowIfImplicitTakeAmountExceeded &&
-                IndexQuery.PageSizeSet == false &&
-                _currentQueryResults.TotalResults > IndexQuery.PageSize)
-            {
-                var message = $"The query has more results ({_currentQueryResults.TotalResults}) than the implicity take ammount " +
-                              $"which is .Take({_session.Conventions.ImplicitTakeAmount}).{Environment.NewLine}" +
-                              $"You can solve this error in the following ways:{Environment.NewLine}" +
-                              "1. Have an explicit .Take() on your query. This is the recommended solution." +
-                              $"2. Set store.Conventions.ThowIfImplicitTakeAmountExceeded to false{Environment.NewLine}" +
-                              "3. Increase the value of store.Conventions.ImplicitTakeAmount.";
-                throw new RavenException(message);
-            }
 
             if (Logger.IsInfoEnabled)
             {

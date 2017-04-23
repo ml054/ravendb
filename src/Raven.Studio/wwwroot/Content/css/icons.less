@@ -264,15 +264,15 @@
     content: "\e926";
 }
 
-.icon-document:before, .icon-documents:before {
+.icon-document:before  {
     content: @icon-document;
 }
 
 .icon-document2:before {
-    content: "\e928";
+    content: @icon-document //"\e928";
 }
 
-.icon-document-group:before {
+.icon-document-group:before, .icon-documents:before {
     content: "\e929";
 }
 
@@ -332,7 +332,7 @@
     content: "\e937";
 }
 
-.icon-recent:before, .icon-latest:before {
+.icon-recent:before, .icon-latest:before, .icon-postpone:before {
     content: "\e938";
 }
 
@@ -344,7 +344,7 @@
     content: "\e93a";
 }
 
-.icon-settings:before {
+.icon-settings:before, .icon-system:before {
     content: "\e93b";
 }
 
@@ -369,6 +369,42 @@
 
 .icon-logo:before {
     content: "\e99a";
+}
+
+.icon-bug:before {
+    content: "\e97f";
+}
+
+.icon-debug:before {
+    content: "\e9b3";
+}
+
+.icon-thumb-down:before {
+    content: "\e9b1";
+}
+
+.icon-thumb-up:before {
+    content: "\e9b2";
+}
+
+.icon-transformer:before {
+    content: "\e9ad";
+}
+
+.icon-support:before {
+    content: "\e9ae";
+}
+
+.icon-feedback:before {
+    content: "\e96e";
+}
+
+.icon-etag:before {
+    content: "\e9af";
+}
+
+.icon-client:before {
+    content: "\e9b0";
 }
 
 .icon-folder:before {
@@ -463,9 +499,7 @@
 .icon-io-test:before {
   content: "\e94d";
 }
-.icon-studio-config-73:before {
-  content: "\e94e";
-}
+
 .icon-admin-logs:before {
   content: "\e94f";
 }
@@ -517,7 +551,7 @@
 .icon-dashboard:before {
   content: "\e962";
 }
-.icon-debug-45:before {
+.icon-debug:before {
   content: "\e963";
 }
 .icon-map-reduce-visualizer:before {
@@ -832,7 +866,7 @@
 .icon-index:before {
   content: "\e92d";
 }
-.icon-info:before {
+.icon-info:before, icon-details {
   content: "\e92e";
 }
 .icon-link:before {
@@ -901,6 +935,14 @@
 /* MENU AND TOPBAR ICON COLORS*/
 
 #main-menu, .inputs-container, .stats {
+    .icon-system:before {
+        color: #3c6fb4;
+    }
+
+    .icon-recent:before {
+        color: #29fffa;
+    }
+
     .icon-plus:before {
         color: #b0d47d;
     }

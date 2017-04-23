@@ -8,12 +8,12 @@
 //== Colors
 //
 //## Gray and brand colors for use across Bootstrap.
-
-@gray-base:              #25272b;
+//#2c343a
+@gray-base:              #272b32;
 @gray-base-light:        #292e33;
-@gray-darker:            #2c343a;
+@gray-darker:            #2c343c;
 @gray-dark:              #39434f;
-@gray:                   #546175;
+@gray:                   lighten(#546175, 7%);
 @gray-light:             #98a7b7;
 @gray-lighter:           #f0f4f6;
 
@@ -208,8 +208,7 @@
 //** `<input>` background color
 @input-bg:                       fadeout(@gray-base,90%);
 //** `<input disabled>` background color
-@input-bg-disabled:              transparent;
-@input-bg-disabled-image:        repeating-linear-gradient(-45deg, fadeout(@gray-darker,75%), fadeout(@gray-darker,75%) 3px, fadeout(#FFF,100%) 3px, fadeout(#FFF,100%) 6px);
+@input-bg-disabled:              fadeout(@gray-darker,50%);
     //url("../../img/disabled-input-bkg.png");
 
 //** Text color for `<input>`s
@@ -399,10 +398,10 @@
 
 // Basics of a navbar
 @navbar-height:                    50px;
-@navbar-margin-bottom:             @line-height-computed;
+@navbar-margin-bottom:             0;
 @navbar-border-radius:             @border-radius-base;
-@navbar-padding-horizontal:        floor((@grid-gutter-width / 2));
-@navbar-padding-vertical:          7px;
+@navbar-padding-horizontal:        0; //floor((@grid-gutter-width / 2));
+@navbar-padding-vertical:          0; //7px;
 @navbar-collapse-max-height:       340px;
 
 @navbar-default-color:             #777;

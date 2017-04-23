@@ -198,7 +198,8 @@ namespace Raven.Server.Documents.Indexes
                     error.Timestamp = new DateTime(IPAddress.NetworkToHostOrder(*(long*)ptr), DateTimeKind.Utc);
 
                     ptr = tvr.Result.Reader.Read(1, out size);
-                    error.Document = context.AllocateStringValue(null, ptr, size);
+                    if(size != 0)
+                        error.Document = context.AllocateStringValue(null, ptr, size);
 
                     ptr = tvr.Result.Reader.Read(2, out size);
                     error.Action = context.AllocateStringValue(null, ptr, size);
@@ -211,6 +212,17 @@ namespace Raven.Server.Documents.Indexes
             }
 
             return errors;
+        }
+
+        public long ReadErrorsCount()
+        {
+            TransactionOperationContext context;
+            using (_contextPool.AllocateOperationContext(out context))
+            using (var tx = context.OpenReadTransaction())
+            {
+                var table = tx.InnerTransaction.OpenTable(_errorsSchema, "Errors");
+                return table.NumberOfEntries;
+            }
         }
 
         public DateTime? ReadLastIndexingTime(RavenTransaction tx)

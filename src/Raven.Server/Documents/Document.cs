@@ -95,81 +95,11 @@ namespace Raven.Server.Documents
             if (Data.TryGet(Constants.Documents.Metadata.Key, out metadata) &&
                 metadata.TryGet(Constants.Documents.Expiration.ExpirationDate, out expirationDate))
             {
-                var expirationDateTime = DateTime.ParseExact(expirationDate, new[] { "o", "r" }, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+                var expirationDateTime = DateTime.ParseExact(expirationDate, new[] {"o", "r"}, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
                 if (expirationDateTime < currentDate)
                     return true;
             }
             return false;
-        }
-
-        private static bool IsMetadataEqualTo(BlittableJsonReaderObject currentDocument, BlittableJsonReaderObject targetDocument)
-        {
-            if (targetDocument == null)
-                return false;
-
-            BlittableJsonReaderObject myMetadata;
-            BlittableJsonReaderObject objMetadata;
-            currentDocument.TryGet(Constants.Documents.Metadata.Key, out myMetadata);
-            targetDocument.TryGet(Constants.Documents.Metadata.Key, out objMetadata);
-
-            if (myMetadata == null && objMetadata == null)
-                return true;
-
-            if (myMetadata == null || objMetadata == null)
-                return false;
-
-            return ComparePropertiesExceptionStartingWithAt(myMetadata, objMetadata, isMetadata: true);
-        }
-
-        public static bool IsEqualTo(BlittableJsonReaderObject currentDocument, BlittableJsonReaderObject targetDocument)
-        {
-            // Performance improvemnt: We compare the metadata first 
-            // because that most of the time the metadata itself won't be the equal, so no need to compare all values
-
-            return IsMetadataEqualTo(currentDocument, targetDocument) &&
-                   ComparePropertiesExceptionStartingWithAt(currentDocument, targetDocument);
-        }
-
-        private static bool ComparePropertiesExceptionStartingWithAt(BlittableJsonReaderObject myObject,
-            BlittableJsonReaderObject otherObject, bool isMetadata = false)
-        {
-            var properties = new HashSet<string>(myObject.GetPropertyNames());
-            foreach (var propertyName in otherObject.GetPropertyNames())
-            {
-                properties.Add(propertyName);
-            }
-
-            foreach (var property in properties)
-            {
-                if (property[0] == '@')
-                {
-                    switch (isMetadata)
-                    {
-                        case true:
-                            if (property.Equals(Constants.Documents.Metadata.Collection, StringComparison.OrdinalIgnoreCase) == false)
-                                continue;
-                            break;
-                        default:
-                            if (property.Equals(Constants.Documents.Metadata.Key, StringComparison.OrdinalIgnoreCase))
-                                continue;
-                            break;
-                    }
-                }
-
-                object myProperty;
-                object otherPropery;
-
-                if (myObject.TryGetMember(property, out myProperty) == false)
-                    return false;
-
-                if (otherObject.TryGetMember(property, out otherPropery) == false)
-                    return false;
-
-                if (Equals(myProperty, otherPropery) == false)
-                    return false;
-            }
-
-            return true;
         }
     }
 }

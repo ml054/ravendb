@@ -10,6 +10,7 @@ using Raven.Client;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Commands;
 using Raven.Client.Documents.Exceptions;
+using Raven.Client.Documents.Operations;
 using Raven.Client.Documents.Replication;
 using Raven.Client.Documents.Replication.Messages;
 using Raven.Client.Documents.Session;
@@ -17,7 +18,6 @@ using Raven.Client.Exceptions;
 using Raven.Client.Http;
 using Raven.Client.Json;
 using Raven.Client.Json.Converters;
-using Raven.Server.Documents.Replication;
 using Sparrow.Json;
 using Xunit;
 using Xunit.Sdk;
@@ -32,19 +32,6 @@ namespace FastTests.Server.Replication
             using (var commands = store.Commands())
             {
                 var command = new GetRevisionsCommand(id);
-
-                commands.RequestExecutor.Execute(command, commands.Context);
-
-                return command.Result;
-            }
-        }
-
-        protected ReplicationStatistics GetReplicationStats(DocumentStore store)
-        {
-            using (var commands = store.Commands())
-            using (var session = store.OpenSession())
-            {                
-                var command = new GetReplicationStatsCommand((DocumentSession)session);
 
                 commands.RequestExecutor.Execute(command, commands.Context);
 
@@ -88,10 +75,7 @@ namespace FastTests.Server.Replication
             }
         }
 
-        protected Dictionary<string, List<ChangeVectorEntry[]>> WaitUntilHasConflict(
-                DocumentStore store,
-                string docId,
-                int count = 2)
+        protected GetConflictsResult WaitUntilHasConflict(DocumentStore store, string docId, int count = 2)
         {
             int timeout = 5000;
 
@@ -103,25 +87,17 @@ namespace FastTests.Server.Replication
             {
                 conflicts = GetConflicts(store, docId);
 
-                List<ChangeVectorEntry[]> list;
-                if (conflicts.Results.Length == 0)
-                    list = new List<ChangeVectorEntry[]>();
-                else if (conflicts.Results.Length >= count)
+                if (conflicts.Results.Length >= count)
                     break;
 
                 if (sw.ElapsedMilliseconds > timeout)
                 {
-                    var replicationStats = GetReplicationStats(store);
-
-                    throw new XunitException($"Timed out while waiting for conflicts on {docId} we have {conflicts.Results.Length} conflicts on database {store.DefaultDatabase}{Environment.NewLine}" +
-                                             $"{JsonConvert.SerializeObject(replicationStats, Formatting.Indented)}");
+                    throw new XunitException($"Timed out while waiting for conflicts on {docId} we have {conflicts.Results.Length} conflicts " +
+                                             $"on database {store.DefaultDatabase}");
                 }
             } while (true);
 
-            return new Dictionary<string, List<ChangeVectorEntry[]>>
-            {
-                { conflicts.Key, new List<ChangeVectorEntry[]>(conflicts.Results.Select(x => x.ChangeVector)) }
-            };
+            return conflicts;
         }
 
         protected bool WaitForDocumentDeletion(DocumentStore store,
@@ -614,34 +590,6 @@ namespace FastTests.Server.Replication
                 }
 
                 Result = result;
-            }
-        }
-
-        private class GetReplicationStatsCommand : RavenCommand<ReplicationStatistics>
-        {
-            private readonly InMemoryDocumentSessionOperations _session;
-            public override bool IsReadRequest => true;
-
-            public GetReplicationStatsCommand(InMemoryDocumentSessionOperations session)
-            {
-                _session = session;
-            }
-            public override HttpRequestMessage CreateRequest(ServerNode node, out string url)
-            {
-                url = $"{node.Url}/databases/{node.Database}/replication/stats";
-
-                return new HttpRequestMessage
-                {
-                    Method = HttpMethod.Get
-                };
-            }
-
-            public override void SetResponse(BlittableJsonReaderObject response, bool fromCache)
-            {
-                if (response == null)
-                    ThrowInvalidResponse();
-                
-                Result = (ReplicationStatistics)_session.Conventions.DeserializeEntityFromBlittable(typeof(ReplicationStatistics),response);
             }
         }
 

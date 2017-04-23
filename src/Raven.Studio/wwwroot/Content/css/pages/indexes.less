@@ -12,6 +12,7 @@
 
     .vertical-divider {
         position: relative;
+
         @media (min-width:@screen-sm) and (max-width:@screen-lg-max) {
             margin-left: 20px;
         }
@@ -29,7 +30,7 @@
         }
     }
 
-    .panel {
+    .index {
         &:hover {
             background-color: lighten(@gray-darker, 3%);
             transition: background-color 0.15s ease;
@@ -117,6 +118,123 @@
         }
     }
 
+    .sidebyside-indexes {
+        margin-bottom: @grid-gutter-width/2;
+
+        .panel {
+            margin-bottom: 0;
+        }
+
+        .sidebyside-actions {
+            .panel {
+                background-color: fadeout(@brand-warning-dark,80%);
+            }
+
+            .state {
+                i {
+                    top: -1px;
+                }
+            }
+
+            .title {
+                color: @brand-warning-dark;
+                font-size: 15px;
+                font-weight: 300;
+                text-transform: uppercase;
+            }
+
+            .padding {
+                border: 1px dashed fadeout(@brand-warning, 70%);
+                border-left: none;
+                border-right: none;
+                padding: 4px 11px;
+            }
+        }
+    }
+
+    .progress-container {
+        display: flex;
+
+        .progress-ovarall {
+            flex-grow: 1;
+            min-width: 220px;
+
+            h3 {
+                margin-bottom: @grid-gutter-width / 4;
+            }
+
+            .percentage {
+                color: @brand-primary;
+                font-size: 18px;
+                line-height: 29px;
+                font-weight: bold;
+            }
+
+            .progress {
+                margin: 0;
+                background-color: @gray-dark;
+            }
+        }
+
+        @collection-progress-width: 410px;
+
+        .collections-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-left: @grid-gutter-width / 4;
+            margin-bottom: -@grid-gutter-width / 4;
+            justify-content: flex-end;
+
+            .collection-progress {
+                width: @collection-progress-width;
+                margin-left: @grid-gutter-width / 4;
+                margin-bottom: @grid-gutter-width / 4;
+                display: flex;
+                align-items: center;
+                padding: @grid-gutter-width /4 @grid-gutter-width /2;
+
+                .collection-name {
+                    flex-grow: 1;
+                    line-height: 22px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                small {
+                    text-transform: uppercase;
+                    font-size: 11px;
+                }
+
+                .documents, .tombstones {
+                    margin-left: @grid-gutter-width/2;
+                    line-height: 12px;
+                    width: 115px;
+                    flex-shrink: 0;
+
+                    .name {
+                        float: left;
+                        font-weight: bold;
+                        color: @gray;
+                    }
+
+                    .percentage {
+                        &:not(.text-success) {
+                            color: @gray-light;
+                        }
+
+                        float: right;
+                    }
+
+                    .progress {
+                        clear: both;
+                        margin-top: @grid-gutter-width/4;
+                        margin-bottom: 0;
+                    }
+                }
+            }
+        }
+    }
+
     .properties-container {
         .properties-item {
             .properties-label,
@@ -126,22 +244,36 @@
                 }
             }
 
-            @media (min-width: @screen-sm) {
-                &.entriesCount, &.staleness {
-                    width: 33%;
-                }
-            }
-
-            @media (min-width: @screen-xl) {
-                &.entriesCount, &.staleness {
-                    width: 24%;
-                }
-            }
-
             @media (min-width: @screen-xl) {
                 width: 49%;
                 max-width: none;
                 min-width: 0;
+            }
+        }
+
+        @media (min-width:@screen-sm) and (max-width:@screen-md-max), (min-width:@screen-xl) {
+            .state-selector {
+                order: 1;
+            }
+
+            .priority {
+                order: 3;
+            }
+
+            .mode {
+                order: 5;
+            }
+
+            .entriesCount {
+                order: 2;
+            }
+
+            .staleness {
+                order: 4;
+            }
+
+            .errors {
+                order: 6;
             }
         }
     }

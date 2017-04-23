@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Raven.Client.Documents.Session;
 using Sparrow.Json;
 
 namespace Raven.Client.Json
 {
-    public class BlittableOperation
+    public static class BlittableOperation
     {
         private static readonly Lazy<JsonOperationContext> Context = new Lazy<JsonOperationContext>(JsonOperationContext.ShortTermSingleUse);
 
@@ -27,7 +26,7 @@ namespace Raven.Client.Json
             Id = Context.Value.GetLazyString(Constants.Documents.Metadata.Id);
         }
 
-        public bool EntityChanged(BlittableJsonReaderObject newObj, DocumentInfo documentInfo, IDictionary<string, DocumentsChanges[]> changes)
+        public static bool EntityChanged(BlittableJsonReaderObject newObj, DocumentInfo documentInfo, IDictionary<string, DocumentsChanges[]> changes)
         {
             var docChanges = changes != null ? new List<DocumentsChanges>() : null;
 
@@ -39,75 +38,6 @@ namespace Raven.Client.Json
 
             NewChange(null, null, null, docChanges, DocumentsChanges.ChangeType.DocumentAdded);
             changes[documentInfo.Id] = docChanges.ToArray();
-            return true;
-        }
-
-
-        public static bool FastCompare(string id, BlittableJsonReaderObject original, BlittableJsonReaderObject modified)
-        {
-            if (ReferenceEquals(original, modified))
-                return true;
-
-            if (original == null || modified == null)
-                return false;
-
-            BlittableJsonReaderObject.AssertNoModifications(original, id, assertChildren: false);
-            BlittableJsonReaderObject.AssertNoModifications(modified, id, assertChildren: false);
-
-            var modifiedToCheck = new HashSet<int>(modified.GetPropertiesByInsertionOrder());
-
-            if (FastCompareInternal(id, original, original.GetPropertiesByInsertionOrder(), modified, modifiedToCheck) == false)
-                return false;
-
-            return modifiedToCheck.Count == 0 || FastCompareInternal(id, modified, modifiedToCheck, original, null);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool FastCompareInternal(string id, BlittableJsonReaderObject original, IEnumerable<int> originalToCheck, BlittableJsonReaderObject modified, HashSet<int> modifiedToCheck)
-        {
-            var originalProperty = new BlittableJsonReaderObject.PropertyDetails();
-            var modifiedProperty = new BlittableJsonReaderObject.PropertyDetails();
-
-            foreach (var originalIndex in originalToCheck)
-            {
-                original.GetPropertyByIndex(originalIndex, ref originalProperty);
-
-                if (originalProperty.Name.Equals(LastModified) ||
-                    originalProperty.Name.Equals(Collection) ||
-                    originalProperty.Name.Equals(ChangeVector) ||
-                    originalProperty.Name.Equals(Etag) ||
-                    originalProperty.Name.Equals(Id))
-                    continue;
-
-                var modifiedIndex = modified.GetPropertyIndex(originalProperty.Name);
-                if (modifiedIndex == -1)
-                    return false;
-
-                modifiedToCheck?.Remove(modifiedIndex);
-
-                modified.GetPropertyByIndex(modifiedIndex, ref modifiedProperty);
-
-                if (originalProperty.Value == null && modifiedProperty.Value == null)
-                    continue;
-
-                if (originalProperty.Value == null || modifiedProperty.Value == null)
-                    return false;
-
-                var originalJson = originalProperty.Value as BlittableJsonReaderObject;
-                var modifiedJson = modifiedProperty.Value as BlittableJsonReaderObject;
-
-                if (originalJson != null && modifiedJson != null)
-                {
-                    if (FastCompare(id, originalJson, modifiedJson))
-                        continue;
-
-                    return false;
-                }
-
-                if (originalProperty.Value.Equals(modifiedProperty.Value) == false)
-                    return false;
-            }
-
             return true;
         }
 

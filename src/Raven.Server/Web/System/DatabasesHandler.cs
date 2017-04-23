@@ -38,7 +38,7 @@ namespace Raven.Server.Web.System
                     writer.WriteStartObject();
 
                     writer.WritePropertyName(nameof(DatabasesInfo.Databases));
-                    writer.WriteArray(context, ServerStore.StartingWith(context, Constants.Documents.Prefix, GetStart(), GetPageSize(int.MaxValue)), (w, c, dbDoc) =>
+                    writer.WriteArray(context, ServerStore.StartingWith(context, Constants.Documents.Prefix, GetStart(), GetPageSize()), (w, c, dbDoc) =>
                     {
                         var databaseName = dbDoc.Key.Substring(Constants.Documents.Prefix.Length);
                         if (namesOnly)
@@ -134,8 +134,8 @@ namespace Raven.Server.Web.System
                     [nameof(Size.HumaneSize)] = size.HumaneSize,
                     [nameof(Size.SizeInBytes)] = size.SizeInBytes
                 },
-                [nameof(DatabaseInfo.Errors)] = online
-                    ? db.IndexStore.GetIndexes().Sum(index => index.GetErrors().Count)
+                [nameof(DatabaseInfo.IndexingErrors)] = online
+                    ? db.IndexStore.GetIndexes().Sum(index => index.GetErrorCount())
                     : 0,
                 [nameof(DatabaseInfo.Alerts)] = online ? db.NotificationCenter.GetAlertCount() : 0,
                 [nameof(DatabaseInfo.UpTime)] = online ? GetUptime(db).ToString() : null,

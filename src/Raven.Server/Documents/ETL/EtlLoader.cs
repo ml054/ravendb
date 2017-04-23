@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 using Raven.Client;
 using Raven.Client.Documents.Changes;
 using Raven.Server.Documents.ETL.Providers.Raven;
 using Raven.Server.Documents.ETL.Providers.SQL;
-using Raven.Server.Documents.ETL.Providers.SQL.Connections;
 using Raven.Server.Json;
 using Raven.Server.NotificationCenter.Notifications;
 using Raven.Server.ServerWide.Context;
@@ -38,7 +37,7 @@ namespace Raven.Server.Documents.ETL
 
         public EtlProcess[] Processes => _processes;
 
-        public EtlConfiguration CurrentConfiguration { get; private set; }
+        public EtlDestinationsConfig Destinations { get; private set; }
 
         public void Initialize()
         {
@@ -49,47 +48,35 @@ namespace Raven.Server.Documents.ETL
         {
             LoadConfiguration();
 
-            if (CurrentConfiguration == null)
+            if (Destinations == null)
                 return;
 
             var processes = new List<EtlProcess>();
-            var uniqueNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var config in CurrentConfiguration.RavenTargets)
+            
+            foreach (var config in Destinations.RavenDestinations)
             {
-                if (ValidateConfiguration(config, uniqueNames) == false)
+                if (ValidateConfiguration(config) == false)
                     continue;
 
-                var etlProcess = new RavenEtl(_database, config);
+                foreach (var transform in config.Transforms)
+                {
+                    var etlProcess = new RavenEtl(transform, config.Destination, _database);
 
-                processes.Add(etlProcess);
+                    processes.Add(etlProcess);
+                }
             }
 
-            foreach (var config in CurrentConfiguration.SqlTargets)
+            foreach (var config in Destinations.SqlDestinations)
             {
-                if (ValidateConfiguration(config, uniqueNames) == false)
+                if (ValidateConfiguration(config) == false)
                     continue;
 
-                PredefinedSqlConnection predefinedConnection;
-                if (CurrentConfiguration.SqlConnections.TryGetValue(config.ConnectionStringName, out predefinedConnection) == false)
+                foreach (var transform in config.Transforms)
                 {
-                    var message =
-                        $"Could not find connection string named '{config.ConnectionStringName}' for SQL ETL config: " +
-                        $"{config.Name}, ignoring SQL ETL setting.";
+                    var sql = new SqlEtl(transform, config.Destination, _database);
 
-                    if (Logger.IsInfoEnabled)
-                        Logger.Info(message);
-
-                    var alert = AlertRaised.Create(AlertTitle, message, AlertType.SqlEtl_ConnectionStringMissing, NotificationSeverity.Error);
-
-                    _database.NotificationCenter.Add(alert);
-
-                    continue;
+                    processes.Add(sql);
                 }
-
-                var sql = new SqlEtl(_database, config, predefinedConnection);
-
-                processes.Add(sql);
             }
 
             _processes = processes.ToArray();
@@ -101,35 +88,24 @@ namespace Raven.Server.Documents.ETL
             }
         }
 
-        private bool ValidateConfiguration(EtlProcessConfiguration config, HashSet<string> uniqueNames)
+        private bool ValidateConfiguration<T>(EtlConfiguration<T> config) where T : EtlDestination
         {
             List<string> errors;
             if (config.Validate(out errors) == false)
             {
-                LogConfigurationError(config, errors);
-                return false;
-            }
+                var errorMessage = $"Invalid ETL configuration for destination: {config.Destination}. " +
+                                   $"Reason{(errors.Count > 1 ? "s" : string.Empty)}: {string.Join(";", errors)}.";
 
-            if (string.IsNullOrEmpty(config.Name) == false && uniqueNames.Add(config.Name) == false)
-            {
-                LogConfigurationError(config, new List<string> { $"'{config.Name}' name is already defined for different ETL process" });
+                if (Logger.IsInfoEnabled)
+                    Logger.Info(errorMessage);
+
+                var alert = AlertRaised.Create(AlertTitle, errorMessage, AlertType.Etl_Error, NotificationSeverity.Error);
+
+                _database.NotificationCenter.Add(alert);
                 return false;
             }
 
             return true;
-        }
-
-        private void LogConfigurationError(EtlProcessConfiguration config, List<string> errors)
-        {
-            var errorMessage = $"Invalid ETL configuration for: '{config.Name}'. " +
-                               $"Reason{(errors.Count > 1 ? "s" : string.Empty)}: {string.Join(";", errors)}.";
-
-            if (Logger.IsInfoEnabled)
-                Logger.Info(errorMessage);
-
-            var alert = AlertRaised.Create(AlertTitle, errorMessage, AlertType.Etl_Error, NotificationSeverity.Error);
-
-            _database.NotificationCenter.Add(alert);
         }
 
         private void LoadConfiguration()
@@ -142,11 +118,11 @@ namespace Raven.Server.Documents.ETL
 
                 if (etlConfigDocument == null)
                 {
-                    CurrentConfiguration = null;
+                    Destinations = null;
                     return;
                 }
 
-                CurrentConfiguration = JsonDeserializationServer.EtlConfiguration(etlConfigDocument.Data);
+                Destinations = JsonDeserializationServer.EtlConfiguration(etlConfigDocument.Data);
             }
         }
 
@@ -164,8 +140,7 @@ namespace Raven.Server.Documents.ETL
             if (change.Key.Equals(Constants.Documents.ETL.RavenEtlDocument, StringComparison.OrdinalIgnoreCase) == false)
                 return;
 
-            foreach (var replication in _processes)
-                replication.Dispose();
+            Parallel.ForEach(_processes, x => x.Dispose());
 
             _processes = new EtlProcess[0];
 
@@ -177,6 +152,8 @@ namespace Raven.Server.Documents.ETL
             _database.Changes.OnDocumentChange -= NotifyAboutWork;
             // TODO arek - RavennDB-6555 _serverStore.Cluster.DatabaseChanged += HandleDatabaseRecordChange;
             _database.Changes.OnSystemDocumentChange -= HandleSystemDocumentChange;
+
+            Parallel.ForEach(_processes, x => x.Dispose());
         }
     }
 }

@@ -4,7 +4,6 @@ using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization.Formatters;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CSharp.RuntimeBinder;
@@ -82,10 +81,8 @@ namespace Raven.Client.Documents.Conventions
                 jsonSerializer.Serialize(streamWriter, entity);
                 streamWriter.Flush();
             };
-            DeserializeEntityFromBlittable = new JsonNetBlittableEntitySerializer(this).EntityFromJsonStream;
 
-            ImplicitTakeAmount = 25;
-            ThrowIfImplicitTakeAmountExceeded = true;
+            DeserializeEntityFromBlittable = new JsonNetBlittableEntitySerializer(this).EntityFromJsonStream;
         }
 
         /// <summary>
@@ -100,30 +97,25 @@ namespace Raven.Client.Documents.Conventions
         public int MaxNumberOfRequestsPerSession { get; set; }
 
         /// <summary>
-        ///     Gets or sets the implicit take amount (page size) that will be used for .Queries() without explicit .Take().
-        /// </summary>
-        /// <value>The max number of requests per session.</value>
-        public int ImplicitTakeAmount { get; set; }
-
-        /// <summary>
-        ///     Gets or sets whether we should throw if implicit take amount is exceeded.
-        ///     The default is true and is recommended in order to make the user use an explicit .Take().
-        /// </summary>
-        /// <value>The max number of requests per session.</value>
-        public bool ThrowIfImplicitTakeAmountExceeded { get; set; }
-
-        /// <summary>
         ///     Gets or sets the default max length of a query using the GET method against a server.
         /// </summary>
         public int MaxLengthOfQueryUsingGetUrl { get; set; }
 
         /// <summary>
-        ///     Whatever to allow queries on document id.
+        ///     Whether to allow queries on document id.
         ///     By default, queries on id are disabled, because it is far more efficient
         ///     to do a Load() than a Query() if you already know the id.
         ///     This is NOT recommended and provided for backward compatibility purposes only.
         /// </summary>
         public bool AllowQueriesOnId { get; set; }
+
+        /// <summary>
+        ///     If set to 'true' then it will throw an exception when any query is performed (in session)
+        ///     without explicit page size set.
+        ///     This can be useful for development purposes to pinpoint all the possible performance bottlenecks
+        ///     since from 4.0 there is no limitation for number of results returned from server.
+        /// </summary>
+        public bool ThrowIfQueryPageSizeIsNotSet { get; set; }
 
         /// <summary>
         ///     Whether UseOptimisticConcurrency is set to true by default for all opened sessions

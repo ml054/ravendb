@@ -40,6 +40,13 @@ interface metadataAwareDto {
     '@metadata'?: documentMetadataDto;
 }
 
+interface IndexErrorPerDocument {
+    Document: string;
+    Error: string;
+    IndexName: string;
+    Timestamp: string;
+}
+
 interface documentMetadataDto {
     '@collection'?: string;
     'Raven-Clr-Type'?: string;
@@ -49,6 +56,14 @@ interface documentMetadataDto {
     '@last-modified'?: string;
     '@etag'?: number;
     '@flags': string;
+    '@attachments': Array<documentAttachmentDto>;
+}
+
+interface documentAttachmentDto {
+    ContentType: string;
+    Hash: string;
+    Name: string;
+    Size: number;
 }
 
 interface connectedDocument {
@@ -206,6 +221,7 @@ interface recentErrorDto extends Raven.Server.NotificationCenter.Notifications.N
 declare module studio.settings {
     type numberFormatting = "raw" | "formatted";
     type dontShowAgain = "EditSystemDocument";
+    type saveLocation = "local" | "remote";
     type usageEnvironment = "Default" | "Dev" | "Test" | "Prod";
 }
 
@@ -217,6 +233,13 @@ interface IndexingPerformanceStatsWithCache extends Raven.Client.Documents.Index
 interface IOMetricsRecentStatsWithCache extends Raven.Server.Documents.Handlers.IOMetricsRecentStats {
     StartedAsDate: Date; // used for caching
     CompletedAsDate: Date; // used for caching
+}
+
+interface ReplicationPerformanceBaseWithCache extends Raven.Client.Documents.Replication.ReplicationPerformanceBase {
+    StartedAsDate: Date;
+    CompletedAsDate: Date;
+    Type: Raven.Server.Documents.Replication.LiveReplicationPerformanceCollector.ReplicationPerformanceType;
+    Description: string;
 }
 
 interface IndexingPerformanceOperationWithParent extends Raven.Client.Documents.Indexes.IndexingPerformanceOperation {
@@ -263,4 +286,9 @@ interface patchDto extends documentDto {
     Query: string;
     Script: string;
     SelectedItem: string;
+}
+
+interface feedbackSavedSettingsDto {
+    Name: string;
+    Email: string;
 }

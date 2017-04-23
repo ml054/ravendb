@@ -125,14 +125,14 @@ namespace Raven.Server.Utils
             var topologyInfo = new NodeTopologyInfo { DatabaseId = database.DbId.ToString() };
             topologyInfo.InitializeOSInformation();
 
-            var replicationLoader = database.DocumentReplicationLoader;
+            var replicationLoader = database.ReplicationLoader;
 
             GetLocalIncomingTopology(replicationLoader, topologyInfo);
 
             foreach (var destination in replicationDocument.Destinations)
             {
                 OutgoingReplicationHandler outgoingHandler;
-                DocumentReplicationLoader.ConnectionShutdownInfo connectionFailureInfo;
+                ReplicationLoader.ConnectionShutdownInfo connectionFailureInfo;
 
                 if (TryGetActiveDestination(destination, replicationLoader.OutgoingHandlers, out outgoingHandler))
                 {
@@ -178,7 +178,7 @@ namespace Raven.Server.Utils
             return topologyInfo;
         }
 
-        public static void GetLocalIncomingTopology(DocumentReplicationLoader replicationLoader, NodeTopologyInfo topologyInfo)
+        public static void GetLocalIncomingTopology(ReplicationLoader replicationLoader, NodeTopologyInfo topologyInfo)
         {
             foreach (var incomingHandler in replicationLoader.IncomingHandlers)
             {
@@ -306,18 +306,6 @@ namespace Raven.Server.Utils
             int size;
             var storageTypeNum = *(int*)tvr.Read(index, out size);
             return (TEnum)Enum.ToObject(typeof(TEnum), storageTypeNum);
-        }
-
-        public static unsafe ChangeVectorEntry[] GetChangeVectorEntriesFromTableValueReader(ref TableValueReader tvr, int index)
-        {
-            int size;
-            var pChangeVector = (ChangeVectorEntry*)tvr.Read(index, out size);
-            var changeVector = new ChangeVectorEntry[size / sizeof(ChangeVectorEntry)];
-            for (int i = 0; i < changeVector.Length; i++)
-            {
-                changeVector[i] = pChangeVector[i];
-            }
-            return changeVector;
         }
 
         public static unsafe ChangeVectorEntry[] ReadChangeVectorFrom(Tree tree)

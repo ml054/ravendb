@@ -41,7 +41,7 @@ class hitTest {
         this.onToggleIndex = onToggleIndex;
         this.handleTrackTooltip = handleTrackTooltip;
         this.handleGapTooltip = handleGapTooltip;
-        this.removeTooltip = removeTooltip;        
+        this.removeTooltip = removeTooltip;
     }
 
     registerTrackItem(x: number, y: number, width: number, height: number, element: Raven.Client.Documents.Indexes.IndexingPerformanceOperation) {
@@ -209,10 +209,12 @@ class indexPerformance extends viewModelBase {
     /* observables */
 
     hasAnyData = ko.observable<boolean>(false);
+    loading: KnockoutComputed<boolean>;
     private searchText = ko.observable<string>();
 
     private liveViewClient = ko.observable<liveIndexPerformanceWebSocketClient>();
     private autoScroll = ko.observable<boolean>(false);
+    private clearSelectionVisible = ko.observable<boolean>(false);
 
     private indexNames = ko.observableArray<string>();
     private filteredIndexNames = ko.observableArray<string>();
@@ -278,6 +280,11 @@ class indexPerformance extends viewModelBase {
                     .transition(); 
             }
         });
+
+        this.loading = ko.pureComputed(() => {
+            const client = this.liveViewClient();
+            return client ? client.loading() : true;
+        });
     }
 
     activate(args: { indexName: string, database: string}): void {
@@ -304,12 +311,10 @@ class indexPerformance extends viewModelBase {
         [this.totalWidth, this.totalHeight] = this.getPageHostDimenensions();
         this.totalWidth -= 1;
 
-        this.totalHeight -= 58; // substract toolbar height
-
         this.initCanvases();
 
         this.hitTest.init(this.svg,
-            (indexName) => this.onToggleIndex(indexName),          
+            (indexName) => this.onToggleIndex(indexName),
             (item, x, y) => this.handleTrackTooltip(item, x, y),
             (gapItem, x, y) => this.handleGapTooltip(gapItem, x, y),
             () => this.hideTooltip());
@@ -327,7 +332,7 @@ class indexPerformance extends viewModelBase {
         this.inProgressCanvas = metricsContainer
             .append("canvas")
             .attr("width", this.totalWidth + 1)
-            .attr("height", this.totalHeight - indexPerformance.brushSectionHeight)
+            .attr("height", this.totalHeight - indexPerformance.brushSectionHeight - indexPerformance.axisHeight)
             .style("top", (indexPerformance.brushSectionHeight + indexPerformance.axisHeight) + "px");
 
         const inProgressCanvasNode = this.inProgressCanvas.node() as HTMLCanvasElement;
@@ -615,7 +620,7 @@ class indexPerformance extends viewModelBase {
             this.brushContainer
                 .call(this.brush)
                 .selectAll("rect")
-                .attr("y", 0)
+                .attr("y", 1)
                 .attr("height", indexPerformance.brushSectionHeight - 1);
         }
     }
@@ -724,6 +729,8 @@ class indexPerformance extends viewModelBase {
 
     private onZoom() {
         this.autoScroll(false);
+        this.clearSelectionVisible(true);
+
         if (!this.brushAndZoomCallbacksDisabled) {
             this.brush.extent(this.xNumericScale.domain() as [number, number]);
             this.brushContainer
@@ -734,6 +741,8 @@ class indexPerformance extends viewModelBase {
     }
 
     private onBrush() {
+        this.clearSelectionVisible(!this.brush.empty());
+
         if (!this.brushAndZoomCallbacksDisabled) {
             this.xNumericScale.domain((this.brush.empty() ? this.xBrushNumericScale.domain() : this.brush.extent()) as [number, number]);
             this.zoom.x(this.xNumericScale);
@@ -867,7 +876,7 @@ class indexPerformance extends viewModelBase {
                     continue;
 
                 const yOffset = isOpened ? indexPerformance.trackHeight + indexPerformance.stackPadding : 0;
-                this.drawStripes(context, [perf.Details], x1, yStart + (isOpened ? yOffset : 0), yOffset, extentFunc);
+                this.drawStripes(context, [perf.Details], x1, yStart + (isOpened ? yOffset : 0), yOffset, extentFunc, perfStat.IndexName);
 
                 if (!perf.Completed) {
                     this.findInProgressAction(context, perf, extentFunc, x1, yStart + (isOpened ? yOffset : 0), yOffset);
@@ -912,7 +921,7 @@ class indexPerformance extends viewModelBase {
     }
 
     private drawStripes(context: CanvasRenderingContext2D, operations: Array<Raven.Client.Documents.Indexes.IndexingPerformanceOperation>, xStart: number, yStart: number,
-        yOffset: number, extentFunc: (duration: number) => number) {
+        yOffset: number, extentFunc: (duration: number) => number, indexName?: string) {
 
         let currentX = xStart;
         const length = operations.length;
@@ -937,6 +946,10 @@ class indexPerformance extends viewModelBase {
                         context.font = "12px Lato";
                         context.fillText(truncatedText, currentX + 2, yStart + 13, dx - 4);
                     }
+                }
+            } else { // track is closed
+                if (indexName && dx >= 0.8) {
+                    this.hitTest.registerIndexToggle(currentX, yStart, dx, indexPerformance.trackHeight, indexName);
                 }
             }
             
@@ -1094,7 +1107,8 @@ class indexPerformance extends viewModelBase {
 
             this.tooltip
                 .style("left", (x + 10) + "px")
-                .style("top", (y + 10) + "px");
+                .style("top", (y + 10) + "px")
+                .style('display', undefined);
 
             this.tooltip
                 .transition()
@@ -1176,6 +1190,7 @@ class indexPerformance extends viewModelBase {
 
     closeImport() {
         this.isImport(false);
+        this.hasAnyData(false);
         this.resetGraphData();
         this.enableLiveView();
     }
@@ -1195,6 +1210,7 @@ class indexPerformance extends viewModelBase {
 
         brushAction(this.brush);
         this.brushContainer.call(this.brush);
+        this.clearSelectionVisible(!this.brush.empty());
 
         this.brushAndZoomCallbacksDisabled = false;
     }
@@ -1215,6 +1231,14 @@ class indexPerformance extends viewModelBase {
             }
             return value;
         });
+    }
+
+    clearBrush() {
+        this.autoScroll(false);
+        this.brush.clear();
+        this.brushContainer.call(this.brush);
+
+        this.onBrush();
     }
 
 }

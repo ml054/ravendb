@@ -1,5 +1,6 @@
 using Sparrow.Binary;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -478,40 +479,71 @@ namespace Sparrow
 
         #region Downsampling Hashing
 
-        public static int Combine(int x, int y)
+        public static class HashCombiner
         {
-            return CombineInline(x, y);
+            public static int Combine(int x, int y)
+            {
+                return CombineInline(x, y);
+            }
+
+            public static uint Combine(uint x, uint y)
+            {
+                return CombineInline(x, y);
+            }
+
+            public static long Combine(long x, long y)
+            {
+                return CombineInline(x, y);
+            }
+
+            public static ulong Combine(ulong x, ulong y)
+            {
+                return CombineInline(x, y);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int CombineInline(int x, int y)
+            {
+                // The jit optimizes this to use the ROL instruction on x86
+                // Related GitHub pull request: dotnet/coreclr#1830
+                uint shift5 = ((uint)x << 5) | ((uint)x >> 27);
+                return ((int)shift5 + x) ^ y;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static uint CombineInline(uint x, uint y)
+            {
+                // The jit optimizes this to use the ROL instruction on x86
+                // Related GitHub pull request: dotnet/coreclr#1830
+                uint shift5 = (x << 5) | (x >> 27);
+                return (shift5 + x) ^ y;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static long CombineInline(long x, long y)
+            {
+                // The jit optimizes this to use the ROL instruction on x86
+                // Related GitHub pull request: dotnet/coreclr#1830
+                ulong ux = (ulong)x;
+                ulong shift5 = (ux << 10) | (ux >> 54);
+                return (long) (shift5 + ux) ^ y;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static ulong CombineInline(ulong x, ulong y)
+            {
+                // The jit optimizes this to use the ROL instruction on x86
+                // Related GitHub pull request: dotnet/coreclr#1830
+                ulong shift5 = (x << 10) | (x >> 54);
+                return (shift5 + x) ^ y;
+            }
         }
 
-        public static uint Combine(uint x, uint y)
-        {
-            return CombineInline(x, y);
-        }
-
-
-        public static long Combine(long x, long y)
-        {
-            return CombineInline(x, y);
-        }
-
-        public static ulong Combine(ulong x, ulong y)
-        {
-            return CombineInline(x, y);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int CombineInline(int x, int y)
-        {
-            // The jit optimizes this to use the ROL instruction on x86
-            // Related GitHub pull request: dotnet/coreclr#1830
-            uint shift5 = ((uint)x << 5) | ((uint)x >> 27);
-            return ((int)shift5 + x) ^ y;
-        }
 
         private static readonly ulong kMul = 0x9ddfea08eb382d69UL;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong CombineInline(ulong x, ulong y)
+        public static ulong Combine(ulong x, ulong y)
         {
             // This is the Hash128to64 function from Google's CityHash (available
             // under the MIT License).  We use it to reduce multiple 64 bit hashes
@@ -528,7 +560,7 @@ namespace Sparrow
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long CombineInline(long upper, long lower)
+        public static long Combine(long upper, long lower)
         {
             // This is the Hash128to64 function from Google's CityHash (available
             // under the MIT License).  We use it to reduce multiple 64 bit hashes
@@ -544,16 +576,60 @@ namespace Sparrow
             b ^= (b >> 47);
             b *= kMul;
 
-            return (long) b;
+            return (long)b;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint CombineInline(uint x, uint y)
+        public static uint Mix(ulong key)
         {
-            // The jit optimizes this to use the ROL instruction on x86
-            // Related GitHub pull request: dotnet/coreclr#1830
-            uint shift5 = (x << 5) | (x >> 27);
-            return (shift5 + x) ^ y;
+            key = (~key) + (key << 18); // key = (key << 18) - key - 1;
+            key = key ^ (key >> 31);
+            key = key * 21; // key = (key + (key << 2)) + (key << 4);
+            key = key ^ (key >> 11);
+            key = key + (key << 6);
+            key = key ^ (key >> 22);
+            return (uint)key;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Mix(long key)
+        {
+            key = (~key) + (key << 18); // key = (key << 18) - key - 1;
+            key = key ^ (key >> 31);
+            key = key * 21; // key = (key + (key << 2)) + (key << 4);
+            key = key ^ (key >> 11);
+            key = key + (key << 6);
+            key = key ^ (key >> 22);
+            return (int)key;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint Combine(uint upper, uint lower)
+        {
+            ulong key = ((ulong)upper << 32) | lower;
+
+            key = (~key) + (key << 18); // key = (key << 18) - key - 1;
+            key = key ^ (key >> 31);
+            key = key * 21; // key = (key + (key << 2)) + (key << 4);
+            key = key ^ (key >> 11);
+            key = key + (key << 6);
+            key = key ^ (key >> 22);
+            return (uint)key;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Combine(int upper, int lower)
+        {
+            ulong x = (uint)upper; // Ensure we do not mess up with the sign extend.
+            ulong key = (x << 32) | (uint)lower;
+
+            key = (~key) + (key << 18); // key = (key << 18) - key - 1;
+            key = key ^ (key >> 31);
+            key = key * 21; // key = (key + (key << 2)) + (key << 4);
+            key = key ^ (key >> 11);
+            key = key + (key << 6);
+            key = key ^ (key >> 22);
+            return (int)key;
         }
 
         #endregion
@@ -729,35 +805,104 @@ namespace Sparrow
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static uint CalculateInline(int[] buffer, ulong seed = 0x5D70D359C498B3F8ul)
+            {
+                uint high = (uint)(seed >> 32);
+                uint low = (uint)seed;
+
+                for (uint i = 0; i < buffer.Length; i++)
+                {
+                    MarvinMix(ref high, ref low, (uint)buffer[i]);
+                }
+
+                MarvinMix(ref high, ref low, 0x80);
+                MarvinMix(ref high, ref low, 0);
+
+                return low ^ high;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static uint CalculateInline(uint[] buffer, ulong seed = 0x5D70D359C498B3F8ul)
+            {
+                uint high = (uint)(seed >> 32);
+                uint low = (uint)seed;
+
+                for (uint i = 0; i < buffer.Length; i++)
+                {
+                    MarvinMix(ref high, ref low, (uint)buffer[i]);
+                }
+
+                MarvinMix(ref high, ref low, 0x80);
+                MarvinMix(ref high, ref low, 0);
+
+                return low ^ high;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static uint CalculateInline(List<uint> buffer, ulong seed = 0x5D70D359C498B3F8ul)
+            {
+                uint high = (uint)(seed >> 32);
+                uint low = (uint)seed;
+
+                int len = buffer.Count;
+                for (int i = 0; i < len; i++)
+                {
+                    MarvinMix(ref high, ref low, buffer[i]);
+                }
+
+                MarvinMix(ref high, ref low, 0x80);
+                MarvinMix(ref high, ref low, 0);
+
+                return low ^ high;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static uint CalculateInline(List<int> buffer, ulong seed = 0x5D70D359C498B3F8ul)
+            {
+                uint high = (uint)(seed >> 32);
+                uint low = (uint)seed;
+
+                int len = buffer.Count;
+                for (int i = 0; i < len; i++)
+                {
+                    MarvinMix(ref high, ref low, (uint)buffer[i]);
+                }
+
+                MarvinMix(ref high, ref low, 0x80);
+                MarvinMix(ref high, ref low, 0);
+
+                return low ^ high;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static uint CalculateInline(byte* buffer, int len, ulong seed = 0x5D70D359C498B3F8ul)
             {
-                unchecked
+                uint high = (uint)(seed >> 32);
+                uint low = (uint)seed;
+
+                byte* ptr = buffer;
+                byte* bEnd = ptr + len;
+                byte* loopEnd = bEnd - sizeof(uint);
+
+                while (ptr <= loopEnd)
                 {
-                    uint high = (uint)(seed >> 32);
-                    uint low = (uint)seed;
-
-                    byte* bEnd = buffer + len;
-                    byte* loopEnd = bEnd - sizeof(uint);
-                    byte* ptr = buffer;
-                    while (ptr <= loopEnd)
-                    {
-                        MarvinMix(ref high, ref low, *(uint*)ptr);
-                        ptr += sizeof(uint);
-                    }
-
-                    uint final = 0x80;
-                    switch ((int)(bEnd - ptr))
-                    {
-                        case 3: final = (final << 8) | ptr[2]; goto case 2;
-                        case 2: final = (final << 8) | ptr[1]; goto case 1;
-                        case 1: final = (final << 8) | ptr[0]; break;
-                    }
-
-                    MarvinMix(ref high, ref low, final);
-                    MarvinMix(ref high, ref low, 0);
-
-                    return low ^ high;
+                    MarvinMix(ref high, ref low, *(uint*)ptr);
+                    ptr += sizeof(uint);
                 }
+
+                uint final = 0x80;
+                int rest = (int)(bEnd - ptr);
+                if (rest == 3)
+                    final = (final << 8) | ptr[2];
+                if (rest >= 2)
+                    final = (final << 8) | ptr[1];
+                if (rest >= 1)
+                    final = (final << 8) | ptr[0];
+
+                MarvinMix(ref high, ref low, final);
+                MarvinMix(ref high, ref low, 0);
+
+                return low ^ high;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

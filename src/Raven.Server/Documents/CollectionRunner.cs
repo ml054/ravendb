@@ -46,6 +46,10 @@ namespace Raven.Server.Documents
                 totalCount = GetTotalCountForCollection(context, collectionName);
             }
             progress.Total = totalCount;
+
+            // send initial progress with total count set, and 0 as processed count
+            onProgress(progress);
+
             long startEtag = 0;
             using (var rateGate = options.MaxOpsPerSecond.HasValue
                     ? new RateGate(options.MaxOpsPerSecond.Value, TimeSpan.FromSeconds(1))
@@ -56,13 +60,15 @@ namespace Raven.Server.Documents
                 while (startEtag <= lastEtag)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    bool wait = false;
+                    var wait = false;
 
                     using (var tx = context.OpenWriteTransaction())
                     {
                         var documents = GetDocuments(context, collectionName, startEtag, batchSize);
                         foreach (var document in documents)
                         {
+                            token.Delay();
+
                             cancellationToken.ThrowIfCancellationRequested();
 
                             if (document.Etag > lastEtag)// we don't want to go over the documents that we have patched

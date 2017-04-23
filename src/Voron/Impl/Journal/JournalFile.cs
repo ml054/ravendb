@@ -126,7 +126,7 @@ namespace Voron.Impl.Journal
                 }
                 catch (Exception e)
                 {
-                    _env.CatastrophicFailure = ExceptionDispatchInfo.Capture(e);
+                    _env.Options.SetCatastrophicFailure(ExceptionDispatchInfo.Capture(e));
                     throw;
                 }
             }
@@ -147,7 +147,7 @@ namespace Voron.Impl.Journal
                     }
                     catch (Exception e)
                     {
-                        _env.CatastrophicFailure = ExceptionDispatchInfo.Capture(e);
+                        _env.Options.SetCatastrophicFailure(ExceptionDispatchInfo.Capture(e));
                         throw;
                     }
                 }
@@ -213,7 +213,6 @@ namespace Voron.Impl.Journal
 
         public void FreeScratchPagesOlderThan(LowLevelTransaction tx, long lastSyncedTransactionId)
         {
-            if (tx == null) throw new ArgumentNullException(nameof(tx));
             var unusedPages = new List<PagePosition>();
 
             List<PagePosition> unusedAndFree;
@@ -226,12 +225,16 @@ namespace Voron.Impl.Journal
               _pageTranslationTable.RemoveKeysWhereAllPagesOlderThan(lastSyncedTransactionId, unusedPages);
             }
 
+            // use current write tx id to prevent from overriding a scratch page by write tx 
+            // while there might be old read tx looking at it by using PTT from the journal snapshot
+            var availableForAllocationAfterTx = tx.Id; 
+
             foreach (var unusedScratchPage in unusedAndFree)
             {
                 if (unusedScratchPage.IsFreedPageMarker)
                     continue;
 
-                tx.Environment.ScratchBufferPool.Free(unusedScratchPage.ScratchNumber, unusedScratchPage.ScratchPos, tx);
+                _env.ScratchBufferPool.Free(unusedScratchPage.ScratchNumber, unusedScratchPage.ScratchPos, availableForAllocationAfterTx);
             }
 
             foreach (var page in unusedPages)
@@ -247,7 +250,7 @@ namespace Voron.Impl.Journal
                     continue;
                 }
 
-                tx.Environment.ScratchBufferPool.Free(page.ScratchNumber, page.ScratchPos, tx);
+                _env.ScratchBufferPool.Free(page.ScratchNumber, page.ScratchPos, availableForAllocationAfterTx);
             }
         }
     }

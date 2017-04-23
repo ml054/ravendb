@@ -11,6 +11,7 @@ using Raven.Server.Commercial;
 using Raven.Server.Config;
 using Raven.Server.Documents;
 using Raven.Server.NotificationCenter;
+using Raven.Server.NotificationCenter.Notifications;
 using Raven.Server.ServerWide.Context;
 using Raven.Server.ServerWide.LowMemoryNotification;
 using Raven.Server.Utils;
@@ -46,8 +47,8 @@ namespace Raven.Server.ServerWide
         public readonly RavenConfiguration Configuration;
         public readonly DatabasesLandlord DatabasesLandlord;
         public readonly NotificationCenter.NotificationCenter NotificationCenter;
-
-        public static LicenseStorage LicenseStorage { get; } = new LicenseStorage();
+        public readonly LicenseManager LicenseManager;
+        public readonly FeedbackSender FeedbackSender;
 
         // this is only modified by write transactions under lock
         // no need to use thread safe ops
@@ -93,6 +94,10 @@ namespace Raven.Server.ServerWide
 
             NotificationCenter = new NotificationCenter.NotificationCenter(_notificationsStorage, resourceName, ServerShutdown);
 
+            LicenseManager = new LicenseManager(NotificationCenter);
+
+            FeedbackSender = new FeedbackSender();
+
             DatabaseInfoCache = new DatabaseInfoCache();
 
             _frequencyToCheckForIdleDatabases = Configuration.Databases.FrequencyToCheckForIdle.AsTimeSpan;
@@ -113,9 +118,46 @@ namespace Raven.Server.ServerWide
 
             var path = Configuration.Core.DataDirectory.Combine("System");
 
+
+            List<AlertRaised> storeAlertForLateRaise = new List<AlertRaised>();
+
             var options = Configuration.Core.RunInMemory
                 ? StorageEnvironmentOptions.CreateMemoryOnly()
                 : StorageEnvironmentOptions.ForPath(path.FullPath);
+
+            options.OnNonDurableFileSystemError += (obj, e) =>
+            {
+                var alert = AlertRaised.Create("Non Durable File System - System Database",
+                    e.Message,
+                    AlertType.NonDurableFileSystem,
+                    NotificationSeverity.Warning,
+                    "NonDurable Error System");
+                if (NotificationCenter.IsInitialized)
+                {
+                    NotificationCenter.Add(alert);
+                }
+                else
+                {
+                    storeAlertForLateRaise.Add(alert);
+                }
+            };
+
+            options.OnRecoveryError += (obj, e) =>
+            {
+                var alert = AlertRaised.Create("Database Recovery Error - System Database",
+                    e.Message,
+                    AlertType.NonDurableFileSystem,
+                    NotificationSeverity.Error,
+                    "Recovery Error System");
+                if (NotificationCenter.IsInitialized)
+                {
+                    NotificationCenter.Add(alert);
+                }
+                else
+                {
+                    storeAlertForLateRaise.Add(alert);
+                }
+            };
 
             options.SchemaVersion = 2;
             options.ForceUsing32BitsPager = Configuration.Storage.ForceUsing32BitsPager;
@@ -167,8 +209,13 @@ namespace Raven.Server.ServerWide
             _timer = new Timer(IdleOperations, null, _frequencyToCheckForIdleDatabases, TimeSpan.FromDays(7));
             _notificationsStorage.Initialize(_env, ContextPool);
             DatabaseInfoCache.Initialize(_env, ContextPool);
-            LicenseStorage.Initialize(_env, ContextPool);
+            
             NotificationCenter.Initialize();
+            foreach (var alertRaised in storeAlertForLateRaise)
+            {
+                NotificationCenter.Add(alertRaised);
+            }
+            LicenseManager.Initialize(_env, ContextPool);
         }
 
         public long ReadLastEtag(TransactionOperationContext ctx)
@@ -341,12 +388,15 @@ namespace Raven.Server.ServerWide
         {
             if (_shutdownNotification.IsCancellationRequested)
                 return;
+
             lock (this)
             {
                 if (_shutdownNotification.IsCancellationRequested)
                     return;
+
                 _shutdownNotification.Cancel();
                 toDispose.Add(NotificationCenter);
+                toDispose.Add(LicenseManager);
                 toDispose.Add(DatabasesLandlord);
                 toDispose.Add(_env);
                 toDispose.Add(ContextPool);

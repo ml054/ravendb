@@ -3,9 +3,6 @@ import index = require("models/database/index/index");
 import appUrl = require("common/appUrl");
 import saveIndexLockModeCommand = require("commands/database/index/saveIndexLockModeCommand");
 import app = require("durandal/app");
-import indexReplaceDocument = require("models/database/index/indexReplaceDocument");
-import getPendingIndexReplacementsCommand = require("commands/database/index/getPendingIndexReplacementsCommand");
-import cancelSideBySizeConfirm = require("viewmodels/database/indexes/cancelSideBySizeConfirm");
 import deleteIndexesConfirm = require("viewmodels/database/indexes/deleteIndexesConfirm");
 import forceIndexReplace = require("commands/database/index/forceIndexReplace");
 import saveIndexPriorityCommand = require("commands/database/index/saveIndexPriorityCommand");
@@ -16,6 +13,9 @@ import togglePauseIndexingCommand = require("commands/database/index/togglePause
 import eventsCollector = require("common/eventsCollector");
 import enableIndexCommand = require("commands/database/index/enableIndexCommand");
 import disableIndexCommand = require("commands/database/index/disableIndexCommand");
+import computeIndexingProgressCommand = require("commands/database/index/computeIndexingProgressCommand");
+import observableMap = require("common/helpers/observableMap");
+import indexProgress = require("models/database/index/indexProgress");
 
 type indexGroup = {
     entityName: string;
@@ -32,13 +32,16 @@ class indexes extends viewModelBase {
     lockModeCommon: KnockoutComputed<string>;
     selectedIndexesName = ko.observableArray<string>();
     indexesSelectionState: KnockoutComputed<checkbox>;
+    indexingProgresses = new observableMap<string, indexProgress>();
 
     spinners = {
         globalStartStop: ko.observable<boolean>(false),
         globalLockChanges: ko.observable<boolean>(false),
         localPriority: ko.observableArray<string>([]),
         localLockChanges: ko.observableArray<string>([]),
-        localState: ko.observableArray<string>([])
+        localState: ko.observableArray<string>([]),
+        swapNow: ko.observableArray<string>([]),
+        indexingProgress: ko.observableArray<string>([])
     }
 
     globalIndexingStatus = ko.observable<Raven.Client.Documents.Indexes.IndexRunningStatus>();
@@ -47,12 +50,15 @@ class indexes extends viewModelBase {
 
     throttledRefresh: Function;
 
+    indexErrorsUrl = ko.pureComputed(() => appUrl.forIndexErrors(this.activeDatabase()));
+
     constructor() {
         super();
         this.initObservables();
         this.bindToCurrentInstance(
             "lowPriority", "highPriority", "normalPriority",
             "resetIndex", "deleteIndex",
+            "forceSideBySide", "showProgress",
             "unlockIndex", "lockIndex", "lockErrorIndex",
             "enableIndex", "disableIndex", "disableSelectedIndexes", "enableSelectedIndexes",
             "pauseSelectedIndexes", "resumeSelectedIndexes",
@@ -66,6 +72,13 @@ class indexes extends viewModelBase {
     private getAllIndexes(): index[] {
         const all: index[] = [];
         this.indexGroups().forEach(g => all.push(...g.indexes()));
+
+        all.forEach(idx => {
+            if (idx.replacement()) {
+                all.push(idx.replacement());
+            }
+        });
+
         return _.uniq(all);
     }
 
@@ -130,22 +143,44 @@ class indexes extends viewModelBase {
         const statusTask = new getIndexesStatusCommand(this.activeDatabase())
             .execute();
 
-        const replacementTask = new getPendingIndexReplacementsCommand(this.activeDatabase()).execute(); //TODO: this is not working yet!
-
-        return $.when<any>(statsTask, replacementTask, statusTask)
-            .done(([stats]: [Array<Raven.Client.Documents.Indexes.IndexStats>], [replacements]: [indexReplaceDocument[]], [statuses]: [Raven.Client.Documents.Indexes.IndexingStatus]) => this.processData(stats, replacements, statuses));
+        return $.when<any>(statsTask, statusTask)
+            .done(([stats]: [Array<Raven.Client.Documents.Indexes.IndexStats>], [statuses]: [Raven.Client.Documents.Indexes.IndexingStatus]) => this.processData(stats, statuses));
     }
 
-    private processData(stats: Array<Raven.Client.Documents.Indexes.IndexStats>, replacements: indexReplaceDocument[], statuses: Raven.Client.Documents.Indexes.IndexingStatus) {
-        //TODO: handle replacements
-
+    private processData(stats: Array<Raven.Client.Documents.Indexes.IndexStats>, statuses: Raven.Client.Documents.Indexes.IndexingStatus) {
         this.globalIndexingStatus(statuses.Status);
 
+        const replacements = stats
+            .filter(i => i.Name.startsWith(index.SideBySideIndexPrefix));
+
         stats
+            .filter(i => !i.Name.startsWith(index.SideBySideIndexPrefix))
             .map(i => new index(i, this.globalIndexingStatus ))
             .forEach(i => {
                 this.putIndexIntoGroups(i);
             });
+
+        this.processReplacements(replacements);
+    }
+
+    private processReplacements(replacements: Raven.Client.Documents.Indexes.IndexStats[]) {
+        const replacementCache = new Map<string, Raven.Client.Documents.Indexes.IndexStats>();
+
+        replacements.forEach(item => {
+            const forIndex = item.Name.substr(index.SideBySideIndexPrefix.length);
+            replacementCache.set(forIndex, item);
+        });
+
+        this.indexGroups().forEach(group => {
+            group.indexes().forEach(indexDef => {
+                const replacementDto = replacementCache.get(indexDef.name);
+                if (replacementDto) {
+                    indexDef.replacement(new index(replacementDto, this.globalIndexingStatus, indexDef));
+                } else {
+                    indexDef.replacement(null);
+                }
+            });
+        });
     }
 
     private putIndexIntoGroups(i: index): void {
@@ -185,6 +220,27 @@ class indexes extends viewModelBase {
 
             indexGroup.groupHidden(!hasAnyInGroup);
         });
+    }
+
+    showProgress(idx: index) {
+        if (!idx.isStale()) {
+            return;
+        }
+
+        this.confirmationMessage("Are you sure?", "Computing indexing progress is resource intensive and may take a while.", ["Cancel", "Show indexing progress"])
+            .done(result => {
+                if (result.can) {
+                    this.spinners.indexingProgress.push(idx.name);
+                    this.indexingProgresses.delete(idx.name);
+
+                    new computeIndexingProgressCommand(idx.name, this.activeDatabase())
+                        .execute()
+                        .done(progress => {
+                            this.indexingProgresses.set(idx.name, progress);
+                        })
+                        .always(() => this.spinners.indexingProgress.remove(idx.name));
+                }
+            });
     }
 
     resetIndex(indexToReset: index) {
@@ -324,32 +380,19 @@ class indexes extends viewModelBase {
     protected afterClientApiConnected() {
         const changesApi = this.changesContext.databaseChangesApi();
         this.addNotification(changesApi.watchAllIndexes(e => this.processIndexEvent(e)));
-        this.addNotification(changesApi.watchDocsStartingWith(indexReplaceDocument.replaceDocumentPrefix, () => this.processReplaceEvent()));
-    }
-
-    private processReplaceEvent() {
-        setTimeout(() => this.fetchIndexes(), 10);
-    }
-
-    cancelSideBySideIndex(i: index) {
-        eventsCollector.default.reportEvent("index", "cancel-side-by-side");
-        const cancelSideBySideIndexViewModel = new cancelSideBySizeConfirm([i.name], this.activeDatabase());
-        app.showBootstrapDialog(cancelSideBySideIndexViewModel);
-        cancelSideBySideIndexViewModel.cancelTask
-            .done((closedWithoutDeletion: boolean) => {
-                if (!closedWithoutDeletion) {
-                    this.removeIndexesFromAllGroups([i]);
-                }
-            })
-            .fail(() => {
-                this.removeIndexesFromAllGroups([i]);
-                this.fetchIndexes();
-            });
     }
 
     forceSideBySide(idx: index) {
-        eventsCollector.default.reportEvent("index", "force-side-by-side");
-        new forceIndexReplace(idx.name, this.activeDatabase()).execute();
+        this.confirmationMessage("Are you sure?", `Do you want to forcibly swap side-by-side index: ${idx.name}?`)
+            .done((result: canActivateResultDto) => {
+                if (result.can) {
+                    this.spinners.swapNow.push(idx.name);
+                    eventsCollector.default.reportEvent("index", "force-side-by-side");
+                    new forceIndexReplace(idx.name, this.activeDatabase())
+                        .execute()
+                        .always(() => this.spinners.swapNow.remove(idx.name));
+                }
+            });
     }
 
     unlockSelectedIndexes() {
@@ -555,6 +598,10 @@ class indexes extends viewModelBase {
                     indexGroup.indexes().forEach(index => {
                         if (!index.filteredOut() && !_.includes(namesToSelect, index.name)) {
                             namesToSelect.push(index.name);
+
+                            if (index.replacement()) {
+                                namesToSelect.push(index.replacement().name);
+                            }
                         }
                     });
                 }

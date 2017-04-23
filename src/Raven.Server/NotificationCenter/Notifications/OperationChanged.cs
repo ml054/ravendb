@@ -20,6 +20,12 @@ namespace Raven.Server.NotificationCenter.Notifications
 
         public bool Killable { get; private set; }
 
+        public DateTime StartTime { get; private set; }
+
+        public DateTime? EndTime { get; private set; }
+
+        public DatabaseOperations.OperationType TaskType { get; private set; }
+
         public override DynamicJsonValue ToJson()
         {
             var result = base.ToJson();
@@ -27,6 +33,9 @@ namespace Raven.Server.NotificationCenter.Notifications
             result[nameof(OperationId)] = OperationId;
             result[nameof(State)] = State.ToJson();
             result[nameof(Killable)] = Killable;
+            result[nameof(TaskType)] = TaskType.ToString();
+            result[nameof(StartTime)] = StartTime;
+            result[nameof(EndTime)] = EndTime;
 
             return result;
         }
@@ -61,7 +70,10 @@ namespace Raven.Server.NotificationCenter.Notifications
                 Message = description.Description,
                 IsPersistent = state.Result?.ShouldPersist ?? false,
                 Killable = killable && state.Status == OperationStatus.InProgress,
-                Severity = severity
+                Severity = severity,
+                TaskType = description.TaskType,
+                StartTime = description.StartTime,
+                EndTime = description.EndTime
             };
         }
     }

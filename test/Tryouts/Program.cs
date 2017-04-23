@@ -21,9 +21,9 @@ namespace Tryouts
             for (int i = 0; i < 1000; i++)
             {
                 Console.WriteLine(i);
-                using (var a = new CanAuthenticate())
+                using (var a = new FastTests.Sparrow.EncryptionTests())
                 {
-                    a.CanGetTokenFromServer().Wait();
+                    a.WriteAndReadPageUsingCryptoPager();
                 }
             }
         }

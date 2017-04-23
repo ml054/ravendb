@@ -132,9 +132,22 @@ namespace Raven.Server.Documents
             if (config == null)
                 return null;
 
-            if (!_resourceSemaphore.Wait(_concurrentResourceLoadTimeout))
-                throw new DatabaseConcurrentLoadTimeoutException(
-                    "Too much databases loading concurrently, timed out waiting for them to load.");
+            if (!_resourceSemaphore.Wait(0))
+                return UnlikelyCreateDatabaseUnderContention(databaseName, config);
+
+            return CreateDatabaseUnderResourceSemaphore(databaseName, config);
+        }
+
+        private async Task<DocumentDatabase> UnlikelyCreateDatabaseUnderContention(StringSegment databaseName, RavenConfiguration config)
+        {
+            if(await _resourceSemaphore.WaitAsync(_concurrentResourceLoadTimeout) == false)
+                throw new DatabaseConcurrentLoadTimeoutException("Too many databases loading concurrently, timed out waiting for them to load.");
+
+            return await CreateDatabaseUnderResourceSemaphore(databaseName, config);
+        }
+
+        private Task<DocumentDatabase> CreateDatabaseUnderResourceSemaphore(StringSegment databaseName, RavenConfiguration config)
+        {
             try
             {
                 var task = new Task<DocumentDatabase>(() => ActuallyCreateDatabase(databaseName, config));
@@ -327,23 +340,30 @@ namespace Raven.Server.Documents
                     maxLastWork = env.Environment.LastWorkTime;
             }
 
-            return maxLastWork + TimeSpan.FromMilliseconds(dbSize / 1024L);
+            return maxLastWork.AddMilliseconds(dbSize / 1024L);
         }
 
-        public void UnloadResourceOnCatastrophicFailue(string databaseName, Exception e)
+        public void UnloadResourceOnCatastrophicFailure(string databaseName, Exception e)
         {
             Task.Run(async () =>
             {
                 var title = $"Critical error in '{databaseName}'";
                 var message = "Database is about to be unloaded due to an encountered error";
 
-                _serverStore.NotificationCenter.Add(AlertRaised.Create(
-                    title,
-                    message,
-                    AlertType.CatastrophicDatabaseFailue,
-                    NotificationSeverity.Error,
-                    key: databaseName,
-                    details: new ExceptionDetails(e)));
+                try
+                {
+                    _serverStore.NotificationCenter.Add(AlertRaised.Create(
+                        title,
+                        message,
+                        AlertType.CatastrophicDatabaseFailure,
+                        NotificationSeverity.Error,
+                        key: databaseName,
+                        details: new ExceptionDetails(e)));
+                }
+                catch (Exception)
+                {
+                    // exception in raising an alert can't prevent us from unloading a database
+                }
 
                 if (_logger.IsOperationsEnabled)
                     _logger.Operations($"{title}. {message}", e);

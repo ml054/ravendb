@@ -21,8 +21,8 @@ using Raven.Client.Server.Tcp;
 using Raven.Server.Commercial;
 using Raven.Server.Config;
 using Raven.Server.Config.Attributes;
-using Raven.Server.Documents.Replication;
 using Raven.Server.Documents.TcpHandlers;
+using Raven.Server.Documents.Replication;
 using Raven.Server.NotificationCenter.Notifications;
 using Raven.Server.NotificationCenter.Notifications.Details;
 using Raven.Server.Routing;
@@ -188,24 +188,6 @@ namespace Raven.Server
                 if (_logger.IsInfoEnabled)
                     _logger.Info("Could not setup latest version check.", e);
             }
-
-            try
-            {
-                LicenseManager.Initialize();
-            }
-            catch (Exception e)
-            {
-                if (_logger.IsInfoEnabled)
-                    _logger.Info("Could not setup license check.", e);
-
-                var alert = AlertRaised.Create("License manager initialization error",
-                    "Could not intitalize the license manager",
-                    AlertType.LicenseManager_InitializationError,
-                    NotificationSeverity.Info,
-                    details: new ExceptionDetails(e));
-
-                ServerStore.NotificationCenter.Add(alert);
-            }
         }
 
         public string[] WebUrls { get; set; }
@@ -246,8 +228,8 @@ namespace Raven.Server
                 host = new Uri(Configuration.Core.ServerUrl).DnsSafeHost;
                 if (string.IsNullOrWhiteSpace(Configuration.Core.TcpServerUrl) == false)
                 {
-                    short shortPort;
-                    if (short.TryParse(Configuration.Core.TcpServerUrl, out shortPort))
+                    ushort shortPort;
+                    if (ushort.TryParse(Configuration.Core.TcpServerUrl, out shortPort))
                     {
                         port = shortPort;
                     }
@@ -437,7 +419,7 @@ namespace Raven.Server
                                 SubscriptionConnection.SendSubscriptionDocuments(tcp);
                                 break;
                             case TcpConnectionHeaderMessage.OperationTypes.Replication:
-                                var documentReplicationLoader = tcp.DocumentDatabase.DocumentReplicationLoader;
+                                var documentReplicationLoader = tcp.DocumentDatabase.ReplicationLoader;
                                 documentReplicationLoader.AcceptIncomingConnection(tcp);
                                 break;
                             case TcpConnectionHeaderMessage.OperationTypes.TopologyDiscovery:

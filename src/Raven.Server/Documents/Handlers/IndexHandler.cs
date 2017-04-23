@@ -18,8 +18,8 @@ using Raven.Server.Documents.Queries;
 using Raven.Server.Json;
 using Raven.Server.Routing;
 using Raven.Server.ServerWide.Context;
-using Sparrow.Extensions;
 using Raven.Server.Utils;
+using Sparrow.Extensions;
 using Sparrow.Json;
 using Sparrow.Json.Parsing;
 
@@ -93,7 +93,7 @@ namespace Raven.Server.Documents.Handlers
                     break;
             }
 
-            return Task.CompletedTask;
+            return NoContent();
         }
 
         [RavenAction("/databases/*/indexes/source", "GET")]
@@ -224,7 +224,7 @@ namespace Raven.Server.Documents.Handlers
                 if (string.Equals(operation, "source-doc-ids", StringComparison.OrdinalIgnoreCase))
                 {
                     IEnumerable<string> ids;
-                    using (index.GetIdentifiersOfMappedDocuments(GetStringQueryString("startsWith", required: false), GetStart(), GetPageSize(Database.Configuration.Core.MaxPageSize), out ids))
+                    using (index.GetIdentifiersOfMappedDocuments(GetStringQueryString("startsWith", required: false), GetStart(), GetPageSize(), out ids))
                     {
                         writer.WriteArrayOfResultsAndCount(ids);
                     }
@@ -264,7 +264,7 @@ namespace Raven.Server.Documents.Handlers
             var name = GetStringQueryString("name", required: false);
 
             var start = GetStart();
-            var pageSize = GetPageSize(Database.Configuration.Core.MaxPageSize);
+            var pageSize = GetPageSize();
             var namesOnly = GetBoolValueQueryString("namesOnly", required: false) ?? false;
 
             DocumentsOperationContext context;
@@ -541,7 +541,7 @@ namespace Raven.Server.Documents.Handlers
                     indexes.Add(index);
                 }
             }
-
+            
             DocumentsOperationContext context;
             using (ContextPool.AllocateOperationContext(out context))
             using (var writer = new BlittableJsonTextWriter(context, ResponseBodyStream()))
@@ -549,47 +549,32 @@ namespace Raven.Server.Documents.Handlers
                 writer.WriteArray(context, indexes, (w, c, index) =>
                 {
                     w.WriteStartObject();
-
                     w.WritePropertyName("Name");
                     w.WriteString(index.Name);
                     w.WriteComma();
-
                     w.WritePropertyName("Errors");
                     w.WriteArray(c, index.GetErrors(), (ew, ec, error) =>
                     {
                         ew.WriteStartObject();
-
                         ew.WritePropertyName(nameof(error.Timestamp));
                         ew.WriteString(error.Timestamp.GetDefaultRavenFormat());
                         ew.WriteComma();
 
                         ew.WritePropertyName(nameof(error.Document));
-                        if (string.IsNullOrWhiteSpace(error.Document) == false)
-                            ew.WriteString(error.Document);
-                        else
-                            ew.WriteNull();
+                        ew.WriteString(error.Document);
                         ew.WriteComma();
 
                         ew.WritePropertyName(nameof(error.Action));
-                        if (string.IsNullOrWhiteSpace(error.Action) == false)
-                            ew.WriteString(error.Action);
-                        else
-                            ew.WriteNull();
+                        ew.WriteString(error.Action); 
                         ew.WriteComma();
 
                         ew.WritePropertyName(nameof(error.Error));
-                        if (string.IsNullOrWhiteSpace(error.Error) == false)
-                            ew.WriteString(error.Error);
-                        else
-                            ew.WriteNull();
-
+                        ew.WriteString(error.Error);
                         ew.WriteEndObject();
                     });
-
                     w.WriteEndObject();
                 });
             }
-
             return Task.CompletedTask;
         }
 
@@ -609,7 +594,7 @@ namespace Raven.Server.Documents.Handlers
 
                 var runner = new QueryRunner(Database, context);
 
-                var result = runner.ExecuteGetTermsQuery(name, field, fromValue, existingResultEtag, GetPageSize(Database.Configuration.Core.MaxPageSize), context, token);
+                var result = runner.ExecuteGetTermsQuery(name, field, fromValue, existingResultEtag, GetPageSize(), context, token);
 
                 if (result.NotModified)
                 {
