@@ -10,7 +10,6 @@ import databaseSwitcher = require("common/shell/databaseSwitcher");
 import searchBox = require("common/shell/searchBox");
 import database = require("models/resources/database");
 import license = require("models/auth/license");
-import topology = require("models/database/replication/topology");
 import environmentColor = require("models/resources/environmentColor");
 import changesContext = require("common/changesContext");
 import allRoutes = require("common/shell/routes");
@@ -53,7 +52,7 @@ class shell extends viewModelBase {
     static studioConfigDocumentId = "Raven/StudioConfig";
 
     renewOAuthTokenTimeoutId: number;
-    showContinueTestButton = ko.computed(() => viewModelBase.hasContinueTestOption()); //TODO:
+    showContinueTestButton = ko.pureComputed(() => viewModelBase.hasContinueTestOption()); //TODO:
     showLogOutButton: KnockoutComputed<boolean>; //TODO:
     
     notificationCenter = notificationCenter.instance;
@@ -337,14 +336,6 @@ class shell extends viewModelBase {
             .execute()
             .done((result: clientBuildVersionDto) => {
                 this.clientBuildVersion(result);
-            });
-    }
-
-    fetchClusterTopology() {
-        new getClusterTopologyCommand(null)
-            .execute()
-            .done((topology: topology) => {
-                shell.clusterMode(topology && topology.allNodes().length > 0);
             });
     }
 

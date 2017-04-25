@@ -67,9 +67,8 @@ namespace Raven.Server.Documents.Replication
 
             _log = LoggingSource.Instance.GetLogger<IncomingReplicationHandler>(_database.Name);
             _cts = CancellationTokenSource.CreateLinkedTokenSource(_database.DatabaseShutdown);
-
-            var replicationDoc = _parent.ReplicationDocument;
-            _conflictManager = new ConflictManager(_database, replicationDoc, _parent.ConflictResolver);
+            
+            _conflictManager = new ConflictManager(_database, _parent.ConflictResolver);
         }
 
         public IncomingReplicationPerformanceStats[] GetReplicationPerformance()
@@ -125,8 +124,7 @@ namespace Raven.Server.Documents.Replication
             IsIncomingReplicationThread = true;
             try
             {
-
-                using (_connectionOptions.ConnectionProcessingInProgress())
+                using (_connectionOptions.ConnectionProcessingInProgress("Replication"))
                 using (_stream)
                 using (var interruptibleRead = new InterruptibleRead(
                             _database.DocumentsStorage.ContextPool,
@@ -157,12 +155,11 @@ namespace Raven.Server.Documents.Replication
                                 }
                                 else // notify peer about new change vector
                                 {
-                                    DocumentsOperationContext documentsContext;
 
                                     using (_database.ConfigurationStorage.ContextPool.AllocateOperationContext(
                                         out configurationContext))
                                     using (_database.DocumentsStorage.ContextPool.AllocateOperationContext(
-                                            out documentsContext))
+                                            out DocumentsOperationContext documentsContext))
                                     using (var writer = new BlittableJsonTextWriter(documentsContext, _stream))
                                     {
                                         SendHeartbeatStatusToSource(
@@ -318,8 +315,7 @@ namespace Raven.Server.Documents.Replication
 
         private void HandleReceivedIndexOrTransformerBatch(TransactionOperationContext configurationContext, BlittableJsonReaderObject message, long lastIndexOrTransformerEtag)
         {
-            int itemsCount;
-            if (!message.TryGet(nameof(ReplicationMessageHeader.ItemsCount), out itemsCount))
+            if (!message.TryGet(nameof(ReplicationMessageHeader.ItemsCount), out int itemsCount))
                 throw new InvalidDataException("Expected the 'ItemsCount' field, but had no numeric field of this value, this is likely a bug");
             var replicatedIndexTransformerCount = itemsCount;
 
@@ -332,23 +328,14 @@ namespace Raven.Server.Documents.Replication
 
         private void HandleReceivedDocumentsAndAttachmentsBatch(DocumentsOperationContext documentsContext, BlittableJsonReaderObject message, long lastDocumentEtag, IncomingReplicationStatsScope stats)
         {
-            int itemsCount;
-            if (!message.TryGet(nameof(ReplicationMessageHeader.ItemsCount), out itemsCount))
+            if (!message.TryGet(nameof(ReplicationMessageHeader.ItemsCount), out int itemsCount))
                 throw new InvalidDataException(
                     $"Expected the '{nameof(ReplicationMessageHeader.ItemsCount)}' field, but had no numeric field of this value, this is likely a bug");
 
-            int attachmentStreamCount;
-            if (!message.TryGet(nameof(ReplicationMessageHeader.AttachmentStreamsCount), out attachmentStreamCount))
+            if (!message.TryGet(nameof(ReplicationMessageHeader.AttachmentStreamsCount), out int attachmentStreamCount))
                 throw new InvalidDataException(
                     $"Expected the '{nameof(ReplicationMessageHeader.AttachmentStreamsCount)}' field, but had no numeric field of this value, this is likely a bug");
 
-            string resovlerId;
-            int? resolverVersion;
-            if (message.TryGet(nameof(ReplicationMessageHeader.ResolverId), out resovlerId) &&
-                message.TryGet(nameof(ReplicationMessageHeader.ResolverVersion), out resolverVersion))
-            {
-                _parent.UpdateReplicationDocumentWithResolver(resovlerId, resolverVersion);
-            }
 
             ReceiveSingleDocumentsBatch(documentsContext, itemsCount, attachmentStreamCount, lastDocumentEtag, stats);
 
@@ -378,9 +365,7 @@ namespace Raven.Server.Documents.Replication
 
             try
             {
-                byte* buffer;
-                int totalSize;
-                writeBuffer.EnsureSingleChunk(out buffer, out totalSize);
+                writeBuffer.EnsureSingleChunk(out byte* buffer, out int totalSize);
 
                 if (_log.IsInfoEnabled)
                     _log.Info(
@@ -399,7 +384,7 @@ namespace Raven.Server.Documents.Replication
                     var remote = item.ChangeVector;
 
                     ChangeVectorEntry[] conflictingVector;
-                    ReplicationUtils.ConflictStatus conflictStatus;
+                    ConflictsStorage.ConflictStatus conflictStatus;
                     using (configurationContext.OpenReadTransaction())
                         conflictStatus = GetConflictStatusForIndexOrTransformer(configurationContext, item.Name,
                             remote,
@@ -413,10 +398,10 @@ namespace Raven.Server.Documents.Replication
                         {
                             //note : PutIndexOrTransformer() is deleting conflicts and merges chnage vectors
                             //of the conflicts. This can be seen in IndexesEtagsStorage::WriteEntry()
-                            case ReplicationUtils.ConflictStatus.Update:
+                            case ConflictsStorage.ConflictStatus.Update:
                                 PutIndexOrTransformer(configurationContext, item, definition);
                                 break;
-                            case ReplicationUtils.ConflictStatus.Conflict:
+                            case ConflictsStorage.ConflictStatus.Conflict:
                                 using (var txw = configurationContext.OpenWriteTransaction())
                                 {
                                     HandleConflictForIndexOrTransformer(item, definition, conflictingVector, txw, configurationContext);
@@ -426,7 +411,7 @@ namespace Raven.Server.Documents.Replication
                                     txw.Commit();
                                     return; // skip the UpdateIndexesChangeVector below to avoid duplicate calls
                                 }
-                            case ReplicationUtils.ConflictStatus.AlreadyMerged:
+                            case ConflictsStorage.ConflictStatus.AlreadyMerged:
                                 if (_log.IsInfoEnabled)
                                     _log.Info(
                                         $"Conflict check resolved to AlreadyMerged operation, nothing to do for index = {item.Name}, with change vector = {_tempReplicatedChangeVector.Format()}");
@@ -479,8 +464,10 @@ namespace Raven.Server.Documents.Replication
         {
             switch (item.Type)
             {
-                case IndexEntryType.Index:
                 case IndexEntryType.Transformer:
+                    //noop
+                    break;
+                case IndexEntryType.Index:
                     var replicationSource = $"{ConnectionInfo.SourceUrl} --> {ConnectionInfo.SourceDatabaseId}";
                     var msg = $"Received {item.Type} via replication from {replicationSource} ( {item.Type} name = {item.Name}), with change vector {conflictingVector.Format()}, and it is conflicting";
                     if (_log.IsInfoEnabled)
@@ -513,33 +500,10 @@ namespace Raven.Server.Documents.Replication
                     PutIndexReplicationItem(configurationContext, item, definition);
                     break;
                 case IndexEntryType.Transformer:
-                    PutTransformerReplicationItem(item, definition);
+                    //noop
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        private void PutTransformerReplicationItem(ReplicationIndexOrTransformerPositions item, BlittableJsonReaderObject definition)
-        {
-            if (_log.IsInfoEnabled)
-            {
-                _log.Info($"Replicated tranhsformer with name = {item.Name}");
-            }
-
-            _database.TransformerStore.TryDeleteTransformerIfExists(item.Name);
-
-            try
-            {
-                TransformerProcessor.Import(definition, _database, ServerVersion.BuildType);
-            }
-            catch (ArgumentException e)
-            {
-                if (_log.IsOperationsEnabled)
-                    _log.Operations(
-                        $"Failed to read transformer (name = {item.Name}, etag = {item.Etag}) definition from incoming replication batch. This is not supposed to happen.",
-                        e);
-                throw;
             }
         }
 
@@ -573,7 +537,7 @@ namespace Raven.Server.Documents.Replication
                 _log.Info($"Replicated index with name = {item.Name}");
             }
 
-            _database.IndexStore.TryDeleteIndexIfExists(item.Name);
+            _database.IndexStore.TryDeleteIndexIfExists(item.Name).Wait();
             try
             {
                 IndexProcessor.Import(definition, _database, ServerVersion.BuildType, false);
@@ -737,9 +701,7 @@ namespace Raven.Server.Documents.Replication
                     }
                 }
 
-                byte* buffer;
-                int totalSize;
-                writeBuffer.EnsureSingleChunk(out buffer, out totalSize);
+                writeBuffer.EnsureSingleChunk(out byte* buffer, out int totalSize);
 
                 if (_log.IsInfoEnabled)
                     _log.Info(
@@ -773,9 +735,8 @@ namespace Raven.Server.Documents.Replication
         {
             for (int i = 0; i < index.ChangeVector.Length; i++)
             {
-                long etag;
-                if (maxReceivedChangeVectorByDatabase.TryGetValue(index.ChangeVector[i].DbId, out etag) == false ||
-                    etag > index.ChangeVector[i].Etag)
+                if (maxReceivedChangeVectorByDatabase.TryGetValue(index.ChangeVector[i].DbId, out long etag) == false ||
+    etag > index.ChangeVector[i].Etag)
                 {
                     maxReceivedChangeVectorByDatabase[index.ChangeVector[i].DbId] = index.ChangeVector[i].Etag;
                 }
@@ -821,7 +782,6 @@ namespace Raven.Server.Documents.Replication
                 _log.Info(
                     $"Sending heartbeat ok => {FromToString} with last document etag = {lastDocumentEtag}, last index/transformer etag = {lastIndexOrTransformerEtag} and document change vector: {databaseChangeVector.Format()}");
             }
-            var defaultResolver = _parent.ReplicationDocument?.DefaultResolver;
             var heartbeat = new DynamicJsonValue
             {
                 [nameof(ReplicationMessageReply.Type)] = "Ok",
@@ -832,8 +792,6 @@ namespace Raven.Server.Documents.Replication
                 [nameof(ReplicationMessageReply.DocumentsChangeVector)] = documentChangeVectorAsDynamicJson,
                 [nameof(ReplicationMessageReply.IndexTransformerChangeVector)] = indexesChangeVectorAsDynamicJson,
                 [nameof(ReplicationMessageReply.DatabaseId)] = _database.DbId.ToString(),
-                [nameof(ReplicationMessageReply.ResolverId)] = defaultResolver?.ResolvingDatabaseId,
-                [nameof(ReplicationMessageReply.ResolverVersion)] = defaultResolver?.Version
             };
 
             documentsContext.Write(writer, heartbeat);
@@ -1111,7 +1069,7 @@ namespace Raven.Server.Documents.Replication
         protected void OnDocumentsReceived(IncomingReplicationHandler instance) => DocumentsReceived?.Invoke(instance);
         protected void OnIndexesAndTransformersReceived(IncomingReplicationHandler instance) => IndexesAndTransformersReceived?.Invoke(instance);
 
-        private ReplicationUtils.ConflictStatus GetConflictStatusForIndexOrTransformer(TransactionOperationContext context, string name, ChangeVectorEntry[] remote, out ChangeVectorEntry[] conflictingVector)
+        private ConflictsStorage.ConflictStatus GetConflictStatusForIndexOrTransformer(TransactionOperationContext context, string name, ChangeVectorEntry[] remote, out ChangeVectorEntry[] conflictingVector)
         {
             //tombstones also can be a conflict entry
             conflictingVector = null;
@@ -1120,14 +1078,14 @@ namespace Raven.Server.Documents.Replication
             {
                 foreach (var existingConflict in conflicts)
                 {
-                    if (ReplicationUtils.GetConflictStatus(remote, existingConflict.ChangeVector) == ReplicationUtils.ConflictStatus.Conflict)
+                    if (ConflictsStorage.GetConflictStatus(remote, existingConflict.ChangeVector) == ConflictsStorage.ConflictStatus.Conflict)
                     {
                         conflictingVector = existingConflict.ChangeVector;
-                        return ReplicationUtils.ConflictStatus.Conflict;
+                        return ConflictsStorage.ConflictStatus.Conflict;
                     }
                 }
 
-                return ReplicationUtils.ConflictStatus.Update;
+                return ConflictsStorage.ConflictStatus.Update;
             }
 
             var metadata = _database.IndexMetadataPersistence.GetIndexMetadataByName(context.Transaction.InnerTransaction, context, name, false);
@@ -1136,11 +1094,11 @@ namespace Raven.Server.Documents.Replication
             if (metadata != null)
                 local = metadata.ChangeVector;
             else
-                return ReplicationUtils.ConflictStatus.Update; //index/transformer with 'name' doesn't exist locally, so just do PUT
+                return ConflictsStorage.ConflictStatus.Update; //index/transformer with 'name' doesn't exist locally, so just do PUT
 
 
-            var status = ReplicationUtils.GetConflictStatus(remote, local);
-            if (status == ReplicationUtils.ConflictStatus.Conflict)
+            var status = ConflictsStorage.GetConflictStatus(remote, local);
+            if (status == ConflictsStorage.ConflictStatus.Conflict)
             {
                 conflictingVector = local;
             }
@@ -1193,8 +1151,7 @@ namespace Raven.Server.Documents.Replication
                             database.DocumentsStorage.AttachmentsStorage.PutFromReplication(context, item.Key, item.Name,
                                 item.ContentType, item.Base64Hash, item.TransactionMarker);
 
-                            ReplicationAttachmentStream attachmentStream;
-                            if (_incoming._replicatedAttachmentStreams.TryGetValue(item.Base64Hash, out attachmentStream))
+                            if (_incoming._replicatedAttachmentStreams.TryGetValue(item.Base64Hash, out ReplicationAttachmentStream attachmentStream))
                             {
                                 using (attachmentStream)
                                 {
@@ -1249,11 +1206,11 @@ namespace Raven.Server.Documents.Replication
                                 }
 
                                 ChangeVectorEntry[] conflictingVector;
-                                var conflictStatus = ReplicationUtils.GetConflictStatusForDocument(context, item.Id, _changeVector, out conflictingVector);
+                                var conflictStatus = ConflictsStorage.GetConflictStatusForDocument(context, item.Id, _changeVector, out conflictingVector);
 
                                 switch (conflictStatus)
                                 {
-                                    case ReplicationUtils.ConflictStatus.Update:
+                                    case ConflictsStorage.ConflictStatus.Update:
                                         if (document != null)
                                         {
                                             if (_incoming._log.IsInfoEnabled)
@@ -1267,8 +1224,7 @@ namespace Raven.Server.Documents.Replication
                                             if (_incoming._log.IsInfoEnabled)
                                                 _incoming._log.Info(
                                                     $"Conflict check resolved to Update operation, writing tombstone for doc = {item.Id}, with change vector = {_changeVector.Format()}");
-                                            Slice keySlice;
-                                            using (DocumentKeyWorker.GetSliceFromKey(context, item.Id, out keySlice))
+                                            using (DocumentKeyWorker.GetSliceFromKey(context, item.Id, out Slice keySlice))
                                             {
                                                 database.DocumentsStorage.Delete(
                                                     context, keySlice, item.Id, null,
@@ -1278,13 +1234,13 @@ namespace Raven.Server.Documents.Replication
                                             }
                                         }
                                         break;
-                                    case ReplicationUtils.ConflictStatus.Conflict:
+                                    case ConflictsStorage.ConflictStatus.Conflict:
                                         if (_incoming._log.IsInfoEnabled)
                                             _incoming._log.Info(
                                                 $"Conflict check resolved to Conflict operation, resolving conflict for doc = {item.Id}, with change vector = {_changeVector.Format()}");
                                         _incoming._conflictManager.HandleConflictForDocument(context, item.Id, item.Collection, item.LastModifiedTicks, document, _changeVector, conflictingVector);
                                         break;
-                                    case ReplicationUtils.ConflictStatus.AlreadyMerged:
+                                    case ConflictsStorage.ConflictStatus.AlreadyMerged:
                                         if (_incoming._log.IsInfoEnabled)
                                             _incoming._log.Info(
                                                 $"Conflict check resolved to AlreadyMerged operation, nothing to do for doc = {item.Id}, with change vector = {_changeVector.Format()}");
@@ -1321,9 +1277,8 @@ namespace Raven.Server.Documents.Replication
                 {
                     _changeVector[i] = ((ChangeVectorEntry*)(buffer + position))[i];
 
-                    long etag;
-                    if (maxReceivedChangeVectorByDatabase.TryGetValue(_changeVector[i].DbId, out etag) == false ||
-                        etag > _changeVector[i].Etag)
+                    if (maxReceivedChangeVectorByDatabase.TryGetValue(_changeVector[i].DbId, out long etag) == false ||
+    etag > _changeVector[i].Etag)
                     {
                         maxReceivedChangeVectorByDatabase[_changeVector[i].DbId] = _changeVector[i].Etag;
                     }

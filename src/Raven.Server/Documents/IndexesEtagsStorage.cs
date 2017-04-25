@@ -118,7 +118,7 @@ namespace Raven.Server.Documents
             using (ContextPool.AllocateOperationContext(out context))
             using (var tx = context.OpenWriteTransaction())
             {
-                var newEtag = WriteEntry(tx.InnerTransaction, index.Name, IndexEntryType.Index, index.IndexId, context);
+                var newEtag = WriteEntry(tx.InnerTransaction, index.Name, IndexEntryType.Index, index.Etag, context);
 
                 tx.Commit();
 
@@ -138,32 +138,7 @@ namespace Raven.Server.Documents
                 return newEtag;
             }
         }
-
-        public long OnTransformerCreated(Transformer transformer)
-        {
-            TransactionOperationContext context;
-            using (ContextPool.AllocateOperationContext(out context))
-            using (var tx = context.OpenWriteTransaction())
-            {
-                var newEtag = WriteEntry(tx.InnerTransaction, transformer.Name, IndexEntryType.Transformer, transformer.TransformerId, context);
-
-                tx.Commit();
-                return newEtag;
-            }
-        }
-
-        public long OnTransformerDeleted(Transformer transformer)
-        {
-            TransactionOperationContext context;
-            using (ContextPool.AllocateOperationContext(out context))
-            using (var tx = context.OpenWriteTransaction())
-            {
-                var newEtag = WriteEntry(tx.InnerTransaction, transformer.Name, IndexEntryType.Transformer, -1, context);
-
-                tx.Commit();
-                return newEtag;
-            }
-        }
+        
 
         public void AddConflict(TransactionOperationContext context,
             Transaction tx,
@@ -218,7 +193,7 @@ namespace Raven.Server.Documents
             return true;
         }
 
-        private long WriteEntry(Transaction tx, string indexName, IndexEntryType type, int indexIndexId,
+        private long WriteEntry(Transaction tx, string indexName, IndexEntryType type, long indexEtag,
             TransactionOperationContext context, bool isConflicted = false, bool allowOverwrite = false)
         {
             var table = tx.OpenTable(IndexesTableSchema, SchemaNameConstants.IndexMetadataTable);
@@ -250,14 +225,14 @@ namespace Raven.Server.Documents
             {
                 if (!allowOverwrite)
                 {
-                    ThrowIfAlreadyExistsAndOverwriting(indexName, type, indexIndexId, table, indexNameAsSlice, existing);
+                    ThrowIfAlreadyExistsAndOverwriting(indexName, type, indexEtag, table, indexNameAsSlice, existing);
                 }
 
                 fixed (ChangeVectorEntry* pChangeVector = changeVectorForWrite)
                 {
                     var bitSwappedEtag = Bits.SwapBytes(newEtag);
 
-                    var bitSwappedId = Bits.SwapBytes(indexIndexId);
+                    var bitSwappedId = Bits.SwapBytes(indexEtag);
 
                     TableValueBuilder tvb;
                     using (table.Allocate(out tvb))
@@ -330,7 +305,7 @@ namespace Raven.Server.Documents
             if (oldValue.Pointer != null)
             {
                 var changeVector = DocumentsStorage.GetChangeVectorEntriesFromTableValueReader(ref oldValue, (int)MetadataFields.ChangeVector);
-                return ReplicationUtils.UpdateChangeVectorWithNewEtag(_environment.DbId, newEtag, changeVector);
+                return ChangeVectorUtils.UpdateChangeVectorWithNewEtag(_environment.DbId, newEtag, changeVector);
             }
 
             return GetMergedConflictChangeVectorsAndDeleteConflicts(tx, loweredName, newEtag);
@@ -345,7 +320,7 @@ namespace Raven.Server.Documents
             if (conflictChangeVectors.Count == 0)
             {
                 if (existing != null)
-                    return ReplicationUtils.UpdateChangeVectorWithNewEtag(_environment.DbId, newEtag, existing);
+                    return ChangeVectorUtils.UpdateChangeVectorWithNewEtag(_environment.DbId, newEtag, existing);
 
                 return new[]
                 {
@@ -465,7 +440,7 @@ namespace Raven.Server.Documents
         {
             var globalChangeVectorTree = tx.ReadTree(SchemaNameConstants.GlobalChangeVectorTree);
             Debug.Assert(globalChangeVectorTree != null);
-            return ReplicationUtils.ReadChangeVectorFrom(globalChangeVectorTree);
+            return ChangeVectorUtils.ReadChangeVectorFrom(globalChangeVectorTree);
         }
 
         public void SetGlobalChangeVector(Transaction tx, ByteStringContext context, Dictionary<Guid, long> changeVector)
@@ -474,7 +449,7 @@ namespace Raven.Server.Documents
 
             Debug.Assert(tree != null);
 
-            ReplicationUtils.WriteChangeVectorTo(context, changeVector, tree);
+            ChangeVectorUtils.WriteChangeVectorTo(context, changeVector, tree);
         }
 
         public long GetLastReplicateEtagFrom(Transaction tx, string dbId)
@@ -510,12 +485,12 @@ namespace Raven.Server.Documents
             var globalChangeVectorTree = tx.ReadTree(SchemaNameConstants.GlobalChangeVectorTree);
             Debug.Assert(globalChangeVectorTree != null);
 
-            var globalChangeVector = ReplicationUtils.ReadChangeVectorFrom(globalChangeVectorTree);
+            var globalChangeVector = ChangeVectorUtils.ReadChangeVectorFrom(globalChangeVectorTree);
 
             // merge metadata change vector into global change vector
             // --> if we have any entry in global vector smaller than in metadata vector,
             // update the entry in global vector to a larger one
-            foreach (var item in ReplicationUtils.MergeVectors(globalChangeVector, changeVectorForWrite))
+            foreach (var item in ChangeVectorUtils.MergeVectors(globalChangeVector, changeVectorForWrite))
             {
                 var dbId = item.DbId;
                 var etagBigEndian = Bits.SwapBytes(item.Etag);
@@ -531,15 +506,15 @@ namespace Raven.Server.Documents
         private void ThrowIfAlreadyExistsAndOverwriting(
             string name,
             IndexEntryType type,
-            int indexIndexId,
+            long indexEtag,
             Table table,
             Slice indexNameAsSlice,
             IndexEntryMetadata existing)
         {
-            if (!table.VerifyKeyExists(indexNameAsSlice) || indexIndexId == -1 || existing == null || existing.Id == -1)
+            if (!table.VerifyKeyExists(indexNameAsSlice) || indexEtag == -1 || existing == null || existing.Id == -1)
             {
                 if (Logger.IsInfoEnabled &&
-                    indexIndexId != -1 &&
+                    indexEtag != -1 &&
                     existing != null &&
                     existing.Id == -1 &&
                     existing.Type != type)
@@ -550,7 +525,7 @@ namespace Raven.Server.Documents
                 return;
             }
 
-            string msg;
+            string msg=String.Empty;
             switch (type)
             {
                 case IndexEntryType.Index:
@@ -558,8 +533,7 @@ namespace Raven.Server.Documents
                         $"Tried to create an index with a name of {name}, but an index or a transformer under the same name exist";
                     break;
                 case IndexEntryType.Transformer:
-                    msg =
-                        $"Tried to create a transformer with a name of {name}, but an index or a transformer under the same name exist";
+                    //nop
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type),
@@ -668,7 +642,7 @@ namespace Raven.Server.Documents
                 }
 
                 if (metadata.Type == IndexEntryType.Transformer &&
-                    transformerStore.GetTransformer(metadata.Id) == null)
+                    transformerStore.GetTransformer(metadata.Name) == null)
                 {
                     toRemove.Add(metadata);
                 }
