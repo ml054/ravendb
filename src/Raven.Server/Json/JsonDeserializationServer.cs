@@ -23,6 +23,7 @@ using Raven.Server.Documents.Studio;
 using Raven.Server.Documents.Versioning;
 using Raven.Server.Rachis;
 using Raven.Server.ServerWide.BackgroundTasks;
+using Raven.Server.ServerWide.Maintance;
 using Raven.Server.Smuggler.Documents.Data;
 using Sparrow.Json;
 using Facet = Raven.Client.Documents.Queries.Facets.Facet;
@@ -47,8 +48,8 @@ namespace Raven.Server.Json
         public static readonly Func<BlittableJsonReaderObject, NodeTopologyInfo> NodeTopologyInfo =
             GenerateJsonDeserializationRoutine<NodeTopologyInfo>();
 
-        public static readonly Func<BlittableJsonReaderObject, FullTopologyInfo> FullTopologyInfo =
-            GenerateJsonDeserializationRoutine<FullTopologyInfo>();
+        public static readonly Func<BlittableJsonReaderObject, LiveTopologyInfo> LiveTopologyInfo =
+            GenerateJsonDeserializationRoutine<LiveTopologyInfo>();
 
         public static readonly Func<BlittableJsonReaderObject, ActiveNodeStatus> ActiveNodeStatus =
             GenerateJsonDeserializationRoutine<ActiveNodeStatus>();

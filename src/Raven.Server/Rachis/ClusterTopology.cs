@@ -21,7 +21,7 @@ namespace Raven.Server.Rachis
         }
 
         //Try to avoid using this since it is expensive
-        public (bool hasUrl,string nodeTag) HasUrl(string nodeUrl)
+        public (bool hasUrl,string nodeTag) TryGetNodeTagByUrl(string nodeUrl)
         {
             foreach (var memeber in Members)
             {
@@ -44,7 +44,7 @@ namespace Raven.Server.Rachis
                     return (true, watcher.Key);
                 }
             }
-            return (false, "does not exists");
+            return (false, (string)null);
         }
 
         public ClusterTopology()
@@ -79,9 +79,8 @@ namespace Raven.Server.Rachis
 
             foreach (var kvp in oldDic)
             {
-                var value = kvp.Value;
                 var key = kvp.Key;
-                if (temp.ContainsKey(key))
+                if (temp.TryGetValue(key, out TValue value))
                 {
                     if (temp[key] == null || temp[key].Equals(value) == false)
                     {
@@ -110,15 +109,15 @@ namespace Raven.Server.Rachis
                 var dic = new Dictionary<string,string>();
                 foreach (var node in Members)
                 {
-                    dic.Add(node.Key,node.Value);
+                    dic[node.Key] = node.Value;
                 }
                 foreach (var node in Promotables)
                 {
-                    dic.Add(node.Key, node.Value);
+                    dic[node.Key] = node.Value;
                 }
                 foreach (var node in Watchers)
                 {
-                    dic.Add(node.Key, node.Value);
+                    dic[node.Key] = node.Value;
                 }
                 return dic;
             }

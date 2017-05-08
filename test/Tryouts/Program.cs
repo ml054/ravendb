@@ -23,9 +23,9 @@ namespace Tryouts
             for (int i = 0; i < 1000; i++)
             {
                 Console.WriteLine("              "+ i);
-                using (var a = new RachisTests.ReplicationTests())
+                using (var a = new RachisTests.DatabaseCluster.ClusterDatabaseMaintance())
                 {
-                    a.EnsureDocumentsReplication().Wait();
+                    a.DemoteOnServerDown().Wait();
                 }
             }
         }

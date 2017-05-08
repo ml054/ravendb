@@ -19,8 +19,10 @@ using Raven.Server.Documents;
 using Raven.Server.NotificationCenter;
 using Raven.Server.Rachis;
 using Raven.Server.NotificationCenter.Notifications;
+using Raven.Server.NotificationCenter.Notifications.Details;
 using Raven.Server.ServerWide.Commands;
 using Raven.Server.ServerWide.Context;
+using Raven.Server.ServerWide.Maintance;
 using Raven.Server.Utils;
 using Sparrow;
 using Sparrow.Json;
@@ -78,7 +80,7 @@ namespace Raven.Server.ServerWide
             DatabaseInfoCache = new DatabaseInfoCache();
 
             _frequencyToCheckForIdleDatabases = Configuration.Databases.FrequencyToCheckForIdle.AsTimeSpan;
-
+            
         }
 
         public DatabaseInfoCache DatabaseInfoCache { get; set; }
@@ -111,7 +113,7 @@ namespace Raven.Server.ServerWide
         public Dictionary<string, ClusterNodeStatusReport> ClusterStats()
         {
             if (_engine.LeaderTag != NodeTag)
-                return null; // not a leader
+                throw new NotLeadingException($"Stats can be requested only from the raft leader {_engine.LeaderTag}");
             return _clusterMaintenanceMaster?.GetStats();
         }
         public async Task ClusterMaintanceSetupTask()
@@ -125,7 +127,8 @@ namespace Raven.Server.ServerWide
                         await _engine.WaitForState(RachisConsensus.State.Leader);
                         continue;
                     }
-                    using (_clusterMaintenanceMaster = new ClusterMaintenanceMaster(_engine.Tag, _engine.CurrentTerm))
+                    using (_clusterMaintenanceMaster = new ClusterMaintenanceMaster(this,_engine.Tag, _engine.CurrentTerm))
+                    using (new ClusterObserver(_clusterMaintenanceMaster,this,_engine,ContextPool,ServerShutdown))
                     {
                         var oldNodes = new Dictionary<string, string>();
                         while (_engine.LeaderTag == NodeTag)
@@ -144,19 +147,15 @@ namespace Raven.Server.ServerWide
                             {
                                 _clusterMaintenanceMaster.RemoveFromCluster(node.Key);
                             }
-                            var taskList = new List<Task>();
                             foreach (var node in nodesChanges.addedValues)
                             {
                                 var task = _clusterMaintenanceMaster.AddToCluster(node.Key, clusterTopology.GetUrlFromTag(node.Key));
-                                taskList.Add(task);
+                                GC.KeepAlive(task);
                             }
 
                             var leaderChanged = _engine.WaitForLeaveState(RachisConsensus.State.Leader);
-                            var allNodesAdded = Task.WhenAll(taskList);
-                            if (await Task.WhenAny(allNodesAdded, topologyChangedTask, leaderChanged) == leaderChanged)
+                            if (await Task.WhenAny(topologyChangedTask, leaderChanged) == leaderChanged)
                                 break;
-
-                            await topologyChangedTask;
                         }
                     }
                 }
@@ -168,7 +167,7 @@ namespace Raven.Server.ServerWide
                 {
                     //
                 }
-            }            
+            }   
         }
 
         public ClusterTopology GetClusterTopology(TransactionOperationContext context)
@@ -210,7 +209,8 @@ namespace Raven.Server.ServerWide
                     e.Message,
                     AlertType.NonDurableFileSystem,
                     NotificationSeverity.Warning,
-                    "NonDurable Error System");
+                    "NonDurable Error System",
+                    details: new MessageDetails{Message=e.Details});
                 if (NotificationCenter.IsInitialized)
                 {
                     NotificationCenter.Add(alert);
@@ -294,7 +294,7 @@ namespace Raven.Server.ServerWide
                     DatabasesLandlord.ClusterOnDatabaseChanged(this, (db.Item1, 0));
                 }
             }
-
+            
             Task.Run(ClusterMaintanceSetupTask, ServerShutdown);
         }
 
@@ -697,15 +697,14 @@ namespace Raven.Server.ServerWide
             return ((now - maxLastWork).TotalMinutes > 5) || ((now - database.LastIdleTime).TotalMinutes > 10);
         }
 
-        public async Task<long> WriteDbAsync(TransactionOperationContext context, string dbId, BlittableJsonReaderObject dbDoc, long? etag, bool encrypted = false)
+        public async Task<long> WriteDbAsync(TransactionOperationContext context, string dbId, BlittableJsonReaderObject dbDoc, long? etag)
         {
             using (var putCmd = context.ReadObject(new DynamicJsonValue
             {
                 ["Type"] = nameof(AddDatabaseCommand),
                 [nameof(AddDatabaseCommand.Name)] = dbId,
                 [nameof(AddDatabaseCommand.Value)] = dbDoc,
-                [nameof(AddDatabaseCommand.Etag)] = etag,
-                [nameof(AddDatabaseCommand.Encrypted)] = encrypted
+                [nameof(AddDatabaseCommand.Etag)] = etag
             }, "put-cmd"))
             {
                 return await SendToLeaderAsync(putCmd);
