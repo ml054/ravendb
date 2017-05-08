@@ -1,5 +1,5 @@
-﻿using Raven.Server.ServerWide.LowMemoryNotification;
-using Sparrow.Json;
+﻿using Sparrow.Json;
+using Sparrow.LowMemory;
 
 namespace Raven.Server.ServerWide
 {
@@ -7,19 +7,7 @@ namespace Raven.Server.ServerWide
     {
         public UnmanagedBuffersPoolWithLowMemoryHandling(string debugTag, string databaseName = null) : base(debugTag, databaseName)
         {
-            AbstractLowMemoryNotification.Instance?.RegisterLowMemoryHandler(this);
+            LowMemoryNotification.Instance?.RegisterLowMemoryHandler(this);
         }
-
-
-        public LowMemoryHandlerStatistics GetStats()
-        {
-            return new LowMemoryHandlerStatistics
-            {
-                Name = _debugTag,
-                DatabaseName = _databaseName,
-                EstimatedUsedMemory = GetAllocatedMemorySize()
-            };
-        }
-
     }
 }

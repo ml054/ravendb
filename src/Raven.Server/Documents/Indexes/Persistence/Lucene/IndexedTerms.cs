@@ -12,9 +12,9 @@ using System.Runtime.CompilerServices;
 using Lucene.Net.Index;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
-using Raven.Server.ServerWide.LowMemoryNotification;
 using Sparrow.Json;
 using Sparrow.Json.Parsing;
+using Sparrow.LowMemory;
 using Constants = Raven.Client.Constants;
 
 namespace Raven.Server.Documents.Indexes.Persistence.Lucene
@@ -31,10 +31,10 @@ namespace Raven.Server.Documents.Indexes.Persistence.Lucene
 
             public WeakCache()
             {
-                AbstractLowMemoryNotification.Instance.RegisterLowMemoryHandler(this);
+                LowMemoryNotification.Instance.RegisterLowMemoryHandler(this);
             }
 
-            public void HandleLowMemory()
+            public void LowMemory()
             {
                 lock (this)
                 {
@@ -49,16 +49,8 @@ namespace Raven.Server.Documents.Indexes.Persistence.Lucene
                 }
             }
 
-            public void SoftMemoryRelease()
+            public void LowMemoryOver()
             {
-            }
-
-            public LowMemoryHandlerStatistics GetStats()
-            {
-                return new LowMemoryHandlerStatistics
-                {
-                    Name = "WeakCache"
-                };
             }
         }
 
@@ -210,29 +202,16 @@ namespace Raven.Server.Documents.Indexes.Persistence.Lucene
             public CachedIndexedTerms(string indexName)
             {
                 _indexName = indexName;
-                AbstractLowMemoryNotification.Instance.RegisterLowMemoryHandler(this);
+                LowMemoryNotification.Instance.RegisterLowMemoryHandler(this);
             }
 
-            public void HandleLowMemory()
+            public void LowMemory()
             {
                 Results.Clear();
             }
 
-            public void SoftMemoryRelease()
+            public void LowMemoryOver()
             {
-            }
-
-            public LowMemoryHandlerStatistics GetStats()
-            {
-                return new LowMemoryHandlerStatistics
-                {
-                    Name = "CachedIndexedTerms",
-                    Metadata = new
-                    {
-                        IndexName = _indexName
-                    },
-                    EstimatedUsedMemory = Results.Sum(x => x.Key.Length * sizeof(char) + x.Value.Results.Sum(y => y.Key.Length * sizeof(char) + y.Value.Length * sizeof(int)))
-                };
             }
         }
 

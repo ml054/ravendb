@@ -5,9 +5,11 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using Sparrow.Collections;
 using Sparrow.Global;
 using Sparrow.Json;
+using Sparrow.LowMemory;
 using Sparrow.Utils;
 #if VALIDATE
 using System.Threading;
@@ -371,6 +373,7 @@ namespace Sparrow
         {
             Size = size;
             Segment = NativeMemory.AllocateMemory(size, out _thread);
+            LowMemoryNotification.NotifyAllocationPending();
         }
 
         ~UnmanagedGlobalSegment()
@@ -493,7 +496,7 @@ namespace Sparrow
         public const int DefaultAllocationBlockSizeInBytes = 1 * MinBlockSizeInBytes;
         public const int MinReusableBlockSizeInBytes = 8;
 
-        public ByteStringContext(int allocationBlockSize = DefaultAllocationBlockSizeInBytes) : base(allocationBlockSize)
+        public ByteStringContext(LowMemoryFlag lowMemoryFlag, int allocationBlockSize = DefaultAllocationBlockSizeInBytes) : base(lowMemoryFlag, allocationBlockSize)
         { }
     }
 
@@ -572,11 +575,12 @@ namespace Sparrow
 
         private static readonly UTF8Encoding Encoding = new UTF8Encoding();
 
-        public ByteStringContext(int allocationBlockSize = ByteStringContext.DefaultAllocationBlockSizeInBytes)
+        public ByteStringContext(LowMemoryFlag lowMemoryFlag, int allocationBlockSize = ByteStringContext.DefaultAllocationBlockSizeInBytes)
         {
             if (allocationBlockSize < ByteStringContext.MinBlockSizeInBytes)
                 throw new ArgumentException($"It is not a good idea to allocate chunks of less than the {nameof(ByteStringContext.MinBlockSizeInBytes)} value of {ByteStringContext.MinBlockSizeInBytes}");
 
+            _lowMemoryFlag = lowMemoryFlag;
             this._allocationBlockSize = allocationBlockSize;
 
             this._wholeSegments = new List<SegmentInformation>();
@@ -1411,6 +1415,7 @@ namespace Sparrow
         }
 
         [ThreadStatic] private static bool _isFinalizerThread;
+        private readonly LowMemoryFlag _lowMemoryFlag;
 
         private void ReleaseSegment(SegmentInformation segment)
         {
@@ -1421,7 +1426,8 @@ namespace Sparrow
 
             // Check if we can release this memory segment back to the pool.
             if (_isFinalizerThread || 
-                segment.Memory.Size > ByteStringContext.MaxAllocationBlockSizeInBytes)
+                segment.Memory.Size > ByteStringContext.MaxAllocationBlockSizeInBytes ||
+                _lowMemoryFlag.LowMemoryState != 0)
             {
                 segment.Memory.Dispose();
             }

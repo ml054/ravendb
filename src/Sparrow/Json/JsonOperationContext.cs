@@ -2,19 +2,15 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Sparrow.Binary;
 using Sparrow.Collections;
-using Sparrow.Compression;
 using Sparrow.Json.Parsing;
-using Sparrow.Logging;
-using Sparrow.Platform;
+using Sparrow.LowMemory;
 
 namespace Sparrow.Json
 {
@@ -137,21 +133,26 @@ namespace Sparrow.Json
 
         public long AllocatedMemory => _arenaAllocator.TotalUsed;
 
+        protected readonly LowMemoryFlag LowMemoryFlag;
+
         public static JsonOperationContext ShortTermSingleUse()
         {
-            return new JsonOperationContext(4096, 1024);
+            return new JsonOperationContext(4096, 1024, LowMemoryFlag.None);
         }
 
-        public JsonOperationContext(int initialSize, int longLivedSize)
+        public JsonOperationContext(int initialSize, int longLivedSize, LowMemoryFlag lowMemoryFlag)
         {
+            Debug.Assert(lowMemoryFlag != null);
+            
             _initialSize = initialSize;
             _longLivedSize = longLivedSize;
-            _arenaAllocator = new ArenaMemoryAllocator(initialSize);
-            _arenaAllocatorForLongLivedValues = new ArenaMemoryAllocator(longLivedSize);
+            _arenaAllocator = new ArenaMemoryAllocator(lowMemoryFlag, initialSize);
+            _arenaAllocatorForLongLivedValues = new ArenaMemoryAllocator(lowMemoryFlag, longLivedSize);
             CachedProperties = new CachedProperties(this);
             _jsonParserState = new JsonParserState();
             _objectJsonParser = new ObjectJsonParser(_jsonParserState, this);
             _documentBuilder = new BlittableJsonDocumentBuilder(this, _jsonParserState, _objectJsonParser);
+            LowMemoryFlag = lowMemoryFlag;
 #if MEM_GUARD_STACK
             ElectricFencedMemory.IncrementConext();
             ElectricFencedMemory.RegisterContextAllocation(this,Environment.StackTrace);
@@ -614,7 +615,7 @@ namespace Sparrow.Json
             _arenaAllocator.RenewArena();
             if (_arenaAllocatorForLongLivedValues == null)
             {
-                _arenaAllocatorForLongLivedValues = new ArenaMemoryAllocator(_longLivedSize);
+                _arenaAllocatorForLongLivedValues = new ArenaMemoryAllocator(LowMemoryFlag, _longLivedSize);
                 CachedProperties = new CachedProperties(this);
             }
         }
