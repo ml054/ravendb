@@ -27,12 +27,14 @@ namespace Raven.Server.ServerWide.Maintance
         private readonly ConcurrentDictionary<string, ClusterNode> _clusterNodes = new ConcurrentDictionary<string, ClusterNode>();
 
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        private readonly Logger _logger;
         private readonly JsonContextPool _contextPool = new JsonContextPool();
 
         internal readonly ClusterMaintainceConfiguration Config;
         public ClusterMaintenanceMaster(ServerStore server,string leaderClusterTag, long term)
         {
             _leaderClusterTag = leaderClusterTag;
+            _logger = LoggingSource.Instance.GetLogger<ClusterMaintenanceMaster>(_leaderClusterTag);
             _term = term;
             Config = server.Configuration.ClusterMaintaince;
         }
@@ -40,6 +42,7 @@ namespace Raven.Server.ServerWide.Maintance
         public async Task AddToCluster(string clusterTag, string url)
         {
             var connectionInfo = await ReplicationUtils.GetTcpInfoAsync(MultiDatabase.GetRootDatabaseUrl(url), null, null);
+
             var clusterNode = new ClusterNode(clusterTag, connectionInfo, _contextPool, this, _cts.Token);
             _clusterNodes.Add(clusterTag, clusterNode);
             var task = clusterNode.StartListening();

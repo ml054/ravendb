@@ -149,7 +149,14 @@ namespace Raven.Server.ServerWide
                             }
                             foreach (var node in nodesChanges.addedValues)
                             {
-                                var task = _clusterMaintenanceMaster.AddToCluster(node.Key, clusterTopology.GetUrlFromTag(node.Key));
+                                var task =
+                                    _clusterMaintenanceMaster
+                                        .AddToCluster(node.Key, clusterTopology.GetUrlFromTag(node.Key))
+                                        .ContinueWith(t =>
+                                        {
+                                            if(Logger.IsInfoEnabled)
+                                                Logger.Info($"ClusterMaintenanceSetupTask() => Failed to add to cluster node key = {node.Key}",t.Exception);
+                                        },TaskContinuationOptions.OnlyOnFaulted);
                                 GC.KeepAlive(task);
                             }
 
@@ -767,6 +774,7 @@ namespace Raven.Server.ServerWide
             TransactionOperationContext context;
             using (ContextPool.AllocateOperationContext(out context))
             {
+                //TODO: timeout, server shutdown handling, etc
                 while (true)
                 {
                     var logChange = _engine.WaitForHeartbeat();
