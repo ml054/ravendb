@@ -179,7 +179,7 @@ class editDocument extends viewModelBase {
 
     private initValidation() {      
         const rg1 = /^[^\\]*$/; // forbidden character - backslash
-        this.userSpecifiedId.extend({           
+        this.userSpecifiedId.extend({
             validation: [
                 {
                     validator: (val: string) => rg1.test(val),
@@ -190,7 +190,7 @@ class editDocument extends viewModelBase {
         this.documentText.extend({
             required: true,
             validJson: true
-        });        
+        });
     }
 
     private initializeObservables(): void {
@@ -343,8 +343,10 @@ class editDocument extends viewModelBase {
                 })
                 .fail(() => documentTask.reject());
         } else {
-            const doc = document.empty();
+            const doc: any = document.empty();
+            doc["Name"] = "...";
             this.document(doc);
+
             documentTask.resolve(doc);
         }
 
@@ -612,7 +614,7 @@ class editDocument extends viewModelBase {
         eventsCollector.default.reportEvent("document", "delete");
         const doc = this.document();
         if (doc) {
-            const viewModel = new deleteDocuments([doc], this.activeDatabase());
+            const viewModel = new deleteDocuments([doc.getId()], this.activeDatabase());
             viewModel.deletionTask.done(() => this.connectedDocuments.onDocumentDeleted());
             app.showBootstrapDialog(viewModel, editDocument.editDocSelector);
         } 

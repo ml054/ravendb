@@ -19,6 +19,7 @@ using Raven.Client.Documents.Exceptions.Session;
 using Raven.Client.Documents.Identity;
 using Raven.Client.Documents.Replication.Messages;
 using Raven.Client.Documents.Session.Operations.Lazy;
+using Raven.Client.Exceptions;
 using Raven.Client.Extensions;
 using Raven.Client.Http;
 using Raven.Client.Json;
@@ -137,7 +138,7 @@ namespace Raven.Client.Documents.Session
         /// <value></value>
         public bool UseOptimisticConcurrency { get; set; }
 
-        private readonly List<ICommandData> _deferedCommands = new List<ICommandData>();
+        protected readonly List<ICommandData> _deferedCommands = new List<ICommandData>();
         public GenerateEntityIdOnTheClient GenerateEntityIdOnTheClient { get; }
         public EntityToBlittable EntityToBlittable { get; }
 
@@ -706,9 +707,7 @@ more responsive application.
         {
             var result = new SaveChangesData
             {
-                Entities = new List<object>(),
-                Commands = new List<ICommandData>(_deferedCommands),
-                DeferredCommandsCount = _deferedCommands.Count,
+                DeferedCommands = new List<ICommandData>(_deferedCommands),
                 Options = _saveChangesOptions
             };
             _deferedCommands.Clear();
@@ -737,8 +736,9 @@ more responsive application.
         {
             foreach (var deletedEntity in DeletedEntities)
             {
-                DocumentInfo documentInfo;
-                if (!DocumentsByEntity.TryGetValue(deletedEntity, out documentInfo)) continue;
+                if (DocumentsByEntity.TryGetValue(deletedEntity, out DocumentInfo documentInfo) == false)
+                    continue;
+
                 if (changes != null)
                 {
                     var docChanges = new List<DocumentsChanges>();
@@ -754,6 +754,12 @@ more responsive application.
                 }
                 else
                 {
+                    foreach (var resultCommand in result.DeferedCommands)
+                    {
+                        if (resultCommand.Key == documentInfo.Id)
+                            ThrowInvalidDeletedDocumentWithDefferredCommand(resultCommand);
+                    }
+
                     long? etag = null;
                     if (DocumentsById.TryGetValue(documentInfo.Id, out documentInfo))
                     {
@@ -773,7 +779,7 @@ more responsive application.
                     etag = UseOptimisticConcurrency ? etag : null;
                     var beforeDeleteEventArgs = new BeforeDeleteEventArgs(this, documentInfo.Id, documentInfo.Entity);
                     OnBeforeDelete?.Invoke(this, beforeDeleteEventArgs);
-                    result.Commands.Add(new DeleteCommandData(documentInfo.Id, etag));
+                    result.SessionCommands.Add(new DeleteCommandData(documentInfo.Id, etag));
                 }
             }
             DeletedEntities.Clear();
@@ -788,13 +794,11 @@ more responsive application.
                 if (entity.Value.IgnoreChanges || EntityChanged(document, entity.Value, null) == false)
                     continue;
 
-                if (result.DeferredCommandsCount > 0)
+                foreach (var resultCommand in result.DeferedCommands)
                 {
-                    foreach (var resultCommand in result.Commands)
-                    {
-                        if(resultCommand.Key == entity.Value.Id)
-                            ThrowInvalidModifiedDocumentWithDefferredCommand(resultCommand);
-                    }
+                    if (resultCommand.Type != CommandType.AttachmentPUT &&
+                        resultCommand.Key == entity.Value.Id)
+                        ThrowInvalidModifiedDocumentWithDefferredCommand(resultCommand);
                 }
 
                 var beforeStoreEventArgs = new BeforeStoreEventArgs(this, entity.Value.Id, entity.Key);
@@ -816,14 +820,20 @@ more responsive application.
                     ? (long?)(entity.Value.ETag ?? 0)
                     : null;
 
-                result.Commands.Add(new PutCommandDataWithBlittableJson(entity.Value.Id, etag, document));
+                result.SessionCommands.Add(new PutCommandDataWithBlittableJson(entity.Value.Id, etag, document));
             }
+        }
+
+        private static void ThrowInvalidDeletedDocumentWithDefferredCommand(ICommandData resultCommand)
+        {
+            throw new InvalidOperationException(
+                $"Cannot perfrom save because document {resultCommand.Key} has been deleted by the session and is also taking part in deferred {resultCommand.Type} command");
         }
 
         private static void ThrowInvalidModifiedDocumentWithDefferredCommand(ICommandData resultCommand)
         {
             throw new InvalidOperationException(
-                $"Cannot perfrom save because document {resultCommand.Key} has been modified by the session and is also taking part in deferred {resultCommand.Method} command");
+                $"Cannot perfrom save because document {resultCommand.Key} has been modified by the session and is also taking part in deferred {resultCommand.Type} command");
         }
 
         protected bool EntityChanged(BlittableJsonReaderObject newObj, DocumentInfo documentInfo, IDictionary<string, DocumentsChanges[]> changes)
@@ -1231,28 +1241,10 @@ more responsive application.
         /// </summary>
         public class SaveChangesData
         {
-            public SaveChangesData()
-            {
-                Commands = new List<ICommandData>();
-                Entities = new List<object>();
-            }
-
-            /// <summary>
-            /// Gets or sets the commands.
-            /// </summary>
-            /// <value>The commands.</value>
-            public List<ICommandData> Commands { get; set; }
-
-            public BatchOptions Options { get; set; }
-
-            public int DeferredCommandsCount { get; set; }
-
-            /// <summary>
-            /// Gets or sets the entities.
-            /// </summary>
-            /// <value>The entities.</value>
-            public List<object> Entities { get; set; }
-
+            public List<ICommandData> DeferedCommands;
+            public readonly List<ICommandData> SessionCommands = new List<ICommandData>();
+            public readonly List<object> Entities = new List<object>();
+            public BatchOptions Options;
         }
 
         public void OnAfterStoreInvoke(AfterStoreEventArgs afterStoreEventArgs)

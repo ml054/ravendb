@@ -109,12 +109,12 @@ namespace Raven.Server.ServerWide
         private bool _disposed;      
         public RachisConsensus<ClusterStateMachine> Engine => _engine;
 
-        private ClusterMaintenanceMaster _clusterMaintenanceMaster;
+        private ClusterMaintenanceSupervisor _clusterMaintenanceSupervisor;
         public Dictionary<string, ClusterNodeStatusReport> ClusterStats()
         {
             if (_engine.LeaderTag != NodeTag)
                 throw new NotLeadingException($"Stats can be requested only from the raft leader {_engine.LeaderTag}");
-            return _clusterMaintenanceMaster?.GetStats();
+            return _clusterMaintenanceSupervisor?.GetStats();
         }
         public async Task ClusterMaintanceSetupTask()
         {
@@ -127,8 +127,8 @@ namespace Raven.Server.ServerWide
                         await _engine.WaitForState(RachisConsensus.State.Leader);
                         continue;
                     }
-                    using (_clusterMaintenanceMaster = new ClusterMaintenanceMaster(this,_engine.Tag, _engine.CurrentTerm))
-                    using (new ClusterObserver(_clusterMaintenanceMaster,this,_engine,ContextPool,ServerShutdown))
+                    using (_clusterMaintenanceSupervisor = new ClusterMaintenanceSupervisor(this,_engine.Tag, _engine.CurrentTerm))
+                    using (new ClusterObserver(this,_clusterMaintenanceSupervisor,_engine,ContextPool,ServerShutdown))
                     {
                         var oldNodes = new Dictionary<string, string>();
                         while (_engine.LeaderTag == NodeTag)
@@ -145,17 +145,14 @@ namespace Raven.Server.ServerWide
                             oldNodes = newNodes;
                             foreach (var node in nodesChanges.removedValues)
                             {
-                                _clusterMaintenanceMaster.RemoveFromCluster(node.Key);
+                                _clusterMaintenanceSupervisor.RemoveFromCluster(node.Key);
                             }
                             foreach (var node in nodesChanges.addedValues)
                             {
-                                var task =
-                                    _clusterMaintenanceMaster
-                                        .AddToCluster(node.Key, clusterTopology.GetUrlFromTag(node.Key))
-                                        .ContinueWith(t =>
+                                var task = _clusterMaintenanceSupervisor.AddToCluster(node.Key, clusterTopology.GetUrlFromTag(node.Key)).ContinueWith(t =>
                                         {
                                             if(Logger.IsInfoEnabled)
-                                                Logger.Info($"ClusterMaintenanceSetupTask() => Failed to add to cluster node key = {node.Key}",t.Exception);
+                                                Logger.Info($"ClusterMaintenanceSupervisor() => Failed to add to cluster node key = {node.Key}",t.Exception);
                                         },TaskContinuationOptions.OnlyOnFaulted);
                                 GC.KeepAlive(task);
                             }
@@ -276,7 +273,7 @@ namespace Raven.Server.ServerWide
 
 
             _engine = new RachisConsensus<ClusterStateMachine>();
-            _engine.Initialize(_env);
+            _engine.Initialize(_env, Configuration.Cluster);
 
             _engine.StateMachine.DatabaseChanged += DatabasesLandlord.ClusterOnDatabaseChanged;
 
@@ -745,28 +742,7 @@ namespace Raven.Server.ServerWide
                 var djv = cmd.ToJson();
                 var cmdJson = context.ReadObject(djv, "raft/command");
 
-                while (true)
-                {
-                    var logChange = _engine.WaitForHeartbeat();
-
-                    if (_engine.CurrentState == RachisConsensus.State.Leader)
-                    {
-                        return await _engine.PutAsync(cmdJson);
-                    }
-
-                    var engineLeaderTag = _engine.LeaderTag; // not actually working
-                    try
-                    {
-                        return await SendToNodeAsync(context, engineLeaderTag, cmdJson);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (Logger.IsInfoEnabled)
-                            Logger.Info("Tried to send message to leader, retrying", ex);
-                    }
-
-                    await logChange;
-                }
+                return await SendToLeaderAsyncInternal(cmdJson, context);
             }
         }
 
@@ -775,29 +751,44 @@ namespace Raven.Server.ServerWide
             TransactionOperationContext context;
             using (ContextPool.AllocateOperationContext(out context))
             {
-                //TODO: timeout, server shutdown handling, etc
-                while (true)
+                return await SendToLeaderAsyncInternal(cmd, context);
+            }
+        }
+
+        public async Task<long> SendToLeaderAsync(DynamicJsonValue cmd)
+        {
+            TransactionOperationContext context;
+            using (ContextPool.AllocateOperationContext(out context))
+            {
+                var cmdJson = context.ReadObject(cmd, "raft/command");
+
+                return await SendToLeaderAsyncInternal(cmdJson, context);
+            }
+        }
+
+        private async Task<long> SendToLeaderAsyncInternal(BlittableJsonReaderObject cmdJson, TransactionOperationContext context)
+        {
+            while (true)
+            {
+                var logChange = _engine.WaitForHeartbeat();
+
+                if (_engine.CurrentState == RachisConsensus.State.Leader)
                 {
-                    var logChange = _engine.WaitForHeartbeat();
-
-                    if (_engine.CurrentState == RachisConsensus.State.Leader)
-                    {
-                        return await _engine.PutAsync(cmd);
-                    }
-
-                    var engineLeaderTag = _engine.LeaderTag; // not actually working
-                    try
-                    {
-                        return await SendToNodeAsync(context, engineLeaderTag, cmd);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (Logger.IsInfoEnabled)
-                            Logger.Info("Tried to send message to leader, retrying", ex);
-                    }
-
-                    await logChange;
+                    return await _engine.PutAsync(cmdJson);
                 }
+
+                var engineLeaderTag = _engine.LeaderTag; // not actually working
+                try
+                {
+                    return await SendToNodeAsync(context, engineLeaderTag, cmdJson);
+                }
+                catch (Exception ex)
+                {
+                    if (Logger.IsInfoEnabled)
+                        Logger.Info("Tried to send message to leader, retrying", ex);
+                }
+
+                await logChange;
             }
         }
 
