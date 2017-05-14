@@ -5,10 +5,10 @@
 // -----------------------------------------------------------------------
 
 using System;
-
 using Lucene.Net.Analysis;
 using Lucene.Net.Index;
 using Lucene.Net.Store;
+using Raven.Server.Exceptions;
 using Sparrow.Logging;
 
 namespace Raven.Server.Documents.Indexes.Persistence.Lucene
@@ -61,10 +61,18 @@ namespace Raven.Server.Documents.Indexes.Persistence.Lucene
             {
                 indexWriter.Commit(state);
             }
-            finally
+            catch (SystemException e)
             {
-                RecreateIndexWriter(state);
+                if (e.Message.StartsWith("this writer hit an OutOfMemoryError"))
+                {
+                    RecreateIndexWriter(state);
+                    throw new OutOfMemoryException("Index writer hit OOM during commit", e);
+                }
+
+                throw;
             }
+
+            RecreateIndexWriter(state);
         }
 
         public long RamSizeInBytes()
@@ -79,10 +87,17 @@ namespace Raven.Server.Documents.Indexes.Persistence.Lucene
 
         private void RecreateIndexWriter(IState state)
         {
-            DisposeIndexWriter();
+            try
+            {
+                DisposeIndexWriter();
 
-            if (indexWriter == null)
-                CreateIndexWriter(state);
+                if (indexWriter == null)
+                    CreateIndexWriter(state);
+            }
+            catch (Exception e) 
+            {
+                throw new IndexWriterCreationException(e);
+            }
         }
 
         private void CreateIndexWriter(IState state)
@@ -135,11 +150,6 @@ namespace Raven.Server.Documents.Indexes.Persistence.Lucene
         public void Dispose()
         {
             DisposeIndexWriter();
-        }
-
-        public void Dispose(bool waitForMerges)
-        {
-            DisposeIndexWriter(waitForMerges);
         }
 
         public void AddIndexesNoOptimize(Directory[] directories, int count, IState state)

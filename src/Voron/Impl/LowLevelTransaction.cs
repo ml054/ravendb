@@ -170,11 +170,24 @@ namespace Voron.Impl
                 journalFile.AddRef();
             }
 
-            foreach (var scratchPagerState in previous._pagerStates)
+            var pagers = new HashSet<AbstractPager>();
+            
+            foreach (var scratchAndDataPagerState in previous._pagerStates)
             {
-                scratchPagerState.AddRef();
-                _pagerStates.Add(scratchPagerState);
+                // in order to avoid "dragging" pager state ref on non active scratch - we will not copy disposed scratches from previous async tx. RavenDB-6766
+                if (scratchAndDataPagerState.DiscardOnTxCopy)
+                    continue;
+
+                // copy the "current pager" which is the last pager used, and by that do not "drag" old non used pager state refs to the next async commit (i.e. older views of data file). RavenDB-6949
+                var currentPager = scratchAndDataPagerState.CurrentPager;
+                if (pagers.Add(currentPager) == false)
+                    continue;
+
+                var state = currentPager.PagerState;
+                state.AddRef();
+                _pagerStates.Add(state);
             }
+
 
             EnsureNoDuplicateTransactionId(_id);
 
@@ -221,8 +234,8 @@ namespace Voron.Impl
             _freeSpaceHandling = freeSpaceHandling;
             _allocator = context ?? new ByteStringContext(LowMemoryFlag.None);
             _disposeAllocator = context == null;
-            _pagerStates = new HashSet<PagerState>(ReferenceEqualityComparer<PagerState>.Default);           
-            
+            _pagerStates = new HashSet<PagerState>(ReferenceEqualityComparer<PagerState>.Default);
+
             PersistentContext = transactionPersistentContext;
             Flags = flags;
 
@@ -369,7 +382,7 @@ namespace Voron.Impl
 
             // Check if we can hit the second level locality cache.            
             if (_dirtyPages.Contains(num))
-                return currentPage;                
+                return currentPage;
 
             // No cache hits.
             int pageSize;
@@ -604,7 +617,7 @@ namespace Voron.Impl
                     pageFromScratchBuffer.PositionInScratchBuffer,
                     numberOfPages);
             }
-            
+
             var newPagePointer = _env.ScratchBufferPool.AcquirePagePointerForNewPage(this, pageFromScratchBuffer.ScratchFileNumber,
                 pageFromScratchBuffer.PositionInScratchBuffer, numberOfPages);
 
@@ -684,6 +697,8 @@ namespace Voron.Impl
             page.OverflowSize = newSize;
             var lowerNumberOfPages = VirtualPagerLegacyExtensions.GetNumberOfOverflowPages(newSize);
 
+            Debug.Assert(lowerNumberOfPages != 0);
+
             if (prevNumberOfPages == lowerNumberOfPages)
                 return;
 
@@ -691,6 +706,9 @@ namespace Voron.Impl
             {
                 FreePage(page.PageNumber + i);
             }
+
+            if (lowerNumberOfPages > 1)
+                _dirtyOverflowPages[pageNumber + 1] = lowerNumberOfPages - 1; // change the range of the overflow page
         }
 
         [Conditional("DEBUG")]
@@ -955,7 +973,7 @@ namespace Voron.Impl
             {
                 ValidateAllPages();
 
-                Allocator.Release(ref _txHeaderMemory);                
+                Allocator.Release(ref _txHeaderMemory);
 
                 Committed = true;
                 _env.TransactionAfterCommit(this);
@@ -1042,16 +1060,20 @@ namespace Voron.Impl
         internal ImmutableAppendOnlyList<JournalFile> JournalFiles;
         internal bool AlreadyAllowedDisposeWithLazyTransactionRunning;
         public DateTime TxStartTime;
-        
+
         public void EnsurePagerStateReference(PagerState state)
         {
             if (state == _lastState || state == null)
                 return;
 
-            _lastState = state;
             if (_pagerStates.Add(state) == false)
+            {
+                _lastState = state;
                 return;
-            state.AddRef();
+            }
+
+            state = state.CurrentPager.GetPagerStateAndAddRefAtomically(); // state might hold released pagerState, and we want to add ref to the current (i.e. data file was re-allocated and a new state is now available). RavenDB-6950
+            _lastState = state;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
