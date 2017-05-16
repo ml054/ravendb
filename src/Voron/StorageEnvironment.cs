@@ -919,24 +919,10 @@ namespace Voron
                 spinner.SpinOnce();
             }
 
-            var dataLength = Constants.Storage.PageSize - (PageHeader.ChecksumOffset + sizeof(ulong));
-            if ((current->Flags & PageFlags.Overflow) == PageFlags.Overflow)
-            {
-                if (pageNumber + _dataPager.GetNumberOfOverflowPages(current->OverflowSize) > _dataPager.NumberOfAllocatedPages)
-                    ThrowInvalidOverflowSize(pageNumber, current);
-
-                dataLength = current->OverflowSize - (PageHeader.ChecksumOffset + sizeof(ulong));
-            }
-
             // No need to call EnsureMapped here. ValidatePageChecksum is only called for pages in the datafile, 
             // which we already got using AcquirePagePointerWithOverflowHandling()
 
-            var ctx = Hashing.Streamed.XXHash64.BeginProcess((ulong)pageNumber);
-
-            Hashing.Streamed.XXHash64.Process(ctx, (byte*)current, PageHeader.ChecksumOffset);
-            Hashing.Streamed.XXHash64.Process(ctx, (byte*)current + PageHeader.ChecksumOffset + sizeof(ulong), dataLength);
-
-            ulong checksum = Hashing.Streamed.XXHash64.EndProcess(ctx);
+            ulong checksum = CalculatePageChecksum((byte*)current, current->PageNumber, current->Flags, current->OverflowSize);
 
             if (checksum == current->Checksum)
                 return;
@@ -950,13 +936,7 @@ namespace Voron
                 $"Invalid checksum for page {pageNumber}, data file {_options.DataPager} might be corrupted, expected hash to be {current->Checksum} but was {checksum}");
         }
 
-        private unsafe void ThrowInvalidOverflowSize(long pageNumber, PageHeader* current)
-        {
-            throw new InvalidDataException(
-                $"Invalid overflow size for page {pageNumber}, current offset is {pageNumber * Constants.Storage.PageSize} and overflow size is {current->OverflowSize}. Page length is beyond the file length {_dataPager.TotalAllocationSize}");
-        }
-
-        public unsafe ulong CalculatePageChecksum(byte* ptr, long pageNumber, PageFlags flags, int overflowSize)
+        public static unsafe ulong CalculatePageChecksum(byte* ptr, long pageNumber, PageFlags flags, int overflowSize)
         {
             var dataLength = Constants.Storage.PageSize - (PageHeader.ChecksumOffset + sizeof(ulong));
             if ((flags & PageFlags.Overflow) == PageFlags.Overflow)

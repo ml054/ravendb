@@ -34,6 +34,8 @@ namespace Raven.Client.Http
 
         public virtual Task<HttpResponseMessage> SendAsync(HttpClient client, HttpRequestMessage request, CancellationToken token)
         {
+            // We must use HttpCompletionOption.ResponseHeadersRead otherwise the client will buffer the response
+            // and we'll get OutOfMemoryException in huge responses (> 2GB).
             return client.SendAsync(request, token);
         }
 
@@ -61,7 +63,7 @@ namespace Raven.Client.Http
 
         public bool IsFailedWithNode(ServerNode node)
         {
-			return FailedNodes != null && FailedNodes.ContainsKey(node);        }
+            return FailedNodes != null && FailedNodes.ContainsKey(node);        }
 
         public virtual async Task ProcessResponse(JsonOperationContext context, HttpCache cache, HttpResponseMessage response, string url)
         {

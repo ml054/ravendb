@@ -145,6 +145,7 @@ namespace Raven.Server.Config
 
         public RavenConfiguration Initialize()
         {
+            Server.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);
             Core.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);
             Replication.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);
             Cluster.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);
@@ -153,7 +154,6 @@ namespace Raven.Server.Config
             Patching.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);
             DebugLog.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);
             BulkInsert.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);
-            Server.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);
             Memory.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);
             Storage.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);
             Encryption.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);

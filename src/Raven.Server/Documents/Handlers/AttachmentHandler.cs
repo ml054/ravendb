@@ -109,11 +109,12 @@ namespace Raven.Server.Documents.Handlers
                 using (var stream = attachment.Stream)
                 {
                     var responseStream = ResponseBodyStream();
-                    var count = await stream.ReadAsync(buffer.Buffer.Array, 0, buffer.Length, Database.DatabaseShutdown);
+                    var count = stream.Read(buffer.Buffer.Array, 0, buffer.Length); // can never wait, so no need for async
                     while (count > 0)
                     {
                         await responseStream.WriteAsync(buffer.Buffer.Array, 0, count, Database.DatabaseShutdown);
-                        count = await stream.ReadAsync(buffer.Buffer.Array, 0, buffer.Length, Database.DatabaseShutdown);
+                        // we know that this can never wait, so no need to do async i/o here
+                        count = stream.Read(buffer.Buffer.Array, 0, buffer.Length);
                     }
                 }
             }
@@ -122,8 +123,7 @@ namespace Raven.Server.Documents.Handlers
         [RavenAction("/databases/*/attachments", "PUT")]
         public async Task Put()
         {
-            DocumentsOperationContext context;
-            using (ContextPool.AllocateOperationContext(out context))
+            using (ContextPool.AllocateOperationContext(out DocumentsOperationContext context))
             {
                 var id = GetQueryStringValueAndAssertIfSingleAndNotEmpty("id");
                 var name = GetQueryStringValueAndAssertIfSingleAndNotEmpty("name");

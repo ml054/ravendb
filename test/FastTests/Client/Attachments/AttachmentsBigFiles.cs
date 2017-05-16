@@ -1,19 +1,14 @@
-﻿using FastTests;
-using FastTests.Client.Attachments;
-using Microsoft.AspNetCore.Http.Features;
-using Raven.Client.Documents.Operations;
+﻿using Raven.Client.Documents.Operations;
 using Xunit;
 
-namespace SlowTests.Client.Attachments
+namespace FastTests.Client.Attachments
 {
     public class AttachmentsBigFiles : RavenTestBase
     {
-        // TODO: This should be a failing test, but it passing.
-        [Fact]
-        public void AttachmentBiggerThan128Mb_WhichIsMaxMultipartBodyLengthLimit()
+        [Theory]
+        [InlineData(10, "JSQotERdt/PFZDB+eYlyf4cZVDLsYG33")]
+        public void BatchRequestWithLongMultiPartSections(long size, string hash)
         {
-            var size = FormOptions.DefaultMultipartBodyLengthLimit * 2;
-
             using (var store = GetDocumentStore())
             {
                 using (var session = store.OpenSession())
@@ -22,7 +17,7 @@ namespace SlowTests.Client.Attachments
                     var user = new User {Name = "Fitzchak"};
                     session.Store(user, "users/1");
 
-                    session.Advanced.StoreAttachment(user, "256mb-file", stream);
+                    session.Advanced.StoreAttachment(user, "big-file", stream);
 
                     session.SaveChanges();
                 }
@@ -33,10 +28,10 @@ namespace SlowTests.Client.Attachments
 
                     using (var bigStream = new BigDummyStream(size))
                     {
-                        var attachment = session.Advanced.GetAttachment(user, "256mb-file", (result, stream) => stream.CopyTo(bigStream));
+                        var attachment = session.Advanced.GetAttachment(user, "big-file", (result, stream) => stream.CopyTo(bigStream));
                         Assert.Equal(2, attachment.Etag);
-                        Assert.Equal("256mb-file", attachment.Name);
-                        Assert.Equal("G/VBSDnFqmLKAphJbokRdiXpfeRMcTwz", attachment.Hash);
+                        Assert.Equal("big-file", attachment.Name);
+                        Assert.Equal(hash, attachment.Hash);
                         Assert.Equal(size, bigStream.Position);
                         Assert.Equal(size, attachment.Size);
                         Assert.Equal("", attachment.ContentType);
@@ -45,9 +40,9 @@ namespace SlowTests.Client.Attachments
             }
         }
 
-        [Theory(Skip = "TODO: Huge file")]
-        [InlineData(int.MaxValue, "todoB3EIIB2gNVjsXTCD1aXlTgzuEz50")]
-        public void SupportHugeAttachment_MaxLong(long size, string hash)
+        [Theory]
+        [InlineData(10, "JSQotERdt/PFZDB+eYlyf4cZVDLsYG33")]
+        public void SupportHugeAttachment(long size, string hash)
         {
             using (var store = GetDocumentStore())
             {
@@ -55,7 +50,6 @@ namespace SlowTests.Client.Attachments
                 {
                     session.Store(new User {Name = "Fitzchak"}, "users/1");
                     session.SaveChanges();
-
                 }
 
                 using (var bigStream = new BigDummyStream(size))

@@ -5,6 +5,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Sparrow.Collections.LockFree;
@@ -13,8 +14,8 @@ namespace Sparrow.Utils
 {
     public static class TimeoutManager
     {
-        private static readonly ConcurrentDictionary<int, TimerTaskHolder> Values 
-            = new ConcurrentDictionary<int, TimerTaskHolder>(NumericEqualityComparer.Instance);
+        private static readonly ConcurrentDictionary<uint, TimerTaskHolder> Values 
+            = new ConcurrentDictionary<uint, TimerTaskHolder>(NumericEqualityComparer.Instance);
 
         private class TimerTaskHolder  : IDisposable
         {
@@ -37,16 +38,20 @@ namespace Sparrow.Utils
                         if (tcs != null)
                             return tcs.Task;
 
-                        tcs = new TaskCompletionSource<object>();
+                        tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
                         if (Interlocked.CompareExchange(ref _nextTimeout, tcs, null) == null)
                             return tcs.Task;
                     }
                 }
             }
 
-            public TimerTaskHolder(int timeout)
+            public TimerTaskHolder(uint timeout)
             {
-                _timer = new Timer(TimerCallback, null, timeout, timeout);
+                var period = TimeSpan.FromMilliseconds(timeout);
+                // TODO: Use the ctor which take uint once it is available.
+                // https://github.com/dotnet/coreclr/blob/master/src/mscorlib/src/System/Threading/Timer.cs#L710
+                // https://github.com/dotnet/coreclr/blob/c55f023f542e63e93a300752432de7bcc4104b3b/src/mscorlib/src/System/Threading/Timer.cs#L710
+                _timer = new Timer(TimerCallback, null, period, period);
             }
 
             public void Dispose()
@@ -55,38 +60,57 @@ namespace Sparrow.Utils
             }
         }
 
-        public static Task WaitFor(int duration)
+        public static async Task WaitFor(uint duration)
         {
-            return Task.Delay(duration);
+            var mod = duration % 50;
+            if (mod != 0)
+                duration += 50 - mod;
 
-            //var mod = duration % 50;
-            //if (mod != 0)
-            //    duration += 50 - mod;
+            var value = GetHolderForDuration(duration);
 
-            //if (Values.TryGetValue(duration, out var value))
-            //    return value.NextTask;
+            var sp = Stopwatch.StartNew();
+            await value.NextTask;
 
-            //value = Values.GetOrAdd(duration, d => new TimerTaskHolder(d));
-            //return value.NextTask;
+            var step = duration / 8;
+
+            if (sp.ElapsedMilliseconds >= (duration - step))
+                return;
+
+            value = GetHolderForDuration(step);
+
+            do
+            {
+                await value.NextTask;
+            } while (sp.ElapsedMilliseconds < (duration - step));
+
+
         }
 
-        public static  Task WaitFor(int duration, CancellationToken token)
+        private static TimerTaskHolder GetHolderForDuration(uint duration)
         {
-            return Task.Delay(duration, token);
-            //token.ThrowIfCancellationRequested();
-            //// ReSharper disable once MethodSupportsCancellation
-            //var task = WaitFor(duration);
-            //if (token == CancellationToken.None || token.CanBeCanceled == false)
-            //{
-            //    await task;
-            //    return;
-            //}
+            if (Values.TryGetValue(duration, out var value) == false)
+            {
+                value = Values.GetOrAdd(duration, d => new TimerTaskHolder(d));
+            }
+            return value;
+        }
 
-            //var onCancel = new TaskCompletionSource<object>();
-            //using (token.Register(tcs => onCancel.TrySetCanceled(), onCancel))
-            //{
-            //    await Task.WhenAny(task, onCancel.Task);
-            //}
+        public static async Task WaitFor(uint duration, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            // ReSharper disable once MethodSupportsCancellation
+            var task = WaitFor(duration);
+            if (token == CancellationToken.None || token.CanBeCanceled == false)
+            {
+                await task;
+                return;
+            }
+
+            var onCancel = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+            using (token.Register(tcs => onCancel.TrySetCanceled(), onCancel))
+            {
+                await Task.WhenAny(task, onCancel.Task);
+            }
         }
     }
 }
