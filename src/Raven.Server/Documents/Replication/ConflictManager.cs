@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Replication;
 using Raven.Client.Documents.Replication.Messages;
+using Raven.Client.Server;
 using Raven.Server.ServerWide.Context;
 using Raven.Server.Utils;
 using Sparrow.Json;
@@ -34,12 +36,12 @@ namespace Raven.Server.Documents.Replication
             long lastModifiedTicks,
             BlittableJsonReaderObject doc,
             ChangeVectorEntry[] changeVector,
-            ChangeVectorEntry[] otherChangeVector
+            ChangeVectorEntry[] conflictedChangeVector
         )
         {
             if (id.StartsWith("Raven/Hilo/", StringComparison.OrdinalIgnoreCase))
             {
-                HandleHiloConflict(documentsContext, id, doc);
+                HandleHiloConflict(documentsContext, id, doc, changeVector);
                 return;
             }
             if (TryResolveIdenticalDocument(
@@ -67,7 +69,7 @@ namespace Raven.Server.Documents.Replication
 
             if (_conflictResolver.ConflictSolver.ResolveToLatest)
             {
-                if (otherChangeVector == null) //precaution
+                if (conflictedChangeVector == null) //precaution
                     throw new InvalidOperationException(
                         "Detected conflict on replication, but could not figure out conflicted vector. This is not supposed to happen and is likely a bug.");
 
@@ -202,7 +204,7 @@ namespace Raven.Server.Documents.Replication
             return false;
         }
 
-        private void HandleHiloConflict(DocumentsOperationContext context, string id, BlittableJsonReaderObject doc)
+        private void HandleHiloConflict(DocumentsOperationContext context, string id, BlittableJsonReaderObject doc, ChangeVectorEntry[] changeVector)
         {
             long highestMax;
             if (!doc.TryGet("Max", out highestMax))
@@ -211,6 +213,7 @@ namespace Raven.Server.Documents.Replication
             var conflicts = _database.DocumentsStorage.ConflictsStorage.GetConflictsFor(context, id);
 
             var resolvedHiLoDoc = doc;
+            ChangeVectorEntry[] mergedChangeVector;
             if (conflicts.Count == 0)
             {
                 //conflict with another existing document
@@ -218,6 +221,7 @@ namespace Raven.Server.Documents.Replication
                 double max;
                 if (localHiloDoc.Data.TryGet("Max", out max) && max > highestMax)
                     resolvedHiLoDoc = localHiloDoc.Data;
+                mergedChangeVector = ChangeVectorUtils.MergeVectors(changeVector,localHiloDoc.ChangeVector);
             }
             else
             {
@@ -230,8 +234,10 @@ namespace Raven.Server.Documents.Replication
                         resolvedHiLoDoc = conflict.Doc;
                     }
                 }
+                var merged = ChangeVectorUtils.MergeVectors(conflicts.Select(c => c.ChangeVector).ToList());
+                mergedChangeVector = ChangeVectorUtils.MergeVectors(merged, changeVector);
             }
-            _database.DocumentsStorage.Put(context, id, null, resolvedHiLoDoc);
+            _database.DocumentsStorage.Put(context, id, null, resolvedHiLoDoc,changeVector: mergedChangeVector);
         }
 
         private static void InvalidConflictWhenThereIsNone(string id)

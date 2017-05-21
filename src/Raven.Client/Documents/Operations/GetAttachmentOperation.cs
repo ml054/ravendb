@@ -52,8 +52,6 @@ namespace Raven.Client.Documents.Operations
                     throw new ArgumentNullException(nameof(documentId));
                 if (string.IsNullOrWhiteSpace(name))
                     throw new ArgumentNullException(nameof(name));
-                if (handleStreamResponse == null)
-                    throw new ArgumentNullException(nameof(handleStreamResponse));
 
                 if (type != AttachmentType.Document && changeVector == null)
                     throw new ArgumentNullException(nameof(changeVector), $"Change Vector cannot be null for attachment type {type}");
@@ -61,11 +59,11 @@ namespace Raven.Client.Documents.Operations
                 _context = context;
                 _documentId = documentId;
                 _name = name;
-                _handleStreamResponse = handleStreamResponse;
+                _handleStreamResponse = handleStreamResponse ?? throw new ArgumentNullException(nameof(handleStreamResponse));
                 _type = type;
                 _changeVector = changeVector;
 
-                ResponseType = RavenCommandResponseType.Stream;
+                ResponseType = RavenCommandResponseType.Raw;
             }
 
             public override HttpRequestMessage CreateRequest(ServerNode node, out string url)
@@ -120,21 +118,18 @@ namespace Raven.Client.Documents.Operations
                 return request;
             }
 
-            public override void SetResponse(BlittableJsonReaderObject response, bool fromCache)
-            {
-                ThrowInvalidResponse();
-            }
-
-            public override void SetResponseUncached(HttpResponseMessage response, Stream stream)
+            public override void SetResponseRaw(HttpResponseMessage response, Stream stream, JsonOperationContext context)
             {
                 if (stream == null)
                     return;
 
                 var contentType = response.Content.Headers.TryGetValues("Content-Type", out IEnumerable<string> contentTypeVale) ? contentTypeVale.First() : null;
                 var etag = response.GetRequiredEtagHeader();
-                var hash = response.Headers.TryGetValues("Content-Hash", out IEnumerable<string> hashVal) ? hashVal.First() : null;
-                var size = stream.Length;
-          
+                var hash = response.Headers.TryGetValues("Attachment-Hash", out IEnumerable<string> hashVal) ? hashVal.First() : null;
+                long size = 0;
+                if (response.Headers.TryGetValues("Attachment-Size", out IEnumerable<string> sizeVal))
+                    long.TryParse(sizeVal.First(), out size);
+
                 Result = new AttachmentResult
                 {
                     ContentType = contentType,

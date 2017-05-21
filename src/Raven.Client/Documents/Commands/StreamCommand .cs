@@ -14,11 +14,9 @@ namespace Raven.Client.Documents.Commands
 
         public StreamCommand(string url, bool usedTransformer)
         {
-            if (url == null)
-                throw new ArgumentNullException(nameof(url));
-
-            _url = url;
+            _url = url ?? throw new ArgumentNullException(nameof(url));
             UsedTransformer = usedTransformer;
+            ResponseType = RavenCommandResponseType.Raw;
         }
 
         public override HttpRequestMessage CreateRequest(ServerNode node, out string url)
@@ -27,15 +25,8 @@ namespace Raven.Client.Documents.Commands
             {
                 Method = HttpMethod.Get,
             };
-
             url = $"{node.Url}/databases/{node.Database}/{_url}";
-
             return request;
-        }
-
-        public override void SetResponse(BlittableJsonReaderObject response, bool fromCache)
-        {
-            throw new NotSupportedException();
         }
 
         public override async Task ProcessResponse(JsonOperationContext context, HttpCache cache, HttpResponseMessage response, string url)

@@ -12,27 +12,21 @@ namespace Raven.Client.Documents.Operations.Indexes
 
         public StartIndexOperation(string indexName)
         {
-            if (indexName == null)
-                throw new ArgumentNullException(nameof(indexName));
-
-            _indexName = indexName;
+            _indexName = indexName ?? throw new ArgumentNullException(nameof(indexName));
         }
 
-        public RavenCommand<object> GetCommand(DocumentConventions conventions, JsonOperationContext context)
+        public RavenCommand GetCommand(DocumentConventions conventions, JsonOperationContext context)
         {
             return new StartIndexCommand(_indexName);
         }
 
-        private class StartIndexCommand : RavenCommand<object>
+        private class StartIndexCommand : RavenCommand
         {
             private readonly string _indexName;
 
             public StartIndexCommand(string indexName)
             {
-                if (indexName == null)
-                    throw new ArgumentNullException(nameof(indexName));
-
-                _indexName = indexName;
+                _indexName = indexName ?? throw new ArgumentNullException(nameof(indexName));
             }
 
             public override HttpRequestMessage CreateRequest(ServerNode node, out string url)
@@ -44,12 +38,6 @@ namespace Raven.Client.Documents.Operations.Indexes
                     Method = HttpMethod.Post
                 };
             }
-
-            public override void SetResponse(BlittableJsonReaderObject response, bool fromCache)
-            {
-            }
-
-            public override bool IsReadRequest => false;
         }
     }
 }

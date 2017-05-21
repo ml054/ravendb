@@ -122,8 +122,6 @@ namespace Sparrow.Json
 
         private Stack<ManagedPinnedBuffer> _managedBuffers;
 
-        public static readonly UTF8Encoding Encoding = new UTF8Encoding();
-
         public CachedProperties CachedProperties;
 
         internal DateTime InPoolSince;
@@ -338,7 +336,7 @@ namespace Sparrow.Json
         private unsafe LazyStringValue GetLazyString(StringSegment field, bool longLived)
         {
             var state = new JsonParserState();
-            var maxByteCount = Encoding.GetMaxByteCount(field.Length);
+            var maxByteCount = Encodings.Utf8.GetMaxByteCount(field.Length);
 
             int escapePositionsSize = JsonParserState.FindEscapePositionsMaxSize(field);
 
@@ -348,7 +346,7 @@ namespace Sparrow.Json
             fixed (char* pField = field.String)
             {
                 var address = memory.Address;
-                var actualSize = Encoding.GetBytes(pField + field.Start, field.Length, address, memory.SizeInBytes);
+                var actualSize = Encodings.Utf8.GetBytes(pField + field.Start, field.Length, address, memory.SizeInBytes);
 
                 state.FindEscapePositionsIn(address, actualSize, escapePositionsSize);
 
@@ -643,41 +641,6 @@ namespace Sparrow.Json
         {
             throw new ObjectDisposedException(nameof(JsonOperationContext));
         }
-
-
-        public async Task<Tuple<BlittableJsonReaderArray, IDisposable>> ParseArrayToMemoryAsync(Stream stream, string debugTag,
-            BlittableJsonDocumentBuilder.UsageMode mode, bool noCache = false)
-        {
-            _jsonParserState.Reset();
-            ManagedPinnedBuffer bytes;
-            using (GetManagedBuffer(out bytes))
-            using (var parser = new UnmanagedJsonParser(this, _jsonParserState, debugTag))
-            using (var builder = new BlittableJsonDocumentBuilder(this, mode, debugTag, parser, _jsonParserState))
-            {
-                CachedProperties.NewDocument();
-                builder.ReadArrayDocument();
-                while (true)
-                {
-                    if (bytes.Valid == bytes.Used)
-                    {
-                        var read = await stream.ReadAsync(bytes.Buffer.Array, bytes.Buffer.Offset, bytes.Length);
-                        if (read == 0)
-                            throw new EndOfStreamException("Stream ended without reaching end of json content");
-                        bytes.Valid = read;
-                        bytes.Used = 0;
-                    }
-                    parser.SetBuffer(bytes);
-                    var readObj = builder.Read();
-                    bytes.Used += parser.BufferOffset;
-                    if (readObj)
-                        break;
-                }
-                builder.FinalizeDocument();
-                var arrayReader = builder.CreateArrayReader(noCache);
-                return Tuple.Create(arrayReader, (IDisposable) arrayReader.Parent);
-            }
-        }
-
 
         protected virtual void InternalResetAndRenew()
         {

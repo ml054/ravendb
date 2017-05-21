@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Sparrow;
 using Voron.Data.BTrees;
 using Voron.Impl;
 using Voron.Impl.Paging;
-using Voron.Util;
 
 namespace Voron.Data
 {
@@ -19,7 +16,6 @@ namespace Voron.Data
         private readonly int[] _positions;
         private int _index;
         private LowLevelTransaction _llt;
-        private readonly LowLevelTransaction.PagerRef _pagerRef;
         
         public override bool CanRead => true;
         public override bool CanSeek => true;
@@ -39,7 +35,8 @@ namespace Voron.Data
             _positions = new int[_chunksDetails.Length];
             _index = 0;
             _llt = llt;
-            _pagerRef = new LowLevelTransaction.PagerRef();
+            _lastPage = default(Page);
+
             foreach (var cd in _chunksDetails)
             {
                 Length += cd.ChunkSize;
@@ -97,6 +94,8 @@ namespace Voron.Data
             }
         }
 
+        private Page _lastPage;
+
         public override int ReadByte()
         {
             int pos = _positions[_index];
@@ -114,10 +113,12 @@ namespace Voron.Data
                     return -1;
             }
 
-            var page = _llt.GetPage(chunk.PageNumber, _pagerRef);
-            _pagerRef.Pager.EnsureMapped(_llt, _pagerRef.PagerPageNumber, _pagerRef.Pager.GetNumberOfOverflowPages(page.OverflowSize));
+            if (!_lastPage.IsValid || _lastPage.PageNumber != chunk.PageNumber)
+            {
+                _lastPage = _llt.GetPage(chunk.PageNumber);
+            }
 
-            return page.DataPointer[_positions[_index]++];
+            return _lastPage.DataPointer[_positions[_index]++];
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -142,12 +143,15 @@ namespace Voron.Data
             if (count > len - pos)
                 count = len - pos;
 
-            var page = _llt.GetPage(_chunksDetails[_index].PageNumber, _pagerRef);
-            _pagerRef.Pager.EnsureMapped(_llt, _pagerRef.PagerPageNumber, _pagerRef.Pager.GetNumberOfOverflowPages(page.OverflowSize));
+            ref Tree.ChunkDetails chunk = ref _chunksDetails[_index];
+            if (!_lastPage.IsValid || _lastPage.PageNumber != chunk.PageNumber)
+            {
+                _lastPage = _llt.GetPage(chunk.PageNumber);
+            }
 
             fixed (byte* dst = buffer)
             {
-                Memory.Copy(dst + offset, page.DataPointer + pos, count);
+                Memory.Copy(dst + offset, _lastPage.DataPointer + pos, count);
             }
 
             _positions[_index] += count;

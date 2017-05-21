@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
+﻿using System.Net.Http;
 using Raven.Client.Http;
-using Sparrow.Json;
 
 namespace Raven.Client.Documents.Commands
 {
-    class KillOperationCommand : RavenCommand<bool>
+    public class KillOperationCommand : RavenCommand
     {
         private readonly long _id;
 
@@ -25,13 +21,5 @@ namespace Raven.Client.Documents.Commands
                 Method = HttpMethod.Post
             };
         }
-
-        public override void SetResponse(BlittableJsonReaderObject response, bool fromCache)
-        {
-            Result = true;
-        }
-
-        public override bool IsReadRequest => true;
-    
     }
 }

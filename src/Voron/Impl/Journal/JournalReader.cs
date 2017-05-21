@@ -3,17 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using Sparrow.Compression;
-using Sparrow.Platform.Win32;
 using Sparrow.Utils;
-using Voron.Data;
 using Voron.Global;
 using Voron.Impl.Paging;
 
 namespace Voron.Impl.Journal
 {
-    public unsafe class JournalReader : IPagerLevelTransactionState
+    public sealed unsafe class JournalReader : IPagerLevelTransactionState
     {
         private readonly AbstractPager _journalPager;
         private readonly AbstractPager _dataPager;
@@ -195,7 +192,7 @@ namespace Voron.Impl.Journal
             fixed (byte* mk = options.MasterKey)
             fixed (byte* ctx = Sodium.Context)
             {
-                if (Sodium.crypto_kdf_derive_from_key(subKey, 32, num, ctx, mk) != 0)
+                if (Sodium.crypto_kdf_derive_from_key(subKey, (UIntPtr)32, (ulong)num, ctx, mk) != 0)
                     throw new InvalidOperationException("Unable to generate derived key");
             }
 

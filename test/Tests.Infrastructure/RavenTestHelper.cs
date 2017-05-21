@@ -10,6 +10,7 @@ using Voron.Platform.Posix;
 using Sparrow;
 using Sparrow.Collections;
 using Sparrow.Platform;
+using Sparrow.Utils;
 
 namespace FastTests
 {
@@ -17,7 +18,7 @@ namespace FastTests
     {
         public static ParallelOptions DefaultParallelOptions = new ParallelOptions
         {
-            MaxDegreeOfParallelism = Environment.ProcessorCount * 2
+            MaxDegreeOfParallelism = ProcessorInfo.ProcessorCount * 2
         };
 
         private static int _pathCount;
@@ -43,33 +44,7 @@ namespace FastTests
             foreach (var pathToDelete in localPathsToDelete)
             {
                 pathsToDelete.TryRemove(pathToDelete);
-
                 exceptionAggregator.Execute(() => ClearDatabaseDirectory(pathToDelete));
-
-                if (File.Exists(pathToDelete))
-                {
-                    exceptionAggregator.Execute(() =>
-                    {
-                        throw new IOException(string.Format("We tried to delete the '{0}' directory, but failed because it is a file.\r\n{1}", pathToDelete, WhoIsLocking.ThisFile(pathToDelete)));
-                    });
-                }
-                else if (Directory.Exists(pathToDelete))
-                {
-                    exceptionAggregator.Execute(() =>
-                    {
-                        string filePath;
-                        try
-                        {
-                            filePath = Directory.GetFiles(pathToDelete, "*", SearchOption.AllDirectories).FirstOrDefault() ?? pathToDelete;
-                        }
-                        catch (Exception)
-                        {
-                            filePath = pathToDelete;
-                        }
-
-                        throw new IOException(string.Format("We tried to delete the '{0}' directory.\r\n{1}", pathToDelete, WhoIsLocking.ThisFile(filePath)));
-                    });
-                }
             }
         }
 
@@ -93,7 +68,7 @@ namespace FastTests
                     GC.WaitForPendingFinalizers();
                     isRetry = true;
 
-                    Thread.Sleep(2500);
+                    Thread.Sleep(200);
                 }
             }
         }

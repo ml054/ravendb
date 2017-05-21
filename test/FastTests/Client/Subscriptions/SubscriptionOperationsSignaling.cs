@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using FastTests.Server.Documents.Notifications;
 using Raven.Client.Documents.Subscriptions;
@@ -11,14 +12,14 @@ namespace FastTests.Client.Subscriptions
 {
     public class SubscriptionOperationsSignaling : RavenTestBase
     {
-        private readonly TimeSpan _reasonableWaitTime = TimeSpan.FromSeconds(60);
+        private readonly TimeSpan _reasonableWaitTime = Debugger.IsAttached ? TimeSpan.FromMinutes(15) : TimeSpan.FromSeconds(60);
 
         [Fact]
         public void WaitOnSubscriptionTaskWhenSubscriptionIsOvertaken()
         {
             using (var store = GetDocumentStore())
             {
-                var subscriptionCreationParams = new SubscriptionCreationParams<User>
+                var subscriptionCreationParams = new SubscriptionCreationOptions<User>
                 {
                     Criteria = new SubscriptionCriteria<User>()
                 };
@@ -67,7 +68,7 @@ namespace FastTests.Client.Subscriptions
         {
             using (var store = GetDocumentStore())
             {
-                var subscriptionCreationParams = new SubscriptionCreationParams<User>
+                var subscriptionCreationParams = new SubscriptionCreationOptions<User>
                 {
                     Criteria = new SubscriptionCriteria<User>()
                 };
@@ -112,7 +113,7 @@ namespace FastTests.Client.Subscriptions
         {
             using (var store = GetDocumentStore())
             {
-                var subscriptionCreationParams = new SubscriptionCreationParams<User>
+                var subscriptionCreationParams = new SubscriptionCreationOptions<User>
                 {
                     Criteria = new SubscriptionCriteria<User>()
                 };
@@ -152,7 +153,7 @@ namespace FastTests.Client.Subscriptions
         {
             using (var store = GetDocumentStore())
             {
-                var subscriptionCriteria = new SubscriptionCreationParams<User>
+                var subscriptionCriteria = new SubscriptionCreationOptions<User>
                 {
                     Criteria = new SubscriptionCriteria<User>()
                 };
@@ -194,7 +195,7 @@ namespace FastTests.Client.Subscriptions
         {
             using (var store = GetDocumentStore())
             {
-                var subscriptionCreationParams = new SubscriptionCreationParams<User>
+                var subscriptionCreationParams = new SubscriptionCreationOptions<User>
                 {
                     Criteria = new SubscriptionCriteria<User>()
                 };
@@ -228,7 +229,7 @@ namespace FastTests.Client.Subscriptions
         {
             using (var store = GetDocumentStore())
             {
-                var subscriptionCreationParams = new SubscriptionCreationParams<User>
+                var subscriptionCreationParams = new SubscriptionCreationOptions<User>
                 {
                     Criteria = new SubscriptionCriteria<User>()
                 };

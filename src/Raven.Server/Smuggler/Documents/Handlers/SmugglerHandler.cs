@@ -31,6 +31,7 @@ using Raven.Server.ServerWide.Context;
 using Raven.Server.Smuggler.Documents.Data;
 using Sparrow.Json;
 using Sparrow.Json.Parsing;
+using Sparrow.Utils;
 
 namespace Raven.Server.Smuggler.Documents.Handlers
 {
@@ -181,7 +182,7 @@ namespace Raven.Server.Smuggler.Documents.Handlers
         private async Task BulkImport(BlockingCollection<Func<Task<Stream>>> files, string directory)
         {
             var results = new ConcurrentQueue<SmugglerResult>();
-            var tasks = new Task[Math.Max(1, Environment.ProcessorCount / 2)];
+            var tasks = new Task[Math.Max(1, ProcessorInfo.ProcessorCount / 2)];
 
             var finalResult = new SmugglerResult();
 
@@ -226,12 +227,12 @@ namespace Raven.Server.Smuggler.Documents.Handlers
                 finalResult.Documents.ReadCount += importResult.Documents.ReadCount;
                 finalResult.Documents.ErroredCount += importResult.Documents.ErroredCount;
                 finalResult.Documents.LastEtag = Math.Max(finalResult.Documents.LastEtag, importResult.Documents.LastEtag);
-                finalResult.Documents.Attachemnts = importResult.Documents.Attachemnts;
+                finalResult.Documents.Attachments = importResult.Documents.Attachments;
 
                 finalResult.RevisionDocuments.ReadCount += importResult.RevisionDocuments.ReadCount;
                 finalResult.RevisionDocuments.ErroredCount += importResult.RevisionDocuments.ErroredCount;
                 finalResult.RevisionDocuments.LastEtag = Math.Max(finalResult.RevisionDocuments.LastEtag, importResult.RevisionDocuments.LastEtag);
-                finalResult.RevisionDocuments.Attachemnts = importResult.RevisionDocuments.Attachemnts;
+                finalResult.RevisionDocuments.Attachments = importResult.RevisionDocuments.Attachments;
 
                 finalResult.Identities.ReadCount += importResult.Identities.ReadCount;
                 finalResult.Identities.ErroredCount += importResult.Identities.ErroredCount;

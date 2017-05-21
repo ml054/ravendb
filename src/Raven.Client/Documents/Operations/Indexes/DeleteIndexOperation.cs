@@ -13,27 +13,21 @@ namespace Raven.Client.Documents.Operations.Indexes
 
         public DeleteIndexOperation(string indexName)
         {
-            if (indexName == null)
-                throw new ArgumentNullException(nameof(indexName));
-
-            _indexName = indexName;
+            _indexName = indexName ?? throw new ArgumentNullException(nameof(indexName));
         }
 
-        public RavenCommand<object> GetCommand(DocumentConventions conventions, JsonOperationContext context)
+        public RavenCommand GetCommand(DocumentConventions conventions, JsonOperationContext context)
         {
             return new DeleteIndexCommand(_indexName);
         }
 
-        private class DeleteIndexCommand : RavenCommand<object>
+        private class DeleteIndexCommand : RavenCommand
         {
             private readonly string _indexName;
 
             public DeleteIndexCommand(string indexName)
             {
-                if (indexName == null)
-                    throw new ArgumentNullException(nameof(indexName));
-
-                _indexName = indexName;
+                _indexName = indexName ?? throw new ArgumentNullException(nameof(indexName));
             }
 
             public override HttpRequestMessage CreateRequest(ServerNode node, out string url)
@@ -45,12 +39,6 @@ namespace Raven.Client.Documents.Operations.Indexes
                     Method = HttpMethods.Delete
                 };
             }
-
-            public override void SetResponse(BlittableJsonReaderObject response, bool fromCache)
-            {
-            }
-
-            public override bool IsReadRequest => false;
         }
     }
 }

@@ -5,17 +5,16 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Sparrow.Collections.LockFree;
 
 namespace Sparrow.Utils
 {
     public static class TimeoutManager
     {
-        private static readonly ConcurrentDictionary<uint, TimerTaskHolder> Values 
-            = new ConcurrentDictionary<uint, TimerTaskHolder>(NumericEqualityComparer.Instance);
+        private static readonly ConcurrentDictionary<uint, TimerTaskHolder> Values = new ConcurrentDictionary<uint, TimerTaskHolder>();
 
         private class TimerTaskHolder  : IDisposable
         {
@@ -62,6 +61,9 @@ namespace Sparrow.Utils
 
         public static async Task WaitFor(uint duration)
         {
+            if (duration == 0)
+                return;
+
             var mod = duration % 50;
             if (mod != 0)
                 duration += 50 - mod;
@@ -95,8 +97,16 @@ namespace Sparrow.Utils
             return value;
         }
 
+        public static Task WaitFor(TimeSpan duration, CancellationToken token)
+        {
+            return WaitFor((uint)duration.TotalMilliseconds, token);
+        }
+
         public static async Task WaitFor(uint duration, CancellationToken token)
         {
+            if (duration == 0)
+                return;
+
             token.ThrowIfCancellationRequested();
             // ReSharper disable once MethodSupportsCancellation
             var task = WaitFor(duration);

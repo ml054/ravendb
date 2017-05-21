@@ -7,12 +7,12 @@ namespace Raven.Client.Documents.Operations.Indexes
 {
     public class StopIndexingOperation : IAdminOperation
     {
-        public RavenCommand<object> GetCommand(DocumentConventions conventions, JsonOperationContext context)
+        public RavenCommand GetCommand(DocumentConventions conventions, JsonOperationContext context)
         {
             return new StopIndexingCommand();
         }
 
-        private class StopIndexingCommand : RavenCommand<object>
+        private class StopIndexingCommand : RavenCommand
         {
             public override HttpRequestMessage CreateRequest(ServerNode node, out string url)
             {
@@ -23,12 +23,6 @@ namespace Raven.Client.Documents.Operations.Indexes
                     Method = HttpMethod.Post
                 };
             }
-
-            public override void SetResponse(BlittableJsonReaderObject response, bool fromCache)
-            {
-            }
-
-            public override bool IsReadRequest => false;
         }
     }
 }

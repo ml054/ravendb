@@ -17,6 +17,7 @@ using Raven.Client.Documents.Replication;
 using Raven.Client.Documents.Replication.Messages;
 using Raven.Client.Extensions;
 using Raven.Server.Documents.TcpHandlers;
+using Sparrow.Utils;
 using Voron;
 using ThreadState = System.Threading.ThreadState;
 
@@ -77,6 +78,8 @@ namespace Raven.Server.Documents.Replication
             return _lastStats;
         }
 
+        private string IncomingReplicationThreadName => $"Incoming replication {FromToString}";
+
         public void Start()
         {
             if (_incomingThread != null)
@@ -85,7 +88,7 @@ namespace Raven.Server.Documents.Replication
             var result = Interlocked.CompareExchange(ref _incomingThread, new Thread(ReceiveReplicationBatches)
             {
                 IsBackground = true,
-                Name = $"Incoming replication {FromToString}"
+                Name = IncomingReplicationThreadName
             }, null);
 
             if (result != null)
@@ -112,6 +115,7 @@ namespace Raven.Server.Documents.Replication
 
         private void ReceiveReplicationBatches()
         {
+            NativeMemory.EnsureRegistered();
             try
             {
                 using (_connectionOptions.ConnectionProcessingInProgress("Replication"))
@@ -309,7 +313,7 @@ namespace Raven.Server.Documents.Replication
             OnDocumentsReceived(this);
         }
 
-        private void ReadExactly(long size, FileStream file)
+        private void ReadExactly(long size, Stream file)
         {
             while (size > 0)
             {
@@ -562,7 +566,7 @@ namespace Raven.Server.Documents.Replication
             public Slice Base64Hash;
             public ByteStringContext.InternalScope Base64HashDispose;
 
-            public FileStream File;
+            public Stream File;
             public AttachmentsStorage.ReleaseTempFile FileDispose;
 
             public void Dispose()

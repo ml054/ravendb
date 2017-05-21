@@ -18,12 +18,12 @@ namespace Raven.Client.Documents.Operations.Indexes
             _mode = mode;
         }
 
-        public RavenCommand<object> GetCommand(DocumentConventions conventions, JsonOperationContext context)
+        public RavenCommand GetCommand(DocumentConventions conventions, JsonOperationContext context)
         {
             return new SetIndexLockCommand(_indexName, _mode);
         }
 
-        private class SetIndexLockCommand : RavenCommand<object>
+        private class SetIndexLockCommand : RavenCommand
         {
             private readonly string _indexName;
             private readonly IndexLockMode _mode;
@@ -43,12 +43,6 @@ namespace Raven.Client.Documents.Operations.Indexes
                     Method = HttpMethod.Post
                 };
             }
-
-            public override void SetResponse(BlittableJsonReaderObject response, bool fromCache)
-            {
-            }
-
-            public override bool IsReadRequest => false;
         }
     }
 }

@@ -17,13 +17,16 @@ import getDatabasesCommand = require("commands/resources/getDatabasesCommand");
 import getDatabaseCommand = require("commands/resources/getDatabaseCommand");
 import databaseInfo = require("models/resources/info/databaseInfo");
 import messagePublisher = require("common/messagePublisher");
+import clusterTopologyManager = require("common/shell/clusterTopologyManager");
 
 class databases extends viewModelBase {
 
     databases = ko.observable<databasesInfo>();
+    clusterManager = clusterTopologyManager.default;
 
     filters = {
-        searchText: ko.observable<string>()
+        searchText: ko.observable<string>(),
+        localOnly: ko.observable<string>()
     }
 
     selectionState: KnockoutComputed<checkbox>;
@@ -50,10 +53,11 @@ class databases extends viewModelBase {
         const filters = this.filters;
 
         filters.searchText.throttle(200).subscribe(() => this.filterDatabases());
+        filters.localOnly.subscribe(() => this.filterDatabases());
 
         this.selectionState = ko.pureComputed<checkbox>(() => {
             const databases = this.databases().sortedDatabases().filter(x => !x.filteredOut());
-            var selectedCount = this.selectedDatabases().length;
+            const selectedCount = this.selectedDatabases().length;
             if (databases.length && selectedCount === databases.length)
                 return checkbox.Checked;
             if (selectedCount > 0)
@@ -76,7 +80,8 @@ class databases extends viewModelBase {
         this.addNotification(this.changesContext.serverNotifications().watchAllDatabaseChanges((e: Raven.Server.NotificationCenter.Notifications.Server.DatabaseChanged) => this.fetchDatabase(e)));
         this.addNotification(this.changesContext.serverNotifications().watchReconnect(() => this.fetchDatabases()));
 
-        return this.fetchDatabases();
+        return $.when<any>(this.fetchDatabases(), clusterTopologyManager.default.forceRefresh()); //TODO: remove me - temporary refresh cluster topology each time we enter this view 
+        //TODO: revert me: return this.fetchDatabases();
     }
 
     attached() {
@@ -121,12 +126,19 @@ class databases extends viewModelBase {
         const filters = this.filters;
         let searchText = filters.searchText();
         const hasSearchText = !!searchText;
+        const localOnly = filters.localOnly();
+        const nodeTag = this.clusterManager.nodeTag();
 
         if (hasSearchText) {
             searchText = searchText.toLowerCase();
         }
 
-        const matchesFilters = (rs: databaseInfo) => !hasSearchText || rs.name.toLowerCase().indexOf(searchText) >= 0;
+        const matchesFilters = (rs: databaseInfo) => {
+            const matchesText = !hasSearchText || rs.name.toLowerCase().indexOf(searchText) >= 0;
+            const matchesLocal = !localOnly || _.some(rs.nodes(), x => x.tag() === nodeTag && (x.type() === "Member" || x.type() === "Promotable"));
+
+            return matchesText && matchesLocal;
+        };
 
         const databases = this.databases();
         databases.sortedDatabases().forEach(db => {
@@ -139,9 +151,41 @@ class databases extends viewModelBase {
         });
     }
 
-    allDocumentsUrl(dbInfo: databaseInfo): string {
+    createManageDbGroupUrlObsevable(dbInfo: databaseInfo): KnockoutComputed<string> {
+        const isLocalObservable = this.createIsLocalDatabaseObservable(dbInfo.name);
         const db = dbInfo.asDatabase();
-        return appUrl.forDocuments(null, db);
+
+        return ko.pureComputed(() => {
+            const isLocal = isLocalObservable();
+            const link = appUrl.forManageDatabaseGroup(db);
+            if (isLocal) {
+                return link;
+            } else {
+                return databases.toExternalUrl(dbInfo, link);
+            }
+        });
+    }
+
+    createAllDocumentsUrlObservable(dbInfo: databaseInfo): KnockoutComputed<string> {
+        const isLocalObservable = this.createIsLocalDatabaseObservable(dbInfo.name);
+        const db = dbInfo.asDatabase();
+
+        return ko.pureComputed(() => {
+            const isLocal = isLocalObservable();
+            const link = appUrl.forDocuments(null, db);
+            if (isLocal) {
+                return link;
+            } else {
+                return databases.toExternalUrl(dbInfo, link);
+            }
+        });
+    }
+
+    private static toExternalUrl(dbInfo: databaseInfo, url: string) {
+        // we have to redirect to different node, let's find first member where selected database exists
+        const firstMember = dbInfo.nodes().find(x => x.type() === "Member");
+        const serverUrl = firstMember.serverUrl();
+        return appUrl.toExternalUrl(serverUrl, url);
     }
 
     indexErrorsUrl(dbInfo: databaseInfo): string {
@@ -162,6 +206,11 @@ class databases extends viewModelBase {
     periodicExportUrl(dbInfo: databaseInfo): string {
         const db = dbInfo.asDatabase();
         return appUrl.forPeriodicExport(db);
+    }
+
+    manageDatabaseGroupUrl(dbInfo: databaseInfo): string {
+        const db = dbInfo.asDatabase();
+        return appUrl.forManageDatabaseGroup(db);
     }
 
     private getSelectedDatabases() {
@@ -268,7 +317,7 @@ class databases extends viewModelBase {
                     new disableDatabaseToggleCommand(selectedDatabases, !enableAll)
                         .execute()
                         .done(disableResult => {
-                            disableResult.forEach(x => this.onDatabaseDisabled(x));
+                            disableResult.Status.forEach(x => this.onDatabaseDisabled(x));
                         })
                         .always(() => this.spinners.globalToggleDisable(false));
                 }
@@ -291,7 +340,7 @@ class databases extends viewModelBase {
                 new disableDatabaseToggleCommand([rs], disable)
                     .execute()
                     .done(disableResult => {
-                        disableResult.forEach(x => this.onDatabaseDisabled(x));
+                        disableResult.Status.forEach(x => this.onDatabaseDisabled(x));
                     })
                     .always(() => rsInfo.inProgressAction(null));
             }
@@ -381,6 +430,24 @@ class databases extends viewModelBase {
 
     createNewDatabase() {
         this.newDatabase();
+    }
+
+    createIsLocalDatabaseObservable(dbName: string) {
+        return ko.pureComputed(() => {
+            const nodeTag = this.clusterManager.nodeTag();
+            const dbInfo = this.databases().getByName(dbName);
+
+            const nodeTags = new Set<string>();
+            const clusterNodes = dbInfo.nodes();
+
+            // using foreach to register knockout dependencies
+            clusterNodes.forEach(n => {
+                if (n.type() === "Member" || n.type() === "Promotable") {
+                    nodeTags.add(n.tag());
+                }
+            });
+            return nodeTags.has(nodeTag);
+        });
     }
 
     /* TODO: cluster related work

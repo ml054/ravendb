@@ -6,9 +6,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using Raven.Client.Documents.Identity;
 using Raven.Client.Extensions;
 using Sparrow;
 using Sparrow.Json.Parsing;
@@ -151,7 +148,7 @@ namespace Raven.Client.Documents.Replication
 
         protected static ulong CalculateStringHash(string s)
         {
-            return string.IsNullOrEmpty(s) ? 0 : Hashing.XXHash64.Calculate(s, Encoding.UTF8);
+            return string.IsNullOrEmpty(s) ? 0 : Hashing.XXHash64.Calculate(s, Encodings.Utf8);
         }
 
         public virtual DynamicJsonValue ToJson()

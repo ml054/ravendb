@@ -14,29 +14,23 @@ namespace Raven.Client.Documents.Operations.Transformers
 
         public SetTransformerLockOperation(string transformerName, TransformerLockMode mode)
         {
-            if (transformerName == null)
-                throw new ArgumentNullException(nameof(transformerName));
-
-            _transformerName = transformerName;
+            _transformerName = transformerName ?? throw new ArgumentNullException(nameof(transformerName));
             _mode = mode;
         }
 
-        public RavenCommand<object> GetCommand(DocumentConventions conventions, JsonOperationContext context)
+        public RavenCommand GetCommand(DocumentConventions conventions, JsonOperationContext context)
         {
             return new SetTransformerLockCommand(_transformerName, _mode);
         }
 
-        private class SetTransformerLockCommand : RavenCommand<object>
+        private class SetTransformerLockCommand : RavenCommand
         {
             private readonly string _transformerName;
             private readonly TransformerLockMode _mode;
 
             public SetTransformerLockCommand(string transformerName, TransformerLockMode mode)
             {
-                if (transformerName == null)
-                    throw new ArgumentNullException(nameof(transformerName));
-
-                _transformerName = transformerName;
+                _transformerName = transformerName ?? throw new ArgumentNullException(nameof(transformerName));
                 _mode = mode;
             }
 
@@ -49,12 +43,6 @@ namespace Raven.Client.Documents.Operations.Transformers
                     Method = HttpMethod.Post
                 };
             }
-
-            public override void SetResponse(BlittableJsonReaderObject response, bool fromCache)
-            {
-            }
-
-            public override bool IsReadRequest => false;
         }
     }
 }

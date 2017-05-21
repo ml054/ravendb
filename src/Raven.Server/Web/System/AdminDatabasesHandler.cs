@@ -14,6 +14,7 @@ using Raven.Client.Documents;
 using Raven.Client.Documents.Conventions;
 using Raven.Client.Documents.Session;
 using Raven.Client.Exceptions;
+using Raven.Client.Server;
 using Raven.Client.Server.Commands;
 using Raven.Server.Documents;
 using Raven.Server.Documents.Replication;
@@ -159,9 +160,9 @@ namespace Raven.Server.Web.System
                 {
                     context.Write(writer, new DynamicJsonValue
                     {
-                        ["ETag"] = index,
-                        ["Key"] = name,
-                        [nameof(DatabaseRecord.Topology)] = databaseRecord.Topology.ToJson()
+                        [nameof(DatabasePutResult.ETag)] = index,
+                        [nameof(DatabasePutResult.Key)] = name,
+                        [nameof(DatabasePutResult.Topology)] = databaseRecord.Topology.ToJson()
                     });
                     writer.Flush();
                 }
@@ -195,7 +196,6 @@ namespace Raven.Server.Web.System
                 {
                     throw new BadRequestException("Database document validation failed.", e);
                 }
-                var factor = Math.Max(1, GetIntValueQueryString("replication-factor", required: false) ?? 0);
 
                 DatabaseTopology topology;
                 if (document.Topology?.Members?.Count > 0)
@@ -205,6 +205,7 @@ namespace Raven.Server.Web.System
                 }
                 else
                 {
+                    var factor = Math.Max(1, GetIntValueQueryString("replication-factor", required: false) ?? 0);
                     topology = AssignNodesToDatabase(context, factor, name, json);
                 }
 
@@ -220,9 +221,9 @@ namespace Raven.Server.Web.System
                 {
                     context.Write(writer, new DynamicJsonValue
                     {
-                        ["ETag"] = index,
-                        ["Key"] = name,
-                        [nameof(DatabaseRecord.Topology)] = topology.ToJson(),
+                        [nameof(DatabasePutResult.ETag)] = index,
+                        [nameof(DatabasePutResult.Key)] = name,
+                        [nameof(DatabasePutResult.Topology)] = topology.ToJson()
                     });
                     writer.Flush();
                 }
@@ -369,9 +370,9 @@ namespace Raven.Server.Web.System
                     {
                         context.Write(writer, new DynamicJsonValue
                         {
-                            ["ETag"] = index,
-                            ["Key"] = name,
-                            [nameof(DatabaseRecord.Topology)] = databaseRecord.Topology.ToJson()
+                            [nameof(DatabasePutResult.ETag)] = index,
+                            [nameof(DatabasePutResult.Key)] = name,
+                            [nameof(DatabasePutResult.Topology)] = databaseRecord.Topology.ToJson()
                         });
                         writer.Flush();
                     }
@@ -481,10 +482,12 @@ namespace Raven.Server.Web.System
         {
             var names = GetStringValuesQueryString("name");
 
-            TransactionOperationContext context;
-            using (ServerStore.ContextPool.AllocateOperationContext(out context))
+            using (ServerStore.ContextPool.AllocateOperationContext(out TransactionOperationContext context))
             using (var writer = new BlittableJsonTextWriter(context, ResponseBodyStream()))
             {
+                writer.WriteStartObject();
+                writer.WritePropertyName("Status");
+
                 writer.WriteStartArray();
                 var first = true;
                 foreach (var name in names)
@@ -540,8 +543,17 @@ namespace Raven.Server.Web.System
                 }
 
                 writer.WriteEndArray();
+
+                writer.WriteEndObject();
             }
         }
+    }
+
+    public class DatabasePutResult
+    {
+        public long ETag { get; set; }
+        public string Key { get; set; }
+        public DatabaseTopology Topology { get; set; }
     }
 
     public class DatabaseDeleteResult

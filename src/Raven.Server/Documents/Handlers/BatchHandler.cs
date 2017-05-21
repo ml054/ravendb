@@ -214,7 +214,7 @@ namespace Raven.Server.Documents.Handlers
         {
             var indexesToCheck = new List<Index>();
 
-            var specifiedIndexesQueryString = HttpContext.Request.Query["waitForSpecificIndexs"];
+            var specifiedIndexesQueryString = HttpContext.Request.Query["waitForSpecificIndex"];
 
             if (specifiedIndexesQueryString.Count > 0)
             {
@@ -408,7 +408,7 @@ namespace Raven.Server.Documents.Handlers
             {
                 public string Hash;
 
-                public FileStream File;
+                public Stream File;
                 public AttachmentsStorage.ReleaseTempFile FileDispose;
 
                 public void Dispose()

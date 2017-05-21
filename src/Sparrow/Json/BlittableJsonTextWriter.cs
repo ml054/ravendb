@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text;
 using Sparrow.Extensions;
 
 namespace Sparrow.Json
@@ -44,7 +42,7 @@ namespace Sparrow.Json
 
         public override string ToString()
         {
-            return Encoding.UTF8.GetString(_pinnedBuffer.Buffer.Array, _pinnedBuffer.Buffer.Offset, _pos);
+            return Encodings.Utf8.GetString(_pinnedBuffer.Buffer.Array, _pinnedBuffer.Buffer.Offset, _pos);
         }
 
         public void WriteObjectOrdered(BlittableJsonReaderObject obj)
@@ -524,7 +522,5 @@ namespace Sparrow.Json
                 Flush();
             }
         }
-
-
     }
 }

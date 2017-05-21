@@ -23,6 +23,10 @@ interface resultsDto<T> {
     Results: T[];
 }
 
+interface statusDto<T> {
+    Status: T[];
+}
+
 interface resultsWithTotalCountDto<T> extends resultsDto<T> {
     TotalResults: number;
 }
@@ -140,10 +144,10 @@ interface databaseCreatedEventArgs {
     name: string;
 }
 
-interface availableBundle {
-    displayName: string;
+interface availableConfigurationSection {
     name: string;
-    hasAdvancedConfiguration: boolean;
+    alwaysEnabled: boolean;
+    enabled: KnockoutObservable<boolean>;
     validationGroup?: KnockoutValidationGroup;
 }
 

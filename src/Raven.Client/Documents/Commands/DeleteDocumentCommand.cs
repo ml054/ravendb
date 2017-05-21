@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Net.Http;
 using Raven.Client.Http;
-using Sparrow.Json;
 
 namespace Raven.Client.Documents.Commands
 {
-    public class DeleteDocumentCommand : RavenCommand<object>
+    public class DeleteDocumentCommand : RavenCommand
     {
         private readonly string _id;
         private readonly long? _etag;
 
         public DeleteDocumentCommand(string id, long? etag)
         {
-            if (id == null)
-                throw new ArgumentNullException(nameof(id));
-
-            _id = id;
+            _id = id ?? throw new ArgumentNullException(nameof(id));
             _etag = etag;
         }
 
@@ -32,11 +28,5 @@ namespace Raven.Client.Documents.Commands
             AddEtagIfNotNull(_etag, request);
             return request;
         }
-
-        public override void SetResponse(BlittableJsonReaderObject response, bool fromCache)
-        {
-        }
-
-        public override bool IsReadRequest => false;
     }
 }

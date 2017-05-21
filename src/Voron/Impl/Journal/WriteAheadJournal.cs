@@ -269,7 +269,7 @@ namespace Voron.Impl.Journal
         }
 
 
-        public Page? ReadPage(LowLevelTransaction tx, long pageNumber, Dictionary<int, PagerState> scratchPagerStates, LowLevelTransaction.PagerRef pagerRef)
+        public Page? ReadPage(LowLevelTransaction tx, long pageNumber, Dictionary<int, PagerState> scratchPagerStates)
         {
             // read transactions have to read from journal snapshots
             if (tx.Flags == TransactionFlags.Read)
@@ -280,7 +280,7 @@ namespace Voron.Impl.Journal
                     PagePosition value;
                     if (tx.JournalSnapshots[i].PageTranslationTable.TryGetValue(tx, pageNumber, out value))
                     {
-                        var page = _env.ScratchBufferPool.ReadPage(tx, value.ScratchNumber, value.ScratchPos, scratchPagerStates[value.ScratchNumber], pagerRef);
+                        var page = _env.ScratchBufferPool.ReadPage(tx, value.ScratchNumber, value.ScratchPos, scratchPagerStates[value.ScratchNumber]);
 
                         Debug.Assert(page.PageNumber == pageNumber);
 
@@ -298,7 +298,7 @@ namespace Voron.Impl.Journal
                 PagePosition value;
                 if (files[i].PageTranslationTable.TryGetValue(tx, pageNumber, out value))
                 {
-                    var page = _env.ScratchBufferPool.ReadPage(tx, value.ScratchNumber, value.ScratchPos, pagerRef: pagerRef);
+                    var page = _env.ScratchBufferPool.ReadPage(tx, value.ScratchNumber, value.ScratchPos, null);
 
                     Debug.Assert(page.PageNumber == pageNumber);
 
@@ -575,12 +575,18 @@ namespace Voron.Impl.Journal
                     var unusedJournals = GetUnusedJournalFiles(jrnls, lastProcessedJournal, lastFlushedTransactionId);
 
                     var needImmediateFsync =
-
-                        Interlocked.Exchange(ref _forceDataSync, 0) != 0 ||
-                        _totalWrittenButUnsyncedBytes > 32 * Constants.Size.Megabyte;
+                        _pendingSync.IsCompleted &&
+                        (Interlocked.Exchange(ref _forceDataSync, 0) != 0 ||
+                         _totalWrittenButUnsyncedBytes > 32 * Constants.Size.Megabyte);
 
                     if (needImmediateFsync)
                     {
+                        // will never wait, we ensure that we have completed the task
+                        // we call Wait() here to ensure that if there was an error in 
+                        // the previous sync, we'll propogate it out and mark the env
+                        // as catastrophic failure.
+                        _pendingSync.Wait(token); 
+                        token.ThrowIfCancellationRequested();
                         var operation = new SyncOperation(this);
                         operation.GatherInformationToStartSync();
                         _pendingSync = operation.Task;
@@ -1413,13 +1419,13 @@ namespace Voron.Impl.Journal
             fixed (byte* ctx = Sodium.Context)
             {
                 var num = txHeader->TransactionId;
-                if (Sodium.crypto_kdf_derive_from_key(subKey, 32, num, ctx, mk) != 0)
+                if (Sodium.crypto_kdf_derive_from_key(subKey, (UIntPtr)32, (ulong)num, ctx, mk) != 0)
                     throw new InvalidOperationException("Unable to generate derived key");
             }
 
             var npub = fullTxBuffer + TransactionHeader.SizeOf - macLen - sizeof(long);
             if (*(long*)npub == 0)
-                Sodium.randombytes_buf(npub, sizeof(long));
+                Sodium.randombytes_buf(npub, (UIntPtr)sizeof(long));
             else
                 (*(long*)npub)++;
 

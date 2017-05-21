@@ -34,7 +34,7 @@
     font-size: 120%;
 
     &+span {
-        margin-left: 9px;
+        margin-left: @grid-gutter-width/4;
     }
 
     &.disabled {
@@ -367,8 +367,44 @@
 
 // -----------------------------------------------
 
+.icon-indexing-progess:before {
+    content: "\e9bf";
+}
+
+.icon-manage-ongoing-tasks:before {
+    content: "\e9c7";
+}
+
+.icon-icon-backup-snapshot:before {
+    content: "\e9c8";
+}
+
+.icon-home:before {
+    content: "\e9c9";
+}
+
 .icon-logo:before {
     content: "\e99a";
+}
+
+.icon-member:before {
+    content: "\e9bd";
+}
+
+.icon-cluster:before {
+    content: "\e9c6";
+}
+
+.icon-promotable:before {
+    content: "\e9be";
+}
+
+.icon-watcher:before {
+    content: "\e9c4";
+}
+
+.icon-database-home:before {
+    content: "\e9c5";
 }
 
 .icon-arrow-dashed:before {
@@ -397,6 +433,10 @@
 
 .icon-sql-etl:before {
     content: "\e9b9";
+}
+
+.icon-print:before {
+    content: "\e9bc";
 }
 
 .icon-clock:before {
@@ -558,7 +598,7 @@
   content: "\e955";
 }
 .icon-server-topology:before {
-  content: "\e956";
+    content: "\e956";
 }
 .icon-traffic-watch:before {
   content: "\e957";
@@ -635,8 +675,8 @@
 .icon-web-socket:before {
   content: "\e972";
 }
-.icon-topology:before {
-  content: "\e973";
+.icon-topology:before, .icon-dbgroup:before {
+    content: "\e973";
 }
 .icon-config:before {
   content: "\e974";

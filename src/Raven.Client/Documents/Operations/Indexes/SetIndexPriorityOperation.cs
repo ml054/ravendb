@@ -14,29 +14,23 @@ namespace Raven.Client.Documents.Operations.Indexes
 
         public SetIndexPriorityOperation(string indexName, IndexPriority priority)
         {
-            if (indexName == null)
-                throw new ArgumentNullException(nameof(indexName));
-
-            _indexName = indexName;
+            _indexName = indexName ?? throw new ArgumentNullException(nameof(indexName));
             _priority = priority;
         }
 
-        public RavenCommand<object> GetCommand(DocumentConventions conventions, JsonOperationContext context)
+        public RavenCommand GetCommand(DocumentConventions conventions, JsonOperationContext context)
         {
             return new SetIndexPriorityCommand(_indexName, _priority);
         }
 
-        private class SetIndexPriorityCommand : RavenCommand<object>
+        private class SetIndexPriorityCommand : RavenCommand
         {
             private readonly string _indexName;
             private readonly IndexPriority _priority;
 
             public SetIndexPriorityCommand(string indexName, IndexPriority priority)
             {
-                if (indexName == null)
-                    throw new ArgumentNullException(nameof(indexName));
-
-                _indexName = indexName;
+                _indexName = indexName ?? throw new ArgumentNullException(nameof(indexName));
                 _priority = priority;
             }
 
@@ -49,12 +43,6 @@ namespace Raven.Client.Documents.Operations.Indexes
                     Method = HttpMethod.Post
                 };
             }
-
-            public override void SetResponse(BlittableJsonReaderObject response, bool fromCache)
-            {
-            }
-
-            public override bool IsReadRequest => false;
         }
     }
 }

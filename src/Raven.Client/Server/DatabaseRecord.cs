@@ -2,16 +2,12 @@
 using System.Collections.Generic;
 using Raven.Client.Documents.Exceptions.Indexes;
 using Raven.Client.Documents.Indexes;
-using Raven.Client.Documents.Replication;
-using Raven.Client.Documents.Replication.Messages;
-using Raven.Client.Documents.Subscriptions;
 using Raven.Client.Documents.Transformers;
 using Raven.Client.Server.Expiration;
 using Raven.Client.Server.PeriodicExport;
 using Raven.Client.Server.Versioning;
 
-
-namespace Raven.Client.Documents
+namespace Raven.Client.Server
 {
     // The DatabaseRecord resides in EVERY server/node inside the cluster regardless if the db is actually within the node 
     public class DatabaseRecord
@@ -36,6 +32,9 @@ namespace Raven.Client.Documents
         public string DataDirectory;
         
         public DatabaseTopology Topology;
+
+        // public OnGoingTasks tasks;  tasks for this node..
+        // list backup.. list sub .. list etl.. list repl(watchers).. list sql
 
         public ConflictSolver ConflictSolverConfig = new ConflictSolver();
 

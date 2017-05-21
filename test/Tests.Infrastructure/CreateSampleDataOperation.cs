@@ -8,12 +8,12 @@ namespace Tests.Infrastructure
 {
     public class CreateSampleDataOperation : IAdminOperation
     {
-        public RavenCommand<object> GetCommand(DocumentConventions conventions, JsonOperationContext context)
+        public RavenCommand GetCommand(DocumentConventions conventions, JsonOperationContext context)
         {
             return new CreateSampleDataCommand();
         }
 
-        private class CreateSampleDataCommand : RavenCommand<object>
+        private class CreateSampleDataCommand : RavenCommand
         {
             public override bool IsReadRequest => false;
 
@@ -21,15 +21,10 @@ namespace Tests.Infrastructure
             {
                 url = $"{node.Url}/databases/{node.Database}/studio/sample-data";
 
-                ResponseType = RavenCommandResponseType.Object;
                 return new HttpRequestMessage
                 {
                     Method = HttpMethod.Post
                 };
-            }
-
-            public override void SetResponse(BlittableJsonReaderObject response, bool fromCache)
-            {
             }
         }
     }
