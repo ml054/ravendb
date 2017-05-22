@@ -29,7 +29,7 @@
                         <i class="icon-plus"></i>
                         <span>New database</span>
                     </button>
-                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button type="button" class="btn btn-primary dropdown-toggle" disabled="disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="caret"></span>
                         <span class="sr-only">Toggle Dropdown</span>
                     </button>
@@ -155,18 +155,12 @@
                                                 <i class="icon-play"></i> Enable indexing
                                             </a>
                                         </li>
-                                        <li>
-                                            <!--<a href="#" class="btn-upcoming" data-bind="click: $root.toggleRejectDatabaseClients.bind($root, $data)"> -->
-                                            <a href="#" class="btn-upcoming">
-                                                <i class="icon-umbrella"></i> Reject clients mode
-                                            </a>
-                                        </li>
                                     </ul>
                                 </div>
-                                <button class="btn btn-success" data-bind="click: $root.activateDatabase">
+                                <button class="btn btn-success" data-bind="click: $root.activateDatabase" title="Refresh database statistics">
                                     <i class="icon-refresh"></i>
                                 </button>
-                                <button class="btn btn-danger" data-bind="click: $root.deleteDatabase, disable: isBeingDeleted">
+                                <button class="btn btn-danger" data-bind="click: $root.deleteDatabase, disable: isBeingDeleted" title="Remove database">
                                     <i class="icon-trash"></i>
                                 </button>
                             </div>

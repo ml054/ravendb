@@ -169,9 +169,9 @@ namespace Raven.Server.Rachis
                                     {
                                         _engine.Log.Info($"FollowerAmbassador {_engine.Tag}:sending {entries.Count} entries to {_tag}"
 #if DEBUG
-                                            + $" [{string.Join(" ,", entries.Select(x => x.ToString()))}]"
+                                                         + $" [{string.Join(" ,", entries.Select(x => x.ToString()))}]"
 #endif
-                                            );
+                                        );
                                     }
                                     _connection.Send(context, appendEntries, entries);
                                     var aer = _connection.Read<AppendEntriesResponse>(context);
@@ -211,6 +211,8 @@ namespace Raven.Server.Rachis
                         {
                             _engine.Log.Info("Failed to talk to remote follower: " + _tag, e);
                         }
+                        // notify leader about an error
+                        _leader.NotifyAboutException(this,e);
                         _leader.WaitForNewEntries().Wait(_engine.ElectionTimeoutMs / 2);
                     }
                     finally

@@ -4,7 +4,6 @@ using System.Net;
 using System.Threading.Tasks;
 using Raven.Client.Documents.Conventions;
 using Raven.Client.Documents.Session;
-using Raven.Server.Extensions;
 using Raven.Server.Rachis;
 using Raven.Server.Routing;
 using Raven.Server.ServerWide.Context;
@@ -79,6 +78,7 @@ namespace Raven.Server.Documents.Handlers.Admin
                     context.Write(writer, new DynamicJsonValue
                     {
                         ["Topology"] = blit,
+                        ["Errors"] = ServerStore.GetClusterErrors(),
                         ["Leader"] = ServerStore.LeaderTag,
                         ["CurrentState"] = ServerStore.CurrentState,
                         ["NodeTag"] = nodeTag
@@ -95,6 +95,8 @@ namespace Raven.Server.Documents.Handlers.Admin
             var serverUrl = GetStringQueryString("url");
             ServerStore.EnsureNotPassive();
             await ServerStore.AddNodeToClusterAsync(serverUrl);
+
+            NoContentStatus();
         }
 
         [RavenAction("/admin/cluster/remove-node", "DELETE", "/admin/cluster/remove-node?nodeTag={nodeTag:string}")]
@@ -103,6 +105,8 @@ namespace Raven.Server.Documents.Handlers.Admin
             var serverUrl = GetStringQueryString("nodeTag");
             ServerStore.EnsureNotPassive();
             await ServerStore.RemoveFromClusterAsync(serverUrl);
+
+            NoContentStatus();
         }
     }
 }
