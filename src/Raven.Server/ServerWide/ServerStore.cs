@@ -313,7 +313,7 @@ namespace Raven.Server.ServerWide
             _engine.StateMachine.DatabaseChanged += OnDatabaseChanged;
 
             _engine.TopologyChanged += OnTopologyChanged;
-
+            _engine.NotifyOnStateChange += OnStateChange;
             _timer = new Timer(IdleOperations, null, _frequencyToCheckForIdleDatabases, TimeSpan.FromDays(7));
             _notificationsStorage.Initialize(_env, ContextPool);
             DatabaseInfoCache.Initialize(_env, ContextPool);
@@ -335,6 +335,20 @@ namespace Raven.Server.ServerWide
             }
 
             Task.Run(ClusterMaintenanceSetupTask, ServerShutdown);
+        }
+
+        private void OnStateChange(object sender, RachisConsensus.StateTransitionResult result)
+        {
+            if (result.To == RachisConsensus.State.Candidate)
+            {
+                // notify about election
+                return;
+            }
+            if (result.To == RachisConsensus.State.Follower || result.To == RachisConsensus.State.LeaderElect)
+            {
+                //notify about new leader
+                return;
+            }
         }
 
         private void OnTopologyChanged(object sender, ClusterTopology topologyJson)
@@ -662,8 +676,6 @@ namespace Raven.Server.ServerWide
                     _disposed = true;
                 }
             }
-
-
         }
 
         public void IdleOperations(object state)
@@ -762,7 +774,7 @@ namespace Raven.Server.ServerWide
                 Record = databaseRecord
             };
             return await SendToLeaderAsync(addDatabaseCommand);
-            }
+        }
 
         public void EnsureNotPassive()
         {

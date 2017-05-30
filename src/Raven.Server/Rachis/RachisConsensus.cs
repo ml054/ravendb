@@ -97,6 +97,7 @@ namespace Raven.Server.Rachis
         public string LastStateChangeReason => _lastStateChangeReason;
 
         public event EventHandler<ClusterTopology> TopologyChanged;
+        public event EventHandler<StateTransitionResult> NotifyOnStateChange;
 
         private string _tag;
         public TransactionContextPool ContextPool { get; private set; }
@@ -267,7 +268,6 @@ namespace Raven.Server.Rachis
 
         protected abstract void InitializeState(TransactionOperationContext context);
 
-
         public async Task WaitForState(State state)
         {
             while (true)
@@ -357,6 +357,14 @@ namespace Raven.Server.Rachis
             }
         }
 
+        public class StateTransitionResult
+        {
+            public State To;
+            public State From;
+            public long Term;
+            public string ChangedReason;
+        }
+
         private void SetNewStateInTx(TransactionOperationContext context, State state, IDisposable disposable, long expectedTerm, string stateChangedReason)
         {
             if (expectedTerm != CurrentTerm && expectedTerm != -1)
@@ -366,6 +374,14 @@ namespace Raven.Server.Rachis
             _currentLeader = null;
             _lastStateChangeReason = stateChangedReason;
             var toDispose = new List<IDisposable>(_disposables);
+
+            var transitionResult = new StateTransitionResult
+            {
+                ChangedReason = stateChangedReason,
+                Term = CurrentTerm,
+                To = state,
+                From = CurrentState
+            };
 
             _disposables.Clear();
 
@@ -385,8 +401,9 @@ namespace Raven.Server.Rachis
             {
                 if (tx is LowLevelTransaction llt && llt.Committed)
                 {
-                    TaskExecutor.CompleteReplaceAndExecute(ref _stateChanged, () =>
+                    TaskExecutor.CompleteReplaceAndExecute(ref _stateChanged,() =>
                     {
+                        NotifyOnStateChange?.Invoke(null, transitionResult);
                         foreach (var d in toDispose)
                         {
                             d.Dispose();
