@@ -4,7 +4,6 @@ import viewModelBase = require("viewmodels/viewModelBase");
 import getDatabaseStatsCommand = require("commands/resources/getDatabaseStatsCommand");
 import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
 import messagePublisher = require("common/messagePublisher");
-import getCollectionsStatsCommand = require("commands/database/documents/getCollectionsStatsCommand");
 import collectionsStats = require("models/database/documents/collectionsStats"); 
 import datePickerBindingHandler = require("common/bindingHelpers/datePickerBindingHandler");
 import deleteDocumentsMatchingQueryConfirm = require("viewmodels/database/query/deleteDocumentsMatchingQueryConfirm");
@@ -12,6 +11,7 @@ import deleteDocsMatchingQueryCommand = require("commands/database/documents/del
 import notificationCenter = require("common/notifications/notificationCenter");
 
 import queryCommand = require("commands/database/query/queryCommand");
+import queryCompleter = require("common/queryCompleter");
 import database = require("models/resources/database");
 import querySort = require("models/database/query/querySort");
 import collection = require("models/database/documents/collection");
@@ -36,12 +36,6 @@ import getCustomFunctionsCommand = require("commands/database/documents/getCusto
 import customFunctions = require("models/database/documents/customFunctions");
 import evaluationContextHelper = require("common/helpers/evaluationContextHelper");
 
-
-type indexItem = {
-    name: string;
-    isMapReduce: boolean;
-}
-
 type filterType = "in" | "string" | "range";
 
 type stringSearchType = "Starts With" | "Ends With" | "Contains" | "Exact";
@@ -64,9 +58,7 @@ class query extends viewModelBase {
     recentQueries = ko.observableArray<storedQueryDto>();
     allTransformers = ko.observableArray<Raven.Client.Documents.Transformers.TransformerDefinition>();
 
-    collections = ko.observableArray<collection>([]);
-    indexes = ko.observableArray<indexItem>();
-    indexFields = ko.observableArray<string>();
+    indexes = ko.observableArray<Raven.Client.Documents.Operations.IndexInformation>();
     querySummary = ko.observable<string>();
 
     criteria = ko.observable<queryCriteria>(queryCriteria.empty());
@@ -92,6 +84,7 @@ class query extends viewModelBase {
     private columnPreview = new columnPreviewPlugin<document>();
 
     hasEditableIndex: KnockoutComputed<boolean>;
+    queryCompleter: queryCompleter;
 
     editIndexUrl: KnockoutComputed<string>;
     indexPerformanceUrl: KnockoutComputed<string>;
@@ -126,6 +119,7 @@ class query extends viewModelBase {
     constructor() {
         super();
 
+        this.queryCompleter = new queryCompleter(this.activeDatabase, this.indexes);
         aceEditorBindingHandler.install();
         datePickerBindingHandler.install();
 
@@ -197,8 +191,8 @@ class query extends viewModelBase {
                 return false;
 
             const indexes = this.indexes() || [];
-            const currentIndex = indexes.find(i => i.name === indexName);
-            return !!currentIndex && currentIndex.isMapReduce;
+            const currentIndex = indexes.find(i => i.Name === indexName);
+            return !!currentIndex && currentIndex.Type === "MapReduce";
         });
 
         this.isStaticIndex = ko.pureComputed(() => {
@@ -217,7 +211,7 @@ class query extends viewModelBase {
                 return false;
 
             const indexes = this.indexes() || [];
-            const currentIndex = indexes.find(i => i.name === indexName);
+            const currentIndex = indexes.find(i => i.Name === indexName);
             return !currentIndex;
         });
 
@@ -287,7 +281,7 @@ class query extends viewModelBase {
         
         const db = this.activeDatabase();
 
-        return $.when<any>(this.fetchAllCollections(db), this.fetchAllIndexes(db), this.fetchCustomFunctions(db))
+        return $.when<any>(this.fetchAllIndexes(db), this.fetchCustomFunctions(db))
             .done(() => this.selectInitialQuery(indexNameOrRecentQueryHash));
     }
 
@@ -323,7 +317,7 @@ class query extends viewModelBase {
         const grid = this.gridController();
         grid.withEvaluationContext(this.customFunctionsContext);
 
-        const documentsProvider = new documentBasedColumnsProvider(this.activeDatabase(), grid, this.collections().map(x => x.name), {
+        const documentsProvider = new documentBasedColumnsProvider(this.activeDatabase(), grid, {
             enableInlinePreview: true
         });
 
@@ -366,14 +360,6 @@ class query extends viewModelBase {
             .done(transformers => this.allTransformers(transformers));
     }
 
-    private fetchAllCollections(db: database): JQueryPromise<collectionsStats> {
-        return new getCollectionsStatsCommand(db)
-            .execute()
-            .done((results: collectionsStats) => {
-                this.collections(results.collections);
-            });
-    }
-
     private fetchCustomFunctions(db: database): JQueryPromise<customFunctions> {
         return new getCustomFunctionsCommand(db)
             .execute()
@@ -386,19 +372,14 @@ class query extends viewModelBase {
         return new getDatabaseStatsCommand(db)
             .execute()
             .done((results: Raven.Client.Documents.Operations.DatabaseStatistics) => {
-                this.indexes(results.Indexes.map(indexDto => {
-                    return {
-                        name: indexDto.Name,
-                        isMapReduce: indexDto.Type === "MapReduce" //TODO: support for autoindexes?
-                    } as indexItem;
-                }));
+                this.indexes(results.Indexes);
             });
     }
 
     selectInitialQuery(indexNameOrRecentQueryHash: string) {
         if (!indexNameOrRecentQueryHash) {
             return;
-        } else if (this.indexes().find(i => i.name === indexNameOrRecentQueryHash) ||
+        } else if (this.indexes().find(i => i.Name === indexNameOrRecentQueryHash) ||
             indexNameOrRecentQueryHash.startsWith(queryUtil.DynamicPrefix) || 
             indexNameOrRecentQueryHash === queryUtil.AllDocs) {
             this.runQueryOnIndex(indexNameOrRecentQueryHash);
@@ -479,7 +460,6 @@ class query extends viewModelBase {
                     })
                     .done((queryResults: pagedResult<any>) => {
                         this.queryStats(queryResults.additionalResultInfo);
-                        queryUtil.fetchIndexFields(this.activeDatabase(), this.queriedIndex(), this.indexFields);
 
                         //TODO: this.indexSuggestions([]);
                         /* TODO
@@ -633,11 +613,6 @@ class query extends viewModelBase {
         }
 
         return "";
-    }
-
-    queryCompleter(editor: any, session: any, pos: AceAjax.Position, prefix: string, callback: (errors: any[], worldlist: { name: string; value: string; score: number; meta: string }[]) => void) {
-        queryUtil.queryCompleter(this.indexFields, this.queriedIndex, this.activeDatabase, editor, session, pos, prefix, callback);
-        callback([], []);
     }
 
     deleteDocsMatchingQuery() {
