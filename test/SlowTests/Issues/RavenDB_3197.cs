@@ -37,12 +37,6 @@ namespace SlowTests.Issues
                     session.Store(new SimpleUser { FirstName = "John", LastName = "Smith" });
                     session.SaveChanges();
                 }
-                var functions = LinuxTestUtils.Dos2Unix(@"exports.a = function(value) { return  b(value); };
-exports.b = function(v) { return c(v); }
-exports.c = function(v) { throw 'oops'; }
-");
-                await store.Admin.Server.SendAsync(new ModifyCustomFunctionsOperation(store.Database, functions)).ConfigureAwait(false);
-
                 var database = await GetDocumentDatabaseInstanceFor(store);
 
                 using (database.DocumentsStorage.ContextPool.AllocateOperationContext(out DocumentsOperationContext context))
