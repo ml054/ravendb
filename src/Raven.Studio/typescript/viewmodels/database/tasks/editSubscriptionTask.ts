@@ -1,3 +1,4 @@
+import app = require("durandal/app");
 import appUrl = require("common/appUrl");
 import viewModelBase = require("viewmodels/viewModelBase");
 import router = require("plugins/router");
@@ -6,7 +7,6 @@ import ongoingTaskInfoCommand = require("commands/database/tasks/getOngoingTaskI
 import saveSubscriptionTaskCommand = require("commands/database/tasks/saveSubscriptionTaskCommand");
 import testSubscriptionTaskCommand = require("commands/database/tasks/testSubscriptionTaskCommand");
 import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
-import popoverUtils = require("common/popoverUtils");
 import virtualGridController = require("widgets/virtualGrid/virtualGridController");
 import documentBasedColumnsProvider = require("widgets/virtualGrid/columns/providers/documentBasedColumnsProvider");
 import columnsSelector = require("viewmodels/partial/columnsSelector");
@@ -14,11 +14,15 @@ import documentObject = require("models/database/documents/document");
 import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
 import textColumn = require("widgets/virtualGrid/columns/textColumn");
 import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
+import subscriptionConnectionDetailsCommand = require("commands/database/tasks/getSubscriptionConnectionDetailsCommand");
+import queryCompleter = require("common/queryCompleter");
+import subscriptionRqlSyntax = require("viewmodels/database/tasks/SubscriptionRqlSyntax");
 
 type fetcherType = (skip: number, take: number) => JQueryPromise<pagedResult<documentObject>>;
 
 class editSubscriptionTask extends viewModelBase {
 
+    queryCompleter = queryCompleter.remoteCompleter(this.activeDatabase, ko.observableArray([])); // we intentionally pass empty indexes here as subscriptions works only on collections
     editedSubscription = ko.observable<ongoingTaskSubscriptionEdit>();
     isAddingNewSubscriptionTask = ko.observable<boolean>(true);
 
@@ -26,10 +30,10 @@ class editSubscriptionTask extends viewModelBase {
     testResultsLimit = ko.observable<number>(10);
 
     private gridController = ko.observable<virtualGridController<any>>();
-    private customFunctionsContext: object;
     columnsSelector = new columnsSelector<documentObject>();
     fetcher = ko.observable<fetcherType>();
     private columnPreview = new columnPreviewPlugin<documentObject>();
+
     dirtyResult = ko.observable<boolean>(false);
     isFirstRun = true;
 
@@ -39,7 +43,7 @@ class editSubscriptionTask extends viewModelBase {
 
     constructor() {
         super();
-        this.bindToCurrentInstance("useCollection", "setStartingPointType");
+        this.bindToCurrentInstance("setStartingPointType");
         aceEditorBindingHandler.install();
     }
 
@@ -52,17 +56,21 @@ class editSubscriptionTask extends viewModelBase {
             // 1. Editing an existing task
             this.isAddingNewSubscriptionTask(false);
 
+            // 1.1 Get general info
             new ongoingTaskInfoCommand(this.activeDatabase(), "Subscription", args.taskId, args.taskName)
                 .execute()
-                .done((result: Raven.Client.Documents.Subscriptions.SubscriptionState) => {
-                    this.editedSubscription(new ongoingTaskSubscriptionEdit(result, true));
+                .done((result: Raven.Client.Documents.Subscriptions.SubscriptionStateWithNodeDetails) => {
+                    this.editedSubscription(new ongoingTaskSubscriptionEdit(result, false));
 
-                    if (this.editedSubscription().collection()) {
-                        this.editedSubscription().getCollectionRevisionsSettings()
-                            .done(() => deferred.resolve());
-                    } else {
-                        deferred.resolve();
-                    }
+                    deferred.resolve();
+
+                    // 1.2 Check if connection is live
+                    this.editedSubscription().liveConnection(false);
+                    new subscriptionConnectionDetailsCommand(this.activeDatabase(), args.taskId, args.taskName, this.editedSubscription().responsibleNode().NodeUrl)
+                        .execute()
+                        .done((result: Raven.Server.Documents.TcpHandlers.SubscriptionConnectionDetails) => {
+                            this.editedSubscription().liveConnection(!!result.ClientUri);
+                        });
                 })
                 .fail(() => router.navigate(appUrl.forOngoingTasks(this.activeDatabase())));
         }
@@ -74,33 +82,6 @@ class editSubscriptionTask extends viewModelBase {
         }
         
         return deferred;
-    }
-
-    attached() {
-        super.attached();
-
-        const jsCode = Prism.highlight(
-            "if (this.Votes < 10)\r\n" +
-            "  return;\r\n" +
-            "var customer = LoadDocument(this.CustomerId);\r\n" +
-            "return {\r\n" +
-            "   Issue: this.Issue,\r\n" +
-            "   Votes: this.Votes,\r\n" +
-            "   Customer: {\r\n" +
-            "        Name: customer.Name,\r\n" +
-            "        Email: customer.Email\r\n" +
-            "   }\r\n" + 
-            "};",
-            (Prism.languages as any).javascript);
-
-        popoverUtils.longWithHover($("#scriptInfo"),
-            {
-                content: `<p>Subscription Scripts are written in JavaScript. <br />Example: <pre>${jsCode}</pre></p>`
-                + `<p>You can use following functions in your patch script:</p>`
-                + `<ul>`
-                + `<li><code>LoadDocument(documentIdToLoad)</code> - loads document by id`
-                + `</ul>`
-            });
     }
 
     compositionComplete() {
@@ -135,10 +116,6 @@ class editSubscriptionTask extends viewModelBase {
         this.goToOngoingTasksView();
     }
 
-    useCollection(collectionToUse: string) {
-        this.editedSubscription().collection(collectionToUse);
-    }
-
     setStartingPointType(startingPointType: subscriptionStartType) {
         this.editedSubscription().startingPointType(startingPointType);
     }
@@ -167,17 +144,12 @@ class editSubscriptionTask extends viewModelBase {
         this.fetcher(fetcherMethod);
 
         if (this.isFirstRun) {
-            const grid = this.gridController();
-            grid.withEvaluationContext(this.customFunctionsContext);
-        }
-
-        if (this.isFirstRun) {
             const extraClassProvider = (item: documentObject | Raven.Server.Documents.Handlers.DocumentWithException) => {
                 const documentItem = item as Raven.Server.Documents.Handlers.DocumentWithException;
                 return documentItem.Exception ? "exception-row" : "";
-            }
+            };
 
-            const documentsProvider = new documentBasedColumnsProvider(this.activeDatabase(), this.gridController(), this.editedSubscription().collections().map(x => x.name), {
+            const documentsProvider = new documentBasedColumnsProvider(this.activeDatabase(), this.gridController(), {
                 showRowSelectionCheckbox: false,
                 showSelectAllCheckbox: false,
                 enableInlinePreview: true,
@@ -239,6 +211,11 @@ class editSubscriptionTask extends viewModelBase {
             this.columnsSelector.reset();
         }
     }
+
+    syntaxHelp() {
+        const viewModel = new subscriptionRqlSyntax();
+            app.showBootstrapDialog(viewModel);
+        }
 }
 
 export = editSubscriptionTask;

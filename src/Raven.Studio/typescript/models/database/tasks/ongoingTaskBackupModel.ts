@@ -2,19 +2,25 @@
 import appUrl = require("common/appUrl");
 import router = require("plugins/router");
 import ongoingTask = require("models/database/tasks/ongoingTaskModel"); 
+import ongoingTaskInfoCommand = require("commands/database/tasks/getOngoingTaskInfoCommand");
+import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
 
 class ongoingTaskBackupModel extends ongoingTask {
     editUrl: KnockoutComputed<string>;
+    activeDatabase = activeDatabaseTracker.default.database;
 
     backupType = ko.observable<Raven.Client.ServerWide.PeriodicBackup.BackupType>();
     nextBackup = ko.observable<string>();
     lastFullBackup = ko.observable<string>();
     lastIncrementalBackup = ko.observable<string>();
 
-    constructor(dto: Raven.Client.ServerWide.Operations.OngoingTaskBackup) {
+    showBackupDetails = ko.observable(false);
+    textClass = ko.observable<string>();
+
+    constructor(dto: Raven.Client.ServerWide.Operations.OngoingTaskBackup, isInListView: boolean) {
         super();
 
-        this.isEdit = false;
+        this.isInTasksListView = isInListView;
         this.update(dto);
         this.initializeObservables();
     }
@@ -38,10 +44,7 @@ class ongoingTaskBackupModel extends ongoingTask {
         }
 
         if (dto.LastIncrementalBackup) {
-            const lastIncrementalBackup = moment
-                .utc(dto.LastIncrementalBackup)
-                .local()
-                .format(dateFormat);
+            const lastIncrementalBackup = moment.utc(dto.LastIncrementalBackup).local().format(dateFormat);
             this.lastIncrementalBackup(lastIncrementalBackup);
         }
 
@@ -50,8 +53,10 @@ class ongoingTaskBackupModel extends ongoingTask {
             const timeSpan = moment.duration(dto.NextBackup.TimeSpan);
             const nextBackupDateTime = now.add(timeSpan).format(dateFormat);
             this.nextBackup(`${nextBackupDateTime} (${dto.NextBackup.IsFull ? "Full" : "Incremental"})`);
+            this.textClass("text-details");
         } else {
             this.nextBackup("N/A");
+            this.textClass("text-warning");
         }
     }
 
@@ -59,13 +64,20 @@ class ongoingTaskBackupModel extends ongoingTask {
         router.navigate(this.editUrl());
     }
 
-    protected generateTaskName(dto: Raven.Client.ServerWide.Operations.OngoingTaskBackup): string {
-        const backupDestinations =
-            dto.BackupDestinations.length === 0
-                ? "No destinations"
-                : `${dto.BackupType} to ${dto.BackupDestinations.join(", ")}`;
+    toggleDetails() {
+        this.showBackupDetails(!this.showBackupDetails());
 
-        return backupDestinations;
+        if (this.showBackupDetails()) {
+            this.refreshBackupInfo();
+        } 
+    }
+
+    refreshBackupInfo() {
+        new ongoingTaskInfoCommand(this.activeDatabase(), "Backup", this.taskId, this.taskName())
+            .execute()
+            .done((result: Raven.Client.ServerWide.Operations.OngoingTaskBackup) => {
+                this.update(result);
+            });
     }
 }
 

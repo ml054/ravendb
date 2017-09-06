@@ -149,7 +149,7 @@ namespace Raven.Server.ServerWide.Maintenance
                 try
                 {
                     tcpConnection = await ReplicationUtils.GetTcpInfoAsync(Url, null, "Supervisor", 
-                        _parent._server.RavenServer.ServerCertificateHolder.Certificate);
+                        _parent._server.RavenServer.ClusterCertificateHolder?.Certificate);
                 }
                 catch (Exception e)
                 {
@@ -167,7 +167,7 @@ namespace Raven.Server.ServerWide.Maintenance
                             await TimeoutManager.WaitFor(onErrorDelayTime, _token);
 
                             tcpConnection = await ReplicationUtils.GetTcpInfoAsync(Url, null, "Supervisor",
-                                _parent._server.RavenServer.ServerCertificateHolder.Certificate);
+                                _parent._server.RavenServer.ClusterCertificateHolder.Certificate);
                         }
 
                         if (tcpConnection == null)
@@ -175,7 +175,7 @@ namespace Raven.Server.ServerWide.Maintenance
                             needToWait = true;
                             continue;
                         }
-                        using (var tcpClient = new TcpClient())
+                        using (var tcpClient = TcpUtils.NewTcpClient(_parent._server.Engine.TcpConnectionTimeout))
                         using (_cts.Token.Register(tcpClient.Dispose))
                         using (var connection = await ConnectToClientNodeAsync(tcpConnection, tcpClient))
                         {
@@ -245,9 +245,8 @@ namespace Raven.Server.ServerWide.Maintenance
 
             private async Task<Stream> ConnectToClientNodeAsync(TcpConnectionInfo tcpConnectionInfo, TcpClient tcpClient)
             {
-                TcpUtils.SetTimeouts(tcpClient, _parent._server.Engine.TcpConnectionTimeout);
                 await TcpUtils.ConnectSocketAsync(tcpConnectionInfo, tcpClient, _log);
-                var connection = await TcpUtils.WrapStreamWithSslAsync(tcpClient, tcpConnectionInfo, _parent._server.RavenServer.ServerCertificateHolder.Certificate);
+                var connection = await TcpUtils.WrapStreamWithSslAsync(tcpClient, tcpConnectionInfo, _parent._server.RavenServer.ClusterCertificateHolder.Certificate);
                 using (_contextPool.AllocateOperationContext(out JsonOperationContext ctx))
                 using (var writer = new BlittableJsonTextWriter(ctx, connection))
                 {

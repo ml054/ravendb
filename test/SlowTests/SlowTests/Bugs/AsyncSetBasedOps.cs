@@ -9,7 +9,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FastTests;
-using Raven.Client;
 using Raven.Client.Documents.Operations;
 using Raven.Client.Documents.Queries;
 using Raven.Client.Documents.Session;
@@ -29,10 +28,13 @@ namespace SlowTests.SlowTests.Bugs
 #pragma warning restore 414,649
         }
 
-        [Fact(Skip = "RavenDB-6274")]
+        [Fact]
         public async Task AwaitAsyncPatchByIndexShouldWork()
         {
-            using (var store = GetDocumentStore(modifyDatabaseRecord: document => document.Settings[RavenConfiguration.GetKey(x => x.Core.RunInMemory)] = "false"))
+            using (var store = GetDocumentStore(new Options
+            {
+                ModifyDatabaseRecord = record => record.Settings[RavenConfiguration.GetKey(x => x.Core.RunInMemory)] = "false"
+            }))
             {
                 string lastUserId = null;
 
@@ -62,13 +64,9 @@ namespace SlowTests.SlowTests.Bugs
                 WaitForIndexing(store, timeout: TimeSpan.FromMinutes(5));
 
                 await (await store.Operations.SendAsync(new PatchByQueryOperation(
-                    new IndexQuery { Query = $"FROM INDEX '{stats.IndexName}'" },
-                    new PatchRequest
-                    {
-                        Script = "this.FullName = this.FirstName + ' ' + this.LastName;"
-                    }
-                ),CancellationToken.None))
-                .WaitForCompletionAsync(TimeSpan.FromSeconds(15));
+                    new IndexQuery { Query = $"FROM INDEX '{stats.IndexName}' UPDATE {{ this.FullName = this.FirstName + ' ' + this.LastName; }}" }
+                ), CancellationToken.None))
+                .WaitForCompletionAsync(TimeSpan.FromSeconds(60));
 
                 using (var db = store.OpenAsyncSession())
                 {

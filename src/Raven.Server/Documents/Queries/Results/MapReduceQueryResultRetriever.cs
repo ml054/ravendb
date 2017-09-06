@@ -1,5 +1,7 @@
 ﻿using Lucene.Net.Store;
 using Raven.Client;
+using Raven.Server.Documents.Includes;
+using Raven.Server.ServerWide.Context;
 using Sparrow.Json;
 
 namespace Raven.Server.Documents.Queries.Results
@@ -8,15 +10,24 @@ namespace Raven.Server.Documents.Queries.Results
     {
         private readonly JsonOperationContext _context;
 
-        public MapReduceQueryResultRetriever(JsonOperationContext context, FieldsToFetch fieldsToFetch)
-            : base(fieldsToFetch, context, true)
+        public MapReduceQueryResultRetriever(DocumentDatabase database, IndexQueryServerSide query, DocumentsStorage documentsStorage, JsonOperationContext context, FieldsToFetch fieldsToFetch, IncludeDocumentsCommand includeDocumentsCommand)
+            : base(database, query, fieldsToFetch, documentsStorage, context, true, includeDocumentsCommand)
         {
             _context = context;
         }
 
+        protected override Document LoadDocument(string id)
+        {
+            if (DocumentsStorage != null &&
+                _context is DocumentsOperationContext ctx)
+                return DocumentsStorage.Get(ctx, id);
+            // can happen during some debug endpoints that should never load a document
+            return null;
+        }
+
         protected override unsafe Document DirectGet(Lucene.Net.Documents.Document input, string id, IState state)
         {
-            var reduceValue = input.GetField(Constants.Documents.Indexing.Fields.ReduceValueFieldName).GetBinaryValue(state);
+            var reduceValue = input.GetField(Constants.Documents.Indexing.Fields.ReduceKeyValueFieldName).GetBinaryValue(state);
 
             var result = new BlittableJsonReaderObject((byte*)_context.PinObjectAndGetAddress(reduceValue), reduceValue.Length, _context);
 
@@ -28,7 +39,7 @@ namespace Raven.Server.Documents.Queries.Results
 
         public override Document Get(Lucene.Net.Documents.Document input, float score, IState state)
         {
-            if (FieldsToFetch.IsProjection || FieldsToFetch.IsTransformation)
+            if (FieldsToFetch.IsProjection)
                 return GetProjection(input, score, null, state);
 
             return DirectGet(input, null, state);

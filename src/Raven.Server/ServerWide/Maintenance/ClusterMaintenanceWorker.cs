@@ -146,7 +146,7 @@ namespace Raven.Server.ServerWide.Maintenance
                             foreach (var index in indexStorage.GetIndexes())
                             {
                                 var stats = index.GetIndexStats(context);
-
+                                //We might have old version of this index with the same name
                                 report.LastIndexStats.Add(index.Name, new DatabaseStatusReport.ObservedIndexStatus
                                 {
                                     LastIndexedEtag = stats.LastProcessedEtag,

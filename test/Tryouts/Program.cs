@@ -1,15 +1,6 @@
 using System;
-using FastTests.Server;
-using FastTests.Server.Documents.Indexing;
-using FastTests.Server.Documents.Queries.Dynamic.Map;
-using SlowTests.Bugs;
-using SlowTests.Issues;
-using FastTests.Voron.Storage;
-using SlowTests.Cluster;
-using Raven.Server.Documents.Replication;
-using Raven.Client.Documents;
-using SlowTests.Client.Subscriptions;
-using SlowTests.Tests.Linq;
+using System.Threading.Tasks;
+using SlowTests.Server.Documents.PeriodicBackup;
 
 namespace Tryouts
 {
@@ -17,24 +8,14 @@ namespace Tryouts
     {
         public static void Main(string[] args)
         {
-            for (int i = 0; i < 100; i++)
+            Parallel.For(0, 1000, i =>
             {
-                Console.Clear();
                 Console.WriteLine(i);
-                using (var test = new FastTests.Client.Subscriptions.RavenDB_7384())
+                using (var test = new SlowTests.Client.Attachments.AttachmentFailover())
                 {
-                    try
-                    {
-                        test.UpdatingSubscriptionScriptShouldNotChangeVectorButShouldDropConnection().Wait();
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        Console.Beep();
-                        return;
-                    }
+                    test.PutAttachmentsWithFailover_Session().Wait();
                 }
-            }
+            });
         }
     }
 }

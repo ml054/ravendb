@@ -19,9 +19,11 @@ import eventsCollector = require("common/eventsCollector");
 import popoverUtils = require("common/popoverUtils");
 import collectionsTracker = require("common/helpers/database/collectionsTracker");
 import generalUtils = require("common/generalUtils");
+import defaultAceCompleter = require("common/defaultAceCompleter");
 
 class exportDatabase extends viewModelBase {
 
+    completer = defaultAceCompleter.completer();
     model = new exportDatabaseModel();
 
     static isExporting = ko.observable(false);
@@ -124,9 +126,6 @@ class exportDatabase extends viewModelBase {
             }
             if (model.includeIndexes()) {
                 types.push("Indexes");
-            }
-            if (model.includeTransformers()) {
-                types.push("Transformers");
             }
             if (model.includeIdentities()) {
                 types.push("Identities");

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Converters;
 using Raven.Server.Documents.Indexes.Static;
 using Sparrow.Compression;
 using Sparrow.Json;
@@ -14,15 +16,21 @@ namespace FastTests.Blittable.BlittableJsonWriterTests
 {
     public class FunctionalityTests : BlittableJsonTestBase
     {
-        [Fact(Skip = "RavenDB-6309")]
+        [Fact]
+        public void Generating_DictionaryDeserializationRoutine_should_work()
+        {
+            Func<BlittableJsonReaderObject, Dictionary<string, long>> deserializationFunc = JsonDeserializationBase.GenerateJsonDeserializationRoutine<Dictionary<string, long>>();
+            Assert.NotNull(deserializationFunc);
+        }
+
+        [Fact]
         public void FunctionalityTest()
         {
-            /*
             var str = GenerateSimpleEntityForFunctionalityTest();
             using (var blittableContext = JsonOperationContext.ShortTermSingleUse())
-            using (var employee =  blittableContext.Read(new MemoryStream(Encoding.UTF8.GetBytes(str)), "doc1"))
+            using (var employee = blittableContext.Read(new MemoryStream(Encoding.UTF8.GetBytes(str)), "doc1"))
             {
-                dynamic dynamicRavenJObject = new DynamicJsonObject(JObject.Parse(str));
+                dynamic dynamicRavenJObject = JsonConvert.DeserializeObject<ExpandoObject>(str, new ExpandoObjectConverter());
                 dynamic dynamicBlittableJObject = new DynamicBlittableJson(employee);
                 Assert.Equal(dynamicRavenJObject.Age, dynamicBlittableJObject.Age);
                 Assert.Equal(dynamicRavenJObject.Name, dynamicBlittableJObject.Name);
@@ -38,10 +46,9 @@ namespace FastTests.Blittable.BlittableJsonWriterTests
                 blittableContext.Write(ms, employee);
                 Assert.Equal(str, Encoding.UTF8.GetString(ms.ToArray()));
             }
-            */
         }
 
-        [Fact(Skip = "RavenDB-6309")]
+        [Fact]
         public void FunctionalityTest2()
         {
             var str = GenerateSimpleEntityForFunctionalityTest2();
@@ -126,7 +133,7 @@ namespace FastTests.Blittable.BlittableJsonWriterTests
             var str = sampleObject.ToJsonString();
 
             using (var blittableContext = JsonOperationContext.ShortTermSingleUse())
-            using (var doc =  blittableContext.Read(new MemoryStream(Encoding.UTF8.GetBytes(str)), "doc1"))
+            using (var doc = blittableContext.Read(new MemoryStream(Encoding.UTF8.GetBytes(str)), "doc1"))
             {
                 dynamic dynamicObject = new DynamicBlittableJson(doc);
                 Assert.Equal(sampleObject.Value, dynamicObject.Value);
@@ -163,7 +170,7 @@ namespace FastTests.Blittable.BlittableJsonWriterTests
             });
 
             using (var ctx = JsonOperationContext.ShortTermSingleUse())
-            using (var r =  ctx.Read(new MemoryStream(Encoding.UTF8.GetBytes(json)), "doc1"))
+            using (var r = ctx.Read(new MemoryStream(Encoding.UTF8.GetBytes(json)), "doc1"))
             {
                 var ms = new MemoryStream();
                 ctx.Write(ms, r);

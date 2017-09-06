@@ -19,9 +19,10 @@ namespace Raven.Server.Documents.Queries.Parser
         public List<ValueToken> Values; // in 
         public List<object> Arguments; // method
 
-        [ThreadStatic] private static StringBuilder _tempBuffer;
+        [ThreadStatic]
+        private static StringBuilder _tempBuffer;
 
-        internal static string Extract(string q, ValueToken val)
+        internal static string Extract(string q, ValueToken val, bool stripQuotes = false)
         {
             switch (val.Type)
             {
@@ -32,6 +33,8 @@ namespace Raven.Server.Documents.Queries.Parser
                 case ValueTokenType.True:
                     return "true";
             }
+            if (stripQuotes && val.Type == ValueTokenType.String)
+                return Extract(q, val.TokenStart + 1, val.TokenLength - 2, val.EscapeChars);
 
             return Extract(q, val.TokenStart, val.TokenLength, val.EscapeChars);
         }
@@ -91,6 +94,133 @@ namespace Raven.Server.Documents.Queries.Parser
             writer.WriteValue(tmp.ToString());
         }
 
+        public void ToJavaScript(string query, string alias, TextWriter writer)
+        {
+            switch (Type)
+            {
+                case OperatorType.Field:
+                    if (alias != null)
+                    {
+                        writer.Write(alias);
+                        writer.Write(".");
+                    }
+                    writer.Write(Extract(query, Field.TokenStart, Field.TokenLength, Field.EscapeChars));
+                    break;
+                case OperatorType.Equal:
+                case OperatorType.NotEqual:
+                case OperatorType.LessThan:
+                case OperatorType.GreaterThan:
+                case OperatorType.LessThanEqual:
+                case OperatorType.GreaterThanEqual:
+                    var fieldName = Extract(query, Field.TokenStart, Field.TokenLength, Field.EscapeChars);
+                    WriteSimpleOperatorJavaScript(query, writer, fieldName, alias, Type, Value);
+                    break;
+                case OperatorType.Between:
+                    throw new InvalidOperationException("Cannot translate between operation to JavaScript");
+                case OperatorType.In:
+                case OperatorType.AllIn:
+                    throw new InvalidOperationException("Cannot translate in operation to JavaScript");
+                case OperatorType.And:
+                case OperatorType.AndNot:
+                case OperatorType.Or:
+                case OperatorType.OrNot:
+                    writer.Write("(");
+                    Left.ToJavaScript(query, alias, writer);
+                    switch (Type)
+                    {
+                        case OperatorType.And:
+                            writer.Write(" && ");
+                            break;
+                        case OperatorType.AndNot:
+                            writer.Write(" && !(");
+                            break;
+                        case OperatorType.Or:
+                            writer.Write(" || ");
+                            break;
+                        case OperatorType.OrNot:
+                            writer.Write(" || !(");
+                            break;
+                    }
+                    Right.ToJavaScript(query, alias, writer);
+                    if (Type == OperatorType.OrNot || Type == OperatorType.AndNot)
+                    {
+                        writer.Write(")");
+                    }
+                    writer.Write(")");
+                    break;
+                case OperatorType.Method:
+                    var method = Extract(query, Field.TokenStart, Field.TokenLength, Field.EscapeChars);
+                    var methodType = QueryMethod.GetMethodType(method, throwIfNoMatch: false);
+                    if (methodType == MethodType.Id && Arguments.Count == 1 && Arguments[0] is QueryExpression idExpression)
+                    {
+                        WriteSimpleOperatorJavaScript(query, writer, $"id({alias})", null, idExpression.Type, idExpression.Value);
+                        break;
+                    }
+
+                    writer.Write(method);
+                    writer.Write("(");
+
+                    for (int i = 0; i < Arguments.Count; i++)
+                    {
+                        var arg = Arguments[i];
+                        if (i != 0)
+                            writer.Write(", ");
+                        if (arg is QueryExpression qe)
+                        {
+                            qe.ToJavaScript(query, alias, writer);
+                        }
+                        else if (arg is FieldToken field)
+                        {
+                            writer.Write(Extract(query, field.TokenStart, field.TokenLength, field.EscapeChars));
+                        }
+                        else
+                        {
+                            var val = (ValueToken)arg;
+                            writer.Write(Extract(query, val));
+                        }
+                    }
+                    writer.Write(")");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static void WriteSimpleOperatorJavaScript(string query, TextWriter writer, string fieldName, string alias, OperatorType type, ValueToken value)
+        {
+            if (alias != null)
+            {
+                writer.Write(alias);
+                writer.Write(".");
+            }
+            writer.Write(fieldName);
+            switch (type)
+            {
+                case OperatorType.Equal:
+                    writer.Write(" == ");
+                    break;
+                case OperatorType.NotEqual:
+                    writer.Write(" != ");
+                    break;
+                case OperatorType.LessThan:
+                    writer.Write(" < ");
+                    break;
+                case OperatorType.GreaterThan:
+                    writer.Write(" > ");
+                    break;
+                case OperatorType.LessThanEqual:
+                    writer.Write(" <= ");
+                    break;
+                case OperatorType.GreaterThanEqual:
+                    writer.Write(" >= ");
+                    break;
+                default:
+                    ThrowInvalidType(type);
+                    break;
+            }
+            writer.Write(Extract(query, value));
+        }
+
         public void ToString(string query, TextWriter writer)
         {
             switch (Type)
@@ -100,6 +230,7 @@ namespace Raven.Server.Documents.Queries.Parser
                     writer.Write(" ");
                     break;
                 case OperatorType.Equal:
+                case OperatorType.NotEqual:
                 case OperatorType.LessThan:
                 case OperatorType.GreaterThan:
                 case OperatorType.LessThanEqual:
@@ -109,6 +240,9 @@ namespace Raven.Server.Documents.Queries.Parser
                     {
                         case OperatorType.Equal:
                             writer.Write(" = ");
+                            break;
+                        case OperatorType.NotEqual:
+                            writer.Write(" != ");
                             break;
                         case OperatorType.LessThan:
                             writer.Write(" < ");
@@ -217,6 +351,7 @@ namespace Raven.Server.Documents.Queries.Parser
                 case OperatorType.True:
                     break;
                 case OperatorType.Equal:
+                case OperatorType.NotEqual:
                 case OperatorType.LessThan:
                 case OperatorType.GreaterThan:
                 case OperatorType.LessThanEqual:

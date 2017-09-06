@@ -46,7 +46,7 @@ namespace SlowTests.MailingList
                     book.Id
                 };
 
-                Index(x => x.Text, FieldIndexing.Analyzed);
+                Index(x => x.Text, FieldIndexing.Search);
             }
         }
 
@@ -109,8 +109,8 @@ namespace SlowTests.MailingList
                         session.Advanced.DocumentQuery<Book, BooksSearch>().WhereLucene("Text", "wire each time").WaitForNonStaleResultsAsOfNow().
                             ToList();
                     var scores = from result in results
-                                 select session.Advanced.GetMetadataFor(result).GetNumber(Constants.Documents.Metadata.IndexScore);
-                    Assert.Equal(0, scores.Single());
+                                 select session.Advanced.GetMetadataFor(result).GetLong(Constants.Documents.Metadata.IndexScore);
+                    Assert.True(scores.Single() > 0);
                 }
             }
         }

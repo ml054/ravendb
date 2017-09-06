@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -26,6 +25,8 @@ namespace Raven.Server.Config
 
         public CoreConfiguration Core { get; }
 
+        public HttpConfiguration Http { get; }
+
         public EtlConfiguration Etl { get; }
 
         public ReplicationConfiguration Replication { get; }
@@ -39,8 +40,6 @@ namespace Raven.Server.Config
         public IndexingConfiguration Indexing { get; set; }
 
         public MonitoringConfiguration Monitoring { get; }
-
-        public WebSocketsConfiguration WebSockets { get; set; }
 
         public QueryConfiguration Queries { get; }
 
@@ -81,6 +80,7 @@ namespace Raven.Server.Config
 
             Core = new CoreConfiguration();
 
+            Http = new HttpConfiguration();
             Replication = new ReplicationConfiguration();
             Cluster = new ClusterConfiguration();
             Etl = new EtlConfiguration();
@@ -88,7 +88,6 @@ namespace Raven.Server.Config
             Security = new SecurityConfiguration();
             PerformanceHints = new PerformanceHintsConfiguration();
             Indexing = new IndexingConfiguration(this);
-            WebSockets = new WebSocketsConfiguration();
             Monitoring = new MonitoringConfiguration();
             Queries = new QueryConfiguration();
             Patching = new PatchingConfiguration();
@@ -120,18 +119,7 @@ namespace Raven.Server.Config
 
         private void AddEnvironmentVariables()
         {
-            const string prefix = "RAVEN.";
-
-            foreach (DictionaryEntry de in Environment.GetEnvironmentVariables())
-            {
-                var s = de.Key as string;
-                if (s == null)
-                    continue;
-                if (s.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) == false)
-                    continue;
-
-                _configBuilder.Properties[s.Substring(prefix.Length)] = de.Value;
-            }
+            _configBuilder.AddEnvironmentVariables("RAVEN.");
         }
 
         public LogsConfiguration Logs { get; set; }
@@ -142,6 +130,7 @@ namespace Raven.Server.Config
 
         public RavenConfiguration Initialize()
         {
+            Http.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);
             Testing.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);
             Server.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);
             Core.Initialize(Settings, ServerWideSettings, ResourceType, ResourceName);

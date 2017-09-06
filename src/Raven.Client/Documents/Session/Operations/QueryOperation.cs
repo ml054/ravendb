@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using Raven.Client.Documents.Commands;
 using Raven.Client.Documents.Queries;
-using Raven.Client.Documents.Transformers;
 using Raven.Client.Exceptions.Documents.Indexes;
 using Raven.Client.Extensions;
 using Sparrow.Json;
@@ -17,14 +16,11 @@ namespace Raven.Client.Documents.Session.Operations
     {
         private readonly InMemoryDocumentSessionOperations _session;
         private readonly string _indexName;
-        private readonly string _collectionName;
         private readonly IndexQuery _indexQuery;
         private readonly bool _waitForNonStaleResults;
         private readonly bool _metadataOnly;
         private readonly bool _indexEntriesOnly;
         private readonly TimeSpan? _timeout;
-        private readonly Func<IndexQuery, IEnumerable<object>, IEnumerable<object>> _transformResults;
-        private readonly HashSet<string> _includes;
         private QueryResult _currentQueryResults;
         private readonly string[] _projectionFields;
         private Stopwatch _sp;
@@ -32,19 +28,15 @@ namespace Raven.Client.Documents.Session.Operations
 
         public QueryResult CurrentQueryResults => _currentQueryResults;
 
-        public QueryOperation(InMemoryDocumentSessionOperations session, string indexName, string collectionName, IndexQuery indexQuery,
+        public QueryOperation(InMemoryDocumentSessionOperations session, string indexName, IndexQuery indexQuery,
                               string[] projectionFields, bool waitForNonStaleResults, TimeSpan? timeout,
-                              Func<IndexQuery, IEnumerable<object>, IEnumerable<object>> transformResults,
-                              HashSet<string> includes, bool disableEntitiesTracking, bool metadataOnly = false, bool indexEntriesOnly = false)
+                              bool disableEntitiesTracking, bool metadataOnly = false, bool indexEntriesOnly = false)
         {
             _session = session;
             _indexName = indexName;
-            _collectionName = collectionName;
             _indexQuery = indexQuery;
             _waitForNonStaleResults = waitForNonStaleResults;
             _timeout = timeout;
-            _transformResults = transformResults;
-            _includes = includes;
             _projectionFields = projectionFields;
             DisableEntitiesTracking = disableEntitiesTracking;
             _metadataOnly = metadataOnly;
@@ -98,45 +90,27 @@ namespace Raven.Client.Documents.Session.Operations
             return _session.DocumentStore.DisableAggressiveCaching();
         }
 
-        public IList<T> Complete<T>()
+        public List<T> Complete<T>()
         {
             var queryResult = _currentQueryResults.CreateSnapshot();
-            foreach (BlittableJsonReaderObject include in queryResult.Includes)
+
+            if (DisableEntitiesTracking == false)
+                _session.RegisterIncludes(queryResult.Includes);
+
+            var list = new List<T>();
+            foreach (BlittableJsonReaderObject document in queryResult.Results)
             {
-                if (include == null)
-                    continue;
+                var metadata = document.GetMetadata();
 
-                var newDocumentInfo = DocumentInfo.GetNewDocumentInfo(include);
-                _session.IncludedDocumentsById[newDocumentInfo.Id] = newDocumentInfo;
-            }
+                metadata.TryGetId(out var id);
 
-            var usedTransformer = string.IsNullOrEmpty(_indexQuery.Transformer) == false;
-            List<T> list;
-            if (usedTransformer)
-            {
-                list = TransformerHelper.ParseResultsForQueryOperation<T>(_session, queryResult).ToList();
-            }
-            else
-            {
-                list = new List<T>();
-                foreach (BlittableJsonReaderObject document in queryResult.Results)
-                {
-                    var metadata = document.GetMetadata();
-
-                    string id;
-                    metadata.TryGetId(out id);
-
-                    list.Add(Deserialize<T>(id, document, metadata, _projectionFields, DisableEntitiesTracking, _session));
-                }
+                list.Add(Deserialize<T>(id, document, metadata, _projectionFields, DisableEntitiesTracking, _session));
             }
 
             if (DisableEntitiesTracking == false)
-                _session.RegisterMissingIncludes(queryResult.Results, _includes);
+                _session.RegisterMissingIncludes(queryResult.Results, queryResult.Includes, queryResult.IncludedPaths);
 
-            if (_transformResults == null)
-                return list;
-
-            return _transformResults(_indexQuery, list.Cast<object>()).Cast<T>().ToList();
+            return list;
         }
 
         internal static T Deserialize<T>(string id, BlittableJsonReaderObject document, BlittableJsonReaderObject metadata, string[] projectionFields, bool disableEntitiesTracking, InMemoryDocumentSessionOperations session)
@@ -158,7 +132,7 @@ namespace Raven.Client.Documents.Session.Operations
                 }
 
                 if (document.TryGetMember(projectionFields[0], out object inner) == false)
-                        return default(T);
+                    return default(T);
 
                 var innerJson = inner as BlittableJsonReaderObject;
                 if (innerJson != null)
@@ -184,7 +158,7 @@ namespace Raven.Client.Documents.Session.Operations
 
         public void EnsureIsAcceptableAndSaveResult(QueryResult result)
         {
-            if(result == null)
+            if (result == null)
                 throw new IndexDoesNotExistException("Could not find index " + _indexName);
 
             if (_waitForNonStaleResults && result.IsStale)
@@ -193,7 +167,7 @@ namespace Raven.Client.Documents.Session.Operations
                 {
                     _sp.Stop();
                     var msg = $"Waited for {_sp.ElapsedMilliseconds:#,#;;0}ms for the query to return non stale result.";
-                    
+
                     throw new TimeoutException(msg);
                 }
             }

@@ -59,19 +59,19 @@ namespace Raven.Server.Documents.Indexes.Persistence.Lucene.Documents
 
         internal const string FalseString = "false";
 
-        private readonly Field _reduceValueField = new Field(Constants.Documents.Indexing.Fields.ReduceValueFieldName, new byte[0], 0, 0, Field.Store.YES);
+        private readonly Field _reduceValueField = new Field(Constants.Documents.Indexing.Fields.ReduceKeyValueFieldName, new byte[0], 0, 0, Field.Store.YES);
 
         protected readonly ConversionScope Scope = new ConversionScope();
 
-        private readonly FastDictionary<int, CachedFieldItem<Field>, NumericEqualityComparer> _fieldsCache = new FastDictionary<int, CachedFieldItem<Field>, NumericEqualityComparer>(default(NumericEqualityComparer));
+        private readonly Dictionary<int, CachedFieldItem<Field>> _fieldsCache = new Dictionary<int, CachedFieldItem<Field>>(default(NumericEqualityComparer));
 
-        private readonly FastDictionary<int, CachedFieldItem<NumericField>, NumericEqualityComparer> _numericFieldsCache = new FastDictionary<int, CachedFieldItem<NumericField>, NumericEqualityComparer>(default(NumericEqualityComparer));
+        private readonly Dictionary<int, CachedFieldItem<NumericField>> _numericFieldsCache = new Dictionary<int, CachedFieldItem<NumericField>>(default(NumericEqualityComparer));
 
         public readonly LuceneDocument Document = new LuceneDocument();
 
         private readonly List<int> _multipleItemsSameFieldCount = new List<int>();
 
-        protected readonly FastDictionary<string, IndexField, OrdinalIgnoreCaseStringStructComparer> _fields;
+        protected readonly Dictionary<string, IndexField> _fields;
 
         protected readonly bool _reduceOutput;
 
@@ -87,7 +87,7 @@ namespace Raven.Server.Documents.Indexes.Persistence.Lucene.Documents
 
         protected LuceneDocumentConverterBase(ICollection<IndexField> fields, bool reduceOutput = false)
         {
-            var dictionary = new FastDictionary<string, IndexField, OrdinalIgnoreCaseStringStructComparer>(fields.Count, default(OrdinalIgnoreCaseStringStructComparer));
+            var dictionary = new Dictionary<string, IndexField>(fields.Count, default(OrdinalIgnoreCaseStringStructComparer));
             foreach (var field in fields)
                 dictionary[field.Name] = field;
             _fields = dictionary;
@@ -480,7 +480,7 @@ namespace Raven.Server.Documents.Indexes.Persistence.Lucene.Documents
             if (_reduceOutput == false)
                 return GetOrCreateField(Constants.Documents.Indexing.Fields.DocumentIdFieldName, null, key, null, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS, Field.TermVector.NO);
 
-            return GetOrCreateField(Constants.Documents.Indexing.Fields.ReduceKeyFieldName, null, key, null, Field.Store.NO, Field.Index.NOT_ANALYZED_NO_NORMS, Field.TermVector.NO);
+            return GetOrCreateField(Constants.Documents.Indexing.Fields.ReduceKeyHashFieldName, null, key, null, Field.Store.NO, Field.Index.NOT_ANALYZED_NO_NORMS, Field.TermVector.NO);
         }
 
         protected Field GetOrCreateField(string name, string value, LazyStringValue lazyValue, BlittableJsonReaderObject blittableValue, Field.Store store, Field.Index index, Field.TermVector termVector)

@@ -62,15 +62,10 @@ namespace Raven.Server.ServerWide.Maintenance
 
         public bool Suspended = false; // don't really care about concurrency here
 
-        public static string FormatDecision(long iteration, string database, string message)
-        {
-            return $"{DateTime.UtcNow:o}, {iteration}, {database}, {message}";
-        }
-
-        private readonly BlockingCollection<string> _decisionsLog = new BlockingCollection<string>();
+        private readonly BlockingCollection<ClusterObserverLogEntry> _decisionsLog = new BlockingCollection<ClusterObserverLogEntry>();
         private long _iteration;
 
-        public (string[] List, long Iteration) ReadDecisionsForDatabase()
+        public (ClusterObserverLogEntry[] List, long Iteration) ReadDecisionsForDatabase()
         {
             return (_decisionsLog.ToArray(), _iteration);
         }
@@ -112,6 +107,10 @@ namespace Raven.Server.ServerWide.Maintenance
             Dictionary<string, ClusterNodeStatusReport> prevStats
             )
         {
+            var currentLeader = _engine.CurrentLeader;
+            if (currentLeader == null)
+                return;
+
             using (_contextPool.AllocateOperationContext(out TransactionOperationContext context))
             {
                 var updateCommands = new List<(UpdateTopologyCommand Update, string Reason)>();
@@ -136,9 +135,9 @@ namespace Raven.Server.ServerWide.Maintenance
                             LeadersTicks = -1,
                             Term = -1
                         };
-                        var graceIfLeaderChanged = _engine.CurrentTerm > topologyStamp.Term && _engine.CurrentLeader.LeaderShipDuration < _stabilizationTime;
+                        var graceIfLeaderChanged = _engine.CurrentTerm > topologyStamp.Term && currentLeader.LeaderShipDuration < _stabilizationTime;
                         var letStatsBecomeStable = _engine.CurrentTerm == topologyStamp.Term &&
-                            (_engine.CurrentLeader.LeaderShipDuration - topologyStamp.LeadersTicks < _stabilizationTime);
+                            (currentLeader.LeaderShipDuration - topologyStamp.LeadersTicks < _stabilizationTime);
                         if (graceIfLeaderChanged || letStatsBecomeStable)
                         {
                             if (_logger.IsInfoEnabled)
@@ -153,7 +152,13 @@ namespace Raven.Server.ServerWide.Maintenance
                             if (_decisionsLog.Count > 99)
                                 _decisionsLog.Take();
 
-                            _decisionsLog.Add(FormatDecision(_iteration, database, updateReason));
+                            _decisionsLog.Add(new ClusterObserverLogEntry
+                            {
+                                Database = database,
+                                Iteration = _iteration,
+                                Message = updateReason,
+                                Date = DateTime.UtcNow 
+                            });
 
                             var cmd = new UpdateTopologyCommand(database)
                             {
@@ -286,6 +291,9 @@ namespace Raven.Server.ServerWide.Maintenance
                         continue;
                     }
 
+                    if (_server.LicenseManager.CanDynamicallyDistributeNodes() == false)
+                        continue;
+
                     if (TryFindFitNode(promotable, dbName, topology, clusterTopology, current, out var node) == false)
                     {
                         if (topology.PromotablesStatus.TryGetValue(promotable, out var currentStatus) == false
@@ -339,14 +347,17 @@ namespace Raven.Server.ServerWide.Maintenance
                 switch (health)
                 {
                     case DatabaseHealth.Bad:
-                        if(topology.DynamicNodesDistribution == false)
+                        if (topology.DynamicNodesDistribution == false)
+                            continue;
+
+                        if (_server.LicenseManager.CanDynamicallyDistributeNodes() == false)
                             continue;
 
                         if (goodMembers < topology.ReplicationFactor &&
                             TryFindFitNode(rehab, dbName, topology, clusterTopology, current, out var node))
                         {
                             topology.Promotables.Add(node);
-                            topology.DemotionReasons[node] = $"Maintaine the replication factor and create new rplica instead of node {rehab}";
+                            topology.DemotionReasons[node] = $"Maintain the replication factor and create new replica instead of node {rehab}";
                             topology.PromotablesStatus[node] = DatabasePromotionStatus.WaitingForFirstPromotion;
                             return $"The rehab node {rehab} was too long in rehabilitation, create node {node} to replace it";
                         }
@@ -500,7 +511,7 @@ namespace Raven.Server.ServerWide.Maintenance
             {
                 if (_logger.IsInfoEnabled)
                 {
-                    _logger.Info($"The database {dbName} on {promotable} not ready to be promoted, because the change vectors are {status}.\n" +
+                    _logger.Info($"The database {dbName} on {promotable} not ready to be promoted, because the change vectors are in status: '{status}'.\n" +
                                  $"mentor's change vector : {mentorPrevDbStats.LastChangeVector}, node's change vector : {promotableDbStats.LastChangeVector}");
                 }
 
@@ -508,11 +519,11 @@ namespace Raven.Server.ServerWide.Maintenance
                 if (topology.PromotablesStatus.TryGetValue(promotable, out var currentStatus) == false
                     || currentStatus != DatabasePromotionStatus.ChangeVectorNotMerged)
                 {
-                    topology.DemotionReasons[promotable] = $"node is not ready to be promoted, because the change vectors are {status}.\n" +
+                    topology.DemotionReasons[promotable] = $"Node is not ready to be promoted, because the change vectors are in status: '{status}'.\n" +
                                                            $"mentor's change vector : {mentorPrevDbStats.LastChangeVector},\n" +
                                                            $"node's change vector : {promotableDbStats.LastChangeVector}";
                     topology.PromotablesStatus[promotable] = DatabasePromotionStatus.ChangeVectorNotMerged;
-                    return (false, $"Node {promotable} not ready to be a member, because the change vector is in status {status} (should be AlreadyMerged)");
+                    return (false, $"Node {promotable} not ready to be a member, because the change vector is in status: '{status}' (should be AlreadyMerged)");
                 }
             }
             return (false, null);
@@ -702,7 +713,7 @@ namespace Raven.Server.ServerWide.Maintenance
             return true;
         }
 
-        private Task<(long Etag, object Result)> UpdateTopology(UpdateTopologyCommand cmd)
+        private Task<(long Index, object Result)> UpdateTopology(UpdateTopologyCommand cmd)
         {
             if (_engine.LeaderTag != _server.NodeTag)
             {
@@ -712,7 +723,7 @@ namespace Raven.Server.ServerWide.Maintenance
             return _engine.PutAsync(cmd);
         }
 
-        private Task<(long Etag, object Result)> Delete(DeleteDatabaseCommand cmd)
+        private Task<(long Index, object Result)> Delete(DeleteDatabaseCommand cmd)
         {
             if (_engine.LeaderTag != _server.NodeTag)
             {

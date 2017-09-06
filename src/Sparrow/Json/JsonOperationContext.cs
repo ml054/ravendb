@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Sparrow.Collections;
 using Sparrow.Json.Parsing;
 using Sparrow.LowMemory;
+using Sparrow.Threading;
 using Sparrow.Utils;
 
 #if VALIDATE
@@ -32,18 +33,18 @@ namespace Sparrow.Json
         private AllocatedMemoryData _tempBuffer;
         private List<GCHandle> _pinnedObjects;
    
-        private readonly FastDictionary<string, LazyStringValue, OrdinalStringStructComparer> _fieldNames = new FastDictionary<string, LazyStringValue, OrdinalStringStructComparer>(OrdinalStringStructComparer.Instance);
+        private readonly Dictionary<string, LazyStringValue> _fieldNames = new Dictionary<string, LazyStringValue>(OrdinalStringStructComparer.Instance);
 
         private struct PathCacheHolder
         {
-            public PathCacheHolder(FastDictionary<StringSegment, object, StringSegmentEqualityStructComparer> path, FastDictionary<int, object, NumericEqualityComparer> byIndex)
+            public PathCacheHolder(Dictionary<StringSegment, object> path, Dictionary<int, object> byIndex)
             {
                 Path = path;
                 ByIndex = byIndex;
             }
             
-            public readonly FastDictionary<StringSegment, object, StringSegmentEqualityStructComparer> Path;
-            public readonly FastDictionary<int, object, NumericEqualityComparer> ByIndex;
+            public readonly Dictionary<StringSegment, object> Path;
+            public readonly Dictionary<int, object> ByIndex;
         }
 
         private int _numberOfAllocatedPathCaches = -1;
@@ -53,7 +54,7 @@ namespace Sparrow.Json
         private readonly FastList<LazyStringValue> _allocateStringValues = new FastList<LazyStringValue>(256);
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AcquirePathCache(out FastDictionary<StringSegment, object, StringSegmentEqualityStructComparer> pathCache, out FastDictionary<int, object, NumericEqualityComparer> pathCacheByIndex)
+        public void AcquirePathCache(out Dictionary<StringSegment, object> pathCache, out Dictionary<int, object> pathCacheByIndex)
         {
             // PERF: Avoids allocating gigabytes in FastDictionary instances on high traffic RW operations like indexing. 
             if (_numberOfAllocatedPathCaches >= 0)
@@ -68,13 +69,13 @@ namespace Sparrow.Json
                 return;
             }
 
-            pathCache = new FastDictionary<StringSegment, object, StringSegmentEqualityStructComparer>(default(StringSegmentEqualityStructComparer));
-            pathCacheByIndex = new FastDictionary<int, object, NumericEqualityComparer>(default(NumericEqualityComparer));
+            pathCache = new Dictionary<StringSegment, object>(default(StringSegmentEqualityStructComparer));
+            pathCacheByIndex = new Dictionary<int, object>(default(NumericEqualityComparer));
         }
 
-        public void ReleasePathCache(FastDictionary<StringSegment, object, StringSegmentEqualityStructComparer> pathCache, FastDictionary<int, object, NumericEqualityComparer> pathCacheByIndex)
+        public void ReleasePathCache(Dictionary<StringSegment, object> pathCache, Dictionary<int, object> pathCacheByIndex)
         {
-            if (_numberOfAllocatedPathCaches < _allocatePathCaches.Length - 1 && pathCache.Capacity < 256)
+            if (_numberOfAllocatedPathCaches < _allocatePathCaches.Length - 1 && pathCache.Count < 256)
             {
                 pathCache.Clear();
                 pathCacheByIndex.Clear();
@@ -179,14 +180,14 @@ namespace Sparrow.Json
 
         public long AllocatedMemory => _arenaAllocator.TotalUsed;
 
-        protected readonly LowMemoryFlag LowMemoryFlag;
+        protected readonly SharedMultipleUseFlag LowMemoryFlag;
 
         public static JsonOperationContext ShortTermSingleUse()
         {
-            return new JsonOperationContext(4096, 1024, LowMemoryFlag.None);
+            return new JsonOperationContext(4096, 1024, SharedMultipleUseFlag.None);
         }
 
-        public JsonOperationContext(int initialSize, int longLivedSize, LowMemoryFlag lowMemoryFlag)
+        public JsonOperationContext(int initialSize, int longLivedSize, SharedMultipleUseFlag lowMemoryFlag)
         {
             Debug.Assert(lowMemoryFlag != null);
             
@@ -396,10 +397,10 @@ namespace Sparrow.Json
             int memorySize = maxByteCount + escapePositionsSize;
             var memory = longLived ? GetLongLivedMemory(memorySize) : GetMemory(memorySize);
 
-            fixed (char* pField = field.String)
+            fixed (char* pField = field.Buffer)
             {
                 var address = memory.Address;
-                var actualSize = Encodings.Utf8.GetBytes(pField + field.Start, field.Length, address, memory.SizeInBytes);
+                var actualSize = Encodings.Utf8.GetBytes(pField + field.Offset, field.Length, address, memory.SizeInBytes);
 
                 state.FindEscapePositionsIn(address, actualSize, escapePositionsSize);
 

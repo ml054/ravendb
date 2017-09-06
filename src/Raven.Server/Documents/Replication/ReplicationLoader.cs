@@ -20,6 +20,7 @@ using Sparrow.Json;
 using Sparrow.Json.Parsing;
 using Sparrow.Logging;
 using Raven.Server.Utils;
+using Sparrow.Threading;
 using Sparrow.Utils;
 
 namespace Raven.Server.Documents.Replication
@@ -37,7 +38,7 @@ namespace Raven.Server.Documents.Replication
         internal ManualResetEventSlim DebugWaitAndRunReplicationOnce;
 
         public readonly DocumentDatabase Database;
-        private volatile bool _isInitialized;
+        private SingleUseFlag _isInitialized = new SingleUseFlag();
 
         private readonly Timer _reconnectAttemptTimer;
         internal readonly int MinimalHeartbeatInterval;
@@ -123,12 +124,12 @@ namespace Raven.Server.Documents.Replication
         {
             _server = server;
             Database = database;
-            var reconnectTime = TimeSpan.FromSeconds(30);
+            var config = Database.Configuration.Replication;
+            var reconnectTime = config.RetryReplicateAfter.AsTimeSpan;
             _log = LoggingSource.Instance.GetLogger<ReplicationLoader>(Database.Name);
             _reconnectAttemptTimer = new Timer(state => ForceTryReconnectAll(),
                 null, reconnectTime, reconnectTime);
-            MinimalHeartbeatInterval =
-               (int)Database.Configuration.Replication.ReplicationMinimalHeartbeat.AsTimeSpan.TotalMilliseconds;
+            MinimalHeartbeatInterval = (int)config.ReplicationMinimalHeartbeat.AsTimeSpan.TotalMilliseconds;
 
         }
 
@@ -329,8 +330,7 @@ namespace Raven.Server.Documents.Replication
             ConflictSolverConfig = record.ConflictSolverConfig;
             ConflictResolver = new ResolveConflictOnReplicationConfigurationChange(this, _log);
             ConflictResolver.RunConflictResolversOnce();
-
-            _isInitialized = true;
+            _isInitialized.Raise();
         }
 
         public void HandleDatabaseRecordChange(DatabaseRecord newRecord)
@@ -725,6 +725,7 @@ namespace Raven.Server.Documents.Replication
             var numberOfSiblings = _destinations.Count;
             if (numberOfSiblings == 0)
             {
+             
                 if (_log.IsInfoEnabled)
                     _log.Info("Was asked to get write assurance on a database without replication, ignoring the request. " +
                               $"InternalDestinations: {_internalDestinations.Count}. " +
@@ -788,7 +789,8 @@ namespace Raven.Server.Documents.Replication
             var count = 0;
             foreach (var destination in _outgoing)
             {
-                if (ChangeVectorUtils.GetConflictStatus(destination.LastAcceptedChangeVector, changeVector) == ConflictStatus.AlreadyMerged)
+                var conflictStatus = ChangeVectorUtils.GetConflictStatus(changeVector, destination.LastAcceptedChangeVector);
+                if (conflictStatus == ConflictStatus.AlreadyMerged)
                     count++;
             }
             return count;

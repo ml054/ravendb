@@ -4,6 +4,7 @@ import adminJsScriptCommand = require("commands/maintenance/adminJsScriptCommand
 import eventsCollector = require("common/eventsCollector");
 import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
 import databasesManager = require("common/shell/databasesManager");
+import defaultAceCompleter = require("common/defaultAceCompleter");
 
 type jsConsolePatchOption = "Server" | "Database";
 type consoleJsSampleDto = {
@@ -52,6 +53,8 @@ class adminJsConsole extends viewModelBase {
     model = ko.observable<adminJsModel>();
     executionResult = ko.observable<string>();
     previewItem = ko.observable<consoleJsSampleDto>();
+    
+    completer = defaultAceCompleter.completer();
 
     databaseNames: KnockoutComputed<Array<string>>;
     previewCode: KnockoutComputed<string>;
@@ -148,9 +151,7 @@ class adminJsConsole extends viewModelBase {
             new adminJsScriptCommand(this.model().script(), this.model().patchOption() === "Database" ? this.model().selectedDatabase() : undefined)
                 .execute()
                 .done((response) => {
-                    const result = response.Result;
-                    const formatedResponse = result != null ? JSON.stringify(result, null, 4) : "Response was empty";
-                    this.executionResult(formatedResponse);
+                    this.executionResult(response || "Response was empty");
                 })
                 .always(() => this.spinners.execute(false));
         }

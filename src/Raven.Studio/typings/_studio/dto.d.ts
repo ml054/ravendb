@@ -128,10 +128,6 @@ interface saveDocumentResponseDto {
     Results: Array<changedOnlyMetadataFieldsDto>;
 }
 
-interface transformerParamInfo {
-    name: string;
-    hasDefault: boolean;
-}
 interface operationIdDto {
     OperationId: number;
 }
@@ -195,19 +191,8 @@ interface workTimeUnit {
     endTime: number;
 }
 
-interface transformerQueryDto {
-    transformerName: string;
-    queryParams: Array<transformerParamDto>;
-}
-
-interface transformerParamDto {
-    name: string;
-    value: string;
-}
-
 interface queryDto {
     queryText: string;
-    transformerQuery: transformerQueryDto;
     showFields: boolean;
     indexEntries: boolean;
 }
@@ -260,8 +245,8 @@ interface IndexingPerformanceOperationWithParent extends Raven.Client.Documents.
 
 interface subscriptionResponseItemDto {
     SubscriptionId: number;
-    Criteria: Raven.Client.Documents.Subscriptions.SubscriptionCriteria;
     AckEtag: number;
+    Query: string;
     TimeOfReceivingLastAck: string;
     Connection: subscriptionConnectionInfoDto;
     RecentConnections: Array<subscriptionConnectionInfoDto>;
@@ -291,23 +276,12 @@ interface pagedResultWithAvailableColumns<T> extends pagedResult<T> {
     availableColumns: string[];
 }
 
-interface clusterTopologyDto {
-    Topology: Raven.Client.Http.ClusterTopology;
-    Leader: string;
-    CurrentTerm: number;
-    NodeTag: string;
-    Status: { [key: string]: Raven.Client.Http.NodeStatus; };
-}
-
 type clusterNodeType = "Member" | "Promotable" | "Watcher";
 type databaseGroupNodeType = "Member" | "Promotable" | "Rehab";
-type patchOption = "Document" | "Query";
 type subscriptionStartType = 'Beginning of Time' | 'Latest Document' | 'Change Vector';
 
 interface patchDto extends documentDto {
-    PatchOnOption: patchOption;
     Query: string;
-    Script: string;
     SelectedItem: string;
 }
 
@@ -322,16 +296,32 @@ interface externalReplicationDataFromUI {
     DestinationURL: string;
 } 
 
-interface subscriptionDataFromUI {
+interface ravenEtlDataFromUI {
     TaskName: string;
-    Script: string;
-    Collection: string;
-    ChangeVectorEntry: string;
-    IncludeRevisions: boolean;
+    ConnectionStringName: string;
+    AllowEtlOnNonEncryptedChannel: boolean;
+    // list of scripts... // TODO..
 } 
 
+interface subscriptionDataFromUI {
+    TaskName: string;
+    Query: string;
+    ChangeVector: Raven.Client.Constants.Documents.SubscriptionChangeVectorSpecialStates | string;
+} 
 
 interface layoutable {
     x: number;
     y: number;
 }
+
+
+interface autoCompleteWordList {
+    caption: string; 
+    value: string; 
+    score: number; 
+    meta: string 
+}
+
+type autoCompleteCompleter = (editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: AceAjax.Position, prefix: string, callback: (errors: any[], wordlist: autoCompleteWordList[]) => void) => void;
+type certificateMode = "generate" | "upload" | "editExisting";
+    

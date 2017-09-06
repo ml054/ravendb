@@ -23,6 +23,7 @@ using Raven.Server.NotificationCenter.Notifications;
 using Raven.Server.NotificationCenter.Notifications.Details;
 using Raven.Server.Utils;
 using Sparrow;
+using Sparrow.Threading;
 using Sparrow.Utils;
 
 namespace Raven.Server.Documents.Replication
@@ -122,7 +123,7 @@ namespace Raven.Server.Documents.Replication
             try
             {
                 var connectionInfo = ReplicationUtils.GetTcpInfo(Destination.Url, GetNode(), "Replication",
-                    _parent._server.RavenServer.ServerCertificateHolder.Certificate);
+                    _parent._server.RavenServer.ClusterCertificateHolder.Certificate);
 
                 if (_log.IsInfoEnabled)
                     _log.Info($"Will replicate to {Destination.FromString()} via {connectionInfo.Url}");
@@ -138,12 +139,11 @@ namespace Raven.Server.Documents.Replication
                         throw new InvalidOperationException(
                             $"{record.DatabaseName} is encrypted, and require HTTPS for replication, but had endpoint with url {Destination.Url} to database {Destination.Database}");
                 }
-                using (_tcpClient = new TcpClient())
+                using (_tcpClient = TcpUtils.NewTcpClient(_parent._server.Engine.TcpConnectionTimeout))
                 {
-                    TcpUtils.SetTimeouts(_tcpClient, _parent._server.Engine.TcpConnectionTimeout);
                     TcpUtils.ConnectSocketAsync(connectionInfo, _tcpClient, _log)
                         .Wait(CancellationToken);
-                    var wrapSsl = TcpUtils.WrapStreamWithSslAsync(_tcpClient, connectionInfo, _parent._server.RavenServer.ServerCertificateHolder.Certificate);
+                    var wrapSsl = TcpUtils.WrapStreamWithSslAsync(_tcpClient, connectionInfo, _parent._server.RavenServer.ClusterCertificateHolder.Certificate);
 
                     wrapSsl.Wait(CancellationToken);
 
@@ -726,13 +726,13 @@ namespace Raven.Server.Documents.Replication
             _waitForChanges.Set();
         }
 
-        private int _disposed;
+        private SingleUseFlag _disposed = new SingleUseFlag();
         private readonly DateTime _startedAt = DateTime.UtcNow;
 
         public void Dispose()
         {
-            //There are multiple invocations of dispose, this happens sometimes during tests, causing failures.
-            if (Interlocked.CompareExchange(ref _disposed, 1, 0) == 1)
+            // There are multiple invocations of dispose, this happens sometimes during tests, causing failures.
+            if (!_disposed.Raise())
                 return;
             if (_log.IsInfoEnabled)
                 _log.Info($"Disposing OutgoingReplicationHandler ({FromToString})");

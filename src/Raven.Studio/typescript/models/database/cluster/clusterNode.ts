@@ -2,16 +2,34 @@
 
 import clusterTopology = require("models/database/cluster/clusterTopology");
 import generalUtils = require("common/generalUtils");
+import license = require("models/auth/license");
 
 class clusterNode {
     tag = ko.observable<string>();
     serverUrl = ko.observable<string>();
     type = ko.observable<clusterNodeType>();
     connected = ko.observable<boolean>();
+    utilizedCores = ko.observable<number>();
+    numberOfCores = ko.observable<number>();
+    installedMemoryInGb = ko.observable<number>();
+    usableMemoryInGb = ko.observable<number>();
     errorDetails = ko.observable<string>();
     errorDetailsShort = ko.pureComputed(() => {
         const longError = this.errorDetails();
         return generalUtils.trimMessage(longError);
+    });
+
+    utilizedMemoryInGb = ko.pureComputed(() => {
+        const licenseStatus = license.licenseStatus();
+        return this.utilizedCores() * licenseStatus.Ratio;
+    });
+
+    cssCores = ko.pureComputed(() => {
+        if (this.utilizedCores() >= this.numberOfCores()) {
+            return "text-success";
+        }
+
+        return "text-warning";
     });
 
     cssIcon = ko.pureComputed(() => {
@@ -30,6 +48,10 @@ class clusterNode {
         this.tag(incoming.tag());
         this.type(incoming.type());
         this.connected(incoming.connected());
+        this.utilizedCores(incoming.utilizedCores());
+        this.numberOfCores(incoming.numberOfCores());
+        this.installedMemoryInGb(incoming.installedMemoryInGb());
+        this.usableMemoryInGb(incoming.usableMemoryInGb());
         this.errorDetails(incoming.errorDetails());
     }
 
@@ -73,7 +95,7 @@ class clusterNode {
                 } else if (this.tag() === "?") {
                     return "Passive";
                 } else {
-                    return "Voting";
+                    return this.connected() ? "Voting" : "Error";
                 }
             }
 
@@ -89,7 +111,11 @@ class clusterNode {
         return ko.pureComputed(() => {
             const topology = topologyProvider();
             if (!topology.leader()) {
-                return this.type() === "Watcher" ? "state-default" : "state-info";
+                if (this.type() === "Watcher") {
+                    return "state-default";
+                }
+                
+                return this.connected() ? "state-info" : "state-danger";
             }
 
             if (topology.nodeTag() !== topology.leader()) {

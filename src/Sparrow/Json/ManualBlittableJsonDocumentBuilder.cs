@@ -294,11 +294,13 @@ namespace Sparrow.Json
                     WriteValue((long)value);
                     break;
                 case BlittableJsonToken.LazyNumber:
-                    WriteValue((float)value);
+                    WriteValue((LazyNumberValue)value);
                     break;
                 case BlittableJsonToken.String:
+                    WriteValue((LazyStringValue)value);
+                    break;
                 case BlittableJsonToken.CompressedString:
-                    WriteValue(value.ToString());
+                    WriteValue((LazyCompressedStringValue)value);
                     break;
                 case BlittableJsonToken.Boolean:
                     WriteValue((bool)value);
@@ -463,6 +465,47 @@ namespace Sparrow.Json
             _continuationState.Push(currentState);
         }
 
+        public void WriteValue(LazyStringValue value)
+        {
+            var currentState = _continuationState.Pop();
+            BlittableJsonToken stringToken;
+            
+
+            var valuePos = _writer.WriteValue(value, out stringToken,UsageMode.None,null);
+            _writeToken = new WriteToken //todo: figure out if we really need those WriteTokens
+            {
+                ValuePos = valuePos,
+                WrittenToken = stringToken
+            };
+
+            if (currentState.FirstWrite == -1)
+                currentState.FirstWrite = valuePos;
+
+            currentState = FinishWritingScalarValue(currentState);
+            _continuationState.Push(currentState);
+        }
+
+        public void WriteValue(LazyCompressedStringValue value)
+        {
+            var currentState = _continuationState.Pop();
+            BlittableJsonToken stringToken;
+
+            //public unsafe int WriteValue(byte* buffer, int size, out BlittableJsonToken token, UsageMode mode, int? initialCompressedSize)
+            //var valuePos = _writer.WriteValue(value, out stringToken, UsageMode.None, null);
+            var valuePos = _writer.WriteValue(value, out stringToken, UsageMode.None);
+            _writeToken = new WriteToken //todo: figure out if we really need those WriteTokens
+            {
+                ValuePos = valuePos,
+                WrittenToken = stringToken
+            };
+
+            if (currentState.FirstWrite == -1)
+                currentState.FirstWrite = valuePos;
+
+            currentState = FinishWritingScalarValue(currentState);
+            _continuationState.Push(currentState);
+        }
+
         public unsafe void WriteEmbeddedBlittableDocument(BlittableJsonReaderObject document)
         {
             WriteEmbeddedBlittableDocument(document.BasePointer, document.Size);
@@ -471,8 +514,7 @@ namespace Sparrow.Json
         public unsafe void WriteEmbeddedBlittableDocument(byte* ptr, int size)
         {
             var currentState = _continuationState.Pop();
-            BlittableJsonToken token;
-            var valuePos = _writer.WriteValue(ptr, size, out token, UsageMode.None, null);
+            var valuePos = _writer.WriteValue(ptr, size, out _, UsageMode.None, null);
             _writeToken = new WriteToken
             {
                 ValuePos = valuePos,

@@ -43,22 +43,23 @@ namespace Raven.Server.Web.System
 
         public static readonly Dictionary<string, string> FileExtensionToContentTypeMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
+            // HTML does not have charset because the HTML is expected to declare the charset itself
             {".html", "text/html"},
             {".htm", "text/html"},
-            {".css", "text/css"},
-            {".js", "text/javascript"},
+            {".css", "text/css; charset=utf-8"},
+            {".js", "text/javascript; charset=utf-8"},
             {".ico", "image/vnd.microsoft.icon"},
             {".jpg", "image/jpeg"},
             {".gif", "image/gif"},
             {".png", "image/png"},
             {".xap", "application/x-silverlight-2"},
-            {".json", "application/json"},
+            {".json", "application/json; charset=utf-8"},
             {".eot", "application/vnd.ms-fontobject"},
             {".svg", "image/svg+xml"},
             {".ttf", "application/octet-stream"},
             {".woff", "application/font-woff"},
             {".woff2", "application/font-woff2"},
-            {".appcache", "text/cache-manifest"}
+            {".appcache", "text/cache-manifest; charset=utf-8"}
         };
 
         private static FileInfo TryGetFileName(string basePath, string fileName)
@@ -125,8 +126,7 @@ namespace Raven.Server.Web.System
         public async Task GetStudioFile()
         {
             var fileName = new StringSegment(
-                RouteMatch.Url,
-                RouteMatch.Url.Length - RouteMatch.MatchLength, RouteMatch.MatchLength);
+                RouteMatch.Url, RouteMatch.MatchLength, RouteMatch.Url.Length - RouteMatch.MatchLength);
 
             var env = (IHostingEnvironment)HttpContext.RequestServices.GetService(typeof(IHostingEnvironment));
 
@@ -147,7 +147,7 @@ namespace Raven.Server.Web.System
                 return;
             }
 
-            WriteFileFromZip(zipFilePath, fileName);
+            await WriteFileFromZip(zipFilePath, fileName);
         }
 
         [RavenAction("/", "GET", AuthorizationStatus.UnauthenticatedClients)]
@@ -158,12 +158,12 @@ namespace Raven.Server.Web.System
             return Task.CompletedTask;
         }
 
-        private void WriteFileFromZip(string zipPath, string fileName)
+        private async Task WriteFileFromZip(string zipPath, string fileName)
         {
-            var etagValue = GetLongFromHeaders("If-None-Match") ?? 
+            var etagValue = GetLongFromHeaders("If-None-Match") ??
                 GetLongFromHeaders("If-Match");
             var currentFileEtag = ZipLastChangedDate.GetOrAdd(
-                zipPath, 
+                zipPath,
                 f => File.GetLastWriteTime(f).Ticks);
 
             if (etagValue == currentFileEtag)
@@ -190,8 +190,8 @@ namespace Raven.Server.Web.System
                 WriteETag(currentFileEtag);
                 using (var entry = zipEntry.Open())
                 {
-                    entry.CopyTo(responseStream);
-                    entry.Flush();
+                    await entry.CopyToAsync(responseStream);
+                    await entry.FlushAsync();
                 }
             }
         }
@@ -199,8 +199,8 @@ namespace Raven.Server.Web.System
         private static string GetContentType(string fileExtension)
         {
             return FileExtensionToContentTypeMapping.TryGetValue(fileExtension, out string contentType)
-    ? contentType
-    : "text/plain";
+                ? contentType
+                : "text/plain; charset=utf-8";
         }
 
         public string GetHeader(string key)

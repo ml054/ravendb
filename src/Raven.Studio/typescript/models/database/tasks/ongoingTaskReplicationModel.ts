@@ -9,13 +9,14 @@ class ongoingTaskReplicationModel extends ongoingTask {
 
     destinationDB = ko.observable<string>();
     destinationURL = ko.observable<string>();
+    showReplicationDetails = ko.observable(false);
   
     validationGroup: KnockoutValidationGroup;
-
-    constructor(dto: Raven.Client.ServerWide.Operations.OngoingTaskReplication, isEdit: boolean) {
+    
+    constructor(dto: Raven.Client.ServerWide.Operations.OngoingTaskReplication, isInListView: boolean) {
         super();
 
-        this.isEdit = isEdit;
+        this.isInTasksListView = isInListView;
         this.update(dto); 
         this.initializeObservables();
         this.initValidation();
@@ -30,12 +31,17 @@ class ongoingTaskReplicationModel extends ongoingTask {
 
     update(dto: Raven.Client.ServerWide.Operations.OngoingTaskReplication) {
         super.update(dto);
+
         this.destinationDB(dto.DestinationDatabase);
         this.destinationURL(dto.DestinationUrl);
     }
 
     editTask() {
         router.navigate(this.editUrl());
+    }
+
+    toggleDetails() {
+        this.showReplicationDetails(!this.showReplicationDetails());
     }
 
     toDto(): externalReplicationDataFromUI {
@@ -65,16 +71,12 @@ class ongoingTaskReplicationModel extends ongoingTask {
     }
 
     static empty(): ongoingTaskReplicationModel {
-        return new ongoingTaskReplicationModel({
+        return new ongoingTaskReplicationModel({  
             TaskName: "",
             TaskType: "Replication",
             DestinationDatabase: null,
             DestinationUrl: clusterTopologyManager.default.localNodeUrl()
-        } as Raven.Client.ServerWide.Operations.OngoingTaskReplication, true);
-    }
-
-    protected generateTaskName(dto: Raven.Client.ServerWide.Operations.OngoingTaskReplication): string {
-        return `External replication to ${dto.DestinationDatabase}@${dto.DestinationUrl}`;
+        } as Raven.Client.ServerWide.Operations.OngoingTaskReplication, false);
     }
 }
 

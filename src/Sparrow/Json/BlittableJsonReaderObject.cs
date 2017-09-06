@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -23,8 +24,8 @@ namespace Sparrow.Json
 
         public DynamicJsonValue Modifications;
 
-        private FastDictionary<StringSegment, object, StringSegmentEqualityStructComparer> _objectsPathCache;
-        private FastDictionary<int, object, NumericEqualityComparer> _objectsPathCacheByIndex;
+        private Dictionary<StringSegment, object> _objectsPathCache;
+        private Dictionary<int, object> _objectsPathCacheByIndex;
 
         public override string ToString()
         {
@@ -660,6 +661,24 @@ namespace Sparrow.Json
             return _propCount;
         }
 
+        public ulong GetHashOfPropertyNames()
+        {
+            ulong hash = (ulong)_propCount;
+            for (int i = 0; i < _propCount; i++)
+            {
+                var propertyNameOffsetPtr = _propNames + sizeof(byte) + i * _propNamesDataOffsetSize;
+                var propertyNameOffset = ReadNumber(propertyNameOffsetPtr, _propNamesDataOffsetSize);
+
+                // Get the relative "In Document" position of the property Name
+                var propRelativePos = (int)(_propNames - propertyNameOffset - _mem);
+                byte offset;
+                var size = ReadVariableSizeInt(propRelativePos, out offset);
+
+                hash = Hashing.XXHash64.Calculate( _mem + propRelativePos + offset, (ulong)size, hash);
+            }
+            return hash;
+        }
+
         public int[] GetPropertiesByInsertionOrder()
         {
             //TODO: Move all callers to use the other overload
@@ -1063,9 +1082,6 @@ namespace Sparrow.Json
 
         protected bool Equals(BlittableJsonReaderObject other)
         {
-            if (_size != other.Size)
-                return false;
-
             if (_propCount != other._propCount)
                 return false;
 

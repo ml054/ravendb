@@ -6,6 +6,7 @@ using System.Threading;
 using Raven.Client.Documents.Changes;
 using Raven.Server.Documents.Replication;
 using Raven.Client.Exceptions.Documents;
+using Raven.Server.Config;
 using Raven.Server.Documents.Revisions;
 using Raven.Server.ServerWide.Context;
 using Raven.Server.Utils;
@@ -19,6 +20,7 @@ using Sparrow.Binary;
 using Sparrow.Collections;
 using Sparrow.Logging;
 using Voron.Data;
+using Voron.Data.RawData;
 using Voron.Exceptions;
 
 namespace Raven.Server.Documents
@@ -40,13 +42,17 @@ namespace Raven.Server.Documents
         private static readonly Slice TombstonesPrefix;
         private static readonly Slice DeletedEtagsSlice;
 
-        public static readonly TableSchema DocsSchema = new TableSchema();
+        public static readonly TableSchema DocsSchema = new TableSchema()
+        {
+            TableType = (byte)TableType.Documents
+        };
+
         public static readonly TableSchema TombstonesSchema = new TableSchema();
         private static readonly TableSchema CollectionsSchema = new TableSchema();
 
         private readonly DocumentDatabase _documentDatabase;
 
-        private FastDictionary<string, CollectionName, OrdinalIgnoreCaseStringStructComparer> _collectionsCache;
+        private Dictionary<string, CollectionName> _collectionsCache;
 
         internal enum TombstoneTable
         {
@@ -200,31 +206,11 @@ namespace Raven.Server.Documents
                      : _documentDatabase.Configuration.Core.DataDirectory.FullPath));
             }
 
-            var basePath = _documentDatabase.Configuration.Core.DataDirectory;
 
-            var tempPath = _documentDatabase.Configuration.Storage.TempPath != null
-                ? _documentDatabase.Configuration.Storage.TempPath.FullPath
-                : basePath.Combine("Scratch").FullPath;
-
-            var journalPath = _documentDatabase.Configuration.Storage.JournalsStoragePath != null
-                ? _documentDatabase.Configuration.Storage.JournalsStoragePath.FullPath
-                : basePath.Combine("Journal").FullPath;
-
-            var options = _documentDatabase.Configuration.Core.RunInMemory
-                ? StorageEnvironmentOptions.CreateMemoryOnly(
-                    _documentDatabase.Configuration.Core.DataDirectory.FullPath,
-                    _documentDatabase.Configuration.Storage.TempPath?.FullPath,
-                    _documentDatabase.IoChanges,
-                    _documentDatabase.CatastrophicFailureNotification)
-                : StorageEnvironmentOptions.ForPath(
-                    _documentDatabase.Configuration.Core.DataDirectory.FullPath,
-                    tempPath,
-                    journalPath,
-                    _documentDatabase.IoChanges,
-                    _documentDatabase.CatastrophicFailureNotification
-                );
+            var options = GetStorageEnvironmentOptionsFromConfiguration(_documentDatabase.Configuration, _documentDatabase.IoChanges, _documentDatabase.CatastrophicFailureNotification);
 
             options.OnNonDurableFileSystemError += _documentDatabase.HandleNonDurableFileSystemError;
+            options.OnRecoveryError += _documentDatabase.HandleOnRecoveryError;
 
             options.GenerateNewDatabaseId = generateNewDatabaseId;
             options.CompressTxAboveSizeInBytes = _documentDatabase.Configuration.Storage.CompressTxAboveSize.GetValue(SizeUnit.Bytes);
@@ -244,9 +230,37 @@ namespace Raven.Server.Documents
             }
         }
 
+        public static StorageEnvironmentOptions GetStorageEnvironmentOptionsFromConfiguration(RavenConfiguration config, IoChangesNotifications ioChanges, CatastrophicFailureNotification catastrophicFailureNotification)
+        {
+            var basePath = config.Core.DataDirectory;
+
+            var tempPath = config.Storage.TempPath != null
+                ? config.Storage.TempPath.FullPath
+                : basePath.Combine("Scratch").FullPath;
+
+            var journalPath = config.Storage.JournalsStoragePath != null
+                ? config.Storage.JournalsStoragePath.FullPath
+                : basePath.Combine("Journal").FullPath;
+
+            if (config.Core.RunInMemory)
+                return StorageEnvironmentOptions.CreateMemoryOnly(
+                    config.Core.DataDirectory.FullPath,
+                    config.Storage.TempPath?.FullPath,
+                    ioChanges,
+                    catastrophicFailureNotification);
+
+            return StorageEnvironmentOptions.ForPath(
+                config.Core.DataDirectory.FullPath,
+                tempPath,
+                journalPath,
+                ioChanges,
+                catastrophicFailureNotification
+            );
+        }
+
         public void Initialize(StorageEnvironmentOptions options)
         {
-            options.SchemaVersion = 6;
+            options.SchemaVersion = 8;
             try
             {
                 Environment = new StorageEnvironment(options);
@@ -503,7 +517,7 @@ namespace Raven.Server.Documents
             }
         }
 
-        public IEnumerable<Document> GetDocuments(DocumentsOperationContext context, List<Slice> ids, int start, int take)
+        public IEnumerable<Document> GetDocuments(DocumentsOperationContext context, List<Slice> ids, int start, int take, Reference<int> totalCount)
         {
             var table = new Table(DocsSchema, context.Transaction.InnerTransaction);
 
@@ -513,13 +527,15 @@ namespace Raven.Server.Documents
                 if (table.ReadByKey(id, out TableValueReader reader) == false)
                     continue;
 
+                totalCount.Value++;
+
                 if (start > 0)
                 {
                     start--;
                     continue;
                 }
                 if (take-- <= 0)
-                    yield break;
+                    continue; // we need to calculate totalCount correctly
 
                 yield return TableValueToDocument(context, ref reader);
             }
@@ -613,7 +629,7 @@ namespace Raven.Server.Documents
             };
         }
 
-        public Document Get(DocumentsOperationContext context, string id)
+        public Document Get(DocumentsOperationContext context, string id, bool throwOnConflict = true)
         {
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentException("Argument is null or whitespace", nameof(id));
@@ -622,13 +638,13 @@ namespace Raven.Server.Documents
 
             using (DocumentIdWorker.GetSliceFromId(context, id, out Slice lowerId))
             {
-                return Get(context, lowerId);
+                return Get(context, lowerId, throwOnConflict);
             }
         }
 
-        public Document Get(DocumentsOperationContext context, Slice lowerId)
+        public Document Get(DocumentsOperationContext context, Slice lowerId, bool throwOnConflict = true)
         {
-            if (GetTableValueReaderForDocument(context, lowerId, out TableValueReader tvr) == false)
+            if (GetTableValueReaderForDocument(context, lowerId, throwOnConflict, out TableValueReader tvr) == false)
                 return null;
 
             var doc = TableValueToDocument(context, ref tvr);
@@ -649,14 +665,15 @@ namespace Raven.Server.Documents
             }
         }
 
-        public bool GetTableValueReaderForDocument(DocumentsOperationContext context, Slice lowerId, out TableValueReader tvr)
+        public bool GetTableValueReaderForDocument(DocumentsOperationContext context, Slice lowerId, bool throwOnConflict, out TableValueReader tvr)
         {
             var table = new Table(DocsSchema, context.Transaction.InnerTransaction);
 
             if (table.ReadByKey(lowerId, out tvr) == false)
             {
-                if (ConflictsStorage.ConflictsCount > 0)
+                if (throwOnConflict && ConflictsStorage.ConflictsCount > 0)
                     ConflictsStorage.ThrowOnDocumentConflict(context, lowerId);
+
                 return false;
             }
             return true;
@@ -678,11 +695,7 @@ namespace Raven.Server.Documents
             return false;
         }
 
-        public IEnumerable<DocumentTombstone> GetTombstonesFrom(
-            DocumentsOperationContext context,
-            long etag,
-            int start,
-            int take)
+        public IEnumerable<DocumentTombstone> GetTombstonesFrom(DocumentsOperationContext context,  long etag, int start, int take)
         {
             var table = new Table(TombstonesSchema, context.Transaction.InnerTransaction);
 
@@ -696,9 +709,24 @@ namespace Raven.Server.Documents
             }
         }
 
-        public IEnumerable<ReplicationBatchItem> GetTombstonesFrom(
-            DocumentsOperationContext context,
-            long etag)
+        public IEnumerable<DocumentTombstone> GetTombstonesFrom(DocumentsOperationContext context, List<string> collections, long etag, int take)
+        {
+            foreach (var collection in collections)
+            {
+                if (take <= 0)
+                    yield break;
+
+                foreach (var tombstone in GetTombstonesFrom(context, collection, etag, 0, int.MaxValue))
+                {
+                    if (take-- <= 0)
+                        yield break;
+
+                    yield return tombstone;
+                }
+            }
+        }
+
+        public IEnumerable<ReplicationBatchItem> GetTombstonesFrom(DocumentsOperationContext context, long etag)
         {
             var table = new Table(TombstonesSchema, context.Transaction.InnerTransaction);
 
@@ -834,7 +862,7 @@ namespace Raven.Server.Documents
             tx.InnerTransaction.LowLevelTransaction.OnDispose += state => reader.Dispose();
         }
 
-        public static Document ParseDocument(JsonOperationContext context, ref TableValueReader tvr)
+        private static Document ParseDocument(JsonOperationContext context, ref TableValueReader tvr)
         {
             var result = new Document
             {
@@ -848,6 +876,32 @@ namespace Raven.Server.Documents
                 Flags = TableValueToFlags((int)DocumentsTable.Flags, ref tvr),
                 TransactionMarker = *(short*)tvr.Read((int)DocumentsTable.TransactionMarker, out size)
             };
+
+            return result;
+        }
+
+        public static Document ParseRawDataSectionDocumentWithValidation(JsonOperationContext context, ref TableValueReader tvr, int expectedSize, out long etag)
+        {
+            var mem = tvr.Read((int)DocumentsTable.Data, out int size);
+
+            if (size > expectedSize || size <= 0)
+                throw new ArgumentException("Data size is invalid, possible corruption when parsing BlittableJsonReaderObject", nameof(size));
+
+            var result = new Document
+            {
+                StorageId = tvr.Id,
+                LowerId = TableValueToString(context, (int)DocumentsTable.LowerId, ref tvr),
+                Id = TableValueToId(context, (int)DocumentsTable.Id, ref tvr),
+                Etag = etag = TableValueToEtag((int)DocumentsTable.Etag, ref tvr),
+                Data = new BlittableJsonReaderObject(mem, size, context),
+                ChangeVector = TableValueToChangeVector(context, (int)DocumentsTable.ChangeVector, ref tvr),
+                LastModified = TableValueToDateTime((int)DocumentsTable.LastModified, ref tvr),
+                Flags = TableValueToFlags((int)DocumentsTable.Flags, ref tvr),
+                TransactionMarker = *(short*)tvr.Read((int)DocumentsTable.TransactionMarker, out size)
+            };
+
+            if (size != sizeof(short))
+                throw new ArgumentException("TransactionMarker size is invalid, possible corruption when parsing BlittableJsonReaderObject", nameof(size));
 
             return result;
         }
@@ -1398,6 +1452,8 @@ namespace Raven.Server.Documents
             }
 
             var collections = context.Transaction.InnerTransaction.OpenTable(CollectionsSchema, CollectionsSlice);
+            if (collections == null)
+                throw new InvalidOperationException("Should never happen!");
 
             name = new CollectionName(collectionName);
             using (Slice.From(context.Allocator, collectionName, out Slice collectionSlice))
@@ -1418,7 +1474,7 @@ namespace Raven.Server.Documents
                 // has to happen after the commit, but while we are holding the write tx lock
                 context.Transaction.InnerTransaction.LowLevelTransaction.BeforeCommitFinalization += _ =>
                 {
-                    var collectionNames = new FastDictionary<string, CollectionName, OrdinalIgnoreCaseStringStructComparer>(_collectionsCache, OrdinalIgnoreCaseStringStructComparer.Instance)
+                    var collectionNames = new Dictionary<string, CollectionName>(_collectionsCache, OrdinalIgnoreCaseStringStructComparer.Instance)
                     {
                         [name.Name] = name
                     };
@@ -1433,9 +1489,9 @@ namespace Raven.Server.Documents
             throw new InvalidOperationException("This method requires active transaction, and no active transactions in the current context...");
         }
 
-        private FastDictionary<string, CollectionName, OrdinalIgnoreCaseStringStructComparer> ReadCollections(Transaction tx)
+        private Dictionary<string, CollectionName> ReadCollections(Transaction tx)
         {
-            var result = new FastDictionary<string, CollectionName, OrdinalIgnoreCaseStringStructComparer>(OrdinalIgnoreCaseStringStructComparer.Instance);
+            var result = new Dictionary<string, CollectionName>(OrdinalIgnoreCaseStringStructComparer.Instance);
 
             var collections = tx.OpenTable(CollectionsSchema, CollectionsSlice);
 
@@ -1502,11 +1558,19 @@ namespace Raven.Server.Documents
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ByteStringContext.ExternalScope TableValueToSlice(
+        public static ByteStringContext.InternalScope TableValueToSlice(
             DocumentsOperationContext context, int index, ref TableValueReader tvr, out Slice slice)
         {
             var ptr = tvr.Read(index, out int size);
-            return Slice.External(context.Allocator, ptr, size, out slice);
+            return Slice.From(context.Allocator, ptr, size, ByteStringType.Immutable, out slice);
         }
+    }
+    
+    public enum TableType : byte
+    {
+        None = 0,
+        Documents = 1,
+        Revisions = 2,
+        Conflicts = 3
     }
 }

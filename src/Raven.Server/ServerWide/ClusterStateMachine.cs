@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Runtime.ExceptionServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
@@ -27,7 +29,6 @@ using Raven.Server.ServerWide.Commands.ETL;
 using Raven.Server.ServerWide.Commands.Indexes;
 using Raven.Server.ServerWide.Commands.PeriodicBackup;
 using Raven.Server.ServerWide.Commands.Subscriptions;
-using Raven.Server.ServerWide.Commands.Transformers;
 using Raven.Server.ServerWide.Context;
 using Raven.Server.Utils;
 using Sparrow;
@@ -46,14 +47,29 @@ namespace Raven.Server.ServerWide
     public class ClusterStateMachine : RachisStateMachine
     {
         private const string LocalNodeStateTreeName = "LocalNodeState";
+        private static readonly StringSegment DatabaseName = new StringSegment("DatabaseName");
+
         private static readonly TableSchema ItemsSchema;
+
+        private static readonly TableSchema CmpXchgItemsSchema;
+        private enum UniqueItems
+        {
+            Key,
+            Index,
+            Value
+        }
+
         private static readonly Slice EtagIndexName;
         private static readonly Slice Items;
+        private static readonly Slice CmpXchg;
+        public static readonly Slice Identities;
 
         static ClusterStateMachine()
         {
             Slice.From(StorageEnvironment.LabelsContext, "Items", out Items);
+            Slice.From(StorageEnvironment.LabelsContext, "CmpXchg", out CmpXchg);
             Slice.From(StorageEnvironment.LabelsContext, "EtagIndexName", out EtagIndexName);
+            Slice.From(StorageEnvironment.LabelsContext, "Identities", out Identities);
 
             ItemsSchema = new TableSchema();
 
@@ -71,6 +87,13 @@ namespace Raven.Server.ServerWide
                 IsGlobal = true,
                 StartIndex = 3
             });
+
+            CmpXchgItemsSchema = new TableSchema();
+            CmpXchgItemsSchema.DefineKey(new TableSchema.SchemaIndexDef
+            {
+                StartIndex = 0,
+                Count = 1
+            });
         }
 
         public event EventHandler<(string DatabaseName, long Index, string Type)> DatabaseChanged;
@@ -87,7 +110,6 @@ namespace Raven.Server.ServerWide
                 return;
             }
 
-
             try
             {
                 string errorMessage;
@@ -99,60 +121,46 @@ namespace Raven.Server.ServerWide
                     case nameof(RemoveNodeFromDatabaseCommand):
                         RemoveNodeFromDatabase(context, cmd, index, leader);
                         break;
-
+                    case nameof(RemoveNodeFromClusterCommand):
+                        RemoveNodeFromCluster(context, cmd, index, leader);
+                        break;
                     case nameof(DeleteValueCommand):
                     case nameof(DeactivateLicenseCommand):
+                    case nameof(DeleteCertificateFromClusterCommand):
                         DeleteValue(context, type, cmd, index, leader);
                         break;
                     case nameof(IncrementClusterIdentityCommand):
-                        if (!ValidatePropertyExistence(cmd,
-                            nameof(IncrementClusterIdentityCommand),
-                            nameof(IncrementClusterIdentityCommand.Prefix),
-                            out errorMessage))
+                        if (ValidatePropertyExistence(cmd, nameof(IncrementClusterIdentityCommand), nameof(IncrementClusterIdentityCommand.Prefix), out errorMessage) == false)
                         {
-                            NotifyLeaderAboutError(index, leader,
-                                new InvalidDataException(errorMessage));
+                            NotifyLeaderAboutError(index, leader, new InvalidDataException(errorMessage));
                             return;
                         }
 
-
-                        var updatedDatabaseRecord = UpdateDatabase(context, type, cmd, index, leader);
-
-                        cmd.TryGet(nameof(IncrementClusterIdentityCommand.Prefix), out string prefix);
-                        Debug.Assert(prefix != null, "since we verified that the property exist, it must not be null");
-
-                        leader?.SetStateOf(index, updatedDatabaseRecord.Identities[prefix]);
+                        SetValueForTypedDatabaseCommand(context, type, cmd, index, leader, out object result);
+                        leader?.SetStateOf(index, result);
                         break;
                     case nameof(UpdateClusterIdentityCommand):
-                        if (!ValidatePropertyExistence(cmd,
-                            nameof(UpdateClusterIdentityCommand),
-                            nameof(UpdateClusterIdentityCommand.Identities),
-                            out errorMessage))
+                        if (ValidatePropertyExistence(cmd, nameof(UpdateClusterIdentityCommand), nameof(UpdateClusterIdentityCommand.Identities), out errorMessage) == false)
                         {
-                            NotifyLeaderAboutError(index, leader,
-                                new InvalidDataException(errorMessage));
+                            NotifyLeaderAboutError(index, leader, new InvalidDataException(errorMessage));
                             return;
                         }
-                        UpdateDatabase(context, type, cmd, index, leader);
+
+                        SetValueForTypedDatabaseCommand(context, type, cmd, index, leader, out _);
                         break;
                     case nameof(PutIndexCommand):
                     case nameof(PutAutoIndexCommand):
                     case nameof(DeleteIndexCommand):
                     case nameof(SetIndexLockCommand):
                     case nameof(SetIndexPriorityCommand):
-                    case nameof(PutTransformerCommand):
-                    case nameof(SetTransformerLockCommand):
-                    case nameof(DeleteTransformerCommand):
-                    case nameof(RenameTransformerCommand):
                     case nameof(EditRevisionsConfigurationCommand):
                     case nameof(UpdatePeriodicBackupCommand):
                     case nameof(EditExpirationCommand):
                     case nameof(ModifyConflictSolverCommand):
                     case nameof(UpdateTopologyCommand):
                     case nameof(DeleteDatabaseCommand):
-                    case nameof(ModifyCustomFunctionsCommand):
                     case nameof(UpdateExternalReplicationCommand):
-                    case nameof(PromoteDatabaseNodeCommand):                        
+                    case nameof(PromoteDatabaseNodeCommand):
                     case nameof(ToggleTaskStateCommand):
                     case nameof(AddRavenEtlCommand):
                     case nameof(AddSqlEtlCommand):
@@ -163,7 +171,7 @@ namespace Raven.Server.ServerWide
                     case nameof(PutSqlConnectionString):
                     case nameof(RemoveRavenConnectionString):
                     case nameof(RemoveSqlConnectionString):
-                        UpdateDatabase(context, type, cmd, index, leader);
+                        UpdateDatabase(context, type, cmd, index, leader, serverStore);
                         break;
                     case nameof(UpdatePeriodicBackupStatusCommand):
                     case nameof(AcknowledgeSubscriptionBatchCommand):
@@ -171,10 +179,17 @@ namespace Raven.Server.ServerWide
                     case nameof(DeleteSubscriptionCommand):
                     case nameof(UpdateEtlProcessStateCommand):
                     case nameof(ToggleSubscriptionStateCommand):
-                        SetValueForTypedDatabaseCommand(context, type, cmd, index, leader);
+                    case nameof(UpdateSubscriptionClientConnectionTime):
+                        SetValueForTypedDatabaseCommand(context, type, cmd, index, leader, out _);
+                        break;
+                    case nameof(CompareExchangeCommand):
+                        CompareExchange(context, type, cmd, index);
                         break;
                     case nameof(PutLicenseCommand):
                         PutValue<License>(context, type, cmd, index, leader);
+                        break;
+                    case nameof(PutLicenseLimitsCommand):
+                        PutValue<LicenseLimits>(context, type, cmd, index, leader);
                         break;
                     case nameof(PutCertificateCommand):
                         PutValue<CertificateDefinition>(context, type, cmd, index, leader);
@@ -193,6 +208,41 @@ namespace Raven.Server.ServerWide
             catch (Exception e)
             {
                 NotifyLeaderAboutError(index, leader, new CommandExecutionException($"Cannot execute command of type {type}", e));
+            }
+        }
+
+        private void RemoveNodeFromCluster(TransactionOperationContext context, BlittableJsonReaderObject cmd, long index, Leader leader)
+        {
+            var removed = JsonDeserializationCluster.RemoveNodeFromClusterCommand(cmd).RemovedNode;
+            var items = context.Transaction.InnerTransaction.OpenTable(ItemsSchema, Items);
+
+            foreach (var record in ReadAllDatabases(context))
+            {
+                try
+                {
+                    using (Slice.From(context.Allocator, "db/" + record.DatabaseName.ToLowerInvariant(), out Slice lowerKey))
+                    using (Slice.From(context.Allocator, "db/" + record.DatabaseName, out Slice key))
+                    {
+                        if (record.DeletionInProgress != null)
+                        {
+                            record.DeletionInProgress.Remove(removed);
+                            if (record.DeletionInProgress.Count == 0 && record.Topology.Count == 0)
+                            {
+                                DeleteDatabaseRecord(context, index, items, lowerKey, record.DatabaseName);
+                                continue;
+                            }
+                        }
+
+                        var updated = EntityToBlittable.ConvertEntityToBlittable(record, DocumentConventions.Default, context);
+
+                        UpdateValue(index, items, lowerKey, key, updated);
+                    }
+                    NotifyDatabaseChanged(context, record.DatabaseName, index, nameof(RemoveNodeFromCluster));
+                }
+                catch (Exception e)
+                {
+                    NotifyLeaderAboutError(index, leader, e);
+                }
             }
         }
 
@@ -216,8 +266,9 @@ namespace Raven.Server.ServerWide
             return true;
         }
 
-        private void SetValueForTypedDatabaseCommand(TransactionOperationContext context, string type, BlittableJsonReaderObject cmd, long index, Leader leader)
+        private void SetValueForTypedDatabaseCommand(TransactionOperationContext context, string type, BlittableJsonReaderObject cmd, long index, Leader leader, out object result)
         {
+            result = null;
             UpdateValueForDatabaseCommand updateCommand = null;
             try
             {
@@ -235,7 +286,7 @@ namespace Raven.Server.ServerWide
 
                 try
                 {
-                    updateCommand.Execute(context, items, index, record, _parent.CurrentState == RachisConsensus.State.Passive);
+                    updateCommand.Execute(context, items, index, record, _parent.CurrentState == RachisConsensus.State.Passive, out result);
                 }
                 catch (Exception e)
                 {
@@ -251,9 +302,9 @@ namespace Raven.Server.ServerWide
 
         private readonly RachisLogIndexNotifications _rachisLogIndexNotifications = new RachisLogIndexNotifications(CancellationToken.None);
 
-        public async Task WaitForIndexNotification(long index)
+        public async Task WaitForIndexNotification(long index, TimeSpan? timeout = null)
         {
-            await _rachisLogIndexNotifications.WaitForIndexNotification(index, _parent.OperationTimeout);
+            await _rachisLogIndexNotifications.WaitForIndexNotification(index, timeout ?? _parent.OperationTimeout);
         }
 
         private unsafe void RemoveNodeFromDatabase(TransactionOperationContext context, BlittableJsonReaderObject cmd, long index, Leader leader)
@@ -282,15 +333,9 @@ namespace Raven.Server.ServerWide
                 }
                 remove.UpdateDatabaseRecord(databaseRecord, index);
 
-                if (databaseRecord.Topology.AllNodes.Any() == false)
+                if (databaseRecord.DeletionInProgress.Count == 0 && databaseRecord.Topology.Count == 0)
                 {
-                    // delete database record
-                    items.DeleteByKey(lowerKey);
-
-                    // delete all values linked to database record - for subscription, etl etc.
-                    CleanupDatabaseRelatedValues(context, items, databaseName);
-
-                    NotifyDatabaseChanged(context, databaseName, index, nameof(RemoveNodeFromDatabaseCommand));
+                    DeleteDatabaseRecord(context, index, items, lowerKey, databaseName);
                     return;
                 }
 
@@ -302,13 +347,26 @@ namespace Raven.Server.ServerWide
             }
         }
 
-        private static void CleanupDatabaseRelatedValues(TransactionOperationContext context, Table items, string dbNameLowered)
+        private void DeleteDatabaseRecord(TransactionOperationContext context, long index, Table items, Slice lowerKey, string databaseName)
         {
-            var dbValuesPrefix = Helpers.ClusterStateMachineValuesPrefix(dbNameLowered).ToLowerInvariant();
-            using (Slice.From(context.Allocator, dbValuesPrefix, out Slice loweredKey))
+            // delete database record
+            items.DeleteByKey(lowerKey);
+
+            // delete all values linked to database record - for subscription, etl etc.
+            CleanupDatabaseRelatedValues(context, items, databaseName);
+
+            NotifyDatabaseChanged(context, databaseName, index, nameof(RemoveNodeFromDatabaseCommand));
+        }
+
+        private void CleanupDatabaseRelatedValues(TransactionOperationContext context, Table items, string databaseName)
+        {
+            var dbValuesPrefix = Helpers.ClusterStateMachineValuesPrefix(databaseName).ToLowerInvariant();
+            using (Slice.From(context.Allocator, dbValuesPrefix, out var loweredKey))
             {
                 items.DeleteByPrimaryKeyPrefix(loweredKey);
             }
+
+            DeleteIdentities(context, databaseName);
         }
 
         internal static unsafe void UpdateValue(long index, Table items, Slice lowerKey, Slice key, BlittableJsonReaderObject updated)
@@ -436,6 +494,22 @@ namespace Raven.Server.ServerWide
             }
         }
 
+        public override void EnsureNodeRemovalOnDeletion(TransactionOperationContext context, string nodeTag)
+        {
+            var djv = new RemoveNodeFromClusterCommand
+            {
+                RemovedNode = nodeTag
+            }.ToJson(context);
+            var index = _parent.InsertToLeaderLog(context, context.ReadObject(djv, "remove"), RachisEntryFlags.StateMachineCommand);
+            context.Transaction.InnerTransaction.LowLevelTransaction.OnDispose += tx =>
+            {
+                if (tx is LowLevelTransaction llt && llt.Committed)
+                {
+                    _parent.CurrentLeader.AddToEntries(index);
+                }
+            };
+        }
+
         private void NotifyValueChanged(TransactionOperationContext context, string type, long index)
         {
             context.Transaction.InnerTransaction.LowLevelTransaction.OnDispose += transaction =>
@@ -446,10 +520,11 @@ namespace Raven.Server.ServerWide
                         try
                         {
                             ValueChanged?.Invoke(this, (index, type));
+                            _rachisLogIndexNotifications.NotifyListenersAbout(index, null);
                         }
-                        finally
+                        catch (Exception e)
                         {
-                            _rachisLogIndexNotifications.NotifyListenersAbout(index);
+                            _rachisLogIndexNotifications.NotifyListenersAbout(index, e);
                         }
                     }, null);
             };
@@ -465,10 +540,11 @@ namespace Raven.Server.ServerWide
                         try
                         {
                             DatabaseChanged?.Invoke(this, (databaseName, index, type));
+                            _rachisLogIndexNotifications.NotifyListenersAbout(index, null);
                         }
-                        finally
+                        catch (Exception e)
                         {
-                            _rachisLogIndexNotifications.NotifyListenersAbout(index);
+                            _rachisLogIndexNotifications.NotifyListenersAbout(index, e);
                         }
                     }, null);
             };
@@ -484,23 +560,21 @@ namespace Raven.Server.ServerWide
                         try
                         {
                             DatabaseValueChanged?.Invoke(this, (databaseName, index, type));
+                            _rachisLogIndexNotifications.NotifyListenersAbout(index, null);
                         }
-                        finally
+                        catch (Exception e)
                         {
-                            _rachisLogIndexNotifications.NotifyListenersAbout(index);
+                            _rachisLogIndexNotifications.NotifyListenersAbout(index, e);
                         }
                     }, null);
             };
         }
 
-        private static readonly StringSegment DatabaseName = new StringSegment("DatabaseName");
-
-        private DatabaseRecord UpdateDatabase(TransactionOperationContext context, string type, BlittableJsonReaderObject cmd, long index, Leader leader)
+        private void UpdateDatabase(TransactionOperationContext context, string type, BlittableJsonReaderObject cmd, long index, Leader leader, ServerStore serverStore)
         {
             if (cmd.TryGet(DatabaseName, out string databaseName) == false)
                 throw new ArgumentException("Update database command must contain a DatabaseName property");
 
-            DatabaseRecord databaseRecord;
             try
             {
                 var items = context.Transaction.InnerTransaction.OpenTable(ItemsSchema, Items);
@@ -509,6 +583,7 @@ namespace Raven.Server.ServerWide
                 using (Slice.From(context.Allocator, dbKey, out Slice valueName))
                 using (Slice.From(context.Allocator, dbKey.ToLowerInvariant(), out Slice valueNameLowered))
                 {
+                    DatabaseRecord databaseRecord;
                     try
                     {
                         var databaseRecordJson = ReadInternal(context, out long etag, valueNameLowered);
@@ -519,7 +594,7 @@ namespace Raven.Server.ServerWide
                             if (updateCommand.ErrorOnDatabaseDoesNotExists)
                                 NotifyLeaderAboutError(index, leader,
                                     DatabaseDoesNotExistException.CreateWithMessage(databaseName, $"Could not execute update command of type '{type}'."));
-                            return null;
+                            return;
                         }
 
                         databaseRecord = JsonDeserializationCluster.DatabaseRecord(databaseRecordJson);
@@ -529,9 +604,9 @@ namespace Raven.Server.ServerWide
                             NotifyLeaderAboutError(index, leader,
                                 new ConcurrencyException(
                                     $"Concurrency violation at executing {type} command, the database {databaseRecord.DatabaseName} has etag {etag} but was expecting {updateCommand.RaftCommandIndex}"));
-                            return null;
+                            return;
                         }
-
+                        updateCommand.Initialize(serverStore, context);
                         var relatedRecordIdToDelete = updateCommand.UpdateDatabaseRecord(databaseRecord, index);
                         if (relatedRecordIdToDelete != null)
                         {
@@ -542,11 +617,17 @@ namespace Raven.Server.ServerWide
                                 items.DeleteByKey(valueNameToDeleteLowered);
                             }
                         }
+
+                        if (databaseRecord.Topology.Count == 0 && databaseRecord.DeletionInProgress.Count == 0)
+                        {
+                            DeleteDatabaseRecord(context, index, items, valueNameLowered, databaseName);
+                            return;
+                        }
                     }
                     catch (Exception e)
                     {
                         NotifyLeaderAboutError(index, leader, new CommandExecutionException($"Cannot execute command of type {type} for database {databaseName}", e));
-                        return null;
+                        return;
                     }
 
                     var updatedDatabaseBlittable = EntityToBlittable.ConvertEntityToBlittable(databaseRecord, DocumentConventions.Default, context);
@@ -557,21 +638,22 @@ namespace Raven.Server.ServerWide
             {
                 NotifyDatabaseChanged(context, databaseName, index, type);
             }
-
-            return databaseRecord;
         }
-
 
         public override bool ShouldSnapshot(Slice slice, RootObjectType type)
         {
-            return slice.Content.Match(Items.Content);
+            return slice.Content.Match(Items.Content)
+                   || slice.Content.Match(CmpXchg.Content)
+                   || slice.Content.Match(Identities.Content);
         }
 
         public override void Initialize(RachisConsensus parent, TransactionOperationContext context)
         {
             base.Initialize(parent, context);
             ItemsSchema.Create(context.Transaction.InnerTransaction, Items, 32);
+            CmpXchgItemsSchema.Create(context.Transaction.InnerTransaction, CmpXchg, 32);
             context.Transaction.InnerTransaction.CreateTree(LocalNodeStateTreeName);
+            context.Transaction.InnerTransaction.CreateTree(Identities);
         }
 
         public unsafe void PutLocalState(TransactionOperationContext context, string key, BlittableJsonReaderObject value)
@@ -632,6 +714,67 @@ namespace Raven.Server.ServerWide
             }
         }
 
+        public unsafe void CompareExchange(TransactionOperationContext context, string type, BlittableJsonReaderObject cmd, long index)
+        {
+            var items = context.Transaction.InnerTransaction.OpenTable(CmpXchgItemsSchema, CmpXchg);
+            cmd.TryGet(nameof(CompareExchangeCommand.Key), out string key);
+            cmd.TryGet(nameof(CompareExchangeCommand.Index), out long cmdIndex);
+            var dbKey = key.ToLowerInvariant();
+            using (Slice.From(context.Allocator, dbKey, out Slice keySlice))
+            using (items.Allocate(out TableValueBuilder tvb))
+            {
+                cmd.TryGet(nameof(CompareExchangeCommand.Value), out BlittableJsonReaderObject value);
+                value = context.ReadObject(value, nameof(CompareExchangeCommand.Value));
+
+                tvb.Add(keySlice.Content.Ptr, keySlice.Size);
+                tvb.Add(index);
+                tvb.Add(value.BasePointer, value.Size);
+
+                if (items.ReadByKey(keySlice, out var reader))
+                {
+                    var itemIndex = *(long*)reader.Read((int)UniqueItems.Index, out var _);
+                    if (cmdIndex == itemIndex)
+                    {
+                        items.Update(reader.Id, tvb);
+                        return;
+                    }
+                    throw new ConcurrencyException($"The key '{key}' was already changed by an other command.");
+                }
+                items.Set(tvb);
+            }
+            context.Transaction.InnerTransaction.LowLevelTransaction.OnDispose += transaction =>
+            {
+                if (transaction is LowLevelTransaction llt && llt.Committed)
+                    TaskExecutor.Execute(_ =>
+                    {
+                        try
+                        {
+                            _rachisLogIndexNotifications.NotifyListenersAbout(index, null);
+                        }
+                        catch (Exception e)
+                        {
+                            _rachisLogIndexNotifications.NotifyListenersAbout(index, e);
+                        }
+                    }, null);
+            };
+        }
+
+        public unsafe (long Index, BlittableJsonReaderObject Value) GetCmpXchg(TransactionOperationContext context, string key)
+        {
+            var items = context.Transaction.InnerTransaction.OpenTable(CmpXchgItemsSchema, CmpXchg);
+            var dbKey = key.ToLowerInvariant();
+            using (Slice.From(context.Allocator, dbKey, out Slice keySlice))
+            {
+                if (items.ReadByKey(keySlice, out var reader))
+                {
+                    var index = *(long*)reader.Read((int)UniqueItems.Index, out var _);
+                    var value = reader.Read((int)UniqueItems.Value, out var size);
+                    return (index, new BlittableJsonReaderObject(value, size, context));
+                }
+                return (0, null);
+            }
+        }
+
         public IEnumerable<string> ItemKeysStartingWith(TransactionOperationContext context, string prefix, int start, int take)
         {
             var items = context.Transaction.InnerTransaction.OpenTable(ItemsSchema, Items);
@@ -666,6 +809,45 @@ namespace Raven.Server.ServerWide
             }
         }
 
+        public int GetClusterSize(TransactionOperationContext context)
+        {
+            var items = context.Transaction.InnerTransaction.OpenTable(ItemsSchema, Items);
+
+            const string dbKey = "db/";
+            var count = 0;
+
+            using (Slice.From(context.Allocator, dbKey, out Slice loweredPrefix))
+            {
+                foreach (var _ in items.SeekByPrimaryKeyPrefix(loweredPrefix, Slices.Empty, 0))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        public IEnumerable<DatabaseRecord> ReadAllDatabases(TransactionOperationContext context, int start = 0, int take = int.MaxValue)
+        {
+            var items = context.Transaction.InnerTransaction.OpenTable(ItemsSchema, Items);
+
+            const string dbKey = "db/";
+            using (Slice.From(context.Allocator, dbKey, out Slice loweredPrefix))
+            {
+                foreach (var result in items.SeekByPrimaryKeyPrefix(loweredPrefix, Slices.Empty, 0))
+                {
+                    if (take-- <= 0)
+                        yield break;
+
+                    var doc = Read(context, GetCurrentItemKey(result.Value));
+                    if (doc == null)
+                        continue;
+
+                    yield return JsonDeserializationCluster.DatabaseRecord(doc);
+                }
+            }
+        }
+
         private static unsafe string GetCurrentItemKey(Table.TableValueHolder result)
         {
             return Encoding.UTF8.GetString(result.Reader.Read(1, out int size), size);
@@ -694,6 +876,74 @@ namespace Raven.Server.ServerWide
                 return null;
 
             return JsonDeserializationCluster.DatabaseRecord(doc);
+        }
+
+        public IEnumerable<(string Prefix, long Value)> ReadIdentities<T>(TransactionOperationContext<T> context, string databaseName, int start, int take)
+            where T : RavenTransaction
+        {
+            var identities = context.Transaction.InnerTransaction.ReadTree(Identities);
+
+            var prefixString = IncrementClusterIdentityCommand.GetStorageKey(databaseName, null);
+            using (Slice.From(context.Allocator, prefixString, out var prefix))
+            {
+                using (var it = identities.Iterate(prefetch: false))
+                {
+                    it.SetRequiredPrefix(prefix);
+
+                    if (it.Seek(prefix) == false || it.Skip(start) == false)
+                        yield break;
+
+                    do
+                    {
+                        if (take-- <= 0)
+                            break;
+
+                        var key = it.CurrentKey;
+                        var keyAsString = key.ToString();
+                        var value = it.CreateReaderForCurrent().ReadLittleEndianInt64();
+
+                        yield return (keyAsString.Substring(prefixString.Length), value);
+
+                    } while (it.MoveNext());
+                }
+            }
+        }
+
+        private static void DeleteIdentities<T>(TransactionOperationContext<T> context, string name)
+            where T : RavenTransaction
+        {
+            const int batchSize = 1024;
+            var identities = context.Transaction.InnerTransaction.ReadTree(Identities);
+
+            var prefixString = IncrementClusterIdentityCommand.GetStorageKey(name, null);
+            using (Slice.From(context.Allocator, prefixString, out var prefix))
+            {
+                var toRemove = new List<Slice>();
+                while (true)
+                {
+                    using (var it = identities.Iterate(prefetch: false))
+                    {
+                        it.SetRequiredPrefix(prefix);
+
+                        if (it.Seek(prefix) == false)
+                            return;
+
+                        do
+                        {
+                            toRemove.Add(it.CurrentKey.Clone(context.Allocator, ByteStringType.Immutable));
+
+                        } while (toRemove.Count < batchSize && it.MoveNext());
+                    }
+
+                    foreach (var key in toRemove)
+                        identities.Delete(key);
+
+                    if (toRemove.Count < batchSize)
+                        break;
+
+                    toRemove.Clear();
+                }
+            }
         }
 
         public BlittableJsonReaderObject Read<T>(TransactionOperationContext<T> context, string name)
@@ -770,15 +1020,13 @@ namespace Raven.Server.ServerWide
             if (_parent.IsEncrypted && url.StartsWith("https:", StringComparison.OrdinalIgnoreCase) == false)
                 throw new InvalidOperationException($"Failed to connect to node {url}. Connections from encrypted store must use HTTPS.");
 
-            var info = await ReplicationUtils.GetTcpInfoAsync(url, "Rachis.Server", "Cluster", certificate);
+            var info = await ReplicationUtils.GetTcpInfoAsync(url, null, "Cluster", certificate);
 
-            var tcpInfo = new Uri(info.Url);
-            var tcpClient = new TcpClient();
+            var tcpClient = TcpUtils.NewTcpClient(_parent.TcpConnectionTimeout);
             Stream stream = null;
             try
             {
-                TcpUtils.SetTimeouts(tcpClient, _parent.TcpConnectionTimeout);
-                await tcpClient.ConnectAsync(tcpInfo.Host, tcpInfo.Port);
+                await TcpUtils.ConnectAsync(tcpClient, info.Url).ConfigureAwait(false);
                 stream = await TcpUtils.WrapStreamWithSslAsync(tcpClient, info, _parent.ClusterCertificate);
 
                 using (ContextPoolForReadOnlyOperations.AllocateOperationContext(out JsonOperationContext context))
@@ -847,7 +1095,7 @@ namespace Raven.Server.ServerWide
                 context.Transaction.Commit();
             }
 
-            _rachisLogIndexNotifications.NotifyListenersAbout(lastIncludedIndex);
+            _rachisLogIndexNotifications.NotifyListenersAbout(lastIncludedIndex, null);
         }
     }
 
@@ -855,6 +1103,14 @@ namespace Raven.Server.ServerWide
     {
         public long LastModifiedIndex;
         private readonly AsyncManualResetEvent _notifiedListeners;
+        private readonly ConcurrentQueue<ErrorHolder> _errors = new ConcurrentQueue<ErrorHolder>();
+        private int _numberOfErrors;
+
+        private class ErrorHolder
+        {
+            public long Index;
+            public ExceptionDispatchInfo Exception;
+        }
 
         public RachisLogIndexNotifications(CancellationToken token)
         {
@@ -878,6 +1134,15 @@ namespace Raven.Server.ServerWide
                     ThrowTimeoutException(timeout ?? TimeSpan.MaxValue, index, LastModifiedIndex);
                 }
             }
+
+            if (_errors.IsEmpty)
+                return;
+
+            foreach (var error in _errors)
+            {
+                if (error.Index == index)
+                    error.Exception.Throw();// rethrow
+            }
         }
 
         private static void ThrowTimeoutException(TimeSpan value, long index, long lastModifiedIndex)
@@ -886,8 +1151,21 @@ namespace Raven.Server.ServerWide
                                        $"Last commit index is: {lastModifiedIndex}.");
         }
 
-        public void NotifyListenersAbout(long index)
+        public void NotifyListenersAbout(long index, Exception e)
         {
+            if (e != null)
+            {
+                _errors.Enqueue(new ErrorHolder
+                {
+                    Index = index,
+                    Exception = ExceptionDispatchInfo.Capture(e)
+                });
+                if (Interlocked.Increment(ref _numberOfErrors) > 25)
+                {
+                    _errors.TryDequeue(out _);
+                    Interlocked.Decrement(ref _numberOfErrors);
+                }
+            }
             var lastModified = LastModifiedIndex;
             while (index > lastModified)
             {

@@ -24,7 +24,7 @@ namespace SlowTests.Client
                     x.SaveChanges();
                 }
 
-                var operation = store.Operations.Send(new DeleteCollectionOperation("users"));
+                var operation = store.Operations.Send(new DeleteByQueryOperation(new IndexQuery { Query = "FROM users" }));
                 operation.WaitForCompletion(TimeSpan.FromSeconds(60));
 
                 var stats = store.Admin.Send(new GetStatisticsOperation());
@@ -47,7 +47,7 @@ namespace SlowTests.Client
                     x.SaveChanges();
                 }
 
-                var operation = store.Operations.Send(new PatchByQueryOperation(new IndexQuery() {Query = "FROM Users"}, new PatchRequest { Script = " this.Name = __document_id;" }));
+                var operation = store.Operations.Send(new PatchByQueryOperation(new IndexQuery() {Query = "FROM Users UPDATE { this.Name = id(this); }" }));
                 operation.WaitForCompletion(TimeSpan.FromSeconds(60));
 
                 var stats = store.Admin.Send(new GetStatisticsOperation());

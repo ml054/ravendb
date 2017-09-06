@@ -23,6 +23,7 @@ var gulp = require('gulp'),
 var PATHS = require('./gulp/paths');
 
 var tsProject = plugins.typescript.createProject('tsconfig.json');
+var testTsProject = plugins.typescript.createProject('tsconfig.json');
 
 gulp.task('z_clean', ['z_clean:js'], function () {
     del.sync(PATHS.releaseTarget);
@@ -77,6 +78,15 @@ gulp.task('z_generate-typings', function (cb) {
 
         cb(err);
     });
+});
+
+gulp.task('z_compile:test', ['z_generate-ts'], function() {
+     return gulp.src([PATHS.test.tsSource])
+        .pipe(plugins.sourcemaps.init())
+        .pipe(testTsProject())
+        .js
+        .pipe(plugins.sourcemaps.write("."))
+        .pipe(gulp.dest(PATHS.test.tsOutput));
 });
 
 gulp.task('z_compile:app', ['z_generate-ts'], function () {
@@ -193,11 +203,54 @@ gulp.task('z_release:durandal', function () {
    .pipe(gulp.dest(PATHS.releaseTargetApp));
 });
 
+gulp.task('z_generate-test-list', function () {
+    var reduceFiles = plugins.reduceFile('tests.js',
+        function (file, memo) {
+            memo.push(file.relative.replace(/\\/g, '/'));
+            return memo;
+        }, function (memo) {
+            return 'var tests = ' + JSON.stringify(memo, null , 2) + ';';
+        }, [])
+
+    return gulp.src([
+        '**/*.spec.js'
+    ], {
+        cwd: PATHS.test.tsOutput,
+        base: PATHS.test.dir
+    })
+    .pipe(reduceFiles)
+    .pipe(gulp.dest(PATHS.test.setup));
+});
+
+gulp.task('z_mochaTests', function () {
+    var mocha = plugins.mochaPhantomjs({
+        reporter: 'spec', //use json for debugging,
+        suppressStdout: false,
+        suppressStderr: false 
+    });
+
+    return gulp.src(PATHS.test.html).pipe(mocha);
+});
+
+gulp.task('test', [ 'z_compile:test' ], function (cb) {
+    return runSequence('z_generate-test-list', 'z_mochaTests', cb);
+});
+
+gulp.task('z_watch:test', ['test'], function () {
+    gulp.watch(PATHS.tsSource, ['z_mochaTests']);
+    gulp.watch(PATHS.test.tsSource, ['test']);
+});
+
+gulp.task('z_watch_test', ['compile', 'test'], function () {
+    gulp.watch(PATHS.watchDirectories, ['z_compile:app-changed', 'test']);
+    gulp.watch(PATHS.lessSourcesToWatch, ['less']);
+});
 
 gulp.task('compile', ['less', 'z_compile:app'], function() { });
 
 gulp.task('watch', ['compile'], function () {
     gulp.watch(PATHS.tsSource, ['z_compile:app-changed']);
+    gulp.watch(PATHS.test.tsSource, ['z_compile:test']);
     gulp.watch(PATHS.lessSourcesToWatch, ['less']);
 });
 

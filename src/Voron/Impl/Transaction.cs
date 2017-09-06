@@ -14,7 +14,7 @@ namespace Voron.Impl
 {
     public unsafe class Transaction : IDisposable
     {
-        private FastDictionary<Tuple<Tree, Slice>, Tree> _multiValueTrees;
+        private Dictionary<Tuple<Tree, Slice>, Tree> _multiValueTrees;
 
         private readonly LowLevelTransaction _lowLevelTransaction;
 
@@ -26,11 +26,11 @@ namespace Voron.Impl
 
         public ByteStringContext Allocator => _lowLevelTransaction.Allocator;
 
-        private FastDictionary<Slice, Table, SliceStructComparer> _tables;
+        private Dictionary<Slice, Table> _tables;
 
-        private FastDictionary<Slice, Tree, SliceStructComparer> _trees;
+        private Dictionary<Slice, Tree> _trees;
 
-        private FastDictionary<Slice, FixedSizeTree, SliceStructComparer> _globalFixedSizeTree;
+        private Dictionary<Slice, FixedSizeTree> _globalFixedSizeTree;
 
         public IEnumerable<Tree> Trees => _trees == null ? Enumerable.Empty<Tree>() : _trees.Values;
 
@@ -48,7 +48,7 @@ namespace Voron.Impl
         {
             if (_trees != null)
                 return;
-            _trees = new FastDictionary<Slice, Tree, SliceStructComparer>(SliceStructComparer.Instance);
+            _trees = new Dictionary<Slice, Tree>(SliceStructComparer.Instance);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -87,7 +87,7 @@ namespace Voron.Impl
                     tree.InitializeCompression();
 
                 _trees.Add(treeName, tree);
-                
+
                 return tree;
             }
 
@@ -142,8 +142,8 @@ namespace Voron.Impl
 
         public Table OpenTable(TableSchema schema, Slice name)
         {
-            if(_tables == null)
-                _tables = new FastDictionary<Slice, Table, SliceStructComparer>(SliceStructComparer.Instance);
+            if (_tables == null)
+                _tables = new Dictionary<Slice, Table>(SliceStructComparer.Instance);
 
             Table value;
             if (_tables.TryGetValue(name, out value))
@@ -157,7 +157,7 @@ namespace Voron.Impl
                 return null;
 
 
-            value = new Table(schema, clonedName, this, tableTree);
+            value = new Table(schema, clonedName, this, tableTree, schema.TableType);
             _tables[clonedName] = value;
             return value;
         }
@@ -173,7 +173,7 @@ namespace Voron.Impl
                     var childTree = multiValueTree.Value;
 
                     byte* ptr;
-                    using (parentTree.DirectAdd(key, sizeof(TreeRootHeader), TreeNodeFlags.MultiValuePageRef,out ptr))
+                    using (parentTree.DirectAdd(key, sizeof(TreeRootHeader), TreeNodeFlags.MultiValuePageRef, out ptr))
                         childTree.State.CopyTo((TreeRootHeader*)ptr);
                 }
             }
@@ -187,7 +187,7 @@ namespace Voron.Impl
                 if (treeState.IsModified)
                 {
                     byte* ptr;
-                    using (_lowLevelTransaction.RootObjects.DirectAdd(tree.Name, sizeof(TreeRootHeader),out ptr))
+                    using (_lowLevelTransaction.RootObjects.DirectAdd(tree.Name, sizeof(TreeRootHeader), out ptr))
                         treeState.CopyTo((TreeRootHeader*)ptr);
                 }
             }
@@ -204,7 +204,7 @@ namespace Voron.Impl
         internal void AddMultiValueTree(Tree tree, Slice key, Tree mvTree)
         {
             if (_multiValueTrees == null)
-                _multiValueTrees = new FastDictionary<Tuple<Tree, Slice>, Tree>(new TreeAndSliceComparer());
+                _multiValueTrees = new Dictionary<Tuple<Tree, Slice>, Tree>(new TreeAndSliceComparer());
             mvTree.IsMultiValueTree = true;
             _multiValueTrees.Add(Tuple.Create(tree, key.Clone(_lowLevelTransaction.Allocator, ByteStringType.Immutable)), mvTree);
         }
@@ -326,7 +326,7 @@ namespace Voron.Impl
 
             byte* ptr;
             using (_lowLevelTransaction.RootObjects.DirectAdd(toName, sizeof(TreeRootHeader), out ptr))
-                fromTree.State.CopyTo((TreeRootHeader*) ptr);
+                fromTree.State.CopyTo((TreeRootHeader*)ptr);
 
             fromTree.Rename(toName);
             fromTree.State.IsModified = true;
@@ -341,8 +341,7 @@ namespace Voron.Impl
         [MethodImpl(MethodImplOptions.NoInlining)]
         public Tree CreateTree(string name, RootObjectType type = RootObjectType.VariableSizeTree, TreeFlags flags = TreeFlags.None, bool isIndexTree = false, NewPageAllocator newPageAllocator = null)
         {
-            Slice treeNameSlice;
-            Slice.From(Allocator, name, ByteStringType.Immutable, out treeNameSlice);
+            Slice.From(Allocator, name, ByteStringType.Immutable, out var treeNameSlice);
             return CreateTree(treeNameSlice, type, flags, isIndexTree, newPageAllocator);
         }
 
@@ -360,7 +359,7 @@ namespace Voron.Impl
             tree.State.RootObjectType = type;
 
             byte* ptr;
-            using (_lowLevelTransaction.RootObjects.DirectAdd(name, sizeof(TreeRootHeader),out ptr))
+            using (_lowLevelTransaction.RootObjects.DirectAdd(name, sizeof(TreeRootHeader), out ptr))
                 tree.State.CopyTo((TreeRootHeader*)ptr);
 
             tree.State.IsModified = true;
@@ -438,7 +437,7 @@ namespace Voron.Impl
         public FixedSizeTree GetGlobalFixedSizeTree(Slice name, ushort valSize, bool isIndexTree = false, NewPageAllocator newPageAllocator = null)
         {
             if (_globalFixedSizeTree == null)
-                _globalFixedSizeTree = new FastDictionary<Slice, FixedSizeTree, SliceStructComparer>(SliceStructComparer.Instance);
+                _globalFixedSizeTree = new Dictionary<Slice, FixedSizeTree>(SliceStructComparer.Instance);
 
             FixedSizeTree tree;
             if (_globalFixedSizeTree.TryGetValue(name, out tree) == false)

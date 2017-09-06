@@ -185,7 +185,7 @@ namespace Raven.Server.Documents.PeriodicBackup
                 using (_database.DocumentsStorage.ContextPool.AllocateOperationContext(out DocumentsOperationContext context))
                 using (var tx = context.OpenReadTransaction())
                 {
-                    var backupToLocalFolder = CanBackupUsing(configuration.LocalSettings);
+                    var backupToLocalFolder = PeriodicBackupConfiguration.CanBackupUsing(configuration.LocalSettings);
                     var now = SystemTime.UtcNow.ToString(DateTimeFormat, CultureInfo.InvariantCulture);
 
                     if (status.LocalBackup == null)
@@ -379,7 +379,11 @@ namespace Raven.Server.Documents.PeriodicBackup
                         configuration.BackupType == BackupType.Snapshot && isFullBackup == false)
                     {
                         // smuggler backup
-                        var result = CreateBackup(backupFilePath, startDocumentEtag, context);
+                        var options = new DatabaseSmugglerOptions();
+                        if (isFullBackup == false)
+                            options.OperateOnTypes |= DatabaseItemType.Tombstones;
+
+                        var result = CreateBackup(options, backupFilePath, startDocumentEtag, context);
                         lastEtag = result.GetLastEtag();
                     }
                     else
@@ -411,8 +415,7 @@ namespace Raven.Server.Documents.PeriodicBackup
             }
         }
 
-        private SmugglerResult CreateBackup(string backupFilePath,
-            long? startDocumentEtag, DocumentsOperationContext context)
+        private SmugglerResult CreateBackup(DatabaseSmugglerOptions options, string backupFilePath, long? startDocumentEtag, DocumentsOperationContext context)
         {
             // the last etag is already included in the last backup
             startDocumentEtag = startDocumentEtag == null ? 0 : ++startDocumentEtag;
@@ -422,11 +425,12 @@ namespace Raven.Server.Documents.PeriodicBackup
             {
                 var smugglerSource = new DatabaseSource(_database, startDocumentEtag.Value);
                 var smugglerDestination = new StreamDestination(file, context, smugglerSource);
-                var smuggler = new DatabaseSmuggler(
+                var smuggler = new DatabaseSmuggler(_database, 
                     smugglerSource,
                     smugglerDestination,
                     _database.Time,
-                    token: _cancellationToken.Token);
+                    token: _cancellationToken.Token, 
+                    options: options);
 
                 result = smuggler.Execute();
             }
@@ -467,7 +471,7 @@ namespace Raven.Server.Documents.PeriodicBackup
                 if (_logger.IsInfoEnabled)
                     _logger.Info($"Periodic backup status with task id {status.TaskId} was updated");
 
-                await _serverStore.WaitForCommitIndexChange(RachisConsensus.CommitIndexModification.GreaterOrEqual, result.Etag);
+                await _serverStore.WaitForCommitIndexChange(RachisConsensus.CommitIndexModification.GreaterOrEqual, result.Index);
             }
             catch (Exception e)
             {
@@ -535,7 +539,7 @@ namespace Raven.Server.Documents.PeriodicBackup
             where S : BackupSettings
             where T : CloudUploadStatus
         {
-            if (CanBackupUsing(settings) == false)
+            if (PeriodicBackupConfiguration.CanBackupUsing(settings) == false)
                 return;
 
             if (uploadStatus == null)
@@ -572,13 +576,6 @@ namespace Raven.Server.Documents.PeriodicBackup
                     }
                 }
             }));
-        }
-
-        private static bool CanBackupUsing(BackupSettings settings)
-        {
-            return settings != null &&
-                   settings.Disabled == false &&
-                   settings.HasSettings();
         }
 
         private async Task UploadToS3(
@@ -999,11 +996,7 @@ namespace Raven.Server.Documents.PeriodicBackup
             if (configuration.Disabled)
                 return TaskStatus.Disabled;
 
-            if (CanBackupUsing(configuration.LocalSettings) == false &&
-                CanBackupUsing(configuration.S3Settings) == false &&
-                CanBackupUsing(configuration.GlacierSettings) == false &&
-                CanBackupUsing(configuration.AzureSettings) == false &&
-                CanBackupUsing(configuration.FtpSettings) == false)
+            if (configuration.HasBackup() == false)
             {
                 if (skipErrorLog == false)
                 {

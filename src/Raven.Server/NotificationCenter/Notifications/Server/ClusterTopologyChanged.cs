@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Raven.Client.Http;
+using Raven.Server.Commercial;
 using Sparrow.Json.Parsing;
 
 namespace Raven.Server.NotificationCenter.Notifications.Server
@@ -22,6 +23,8 @@ namespace Raven.Server.NotificationCenter.Notifications.Server
         
         public long CurrentTerm { get; private set; }
 
+        public Dictionary<string, DetailsPerNode> NodeLicenseDetails { get; private set; }
+
         public override DynamicJsonValue ToJson()
         {
             var json = base.ToJson();
@@ -31,11 +34,15 @@ namespace Raven.Server.NotificationCenter.Notifications.Server
             json[nameof(NodeTag)] = NodeTag;
             json[nameof(Status)] = DynamicJsonValue.Convert(Status);
             json[nameof(CurrentTerm)] = CurrentTerm;
+            json[nameof(NodeLicenseDetails)] = DynamicJsonValue.Convert(NodeLicenseDetails);
 
             return json;
         }
 
-        public static ClusterTopologyChanged Create(ClusterTopology clusterTopology, string leaderTag, string nodeTag, long term, Dictionary<string, NodeStatus> status)
+        public static ClusterTopologyChanged Create(ClusterTopology clusterTopology, 
+            string leaderTag, string nodeTag, long term, 
+            Dictionary<string, NodeStatus> status,
+            Dictionary<string, DetailsPerNode> nodeLicenseDetails)
         {
             return new ClusterTopologyChanged
             {
@@ -43,7 +50,8 @@ namespace Raven.Server.NotificationCenter.Notifications.Server
                 Leader = leaderTag,
                 NodeTag = nodeTag,
                 Status = status,
-                CurrentTerm = term
+                CurrentTerm = term,
+                NodeLicenseDetails = nodeLicenseDetails
             };
         }
     }

@@ -3,6 +3,7 @@ import database = require("models/resources/database");
 import document = require("models/database/documents/document");
 import endpoints = require("endpoints");
 import queryCriteria = require("models/database/query/queryCriteria");
+import queryUtil = require("common/queryUtil");
 
 class queryCommand extends commandBase {
     constructor(private db: database, private skip: number, private take: number, private criteria: queryCriteria, private disableCache?: boolean) {
@@ -10,44 +11,50 @@ class queryCommand extends commandBase {
     }
 
     execute(): JQueryPromise<pagedResult<document>> {
-        const selector = (results: Raven.Client.Documents.Queries.QueryResult<Array<any>>) =>
+        const selector = (results: Raven.Client.Documents.Queries.QueryResult<Array<any>, any>) =>
             ({ items: results.Results.map(d => new document(d)), totalResultCount: results.TotalResults, additionalResultInfo: results, resultEtag: results.ResultEtag.toString() }) as pagedResult<document>
         return this.query(this.getUrl(), null, this.db, selector)
             .fail((response: JQueryXHR) => this.reportError("Error querying index", response.responseText, response.statusText));
     }
 
+    private getQueryText() {
+        if (!this.criteria.queryText()) {
+            return undefined;
+        }
+        
+        if (this.criteria.showFields()) {
+            return queryUtil.replaceSelectWithFetchAllStoredFields(this.criteria.queryText());
+        } else {
+            return this.criteria.queryText();
+        }
+    }
+    
     getUrl() {
         const criteria = this.criteria;
         const url = endpoints.databases.queries.queries;
-        const resultsTransformerUrlFragment = criteria.getTransformerQueryUrlPart();
 
         const urlArgs = this.urlEncodeArgs({
-            query: criteria.queryText() || undefined,
+            query: this.getQueryText(),
             start: this.skip,
             pageSize: this.take,
-            fetch: criteria.showFields() ? "__all_stored_fields" : undefined,
             debug: criteria.indexEntries() ? "entries" : undefined,
-            disableCache: this.disableCache ? Date.now() : undefined
-        }) + resultsTransformerUrlFragment;
+            disableCache: this.disableCache ? Date.now() : undefined,
+            "metadata-only": typeof(criteria.metadataOnly()) !== 'undefined' ? criteria.metadataOnly() : undefined
+        });
         return url + urlArgs;
     }
 
     getCsvUrl() {
         const criteria = this.criteria;
 
-        const url = endpoints.databases.streaming.streamsQueries
-        /* TODO
-             + criteria.selectedIndex();
-        */;
-        const resultsTransformerUrlFragment = criteria.getTransformerQueryUrlPart();
-
+        const url = endpoints.databases.streaming.streamsQueries;
+        
         const urlArgs = this.urlEncodeArgs({
-            query: criteria.queryText() || undefined,
-            fetch: criteria.showFields() ? "__all_stored_fields" : undefined,
+            query: this.getQueryText(),
             debug: criteria.indexEntries() ? "entries" : undefined,
             format: "excel",
             download: true
-        }) + resultsTransformerUrlFragment;
+        });
 
         return url + urlArgs;
     }

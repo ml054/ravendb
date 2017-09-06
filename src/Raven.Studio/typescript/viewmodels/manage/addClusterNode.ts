@@ -30,15 +30,15 @@ class addClusterNode extends viewModelBase {
         // discard test connection result when url has changed
         this.model.serverUrl.subscribe(() => this.testConnectionResult(null));
     }
-    
+
     private initObservables() {
         this.shortErrorText = ko.pureComputed(() => {
             const result = this.testConnectionResult();
             if (!result || result.Success) {
                 return "";
-            } 
+            }
             return generalUtils.trimMessage(result.Error);
-        })
+        });
     }
 
     save() {
@@ -47,7 +47,7 @@ class addClusterNode extends viewModelBase {
 
             this.spinners.save(true);
 
-            new addNodeToClusterCommand(this.model.serverUrl(), this.model.addAsWatcher())
+            new addNodeToClusterCommand(this.model.serverUrl(), this.model.addAsWatcher(), this.model.assignedCores())
                 .execute()
                 .done(() => this.goToClusterView())
                 .always(() => this.spinners.save(false));

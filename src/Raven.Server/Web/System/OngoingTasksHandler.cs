@@ -99,10 +99,7 @@ namespace Raven.Server.Web.System
                     TaskName = subscriptionState.SubscriptionName,
                     TaskState = subscriptionState.Disabled ? OngoingTaskState.Disabled : OngoingTaskState.Enabled,
                     TaskId = subscriptionState.SubscriptionId,
-                    Collection = subscriptionState.Criteria.Collection,
-                    TimeOfLastClientActivity = subscriptionState.TimeOfLastClientActivity,
-                    LastChangeVector = subscriptionState.ChangeVector
-
+                    Query = subscriptionState.Query
                 };
             }
         }
@@ -312,7 +309,7 @@ namespace Raven.Server.Web.System
                                 break;
                             }
 
-                            tag = dbTopology.WhoseTaskIsIt(watcher, ServerStore.IsPassive());
+                            tag = dbTopology?.WhoseTaskIsIt(watcher, ServerStore.IsPassive());
 
                             var replicationTaskInfo = new OngoingTaskReplication
                             {
@@ -334,28 +331,33 @@ namespace Raven.Server.Web.System
 
                         case OngoingTaskType.Backup:
 
-                            var backup = record?.PeriodicBackups?.Find(x => x.TaskId == key);
-                            if (backup == null)
+                            var backupConfiguration = record?.PeriodicBackups?.Find(x => x.TaskId == key);
+                            if (backupConfiguration == null)
                             {
                                 HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
                                 break;
                             }
 
-                            tag = dbTopology?.WhoseTaskIsIt(backup, ServerStore.IsPassive());
-                            var backupDestinations = GetBackupDestinations(backup);
+                            tag = dbTopology?.WhoseTaskIsIt(backupConfiguration, ServerStore.IsPassive());
+                            var backupDestinations = GetBackupDestinations(backupConfiguration);
+                            var backupStatus = Database.PeriodicBackupRunner.GetBackupStatus(key);
+                            var nextBackup = Database.PeriodicBackupRunner.GetNextBackupDetails(record, backupConfiguration, backupStatus);
 
                             var backupTaskInfo = new OngoingTaskBackup
                             {
-                                TaskId = backup.TaskId,
-                                BackupType = backup.BackupType,
-                                TaskName = backup.Name,
-                                TaskState = backup.Disabled ? OngoingTaskState.Disabled : OngoingTaskState.Enabled,
+                                TaskId = backupConfiguration.TaskId,
+                                BackupType = backupConfiguration.BackupType,
+                                TaskName = backupConfiguration.Name,
+                                TaskState = backupConfiguration.Disabled ? OngoingTaskState.Disabled : OngoingTaskState.Enabled,
                                 ResponsibleNode = new NodeId
                                 {
                                     NodeTag = tag,
                                     NodeUrl = clusterTopology.GetUrlFromTag(tag)
                                 },
-                                BackupDestinations = backupDestinations
+                                BackupDestinations = backupDestinations,
+                                LastFullBackup = backupStatus.LastFullBackup,
+                                LastIncrementalBackup = backupStatus.LastIncrementalBackup,
+                                NextBackup = nextBackup
                             };
 
                             WriteResult(context, backupTaskInfo);
@@ -407,27 +409,27 @@ namespace Raven.Server.Web.System
                             }
 
                             var subscriptionState = JsonDeserializationClient.SubscriptionState(doc);
-
                             tag = dbTopology?.WhoseTaskIsIt(subscriptionState, ServerStore.IsPassive());
-                            var ongoingSubscriptionTask = new OngoingTaskSubscription
+
+                            var subscriptionStateInfo = new SubscriptionStateWithNodeDetails
                             {
-                                Collection = subscriptionState.Criteria.Collection,
-                                TimeOfLastClientActivity = subscriptionState.TimeOfLastClientActivity,
-                                LastChangeVector = subscriptionState.ChangeVector,
+                                Query = subscriptionState.Query,
+                                ChangeVectorForNextBatchStartingPoint = subscriptionState.ChangeVectorForNextBatchStartingPoint,
+                                SubscriptionId = subscriptionState.SubscriptionId,
+                                SubscriptionName = subscriptionState.SubscriptionName,
+                                LastTimeServerMadeProgressWithDocuments = subscriptionState.LastTimeServerMadeProgressWithDocuments,
+                                Disabled = subscriptionState.Disabled,
+                                LastClientConnectionTime = subscriptionState.LastClientConnectionTime,
                                 ResponsibleNode = new NodeId
                                 {
                                     NodeTag = tag,
                                     NodeUrl = clusterTopology.GetUrlFromTag(tag)
-                                },
-                                TaskId = subscriptionState.SubscriptionId,
-                                TaskName = subscriptionState.SubscriptionName,
-                                // todo: here we'll need to talk with the running node? TaskConnectionStatus = subscriptionState.Disabled ? OngoingTaskConnectionStatus.NotActive : OngoingTaskConnectionStatus.Active,
-                                TaskState = subscriptionState.Disabled ? OngoingTaskState.Disabled : OngoingTaskState.Enabled,
+                                }
                             };
-                            WriteResult(context, ongoingSubscriptionTask);
 
-                            
+                            // Todo: here we'll need to talk with the running node? TaskConnectionStatus = subscriptionState.Disabled ? OngoingTaskConnectionStatus.NotActive : OngoingTaskConnectionStatus.Active,
 
+                            WriteResult(context, subscriptionStateInfo.ToJson());
                             break;
 
                         default:
@@ -510,6 +512,12 @@ namespace Raven.Server.Web.System
                 }
 
                 var watcher = JsonDeserializationClient.ExternalReplication(watcherBlittable);
+                if (ServerStore.LicenseManager.CanAddExternalReplication(watcher, out var licenseLimit) == false)
+                {
+                    SetLicenseLimitResponse(licenseLimit);
+                    return;
+                }
+
                 var (index, _) = await ServerStore.UpdateExternalReplication(Database.Name, watcher);
                 await Database.RachisLogIndexNotifications.WaitForIndexNotification(index);
                 string responsibleNode;

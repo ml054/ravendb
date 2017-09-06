@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Sparrow;
 
 namespace Raven.Server.Commercial
 {
@@ -13,8 +14,9 @@ namespace Raven.Server.Commercial
 
         private static readonly string[] Terms =
         {
-            "type", "version", "expiration", "updatesExpiration",
-            "RAM", "cores", "ISV", "encryption", "fips", "monitoring"
+            "type", "version", "expiration", "memory", "cores", "redist",
+            "encryption", "snmp", "distributed", "maxClusterSize", "snapshotBackup",
+            "cloudBackup", "dynamicNodesDistribution", "ravenEtl", "sqlEtl"
         };
 
         private enum ValueType : byte
@@ -123,6 +125,7 @@ namespace Raven.Server.Commercial
             var keysByteArray = GetBytesFromBase64String(stringKey);
             var attributes = keysByteArray.Skip(128).Take(keysByteArray.Length - 128).ToArray();
             Array.Resize(ref keysByteArray, 128);
+
             return new Keys
             {
                 Signature = keysByteArray,

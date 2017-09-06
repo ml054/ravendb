@@ -11,7 +11,6 @@ namespace Sparrow.Platform.Posix
         private static readonly Logger Logger = LoggingSource.Instance.GetLogger(nameof(KernelVirtualFileSystemUtils), "Raven/Server");
         private static readonly HashSet<string> IsOldFileAlert = new HashSet<string>();
 
-
         public static long ReadNumberFromCgroupFile(string filename)
         {
             // return long number read from file.  long.MaxValue is returned on error or on N/A value (-1)
@@ -63,7 +62,7 @@ namespace Sparrow.Platform.Posix
             }
         }
 
-        public static string [] ReadSwapInformationFromSwapsFile()
+        public static string[] ReadSwapInformationFromSwapsFile()
         {
             // /proc/swaps output format :
             //              Filename        Type            Size            Used    Priority
@@ -79,7 +78,7 @@ namespace Sparrow.Platform.Posix
                 var txt = File.ReadAllText(filename);
                 var items = System.Text.RegularExpressions.Regex.Split(txt, @"\s+").Where(s => s != string.Empty).ToArray();
 
-               if (items.Length < 6)
+                if (items.Length < 6)
                 {
                     if (IsOldFileAlert.Add(filename) && Logger.IsOperationsEnabled)
                         Logger.Operations($"no swap defined on this system according to {filename}");
@@ -111,9 +110,9 @@ namespace Sparrow.Platform.Posix
                 var path = new string[numberOfSwaps];
 
                 int j = 0;
-                for (var i=5; i < items.Length; i+=5) // start from "5" - skip header
+                for (var i = 5; i < items.Length; i += 5) // start from "5" - skip header
                 {
-                    path[j++] = items[i];                    
+                    path[j++] = items[i];
                 }
 
                 return path;
@@ -204,6 +203,30 @@ namespace Sparrow.Platform.Posix
                 if (IsOldFileAlert.Add(filename) && Logger.IsOperationsEnabled)
                     Logger.Operations($"Unable to read and parse '{filename}', cannot read partitions information", e);
                 return new HashSet<string>();
+            }
+        }
+
+        public static string ReadLineFromFile(string path, string filter)
+        {
+            try
+            {
+                string result = null;
+                var txt = File.ReadAllLines(path);
+                var cnt = 0;
+                foreach (var line in txt)
+                {
+                    if (line.Contains(filter))
+                    {
+                        result = line;
+                        if (++cnt > 1)
+                            return null;
+                    }
+                }
+                return result;
+            }
+            catch (Exception)
+            {
+                return null;
             }
         }
     }

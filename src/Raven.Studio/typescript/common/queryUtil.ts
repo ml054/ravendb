@@ -7,6 +7,15 @@ import getIndexEntriesFieldsCommand = require("commands/database/index/getIndexE
 import collection = require("models/database/documents/collection");
 import document = require("models/database/documents/document");
 
+
+interface rqlTokensIndexInfo {
+    update?: RegExpExecArray,
+    where?: RegExpExecArray,
+    load?: RegExpExecArray,
+    orderby?: RegExpExecArray,
+    select?: RegExpExecArray
+}
+
 class queryUtil {
 
     static readonly AutoPrefix = "auto/";
@@ -17,13 +26,13 @@ class queryUtil {
      * Escapes lucene single term
      * 
      * Note: Do not use this method for escaping entire query unless you want to end up with: query\:value\ AND\ a\:b
-     * @param query query to escape
+     * @param term term to escape
      */
     static escapeTerm(term: string) {
-        var output = "";
+        let output = "";
 
-        for (var i = 0; i < term.length; i++) {
-            var c = term.charAt(i);
+        for (let i = 0; i < term.length; i++) {
+            const c = term.charAt(i);
             if (c === '\\' || c === '+' || c === '-' || c === '!' || c === '(' || c === ')'
                 || c === ':' || c === '^' || c === '[' || c === ']' || c === '\"'
                 || c === '{' || c === '}' || c === '~' || c === '*' || c === '?'
@@ -65,65 +74,6 @@ class queryUtil {
         }
     }
 
-    static queryCompleter(indexFields: KnockoutObservableArray<string>, selectedIndex: KnockoutObservable<string>, activeDatabase: KnockoutObservable<database>, editor: any, session: any, pos: AceAjax.Position, prefix: string, callback: (errors: any[], worldlist: { name: string; value: string; score: number; meta: string }[]) => void) {
-        const currentToken: AceAjax.TokenInfo = session.getTokenAt(pos.row, pos.column);
-        if (!currentToken || typeof currentToken.type === "string") {
-            // if in beginning of text or in free text token
-            if (!currentToken || currentToken.type === "text") {
-                callback(null, indexFields().map(curColumn => {
-                    return { name: curColumn, value: curColumn, score: 10, meta: "field" };
-                }));
-            } else if (currentToken.type === "keyword" || currentToken.type === "value") {
-                // if right after, or a whitespace after keyword token ([column name]:)
-
-                // first, calculate and validate the column name
-                let currentColumnName: string = null;
-                let currentValue: string = "";
-
-                if (currentToken.type == "keyword") {
-                    currentColumnName = currentToken.value.substring(0, currentToken.value.length - 1);
-                } else {
-                    currentValue = currentToken.value.trim();
-                    const rowTokens: any[] = session.getTokens(pos.row);
-                    if (!!rowTokens && rowTokens.length > 1) {
-                        currentColumnName = rowTokens[rowTokens.length - 2].value.trim();
-                        currentColumnName = currentColumnName.substring(0, currentColumnName.length - 1);
-                    }
-                }
-
-                // for non dynamic indexes query index terms, for dynamic indexes, try perform general auto complete
-                if (currentColumnName && indexFields().find(x => x === currentColumnName)) {
-
-                    if (!selectedIndex().startsWith(queryUtil.DynamicPrefix)) {
-                        new getIndexTermsCommand(selectedIndex(), currentColumnName, activeDatabase(), 20)
-                            .execute()
-                            .done(terms => {
-                                if (terms && terms.Terms.length > 0) {
-                                    callback(null, terms.Terms.map(curVal => {
-                                        return { name: curVal, value: curVal, score: 10, meta: "value" };
-                                    }));
-                                }
-                            });
-                    } else {
-                        if (currentValue.length > 0) {
-                            new getDocumentsMetadataByIDPrefixCommand(currentValue, 10, activeDatabase())
-                                .execute()
-                                .done((results: metadataAwareDto[]) => {
-                                    if (results && results.length > 0) {
-                                        callback(null, results.map(curVal => {
-                                            return { name: curVal["@metadata"]["@id"], value: curVal["@metadata"]["@id"], score: 10, meta: "value" };
-                                        }));
-                                    }
-                                });
-                        } else {
-                            callback([{ error: "notext" }], null);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
     static formatIndexQuery(indexName: string, ...predicates: { name?: string, value?: string }[]) {
         let query = `from index '${indexName}'`;
         if (predicates && predicates.length) {
@@ -133,6 +83,83 @@ class queryUtil {
         }
 
         return query;
+    }
+
+    private static readonly RQL_TOKEN_REGEX = /(?=([^{]*{[^}{]*})*[^}]*$)(?=([^']*'[^']*')*[^']*$)(?=([^"]*"[^"]*")*[^"]*$)(SELECT|WHERE|ORDER BY|LOAD|UPDATE)(\s+|{)/gi;
+
+    private static readonly RQL_TOKEN_ORDER = [
+        'where', 'load', 'orderby', 'update'
+    ];
+
+    static replaceSelectWithFetchAllStoredFields(query: string) {
+        if (!query)
+            throw new Error("Query is required.");
+
+        const tokenIndexes = queryUtil.findTokenIndexes(query);
+        if (tokenIndexes.select) {
+            const selectIdx = tokenIndexes.select.index;
+            
+            return query.substring(0, selectIdx) + " select __all_stored_fields";
+        } else {
+            // select statement wasn't found append at the end of query
+            return query + " select __all_stored_fields";
+        }
+    }
+    
+    private static findTokenIndexes(query: string) {
+        let tokenIndexes: rqlTokensIndexInfo = {};
+
+        let match: RegExpExecArray;
+        let keyword;
+        try {
+            while ((match = queryUtil.RQL_TOKEN_REGEX.exec(query)) !== null) {
+                keyword = (match[4] || '').toLowerCase().replace(/\s/, '');
+                (tokenIndexes as any)[keyword] = match;
+            }
+        } finally {
+            queryUtil.RQL_TOKEN_REGEX.lastIndex = 0;
+        }
+        
+        return tokenIndexes;
+    }
+    
+    static replaceWhereWithDocumentIdPredicate(query: string, documentId: string) {
+        if (!query)
+            throw new Error("Query is required.");
+
+        if (!documentId)
+            throw new Error("Document ID is required.");
+
+        const tokenIndexes = queryUtil.findTokenIndexes(query);
+
+        const { where, update, load, orderby } = tokenIndexes;
+
+        let startToken;
+        if (where) {
+            startToken = where;
+
+            let endToken = queryUtil.RQL_TOKEN_ORDER
+                .filter(x => x !== 'where')
+                .filter(token => (tokenIndexes as any)[token])
+                .map(x => (tokenIndexes as any)[x])[0] as RegExpExecArray;
+
+            let whereStartIndex = where.index;
+            let whereEndIndex = endToken ? endToken.index : query.length; 
+            const qstart = query.substring(0, whereStartIndex).trim();
+            const qend = query.substring(whereEndIndex, query.length).trim();
+            return `${qstart} where id() = '${documentId}' ${qend}`.trim();
+        }
+
+        startToken = queryUtil.RQL_TOKEN_ORDER
+            .filter(token => (tokenIndexes as any)[token])
+            .map(x => (tokenIndexes as any)[x])[0] as RegExpExecArray;
+        if (!startToken) {
+            return `${query} where id() = '${documentId}'`;
+        }
+
+        const qstart = query.substring(0, startToken.index).trim() ;
+        const qend = query.substring(startToken.index, query.length).trim();
+        return `${qstart} where id() = '${documentId}' ${qend}`;
     }
 }
 

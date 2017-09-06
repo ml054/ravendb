@@ -17,6 +17,7 @@ namespace Sparrow.LowMemory
         {
             AvailableMemory = new Size(256, SizeUnit.Megabytes),
             TotalPhysicalMemory = new Size(256, SizeUnit.Megabytes),
+            InstalledMemory = new Size(256, SizeUnit.Megabytes)
         };
 
         [StructLayout(LayoutKind.Sequential)]
@@ -37,6 +38,10 @@ namespace Sparrow.LowMemory
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern unsafe bool GlobalMemoryStatusEx(MemoryStatusEx* lpBuffer);
 
+        [return: MarshalAs(UnmanagedType.Bool)]
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool GetPhysicallyInstalledSystemMemory(out long totalMemoryInKb);
+
         /// <summary>
         /// This value is in MB
         /// </summary>
@@ -47,6 +52,69 @@ namespace Sparrow.LowMemory
             {
                 _memoryLimit = value;
             }
+        }
+
+        public static long GetRssMemoryUsage(int procId)
+        {
+            // currently Process.GetCurrentProcess().WorkingSet64 doesn't give the real RSS number
+            // getting it from /proc/self/stat or statm can be also problematic because in some distros the number is in page size, in other pages, and position is not always guarenteed
+            // however /proc/self/status gives the real number in humenly format. We extract this here:
+            var path = $"/proc/{procId}/status";
+            var vmRssString = KernelVirtualFileSystemUtils.ReadLineFromFile(path, "VmRSS");
+            if (vmRssString == null)
+            {
+                if (Logger.IsInfoEnabled)
+                    Logger.Info($"Failed to read VmRSS from {path}");
+                return 0;
+            }
+
+            var parsedLine = vmRssString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (parsedLine.Length != 3) // format should be: VmRss: <num> kb
+            {
+                if (Logger.IsInfoEnabled)
+                    Logger.Info($"Failed to read VmRSS from {path}. Line was {parsedLine}");
+                return 0;
+            }
+
+            if (parsedLine[0].Contains("VmRSS:") == false)
+            {
+                if (Logger.IsInfoEnabled)
+                    Logger.Info($"Failed to find VmRSS from {path}. Line was {parsedLine}");
+                return 0;
+            }
+
+            long result;
+            if (long.TryParse(parsedLine[1], out result) == false)
+            {
+                if (Logger.IsInfoEnabled)
+                    Logger.Info($"Failed to parse VmRSS from {path}. Line was {parsedLine}");
+                return 0;
+            }
+
+            switch (parsedLine[2].ToLowerInvariant())
+            {
+                case "kb":
+                    result *= 1024L;
+                    break;
+                case "mb":
+                    result *= 1024L * 1024;
+                    break;
+                case "gb":
+                    result *= 1024L * 1024 * 1024;
+                    break;
+            }
+
+            return result;
+        }
+
+        public static (long InstalledMemory, double UsableMemory) GetMemoryInfoInGb()
+        {
+            var memoryInformation = GetMemoryInfo();
+            var installedMemoryInGb = memoryInformation.InstalledMemory.GetValue(SizeUnit.Gigabytes);
+            var usableMemoryInBytes = memoryInformation.TotalPhysicalMemory.GetValue(SizeUnit.Bytes);
+            var usableMemoryInGb = usableMemoryInBytes / (double)1024 / 1024 / 1024;
+            return (installedMemoryInGb, usableMemoryInGb);
         }
 
         public static unsafe MemoryInfoResult GetMemoryInfo()
@@ -62,23 +130,27 @@ namespace Sparrow.LowMemory
             {
                 if (PlatformDetails.RunningOnPosix == false)
                 {
-                    // Windows
+                    // windows
                     var memoryStatus = new MemoryStatusEx
                     {
                         dwLength = (uint)sizeof(MemoryStatusEx)
                     };
-                    var result = GlobalMemoryStatusEx(&memoryStatus);
-                    if (result == false)
+
+                    if (GlobalMemoryStatusEx(&memoryStatus) == false)
                     {
                         if (Logger.IsInfoEnabled)
                             Logger.Info("Failure when trying to read memory info from Windows, error code is: " + Marshal.GetLastWin32Error());
                         return FailedResult;
                     }
 
+                    if (GetPhysicallyInstalledSystemMemory(out var installedMemoryInKb) == false)
+                        installedMemoryInKb = (long)memoryStatus.ullTotalPhys;
+
                     return new MemoryInfoResult
                     {
                         AvailableMemory = new Size((long)memoryStatus.ullAvailPhys, SizeUnit.Bytes),
                         TotalPhysicalMemory = new Size((long)memoryStatus.ullTotalPhys, SizeUnit.Bytes),
+                        InstalledMemory = new Size(installedMemoryInKb, SizeUnit.Kilobytes)
                     };
                 }
 
@@ -91,7 +163,7 @@ namespace Sparrow.LowMemory
 
                 if (PlatformDetails.RunningOnMacOsx == false)
                 {
-                    // Linux
+                    // linux
                     var info = new sysinfo_t();
                     if (Syscall.sysinfo(ref info) != 0)
                     {
@@ -105,7 +177,7 @@ namespace Sparrow.LowMemory
                 }
                 else
                 {
-                    // MacOS
+                    // macOS
                     var mib = new[] {(int)TopLevelIdentifiersMacOs.CTL_HW, (int)CtkHwIdentifiersMacOs.HW_MEMSIZE};
                     ulong physicalMemory = 0;
                     var len = sizeof(ulong);
@@ -151,7 +223,9 @@ namespace Sparrow.LowMemory
                 return new MemoryInfoResult
                 {
                     AvailableMemory = availableRam,
-                    TotalPhysicalMemory = totalPhysicalMemory
+                    TotalPhysicalMemory = totalPhysicalMemory,
+                    //TODO: http://issues.hibernatingrhinos.com/issue/RavenDB-8468
+                    InstalledMemory = totalPhysicalMemory
                 };
             }
             catch (Exception e)
@@ -176,6 +250,7 @@ namespace Sparrow.LowMemory
     public struct MemoryInfoResult
     {
         public Size TotalPhysicalMemory;
+        public Size InstalledMemory;
         public Size AvailableMemory;
     }
 }
