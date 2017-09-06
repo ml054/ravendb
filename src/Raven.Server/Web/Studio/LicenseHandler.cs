@@ -22,22 +22,6 @@ namespace Raven.Server.Web.Studio
             return Task.CompletedTask;
         }
  
-        [RavenAction("/admin/license/registration", "POST", AuthorizationStatus.ClusterAdmin)]
-        public async Task Register()
-        {
-            UserRegistrationInfo userInfo;
-
-            using (var context = JsonOperationContext.ShortTermSingleUse())
-            {
-                var json = context.Read(RequestBodyStream(), "license registration form");
-                userInfo = JsonDeserializationServer.UserRegistrationInfo(json);
-            }
-
-            await ServerStore.LicenseManager.RegisterForFreeLicense(userInfo).ConfigureAwait(false);
-
-            NoContentStatus();
-        }
-
         [RavenAction("/admin/license/activate", "POST", AuthorizationStatus.ClusterAdmin)]
         public async Task Activate()
         {
