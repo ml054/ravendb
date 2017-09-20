@@ -45,7 +45,7 @@ namespace Raven.Server.Web.Authentication
                 }
 
                 if (Server.ClusterCertificateHolder?.Certificate == null)
-                    throw new InvalidOperationException($"Cannot generate the client certificate '{certificate.Name}' becuase the server certificate is not loaded. " +
+                    throw new InvalidOperationException($"Cannot generate the client certificate '{certificate.Name}' because the server certificate is not loaded. " +
                                                         $"You can supply a server certificate by using the following configuration keys: " +
                                                         $"'{RavenConfiguration.GetKey(x => x.Security.CertificatePath)}'/'{RavenConfiguration.GetKey(x => x.Security.CertificateExec)}'/" +
                                                         $"'{RavenConfiguration.GetKey(x => x.Security.ClusterCertificatePath)}'/'{RavenConfiguration.GetKey(x => x.Security.ClusterCertificateExec)}'. " +
@@ -166,7 +166,7 @@ namespace Raven.Server.Web.Authentication
             var clientCert = feature?.Certificate;
 
             if (clientCert != null && clientCert.Thumbprint.Equals(thumbprint))
-                throw new InvalidOperationException($"Cannot delete {clientCert.FriendlyName} becuase it's the current client certificate being used");
+                throw new InvalidOperationException($"Cannot delete {clientCert.FriendlyName} because it's the current client certificate being used");
 
             using (ServerStore.ContextPool.AllocateOperationContext(out TransactionOperationContext ctx))
             {

@@ -261,7 +261,7 @@ namespace Voron.Impl.Journal
 
                 // if the header marker is zero or garbage, we are probably in the area at the end of the log file, and have no additional log records
                 // to read from it. This can happen if the next transaction was too big to fit in the current log file. We stop reading
-                // this log file and move to the next one, or it might have happened becuase of reuse of journal file 
+                // this log file and move to the next one, or it might have happened because of reuse of journal file 
 
                 // note : we might encounter a "valid" TransactionHeaderMarker which is still garbage, so we will test that later on
 

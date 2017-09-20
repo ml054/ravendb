@@ -133,7 +133,7 @@ namespace Raven.Server.Documents.Queries.Parser
 
         private (StringSegment Name, ValueToken FunctionText) DeclaredFunction()
         {
-            // becuase of how we are processing them, we don't actually care for
+            // because of how we are processing them, we don't actually care for
             // parsing the function directly. We have implemented a minimal parser
             // here that find the _boundary_ of the function call, and then we hand
             // all of that code directly to the js code. 

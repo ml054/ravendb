@@ -21,6 +21,8 @@ class certificates extends viewModelBase {
     showDatabasesSelector: KnockoutComputed<boolean>;
     hasAllDatabasesAccess: KnockoutComputed<boolean>;
     certificates = ko.observableArray<Raven.Client.ServerWide.Operations.Certificates.CertificateDefinition>();
+    
+    usingHttps = location.protocol === "https:";
 
     importedFileName = ko.observable<string>();
     

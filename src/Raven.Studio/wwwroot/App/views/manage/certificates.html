@@ -1,5 +1,19 @@
 <div class="certificates flex-vertical absolute-fill content-margin">
-    <div class="row flex-row flex-grow flex-stretch-items">
+    
+    <div data-bind="visible: !usingHttps">
+        <div class="absolute-center panel padding">
+            <i class="icon-info icon-xl"></i>
+
+            <div>
+                Server certificate information has not been set up. <Br /> In order to manage certificates supply a server 
+                certificate by using the following configuration keys: 
+                'Security.Certificate.Path'/'Security.Certificate.Exec'/'Security.ClusterCertificate.Path'/'Security.ClusterCertificate.Exec' 
+                in your RavenDB server settings file.
+            </div>
+            
+        </div>
+    </div>
+    <div class="row flex-row flex-grow flex-stretch-items" data-bind="visible: usingHttps">
         <div class="col-sm-12 col-lg-7 flex-vertical">
             <div class="flex-header">
                 <div>
