@@ -225,7 +225,6 @@ namespace Raven.Server.Web.System
             {
                 foreach (var ravenEtl in databaseRecord.RavenEtls)
                 {
-                    var tag = dbTopology.WhoseTaskIsIt(ravenEtl, ServerStore.Engine.CurrentState);
 
                     var taskState = GetEtlTaskState(ravenEtl);
 
@@ -233,31 +232,7 @@ namespace Raven.Server.Web.System
                         throw new InvalidOperationException(
                             $"Could not find connection string named '{ravenEtl.ConnectionStringName}' in the database record for '{ravenEtl.Name}' ETL");
 
-                    (string Url, OngoingTaskConnectionStatus Status) res = (null, OngoingTaskConnectionStatus.None);
-                    string error = null;
-                    if (tag == ServerStore.NodeTag)
-                    {
-                        foreach (var process in Database.EtlLoader.Processes)
-                        {
-                            if (process is RavenEtl etlProcess)
-                            {
-                                if (etlProcess.ConfigurationName == ravenEtl.Name)
-                                {
-                                    res.Url = etlProcess.Url;
-                                    res.Status = OngoingTaskConnectionStatus.Active;
-                                    break;
-                                }
-                            }
-                        }
-                        if (res.Status == OngoingTaskConnectionStatus.None)
-                        {
-                            error = $"The raven etl process'{ravenEtl.Name}' was not found.";
-                        }
-                    }
-                    else
-                    {
-                        res.Status = OngoingTaskConnectionStatus.NotOnThisNode;
-                    }
+                    var res = GetEtlTaskStatus(databaseRecord, ravenEtl,out var tag, out var error);
 
                     yield return new OngoingTaskRavenEtlListView()
                     {
@@ -311,6 +286,37 @@ namespace Raven.Server.Web.System
                     };
                 }
             }
+        }
+
+        private (string Url, OngoingTaskConnectionStatus Status) GetEtlTaskStatus(DatabaseRecord record, RavenEtlConfiguration ravenEtl ,out string tag, out string error)
+        {
+            (string Url, OngoingTaskConnectionStatus Status) res = (null, OngoingTaskConnectionStatus.None);
+            error = null;
+            tag = record.Topology.WhoseTaskIsIt(ravenEtl, ServerStore.Engine.CurrentState);
+            if (tag == ServerStore.NodeTag)
+            {
+                foreach (var process in Database.EtlLoader.Processes)
+                {
+                    if (process is RavenEtl etlProcess)
+                    {
+                        if (etlProcess.ConfigurationName == ravenEtl.Name)
+                        {
+                            res.Url = etlProcess.Url;
+                            res.Status = OngoingTaskConnectionStatus.Active;
+                            break;
+                        }
+                    }
+                }
+                if (res.Status == OngoingTaskConnectionStatus.None)
+                {
+                    error = $"The raven etl process'{ravenEtl.Name}' was not found.";
+                }
+            }
+            else
+            {
+                res.Status = OngoingTaskConnectionStatus.NotOnThisNode;
+            }
+            return res;
         }
 
         // Get Info about a specific task - For Edit View in studio - Each task should return its own specific object
@@ -412,13 +418,15 @@ namespace Raven.Server.Web.System
                                 HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
                                 break;
                             }
+                            var res = GetEtlTaskStatus(record, ravenEtl, out var _, out var _);
 
                             WriteResult(context, new OngoingTaskRavenEtlDetails()
                             {
                                 TaskId = ravenEtl.TaskId,
                                 TaskName = ravenEtl.Name,
                                 Configuration = ravenEtl,
-                                TaskState = GetEtlTaskState(ravenEtl)
+                                TaskState = GetEtlTaskState(ravenEtl),
+                                DestinationUrl = res.Url
                             });
                             break;
 
