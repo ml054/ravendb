@@ -381,3 +381,8 @@ type dashboardChartTooltipProviderArgs = {
     date: Date;
     values: dictionary<number>;
 }
+
+interface claimDomainResult {
+    Email: string;
+    Domains: dictionary<Array<string>>;
+}
