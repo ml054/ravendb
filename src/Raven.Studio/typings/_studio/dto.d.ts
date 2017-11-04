@@ -382,7 +382,7 @@ type dashboardChartTooltipProviderArgs = {
     values: dictionary<number>;
 }
 
-interface claimDomainResult {
+interface registrationInfoResult {
     Email: string;
     Domains: dictionary<Array<string>>;
 }
