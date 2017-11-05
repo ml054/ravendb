@@ -19,7 +19,6 @@ namespace Raven.Server.Web.System
 {
     public class SetupHandler : RequestHandler
     {
-        
         [RavenAction("/setup/check-domain", "GET", AuthorizationStatus.UnauthenticatedClients)]
         public Task CheckDomainAvailability()
         {

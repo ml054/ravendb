@@ -71,7 +71,7 @@ namespace Raven.Server.Commercial
             progress.AddInfo("Creating new RavenDB configuration settings.");
             onProgress(progress);
 
-            ValidateSetupInfo(SetupMode.LetsEncrypt, setupInfo);
+            ValidateSetupInfo(SetupMode.Secured, setupInfo);
 
             try
             {
@@ -382,12 +382,15 @@ namespace Raven.Server.Commercial
         {
             try
             {
-                if (setupInfo.NodeSetupInfos.ContainsKey(LocalNodeTag) == false)
-                    throw new ArgumentException($"At least one of the nodes must have the node tag '{LocalNodeTag}'.");
-                if (IsValidEmail(setupInfo.Email) == false)
-                    throw new ArgumentException("Invalid domain name.");
-                if (IsValidDomain(setupInfo.Domain) == false)
-                    throw new ArgumentException("Invalid domain name.");
+                if (setupMode == SetupMode.LetsEncrypt)
+                {
+                    if (setupInfo.NodeSetupInfos.ContainsKey(LocalNodeTag) == false)
+                        throw new ArgumentException($"At least one of the nodes must have the node tag '{LocalNodeTag}'.");
+                    if (IsValidEmail(setupInfo.Email) == false)
+                        throw new ArgumentException("Invalid email address.");
+                    if (IsValidDomain(setupInfo.Domain) == false)
+                        throw new ArgumentException("Invalid domain name.");
+                }
 
                 foreach (var node in setupInfo.NodeSetupInfos)
                 {
@@ -477,8 +480,8 @@ namespace Raven.Server.Commercial
                             {
                                 try
                                 {
-                                    var nodeCert = new X509Certificate2(node.Value.Certificate, node.Value.Password);
-                                    var cn = nodeCert.SubjectName.Name;
+                                    var nodeCert = new X509Certificate2(Convert.FromBase64String(node.Value.Certificate), node.Value.Password);
+                                    var cn = nodeCert.GetNameInfo(X509NameType.DnsName, false);
                                     nodeServerUrl = $"https://{cn}:{node.Value.Port}";
                                 }
                                 catch (Exception e)
