@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Certes;
 using Certes.Acme;
 using Certes.Pkcs;
+using Lextm.SharpSnmpLib.Messaging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -68,7 +69,6 @@ namespace Raven.Server.Commercial
             progress.AddInfo("Setting up RavenDB in secured mode.");
             progress.AddInfo("Creating new RavenDB configuration settings.");
             onProgress(progress);
-
             ValidateSetupInfo(SetupMode.Secured, setupInfo);
 
             try
@@ -325,7 +325,6 @@ namespace Raven.Server.Commercial
 
                     if (authz.Data.Status == EntityStatus.Valid)
                         return;
-
                     throw new InvalidOperationException("Failed to authorize certificate: " + authz.Data.Status + Environment.NewLine + authz.Json);
                 }
             }
