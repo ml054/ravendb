@@ -3,7 +3,7 @@
 CURL_CMD=$(which curl)
 GIT_CMD=$(which git)
 NODE_CMD=$(which node)
-POWERSHELL_CMD=$(which powershell)
+POWERSHELL_CMD=$(which pwsh)
 MONO_CMD=$(which mono)
 DOTNET_VERSION_CMD=`dotnet --version 2> /dev/null`
 UBUNTU_CODENAME=$(lsb_release -c | cut -d ":" -f2 | sed 's/\t//g')
