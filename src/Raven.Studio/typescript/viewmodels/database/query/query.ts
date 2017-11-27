@@ -590,10 +590,14 @@ class query extends viewModelBase {
     }
 
     private saveRecentQuery() {
-        const name = this.getRecentQueryName();
-        this.criteria().name(name);
-        this.saveQueryInStorage(true);
-    }
+        const name = this.generateRecentQueryName();
+        
+        // !name means that exact query already exists...
+        if (name) { 
+            this.criteria().name(name);
+            this.saveQueryInStorage(true);
+        }
+    }   
 
     private saveQueryInStorage(isRecent: boolean) {
         const dto = this.criteria().toStorageDto();
@@ -632,11 +636,53 @@ class query extends viewModelBase {
             .forEach(x => this.savedQueries.remove(x));
     }
 
-    private getRecentQueryName(): string {
+    private generateRecentQueryName(): string {
+        let copyNumber = 0;
+        let generateNewName = false;
+        let baseNameExists = false;
 
-        const collectionIndexName = queryUtil.getCollectionOrIndexName(this.criteria().queryText());
+        const queryText = this.criteria().queryText();
+        const collectionIndexName = queryUtil.getCollectionOrIndexName(queryText);
 
-        return query.recentKeyword + " (" + collectionIndexName + ")";
+        const proposedName = query.recentKeyword + " (" + collectionIndexName + ")";
+        const proposedNameHash = genUtils.hashCode(proposedName + queryText || "");
+
+        // Read existing Saved Recent Queries
+        const savedRecentQueries = savedQueriesStorage.getSavedQueries(this.activeDatabase())
+            .filter(x => x.name.indexOf(query.recentKeyword) >= 0 );
+        
+        for (let query of savedRecentQueries) {
+
+            const parts = _.split(query.name,  '-');
+            // parts[0] will be: The query name
+            // parts[last_part] will be: The copy 'number'..
+
+            if (parts[0] === proposedName) {
+
+                baseNameExists = true;
+                
+                if (parts.length > 1) {
+                    // There are existing copies.. find highest number to use for the new generated name
+                    const number = +parts[parts.length-1];
+                    copyNumber = _.max([number,  copyNumber]);
+                }
+
+                if (proposedNameHash === generalUtils.hashCode(parts[0] + (query.queryText || ""))  ) {
+                    // No need to generate name, use existing, content is the same
+                    generateNewName = false;
+                    break;                      
+                }
+
+                // Content is different - we will need to generate new name 
+                generateNewName = true;
+            }            
+        }     
+       
+        if (generateNewName) {
+            return proposedName + '-' + (copyNumber+1);
+        }
+
+        return baseNameExists ? "" : proposedName;
     }
 
     previewQuery(item: storedQueryDto) {

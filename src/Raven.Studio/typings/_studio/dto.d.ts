@@ -205,8 +205,6 @@ interface workTimeUnit {
 interface queryDto {
     name: string;
     queryText: string;
-    showFields: boolean;
-    indexEntries: boolean;
     modificationDate: string;
     recentQuery: boolean;
 }
