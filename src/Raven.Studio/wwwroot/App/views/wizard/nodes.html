@@ -75,8 +75,7 @@
                         <div class="form-group" data-bind="validationElement: ip">
                             <label class="control-label" data-bind="attr: { for: 'ipInput_' + $index() }">
                                 <span data-bind="visible: $index() === 0">IP address<i class="required"></i></span>
-                            </label>
-                            
+                            </label>                            
                             <div class="flex-grow input-group" data-bind="validationOptions: { insertMessages: false }, visible: !$parent.isLocal()">
                                 <input type="text" autocomplete="off" class="form-control" placeholder="Enter server IP address" data-bind="textInput: ip ">                               
                                 <div data-bind="validationOptions: { errorsAsTitle: false }, validationElement: ip">
@@ -118,20 +117,47 @@
                                 <div class="help-block" data-bind="validationMessage: ips"></div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <button class="btn btn-default" data-bind="click: toggleAdvanced, visible: $root.showAdvancedSettings">Advanced</button>
-                    
-                    <div data-bind="collapse: showAdvancedSettings">
-                        <div class="form-group" data-bind="validationElement: externalIpAddress">
-                            <label class="control-label">External IP address</label>
-                            <div class="flex-grow">
-                                <input type="text" autocomplete="off" class="form-control" placeholder="Enter external IP address"
-                                       data-bind="textInput: externalIpAddress">
+                    </div>                    
+                    <!--<button class="btn btn-default" data-bind="click: toggleAdvanced, visible: $root.showAdvancedSettings">Advanced</button>                    -->
+                    <!--<div data-bind="collapse: showAdvancedSettings">-->
+                        <!--<div class="form-group" data-bind="validationElement: externalIpAddress">-->
+                            <!--<label class="control-label">External IP address</label>-->
+                            <!--<div class="flex-grow">-->
+                                <!--<input type="text" autocomplete="off" class="form-control" placeholder="Enter external IP address"-->
+                                       <!--data-bind="textInput: externalIpAddress">-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                
+                    <!--<div class="form-group" data-bind="validationElement: externalIpAddress">-->
+                        <!--<label class="control-label">External IP address</label>-->
+                        <!--<div class="flex-grow">-->
+                            <!--<input type="text" autocomplete="off" class="form-control" placeholder="Enter external IP address"-->
+                                   <!--data-bind="textInput: externalIpAddress">-->
+                        <!--</div>-->
+                    <!--</div>-->                    
+                    <div data-bind="visible: ips()[0].ip()">
+                        <p class="text-info bg-info padding padding-sm">
+                            <i class="icon-info"></i>&nbsp;
+                            RavenDB will update the DNS record for
+                            <strong data-bind="text: nodeTag() ? nodeTag().toLocaleUpperCase() : ''"></strong>.<strong data-bind="text: $root.model.createFullNodeNameObservable($data)"></strong>
+                            to IP Address:
+                            <strong data-bind="text: externalIpAddress() || ips()[0].ip()"></strong>
+                        </p>    
+                        <div class="checkbox">
+                            <input id="customize" type="checkbox" data-bind="checked: showAdvancedSettings">
+                            <label for="customize">Customize the DNS record IP Address</label>
+                        </div> 
+                        <div class="padding" data-bind="collapse: showAdvancedSettings">
+                            <div class="form-group" data-bind="validationElement: externalIpAddress">
+                                <label class="control-label">External IP address</label>
+                                <div class="flex-grow">
+                                    <input type="text" autocomplete="off" class="form-control" placeholder="Enter external IP address"
+                                    data-bind="textInput: externalIpAddress">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
+                    </div>             
                 </div>
             </div>
         </div>

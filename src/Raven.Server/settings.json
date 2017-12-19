@@ -1,4 +1,5 @@
 ﻿{
     "ServerUrl": "http://127.0.0.1:8080",
-    "Setup.Mode": "None"
+    "Setup.Mode": "Initial",
+    "AcmeUrl":"https://acme-staging.api.letsencrypt.org/directory"	
 }

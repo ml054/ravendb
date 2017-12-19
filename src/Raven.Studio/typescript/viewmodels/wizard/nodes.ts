@@ -20,7 +20,9 @@ class nodes extends setupStep {
     provideCertificates: KnockoutComputed<boolean>;
     showAgreement: KnockoutComputed<boolean>;
     showFullDomain: KnockoutComputed<boolean>;
-    showAdvancedSettings: KnockoutComputed<boolean>;
+    
+    //showAdvancedSettings: KnockoutComputed<boolean>;
+    showAdvancedSettings = ko.observable<boolean>(false);
    
     maxNodesAddedMsg: KnockoutComputed<string>;
     
@@ -50,7 +52,7 @@ class nodes extends setupStep {
         this.showDnsInfo = ko.pureComputed(() => this.model.mode() === "LetsEncrypt");
         this.showFullDomain = ko.pureComputed(() => this.model.mode() === "LetsEncrypt");
         this.showAgreement = ko.pureComputed(() => this.model.mode() === "LetsEncrypt");
-        this.showAdvancedSettings = ko.pureComputed(() => this.model.mode() === "LetsEncrypt");
+        //this.showAdvancedSettings = ko.pureComputed(() => this.model.mode() === "LetsEncrypt");
        
         this.maxNodesAddedMsg = ko.pureComputed(() => {   
             const numberOfNodesAdded = this.model.nodes().length;
