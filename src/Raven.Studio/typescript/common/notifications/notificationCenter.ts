@@ -162,6 +162,7 @@ class notificationCenter {
                 this.alertCountAnimation(false);
             }
         });
+        
         this.noNewNotifications = ko.pureComputed(() => {
             return this.totalItemsCount() === 0;
         });

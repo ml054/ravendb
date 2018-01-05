@@ -8,7 +8,7 @@ class serverDashboardWebSocketClient extends abstractWebSocketClient<Raven.Serve
     loading = ko.observable<boolean>(true);
 
     constructor(onData: (data: Raven.Server.Dashboard.AbstractDashboardNotification) => void) {
-        super(null);
+        super(null, null);
         this.onData = onData;
     }
 

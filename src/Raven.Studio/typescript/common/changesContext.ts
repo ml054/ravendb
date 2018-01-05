@@ -17,6 +17,7 @@ class changesContext {
     static default = new changesContext();
     
     serverNotifications = ko.observable<serverNotificationCenterClient>();
+    leaderNotifications = ko.observable<serverNotificationCenterClient>();
     databaseNotifications = ko.observable<databaseNotificationCenterClient>();
 
     databaseChangesApi = ko.observable<changesApi>();
@@ -56,8 +57,10 @@ class changesContext {
         this.pendingAfterChangesApiConnectedHandlers.push(func);
     }
 
+    // Notifications from the Server for which the studio is open
     connectServerWideNotificationCenter(): JQueryPromise<void> {
         const alreadyHasGlobalChangesApi = this.serverNotifications();
+        
         if (alreadyHasGlobalChangesApi) {
             return alreadyHasGlobalChangesApi.connectToWebSocketTask;
         }
@@ -66,6 +69,21 @@ class changesContext {
         this.serverNotifications(serverClient);
 
         return serverClient.connectToWebSocketTask;
+    }
+
+    // Notifications from the Leader - regardlsess of which server the studio is open on
+    connectLeaderNotificationCenter(leaderUrl: string): JQueryPromise<void> {
+        const alreadyHasGlobalChangesApi = this.leaderNotifications();
+        
+        if (alreadyHasGlobalChangesApi){
+            // Close because we need to connect to a 'new' leader
+            alreadyHasGlobalChangesApi.dispose(); 
+        }
+        
+        const leaderClient = new serverNotificationCenterClient(leaderUrl, true);
+        this.leaderNotifications(leaderClient);
+
+        return leaderClient.connectToWebSocketTask;
     }
 
     changeDatabase(db: database): void {
@@ -83,8 +101,8 @@ class changesContext {
             this.navigateToResourceSpecificPage(db);
             return;
         }
-
-        const notificationsClient = new databaseNotificationCenterClient(db);
+       
+        const notificationsClient = new databaseNotificationCenterClient(db, null);
 
         this.globalDatabaseSubscriptions.push(...notificationCenter.instance.configureForDatabase(notificationsClient));
 

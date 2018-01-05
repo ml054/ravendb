@@ -1,11 +1,15 @@
-
 import clusterNode = require("models/database/cluster/clusterNode");
+import genUtils = require("common/generalUtils");
 
 class clusterTopology {
     leader = ko.observable<string>();
-    nodeTag = ko.observable<string>();
-    currentTerm = ko.observable<number>();
+    leaderUrl = ko.observable<string>();
+    leaderTag = ko.observable<string>();
     
+    nodeTag = ko.observable<string>();
+    localNodeTag: KnockoutComputed<string>;
+    
+    currentTerm = ko.observable<number>();    
     nodes = ko.observableArray<clusterNode>([]);
     
     membersCount: KnockoutComputed<number>;
@@ -45,9 +49,36 @@ class clusterTopology {
 
         this.nodes().forEach(node => {      
             node.isLeader(node.tag() === this.leader());
+            
+            if (node.isLeader()) {
+                this.leaderUrl(node.serverUrl()); 
+                this.leaderTag(node.tag());
+            }            
         });
-    }
+        
+        this.localNodeTag = ko.pureComputed(() => {
+            let localHostName = window.location.hostname;
+            localHostName = genUtils.isLocalhostIpAddress(localHostName) ? 'localhost' : localHostName;
+            const localHostPort = window.location.port;
+            const localHost = localHostName + ':' + localHostPort;
 
+            for (let i = 0; i < this.nodes().length; i++) {
+                const nodeItem = this.nodes()[i];
+
+                let nodeHostName = (new URL(nodeItem.serverUrl())).hostname;
+                nodeHostName = genUtils.isLocalhostIpAddress(nodeHostName) ? 'localhost' : nodeHostName;
+                const nodeHostPort = (new URL(nodeItem.serverUrl())).port;
+                const nodeHost = nodeHostName + ':' + nodeHostPort;
+
+                if (nodeHost === localHost) {
+                    return nodeItem.tag();
+                }
+            }                   
+                        
+            return '?'; 
+        });
+    }    
+        
     private mapNodes(type: clusterNodeType, dict: System.Collections.Generic.Dictionary<string, string>,
         status: { [key: string]: Raven.Client.Http.NodeStatus; }): Array<clusterNode> {
         return _.map(dict, (v, k) => {
@@ -70,12 +101,19 @@ class clusterTopology {
         );
         const newServerUrls = new Set<string>(newNodes.map(x => x.serverUrl()));
 
-        const toDelete = existingNodes.filter(x => !newServerUrls.has(x.serverUrl()));
-        toDelete.forEach(x => this.nodes.remove(x));
+        if (existingNodes.length > 1) {
+            const toDelete = existingNodes.filter(x => !newServerUrls.has(x.serverUrl()));
+            toDelete.forEach(x => this.nodes.remove(x));
+        }
 
         newNodes.forEach(node => {
             node.isLeader(node.tag() === incomingChanges.Leader);
-            
+
+            if (node.isLeader()) {
+                this.leaderUrl(node.serverUrl());
+                this.leaderTag(node.tag());
+            }
+
             const matchedNode = existingNodes.find(x => x.serverUrl() === node.serverUrl());           
                         
             if (matchedNode) {
@@ -88,6 +126,7 @@ class clusterTopology {
 
         this.updateAssignedCores(incomingChanges.NodeLicenseDetails);
         this.nodeTag(incomingChanges.NodeTag);
+                
         this.leader(incomingChanges.Leader);
         this.currentTerm(incomingChanges.CurrentTerm);
     }

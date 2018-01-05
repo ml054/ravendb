@@ -8,7 +8,7 @@ class trafficWatchWebSocketClient extends abstractWebSocketClient<Raven.Client.D
     private readonly onData: (data: Raven.Client.Documents.Changes.TrafficWatchChange) => void;
 
     constructor(onData: (data: Raven.Client.Documents.Changes.TrafficWatchChange) => void) {
-        super(null);
+        super(null, null);
         this.onData = onData;
     }
 

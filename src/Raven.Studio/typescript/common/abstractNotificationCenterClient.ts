@@ -1,5 +1,4 @@
 /// <reference path="../../typings/tsd.d.ts" />
-
 import database = require("models/resources/database");
 import changeSubscription = require("common/changeSubscription");
 import changesCallback = require("common/changesCallback");
@@ -7,8 +6,8 @@ import eventsWebSocketClient = require("common/eventsWebSocketClient");
 
 abstract class abstractNotificationCenterClient extends eventsWebSocketClient<Raven.Server.NotificationCenter.Notifications.Notification> {
 
-    constructor(db: database) {
-        super(db);
+    constructor(db: database, leaderUrl: string) {
+        super(db, leaderUrl);
     }
 
     protected allReconnectHandlers = ko.observableArray<changesCallback<void>>();
@@ -125,8 +124,6 @@ abstract class abstractNotificationCenterClient extends eventsWebSocketClient<Ra
             this.allNotificationUpdatedHandlers.remove(callback);
         });
     }
-
-
 }
 
 export = abstractNotificationCenterClient;

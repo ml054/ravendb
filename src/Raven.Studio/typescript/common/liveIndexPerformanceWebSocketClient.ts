@@ -19,7 +19,7 @@ class liveIndexPerformanceWebSocketClient extends abstractWebSocketClient<result
     loading = ko.observable<boolean>(true);
 
     constructor(db: database, onData: (data: Raven.Client.Documents.Indexes.IndexPerformanceStats[]) => void) {
-        super(db);
+        super(db, null);
         this.onData = onData;
     }
 

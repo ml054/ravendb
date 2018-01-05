@@ -31,17 +31,15 @@ namespace Raven.Server.NotificationCenter.Handlers
                                     isValidFor(db) == false)
                                     continue; // not valid for this, skipping
                             }
-                                
 
                             await writer.WriteToWebSocket(action.Json);
                         }
                     }
 
-                    await writer.WriteNotifications(isValidFor);
+                    await writer.WriteNotifications(isValidFor, () => { ServerStore.OnTopologyChanged(null, ServerStore.GetClusterTopology()); });
                 }
             }
         }
-
      
         [RavenAction("/server/notification-center/dismiss", "POST", AuthorizationStatus.ValidUser)]
         public Task DismissPost()

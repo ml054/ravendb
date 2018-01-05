@@ -1,7 +1,6 @@
 <div class="cluster flex-vertical absolute-fill content-margin">
     <div class="row flex-row flex-grow flex-stretch-items">
         <div class="col-sm-12 col-lg-6 flex-vertical">
-
             <div class="flex-header flex-horizontal">
                 <button data-bind="click: addNode, enable: canAddNodes" class="btn btn-primary"><i class="icon-plus"></i> <span>Add Node to cluster</span></button>
                 <div class="flex-separator"></div>
@@ -24,7 +23,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="scroll flex-grow" data-bind="foreach: topology().nodes">
                 <div class="panel panel-state">
                     <div data-bind="attr: { 'data-state-text': createStateObservable($root.topology), class: 'state ' + createStateClassObservable($root.topology)() } "></div>
@@ -64,7 +62,6 @@
                                         data-bind="click: _.partial($parent.demote, $data), css: { 'btn-spinner': _.includes($root.spinners.demote(), tag()) }, disable: _.includes($root.spinners.demote(), tag()), visible: createCanBeDemotedObservable($root.topology)" >
                                     <i class="icon-demote"></i> <span>Demote</span>
                                 </button>
-
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                                         <span>Operations</span>
@@ -91,7 +88,6 @@
                                         </li>
                                     </ul>
                                 </div>
-                               
                                 <button class="btn btn-danger" 
                                         data-bind="click: _.partial($parent.deleteNode, $data), enable: $root.canDeleteNodes() && !_.includes($root.spinners.delete(), tag()), css: { 'btn-spinner': _.includes($root.spinners.delete(), tag()) }" 
                                         title="Remove node from cluster">
@@ -111,7 +107,6 @@
                                  <strong data-bind="text: utilizedCores, css: cssCores" data-toggle="tooltip" title="Assigned CPU cores limit"></strong><span data-bind="if: numberOfCores() && utilizedCores() != -1">
                                     <span data-bind="numberOfCores() > 0">/ <strong data-bind="text: numberOfCores" data-toggle="tooltip" title="Total CPU cores count"></strong></span>
                                 </span>
-                                
                             </div>
                             <div class="memory" data-bind="if: installedMemoryInGb">
                                 <h5><i class="icon-memory"></i> &nbsp; MEMORY</h5>
@@ -148,11 +143,8 @@
                         <li><a href="#">.zip</a></li>
                     </ul>
                 </div> -->
-            </div>
-            <div class="panel flex-grow" id="clusterGraphContainer" data-bind="css: { graphHidden: !$root.showConnectivity() }">
-                <div class="absolute-center" data-bind="visible: !$root.showConnectivity()">
-                    Go to <a target="_blank" href="#" data-bind="attr: { href: $root.leaderUrl }">Leader</a> node to see connectivity status.
-                </div>
+            </div>           
+            <div class="panel flex-grow" id="clusterGraphContainer">                
             </div>
             <div class="legend">
                 <div class="row">

@@ -1,5 +1,4 @@
 /// <reference path="../../typings/tsd.d.ts" />
-
 import database = require("models/resources/database");
 import abstractWebSocketClient = require("common/abstractWebSocketClient");
 
@@ -10,8 +9,8 @@ abstract class eventsWebSocketClient<T> extends abstractWebSocketClient<T> {
 
     private sentMessages: chagesApiConfigureRequestDto[] = [];
    
-    protected constructor(protected db: database) {
-        super(db);
+    protected constructor(protected db: database, leaderUrl: string) {
+        super(db, leaderUrl);
     }
 
     protected get autoReconnect() {
@@ -71,7 +70,6 @@ abstract class eventsWebSocketClient<T> extends abstractWebSocketClient<T> {
             }
         }
     }
-
 }
 
 export = eventsWebSocketClient;

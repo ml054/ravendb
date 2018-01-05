@@ -251,7 +251,6 @@ class databasesManager {
             callback(db.qualifier, db.name);
         });
     }
-   
 }
 
 export = databasesManager;

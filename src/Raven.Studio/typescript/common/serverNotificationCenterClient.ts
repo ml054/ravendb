@@ -12,12 +12,16 @@ class serverNotificationCenterClient extends abstractNotificationCenterClient {
     protected watchedDatabaseChangedPrefixes = new Map<string, KnockoutObservableArray<changesCallback<Raven.Server.NotificationCenter.Notifications.Server.DatabaseChanged>>>();
     protected clusterTopologyChangedHandlers = ko.observableArray<changesCallback<Raven.Server.NotificationCenter.Notifications.Server.ClusterTopologyChanged>>(); 
 
-    constructor() {
-        super(null);
+    private description: string;
+    
+    constructor(leaderUrl: string = null, isLeaderNotifications: boolean = false) {
+        super(null,  leaderUrl);
+        
+        this.description = isLeaderNotifications ? `Leader Notification Center Client (${leaderUrl})` : "Server Notification Center Client";
     }
 
     get connectionDescription() {
-        return "Server Notification Center Client";
+        return this.description;
     }
 
     protected webSocketUrlFactory() {
@@ -48,7 +52,6 @@ class serverNotificationCenterClient extends abstractNotificationCenterClient {
 
             default:
                 super.onMessage(actionDto);
-
         }
     }
 
@@ -107,7 +110,6 @@ class serverNotificationCenterClient extends abstractNotificationCenterClient {
             }
         });
     }
-
 }
 
 export = serverNotificationCenterClient;

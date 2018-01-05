@@ -137,9 +137,8 @@ class shell extends viewModelBase {
 
         $.when<any>(licenseTask, topologyTask, clientCertifiateTask)
             .done(() => {
-                changesContext.default
-                    .connectServerWideNotificationCenter();
-
+                changesContext.default.connectServerWideNotificationCenter(); 
+                
                 // load global settings
                 studioSettings.default.globalSettings();
 

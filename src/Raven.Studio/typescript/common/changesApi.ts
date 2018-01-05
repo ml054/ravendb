@@ -11,7 +11,7 @@ import eventsWebSocketClient = require("common/eventsWebSocketClient");
 class changesApi extends eventsWebSocketClient<changesApiEventDto[]> {
 
     constructor(db: database) {
-        super(db);
+        super(db, null);
     }
 
     //TODO: private allReplicationConflicts = ko.observableArray<changesCallback<replicationConflictNotificationDto>>();

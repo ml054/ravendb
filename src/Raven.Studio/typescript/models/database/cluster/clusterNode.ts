@@ -1,5 +1,4 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-
 import clusterTopology = require("models/database/cluster/clusterTopology");
 import generalUtils = require("common/generalUtils");
 import license = require("models/auth/licenseModel");
@@ -113,10 +112,6 @@ class clusterNode {
                 }
             }
 
-            if (topology.nodeTag() !== topology.leader()) {
-                return "";
-            }
-
             return this.connected() ? "Active" : "Error";
         });
     }
@@ -130,10 +125,6 @@ class clusterNode {
                 }
                 
                 return this.connected() ? "state-info" : "state-danger";
-            }
-
-            if (topology.nodeTag() !== topology.leader()) {
-                return "state-unknown";
             }
 
             return this.connected() ? "state-success" : "state-danger";

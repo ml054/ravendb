@@ -17,15 +17,22 @@ class clusterTopologyManager {
     votingInProgress: KnockoutComputed<boolean>;
     nodesCount: KnockoutComputed<number>;
     
+    leader: string;
+    leaderUrl: string;
+    
     init(): JQueryPromise<clusterTopology> {
-        return this.fetchTopology();
+        return this.fetchTopology(true);
     }
 
-    private fetchTopology() {
+    private fetchTopology(isFirst: boolean = false) {
         return new getClusterTopologyCommand()
             .execute()
-            .done(topology => {
+            .done((topology: clusterTopology) => {
                 this.topology(topology);
+                if (isFirst){
+                    this.leader = this.topology().leader();
+                    this.leaderUrl = this.topology().leaderUrl();
+                }
             });
     }
 
@@ -33,11 +40,44 @@ class clusterTopologyManager {
         this.initObservables();
     }
 
+    private getLeaderHost(): string{
+        const leaderUrlLocal = this.leaderUrl;
+        
+        if (!leaderUrlLocal){
+            return window.location.host;
+        }
+        
+        const url = new URL(leaderUrlLocal);
+        return url.host;
+    }
+    
     setupGlobalNotifications() {
-        const serverWideClient = changesContext.default.serverNotifications();
+        const task = changesContext.default.connectServerWideNotificationCenter();
+        task.done(() => {
+            const serverWideClient = changesContext.default.serverNotifications();
 
-        serverWideClient.watchClusterTopologyChanges(e => this.onTopologyUpdated(e));
-        serverWideClient.watchReconnect(() => this.fetchTopology());
+            serverWideClient.watchClusterTopologyChanges(e => {
+                const tempClusterTopology = new clusterTopology(e);
+                this.leaderUrl = tempClusterTopology.leaderUrl();
+                if (this.leader != e.Leader) {
+                    this.leader = e.Leader;
+                    this.setupLeaderGlobalNotifications();
+                }
+            });
+            
+            serverWideClient.watchReconnect(() => this.fetchTopology());
+        });
+        
+        this.setupLeaderGlobalNotifications();
+    }
+
+    setupLeaderGlobalNotifications() {
+        const task = changesContext.default.connectLeaderNotificationCenter(this.getLeaderHost());
+        
+        task.done(() => {
+            const leaderClient = changesContext.default.leaderNotifications();
+            leaderClient.watchClusterTopologyChanges(e => this.onTopologyUpdated(e));
+        });
     }
 
     private onTopologyUpdated(e: Raven.Server.NotificationCenter.Notifications.Server.ClusterTopologyChanged) {
@@ -52,7 +92,7 @@ class clusterTopologyManager {
         
         this.localNodeTag = ko.pureComputed(() => {
             const topology = this.topology();
-            return topology ? topology.nodeTag() : null;
+            return topology ? topology.localNodeTag() : null;
         });
 
         this.localNodeUrl = ko.pureComputed(() => {

@@ -9,8 +9,8 @@ import abstractNotificationCenterClient = require("common/abstractNotificationCe
 
 class databaseNotificationCenterClient extends abstractNotificationCenterClient {
 
-    constructor(db: database) {
-        super(db);
+    constructor(db: database, leaderUrl: string) {
+        super(db, leaderUrl);
     }
 
     protected allDatabaseStatsChangedHandlers = ko.observableArray<changesCallback<Raven.Server.NotificationCenter.Notifications.DatabaseStatsChanged>>();

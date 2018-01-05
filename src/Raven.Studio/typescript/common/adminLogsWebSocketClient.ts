@@ -9,7 +9,7 @@ class adminLogsWebSocketClient extends abstractWebSocketClient<string> {
     private readonly onData: (data: string) => void;
 
     constructor(config: adminLogsConfig, onData: (data: string) => void) {
-        super(null, config);
+        super(null, null, config);
         this.onData = onData;
     }
 

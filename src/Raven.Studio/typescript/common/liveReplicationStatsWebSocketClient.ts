@@ -17,7 +17,7 @@ class liveReplicationStatsWebSocketClient extends abstractWebSocketClient<result
     loading = ko.observable<boolean>(true);
 
     constructor(db: database, onData: (data: Raven.Server.Documents.Replication.LiveReplicationPerformanceCollector.ReplicationPerformanceStatsBase<Raven.Client.Documents.Replication.ReplicationPerformanceBase>[]) => void) {
-        super(db);
+        super(db, null);
         this.onData = onData;
     }
 
