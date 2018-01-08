@@ -36,7 +36,7 @@ namespace Raven.Server.NotificationCenter.Handlers
                         }
                     }
 
-                    await writer.WriteNotifications(isValidFor, () => { ServerStore.OnTopologyChanged(null, ServerStore.GetClusterTopology()); });
+                    await writer.WriteNotifications(isValidFor, Server.ServerStore.Engine.NotifyTopologyChange);
                 }
             }
         }

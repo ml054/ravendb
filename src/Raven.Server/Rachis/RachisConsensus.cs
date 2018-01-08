@@ -854,6 +854,15 @@ namespace Raven.Server.Rachis
             return topologyJson;
         }
 
+        public void NotifyTopologyChange()
+        {
+            using (ContextPool.AllocateOperationContext(out TransactionOperationContext ctx))
+            using (ctx.OpenReadTransaction())
+            {
+                TopologyChanged?.Invoke(this, GetTopology(ctx));
+            }
+        }
+        
         /// <summary>
         /// This method is expected to run for a long time (lifetime of the connection)
         /// and can never throw. We expect this to be on a separate thread

@@ -71,7 +71,7 @@ class changesContext {
         return serverClient.connectToWebSocketTask;
     }
 
-    // Notifications from the Leader - regardlsess of which server the studio is open on
+    // Notifications from the Leader - regardless of which server the studio is open on
     connectLeaderNotificationCenter(leaderUrl: string): JQueryPromise<void> {
         const alreadyHasGlobalChangesApi = this.leaderNotifications();
         

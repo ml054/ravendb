@@ -1,5 +1,4 @@
 ﻿/// <reference path="../../../typings/tsd.d.ts"/>
-
 import clusterTopology = require("models/database/cluster/clusterTopology");
 import getClusterTopologyCommand = require("commands/database/cluster/getClusterTopologyCommand");
 import changesContext = require("common/changesContext");
@@ -40,7 +39,7 @@ class clusterTopologyManager {
         this.initObservables();
     }
 
-    private getLeaderHost(): string{
+    private getLeaderHostPart(): string{
         const leaderUrlLocal = this.leaderUrl;
         
         if (!leaderUrlLocal){
@@ -50,29 +49,71 @@ class clusterTopologyManager {
         const url = new URL(leaderUrlLocal);
         return url.host;
     }
-    
+
+    // setupGlobalNotifications() {
+    //     const task = changesContext.default.connectServerWideNotificationCenter();
+    //     task.done(() => {
+    //         const serverWideClient = changesContext.default.serverNotifications();
+    //
+    //         serverWideClient.watchClusterTopologyChanges(e => {
+    //             const tempClusterTopology = new clusterTopology(e);
+    //             this.leaderUrl = tempClusterTopology.leaderUrl();
+    //             if (this.leader != e.Leader) {
+    //                 this.leader = e.Leader;
+    //                 this.setupLeaderGlobalNotifications();
+    //             }
+    //         });
+    //
+    //         serverWideClient.watchReconnect(() => this.fetchTopology());
+    //     });
+    //
+    //     this.setupLeaderGlobalNotifications();
+    // }
+    //
+
+    /// Not sure about this.....
     setupGlobalNotifications() {
         const task = changesContext.default.connectServerWideNotificationCenter();
+
         task.done(() => {
-            const serverWideClient = changesContext.default.serverNotifications();
+            const serverWideClient = changesContext.default.serverNotifications();                
+
+            serverWideClient.watchReconnect(() => this.fetchTopology());
 
             serverWideClient.watchClusterTopologyChanges(e => {
-                const tempClusterTopology = new clusterTopology(e);
-                this.leaderUrl = tempClusterTopology.leaderUrl();
-                if (this.leader != e.Leader) {
+
+                console.log("NEW leader is: " + e.Leader);
+                console.log("CURRENT leader is: " + this.leader);
+                
+                if (this.leader !== e.Leader) { 
+                    
+                    // 0. We have a new leader (e.Leader)  
+                    //    Update details for the new Leader
                     this.leader = e.Leader;
-                    this.setupLeaderGlobalNotifications();
+                    this.leaderUrl = (new clusterTopology(e)).leaderUrl();
+                   
+                    if (window.location.host !== this.getLeaderHostPart()) {
+                        // 1. Open special ws with the new leader url - only if I am Not leader...
+                        this.setupLeaderGlobalNotifications();
+                    }
+                }
+                else {
+                    // 2. Register also for topology changes for the local server - Only if I am leader...
+                    if (window.location.host === this.getLeaderHostPart()) {
+                        this.onTopologyUpdated(e);
+                    }
                 }
             });
-            
-            serverWideClient.watchReconnect(() => this.fetchTopology());
         });
-        
-        this.setupLeaderGlobalNotifications();
+
+        // Register for topology changes only if current open tab is Not the Leader
+        if (window.location.host !== this.getLeaderHostPart()) {
+            this.setupLeaderGlobalNotifications();
+        }
     }
 
     setupLeaderGlobalNotifications() {
-        const task = changesContext.default.connectLeaderNotificationCenter(this.getLeaderHost());
+        const task = changesContext.default.connectLeaderNotificationCenter(this.getLeaderHostPart());
         
         task.done(() => {
             const leaderClient = changesContext.default.leaderNotifications();

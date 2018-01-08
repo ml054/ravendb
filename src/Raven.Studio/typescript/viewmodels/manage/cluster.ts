@@ -64,12 +64,24 @@ class cluster extends viewModelBase {
         this.graph.draw(this.topology().nodes(), this.topology().leader());
 
         const serverWideClient = changesContext.default.serverNotifications();
-
         this.addNotification(serverWideClient.watchClusterTopologyChanges(() => this.refresh()));
         this.addNotification(serverWideClient.watchReconnect(() => this.refresh()));
+
+        const leaderClient = changesContext.default.leaderNotifications();
+        if (leaderClient) {
+            this.addNotification(leaderClient.watchClusterTopologyChanges(() => this.refresh()));
+        }
     }
 
     private initObservables() {
+
+        // changesContext.default.leaderNotifications.subscribe(() => {         
+        //       this.addNotification(changesContext.default.leaderNotifications().watchClusterTopologyChanges(() => this.refresh()));          
+        // });
+        changesContext.default.serverNotifications.subscribe(() => {
+            this.addNotification(changesContext.default.serverNotifications().watchClusterTopologyChanges(() => this.refresh()));
+        }); // ??? not sure about the above ....
+        
         this.canDeleteNodes = ko.pureComputed(() => this.topology().leader() && this.topology().nodes().length > 1);
         this.canAddNodes = ko.pureComputed(() => !!this.topology().leader() || this.topology().nodeTag() === "?");
 

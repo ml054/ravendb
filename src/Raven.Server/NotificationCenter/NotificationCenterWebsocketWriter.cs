@@ -33,7 +33,7 @@ namespace Raven.Server.NotificationCenter
             _ms.Dispose();
         }
 
-        public async Task WriteNotifications(Func<string, bool> shouldWriteByDb, Action someAction = null)
+        public async Task WriteNotifications(Func<string, bool> shouldWriteByDb, Action firstTime = null)
         {
             var receiveBuffer = new ArraySegment<byte>(new byte[1024]);
             var receive = _webSocket.ReceiveAsync(receiveBuffer, _resourceShutdown);
@@ -44,8 +44,7 @@ namespace Raven.Server.NotificationCenter
             {
                 using (_notificationsBase.TrackActions(asyncQueue, this))
                 {
-                    someAction?.Invoke();
-
+                    firstTime?.Invoke();
                     while (_resourceShutdown.IsCancellationRequested == false)
                     {
                         // we use this to detect client-initialized closure
@@ -57,12 +56,6 @@ namespace Raven.Server.NotificationCenter
                         var tuple = await asyncQueue.TryDequeueAsync(TimeSpan.FromSeconds(5));
                         if (tuple.Item1 == false)
                         {
-                            if (someAction != null)
-                            {
-                                someAction();
-                                continue;
-                            }
-                            
                             await _webSocket.SendAsync(WebSocketHelper.Heartbeat, WebSocketMessageType.Text, true, _resourceShutdown);
                             continue;
                         }

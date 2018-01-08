@@ -15,12 +15,12 @@ abstract class abstractWebSocketClient<T> {
 
     protected abstract get autoReconnect(): boolean;
    
-    protected constructor(protected db: database, private leaderUrl: string, connectArgs: any = null) {
+    protected constructor(protected db: database, private serverUrl: string, connectArgs: any = null) {
         this.resourcePath = appUrl.forDatabaseQuery(this.db);
         this.connectToWebSocketTask = $.Deferred<void>();
 
         if ("WebSocket" in window) {
-            this.connect(() => this.connectWebSocket(leaderUrl, connectArgs));
+            this.connect(() => this.connectWebSocket(serverUrl, connectArgs));
         } else {
             //The browser doesn't support websocket
             //or we are in IE10 or IE11 and the server doesn't support WebSockets.
@@ -63,11 +63,11 @@ abstract class abstractWebSocketClient<T> {
         return true;
     }
     
-    private connectWebSocket(leaderUrl: string, connectArgs: any) { 
+    private connectWebSocket(serverUrl: string, connectArgs: any) { 
         let connectionOpened: boolean = false;
         
         const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-        const wsUrl = leaderUrl ? leaderUrl : window.location.host;
+        const wsUrl = serverUrl || window.location.host;
         const queryString = this.webSocketUrlFactory(connectArgs);
         const url = wsProtocol + wsUrl + this.resourcePath + queryString;
         
@@ -98,7 +98,7 @@ abstract class abstractWebSocketClient<T> {
 
                 if (this.autoReconnect) {
                     // Connection has closed uncleanly, so try to reconnect.
-                    this.connect(() => this.connectWebSocket(leaderUrl,  connectArgs));
+                    this.connect(() => this.connectWebSocket(serverUrl,  connectArgs));
                 }
             }
         };

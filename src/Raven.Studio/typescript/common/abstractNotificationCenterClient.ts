@@ -6,8 +6,8 @@ import eventsWebSocketClient = require("common/eventsWebSocketClient");
 
 abstract class abstractNotificationCenterClient extends eventsWebSocketClient<Raven.Server.NotificationCenter.Notifications.Notification> {
 
-    constructor(db: database, leaderUrl: string) {
-        super(db, leaderUrl);
+    constructor(db: database, serverUrl: string) {
+        super(db, serverUrl);
     }
 
     protected allReconnectHandlers = ko.observableArray<changesCallback<void>>();

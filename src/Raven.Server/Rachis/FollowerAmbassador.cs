@@ -50,6 +50,7 @@ namespace Raven.Server.Rachis
                 if (_statusMessage == value)
                     return;
                 _statusMessage = value;
+                _engine.NotifyTopologyChange();
             }
         }
         public AmbassadorStatus Status;
