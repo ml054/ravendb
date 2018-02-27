@@ -161,7 +161,7 @@ class indexFieldOptions {
 
         const label = labelProvider ? labelProvider(value) : value;
 
-        return (index > 0 && wrapWithDefault) ? "Default" : <any>label;
+        return (index > 0 && wrapWithDefault) ? "Inherit from Default" : <any>label;
     }
 
     private initValidation() {
