@@ -599,7 +599,158 @@ class serverDashboard extends viewModelBase {
     }
     
     private enableLiveView() {
-        this.liveClient(new serverDashboardWebSocketClient(d => this.onData(d)));
+        
+        const dbCreator = (name: string, docCount: number, indexCount: number) => {
+            return {
+                AlertsCount: 0,
+                Database: name,
+                Disabled: false,
+                DocumentsCount: docCount,
+                ErroredIndexesCount: 0,
+                IndexesCount: indexCount,
+                Irrelevant: false,
+                Online: true,
+                ReplicationFactor: 1
+            } as Raven.Server.Dashboard.DatabaseInfoItem;
+        };
+        
+        const dbInfo = {
+            Type: "DatabasesInfo",
+            Items: [
+                dbCreator("DrugRequests", 5503203, 20),
+                dbCreator("DutySchedule", 1572864, 5),
+                dbCreator("Equipment", 1048576, 7),
+                dbCreator("Hospitalizations", 14680064, 30),
+                dbCreator("MedicalHistory", 24793845, 2),
+                dbCreator("Prescriptions", 7864320, 7),
+                dbCreator("StaffAndWages", 524288, 9)
+            ]
+            
+        } as Raven.Server.Dashboard.DatabasesInfo;
+        
+        const resourcesUsage = {
+             Date: null,
+            Type: "MachineResources",
+            TotalMemory: 64 * 1024 * 1023 * 1023,
+            ProcessCpuUsage: 23,
+            SystemCommitLimit: 72 * 1023 * 1023 * 1023,
+            MachineCpuUsage: 57,
+            AvailableMemory:  12 * 1024 * 1023 * 1023,
+            
+            IsWindows: true,
+            IsLowMemory: false,
+            CommitedMemory: 1024,
+            ProcessMemoryUsage: 11.2 * 1024 * 1023 * 1023
+            
+            
+        }as Raven.Server.Dashboard.MachineResources;
+        
+        const driveUsage = {
+            Date: null,
+            Type: "DriveUsage",
+            Items: [
+                {
+                    FreeSpace: 133.08 * 1024* 1024*1024,
+                    FreeSpaceLevel: "High",
+                    MountPoint: "",
+                    TotalCapacity: 502.08 * 1024* 1024*1024,
+                    VolumeLabel: "C:\\",
+                    Items: [
+                        {   Database: "DrugRequests", Size: 20.93 * 1024 * 1024 * 1024 },
+                        {   Database: "DutySchedule", Size: 5.98 * 1024 * 1024 * 1024 },
+                        {   Database: "Equipment", Size: 3.98 * 1024 * 1024 * 1024 },
+                        {   Database: "Hospitalizations", Size: 55.83 * 1024 * 1024 * 1024 },
+                        {   Database: "MedicalHistory", Size: 92.85 * 1024 * 1024 * 1024 },
+                        {   Database: "Prescriptions", Size: 48.85 * 1024 * 1024 * 1024 },
+                        {   Database: "StaffAndWages", Size: 1.99 * 1024 * 1024 * 1024 },
+                    ]
+                }
+            ]
+        } as Raven.Server.Dashboard.DrivesUsage;
+        
+        const requests = {
+            Date: null,
+            Type: "TrafficWatch",
+            Items: [
+                {  Database: "DrugRequests", RequestsPerSecond: 30, WritesPerSecond: 35, WriteBytesPerSecond: 280 * 1024  },
+                {  Database: "DutySchedule", RequestsPerSecond: 15, WritesPerSecond: 142, WriteBytesPerSecond: 1100 * 1024  },
+                {  Database: "Equipment", RequestsPerSecond: 52, WritesPerSecond: 21, WriteBytesPerSecond: 168 * 1024  },
+                {  Database: "Hospitalizations", RequestsPerSecond: 25, WritesPerSecond: 0, WriteBytesPerSecond: 0 * 1024  },
+                {  Database: "MedicalHistory", RequestsPerSecond: 84, WritesPerSecond: 22, WriteBytesPerSecond: 176 * 1024  },
+                {  Database: "Prescriptions", RequestsPerSecond: 191, WritesPerSecond: 0, WriteBytesPerSecond: 280 * 1024  },
+                {  Database: "StaffAndWages", RequestsPerSecond: 2, WritesPerSecond: 0, WriteBytesPerSecond: 280 * 1024  },
+            ]
+        } as Raven.Server.Dashboard.TrafficWatch;
+        
+        const indexing = {
+            Type: "IndexingSpeed",
+            Date: null,
+            Items: [
+                { Database: "DrugRequests", IndexedPerSecond: 139, MappedPerSecond: 42, ReducedPerSecond: 14 },
+                { Database: "DutySchedule", IndexedPerSecond: 28, MappedPerSecond: 7, ReducedPerSecond: 17 },
+                { Database: "Equipment", IndexedPerSecond: 42, MappedPerSecond: 5, ReducedPerSecond: 1 },
+                { Database: "Hospitalizations", IndexedPerSecond: 1, MappedPerSecond: 0, ReducedPerSecond: 0 },
+                { Database: "MedicalHistory", IndexedPerSecond: 232, MappedPerSecond: 66, ReducedPerSecond: 96 },
+                { Database: "Prescriptions", IndexedPerSecond: 942, MappedPerSecond: 1214, ReducedPerSecond: 240 },
+                { Database: "StaffAndWages", IndexedPerSecond: 25, MappedPerSecond: 0, ReducedPerSecond: 0 },
+            ]
+        } as Raven.Server.Dashboard.IndexingSpeed;
+        
+        
+        const update = () => {
+            
+            const date = new Date();
+            requests.Date = moment.utc(date).format();
+            resourcesUsage.Date = moment.utc(date).format();
+            indexing.Date = moment.utc(date).format();
+            
+            requests.Items.forEach(item => {
+                const diffRequests =Math.ceil(item.RequestsPerSecond * 0.1);
+                item.RequestsPerSecond += _.random(-diffRequests, diffRequests);
+                item.RequestsPerSecond = Math.max(0, item.RequestsPerSecond);
+
+
+                const diffWrites =Math.ceil(item.WritesPerSecond * 0.1);
+                item.WritesPerSecond += _.random(-diffWrites, diffWrites);
+                item.WritesPerSecond = Math.max(0, item.WritesPerSecond);
+                
+                const diffDataWritten = Math.ceil(item.WriteBytesPerSecond * 0.1);
+                item.WriteBytesPerSecond += _.random(-diffDataWritten, diffDataWritten);
+                item.WriteBytesPerSecond = Math.max(0, item.WriteBytesPerSecond);
+                
+            });
+            
+            resourcesUsage.ProcessCpuUsage += _.random(-5, 5);
+            resourcesUsage.MachineCpuUsage += _.random(-5, 5);
+            resourcesUsage.MachineCpuUsage = Math.max(0, Math.min(100, resourcesUsage.MachineCpuUsage));
+            resourcesUsage.ProcessCpuUsage = Math.max(0, Math.min(resourcesUsage.MachineCpuUsage, resourcesUsage.ProcessCpuUsage));
+            
+            
+            indexing.Items.forEach(item => {
+                const diff1 =Math.ceil(item.IndexedPerSecond * 0.1);
+                item.IndexedPerSecond += _.random(-diff1, diff1);
+                item.IndexedPerSecond = Math.max(0, item.IndexedPerSecond);
+
+                const diff2 =Math.ceil(item.MappedPerSecond * 0.1);
+                item.MappedPerSecond += _.random(-diff2, diff2);
+                item.MappedPerSecond = Math.max(0, item.MappedPerSecond);
+
+                const diff3 =Math.ceil(item.ReducedPerSecond * 0.1);
+                item.ReducedPerSecond += _.random(-diff3, diff3);
+                item.ReducedPerSecond = Math.max(0, item.ReducedPerSecond);
+            });
+            
+            this.onData(dbInfo);
+            this.onData(driveUsage);
+            this.onData(requests);
+            this.onData(resourcesUsage);
+            this.onData(indexing);
+        };
+        
+        
+        setInterval(update, 1000);
+        
+        //this.liveClient(new serverDashboardWebSocketClient(d => this.onData(d)));
     }
 
     private onData(data: Raven.Server.Dashboard.AbstractDashboardNotification) {
