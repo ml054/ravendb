@@ -129,13 +129,11 @@ class spatialOptions {
                 if (i % 2 == 0) {
                     x /= 8;
                     y /= 4;
-                }
-                else {
+                } else {
                     x /= 4;
                     y /= 8;
                 }
-            }
-            else if (strategy === "QuadPrefixTree") {
+            } else if (strategy === "QuadPrefixTree") {
                 x /= 2;
                 y /= 2;
             }
