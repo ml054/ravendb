@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Raven.Client.Documents.Indexes;
 using Raven.Client.Exceptions.Documents.Compilation;
@@ -8,6 +9,7 @@ using Raven.Server.Documents.Indexes.Static;
 using Raven.Server.Json;
 using Raven.Server.Routing;
 using Raven.Server.ServerWide.Context;
+using Raven.Server.TrafficWatch;
 using Sparrow.Json;
 
 namespace Raven.Server.Web.Studio
@@ -73,15 +75,22 @@ namespace Raven.Server.Web.Studio
                     }
                     catch (IndexCompilationException)
                     {
-                        // swallow compilaton exception and return empty array as response
-
+                        // swallow compilation exception and return empty array as response
                         using (var writer = new BlittableJsonTextWriter(context, ResponseBodyStream()))
                         {
                             writer.WriteStartArray();
                             writer.WriteEndArray();
                         }
                     }
+                    // add TW customData to httpContext
+                    if (TrafficWatchManager.HasRegisteredClients)
+                    {
+                        var sb = new StringBuilder();
+                        sb.Append(/*"Map:\n"+ */map);
+                        HttpContext.Items["TrafficWatch"] = sb.ToString();
+                    }
                 }
+
             }
         }
 
