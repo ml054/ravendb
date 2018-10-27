@@ -13,9 +13,11 @@ class virtualRow {
     private _even: boolean | null = null;
 
     private _height: number;
+    private _rowsLimit: number;
     
-    constructor(height: number) {
+    constructor(height: number, rowsLimit: number) {
         this._height = height;
+        this._rowsLimit = rowsLimit;
         this.element = $(`<div class="virtual-row" style="height: ${this._height}px; top: ${this.top}px"></div>`);
     }
 
@@ -85,6 +87,7 @@ class virtualRow {
             // Move it to its proper position.
             const desiredNewRowY = rowIndex * this._height;
             this.setElementTop(desiredNewRowY);
+            this.element.toggle(rowIndex < this._rowsLimit);
         }
     }
 

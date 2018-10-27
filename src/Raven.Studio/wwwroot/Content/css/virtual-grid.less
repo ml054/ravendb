@@ -69,6 +69,21 @@
     @row-bg-selection-preview: @gray-darker;
     @row-bg-selected: @gray-dark;
 
+    
+    .overflow_info {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 1px;
+        display: none;
+    }
+    
+    &.reachedHeightLimit {
+        .overflow_info {
+            display: block;
+        }
+    }
+    
     .virtual-row {
         position: absolute;
         top: 0;

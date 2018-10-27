@@ -45,12 +45,15 @@ class virtualGrid<T> {
     private previousWindowSize: [number, number] = [0, 0];
     private condensed = false;
     private rowHeight: number;
+    private reachedHeightLimit = ko.observable<boolean>(false);
 
     private static readonly minItemFetchCount = 100;
     private static readonly viewportSelector = ".viewport";
     private static readonly columnContainerSelector = ".column-container";
     private static readonly viewportScrollerSelector = ".viewport-scroller";
     private static readonly minColumnWidth = 20;
+    private static readonly rowsLimit = 900000;
+    private static readonly limitReachedSectionHeight = 300; 
 
     constructor(params: { controller: KnockoutObservable<virtualGridController<T>>, emptyTemplate: string , condensed: boolean}) {
         this.gridId = _.uniqueId("vg_");
@@ -186,10 +189,29 @@ class virtualGrid<T> {
 
     private initializeVirtualRows() {
         this.virtualRows = this.createVirtualRows();
-        this.$viewportElement
+        const $scroller = this.$viewportElement
             .find(virtualGrid.viewportScrollerSelector)
-            .empty()
+            .empty();
+        
+        $scroller
             .append(this.virtualRows.map(r => r.element[0]));
+        
+        $scroller
+            .append(this.createOverflowText());
+    }
+    
+    private createOverflowText() {
+        const $overflowText = $("<div class='overflow_info'></div>");
+        $overflowText.css("top", virtualGrid.rowsLimit * this.rowHeight);
+        $overflowText.css("height", virtualGrid.limitReachedSectionHeight);
+        $overflowText.html(`<div class="absolute-fill bg-info flex-horizontal">
+                <div class="flex-separator"></div>
+                <i class="icon-info"></i>
+                <span>Displaying more than 900,000 items is not supported.</span>
+                <div class="flex-separator"></div>
+</div>`);
+        
+        return $overflowText;
     }
 
     private createVirtualRows(): virtualRow[] {
@@ -199,7 +221,7 @@ class virtualGrid<T> {
         const rows: virtualRow[] = [];
         rows.length = desiredRowCount;
         for (let i = 0; i < desiredRowCount; i++) {
-            rows[i] = new virtualRow(this.rowHeight);
+            rows[i] = new virtualRow(this.rowHeight, virtualGrid.rowsLimit);
         }
 
         return rows;
@@ -283,12 +305,14 @@ class virtualGrid<T> {
             return [skip, take];
         }
 
-        if (skip > this.totalItemCount) {
+        const effectiveTotalCount = Math.min(this.totalItemCount, virtualGrid.rowsLimit);
+        
+        if (skip > effectiveTotalCount) {
             return [0, 0]; // nothing to fetch
         }
 
-        if (skip + take > this.totalItemCount) {
-            take = this.totalItemCount - skip;
+        if (skip + take > effectiveTotalCount) {
+            take = effectiveTotalCount - skip;
         }
 
         // now first first and last missing item in range:
@@ -484,9 +508,7 @@ class virtualGrid<T> {
         return (containerWidth * parseFloat(woPercentage) / 100) + 'px';
     }
 
-    //TODO: investigate if we fetch this properly
     private chunkFetched(results: pagedResult<T>, skip: number, take: number) {
-
         if (results.totalResultCount === -1) {
             this.emptyResult(true);
             this.virtualHeight(0);
@@ -509,13 +531,22 @@ class virtualGrid<T> {
         }
 
         this.emptyResult(results.totalResultCount === 0);
+        this.reachedHeightLimit(results.totalResultCount > virtualGrid.rowsLimit);
 
         this.updateResultEtag(results.resultEtag);
 
         // Add these results to the .items array as necessary.
         const oldTotalCount = this.items.size;
         this.totalItemCount = results.totalResultCount;
-        this.virtualHeight(results.totalResultCount * this.rowHeight);
+        
+        const virtualHeight = results.totalResultCount * this.rowHeight;
+        
+        if (results.totalResultCount > virtualGrid.rowsLimit) {
+            this.virtualHeight(virtualGrid.rowsLimit * this.rowHeight + virtualGrid.limitReachedSectionHeight);
+        } else {
+            this.virtualHeight(virtualHeight);    
+        }
+        
         const endIndex = skip + results.items.length;
         for (let i = 0; i < results.items.length; i++) {
             const rowIndex = i + skip;
@@ -843,7 +874,7 @@ class virtualGrid<T> {
             ko.components.register(componentName, {
                 viewModel: virtualGrid,
                 template: `
-<div class="virtual-grid flex-window stretch" data-bind="attr: { id: gridId }, css: { condensed : condensed }">
+<div class="virtual-grid flex-window stretch" data-bind="attr: { id: gridId }, css: { condensed : condensed, reachedHeightLimit: reachedHeightLimit }">
     <div class="absolute-center loading" data-bind="visible: isLoading"><div class="global-spinner"></div></div>
     <div class="column-container flex-window-head" data-bind="foreach: columns, visible: settings.showHeader"><div class="column" data-bind="style: { width: $data.width }, attr: { title: $data.headerTitle }"><strong data-bind="html: $data.header"></strong></div></div>    
     <div class="viewport flex-window-scroll" data-bind="css: { 'header-visible': settings.showHeader }">
