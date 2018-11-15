@@ -283,26 +283,26 @@ namespace Raven.Server.Documents.Handlers.Debugging
                 totalUnmanagedAllocations += unmanagedAllocations;
                 var ids = new DynamicJsonArray(stats.OrderByDescending(x => x.TotalAllocated).Select(x => new DynamicJsonValue
                 {
-                    ["Id"] = x.UnmanagedThreadId,
-                    ["ManagedThreadId"] = x.Id,
-                    ["Allocations"] = x.TotalAllocated,
-                    ["HumaneAllocations"] = Size.Humane(x.TotalAllocated)
+                    [nameof(MemoryInfoThreads.Id)] = x.UnmanagedThreadId,
+                    [nameof(MemoryInfoThreads.ManagedThreadId)] = x.Id,
+                    [nameof(MemoryInfoThreads.Allocations)] = x.TotalAllocated,
+                    [nameof(MemoryInfoThreads.HumaneAllocations)] = Size.Humane(x.TotalAllocated)
                 }));
                 var groupStats = new DynamicJsonValue
                 {
-                    ["Name"] = stats.Key,
-                    ["Allocations"] = unmanagedAllocations,
-                    ["HumaneAllocations"] = Size.Humane(unmanagedAllocations)
+                    [nameof(MemoryInfoThreads.Name)] = stats.Key,
+                    [nameof(MemoryInfoThreads.Allocations)] = unmanagedAllocations,
+                    [nameof(MemoryInfoThreads.HumaneAllocations)] = Size.Humane(unmanagedAllocations)
                 };
                 if (ids.Count == 1)
                 {
                     var threadStats = stats.First();
-                    groupStats["Id"] = threadStats.UnmanagedThreadId;
-                    groupStats["ManagedThreadId"] = threadStats.Id;
+                    groupStats[nameof(MemoryInfoThreads.Id)] = threadStats.UnmanagedThreadId;
+                    groupStats[nameof(MemoryInfoThreads.ManagedThreadId)] = threadStats.Id;
                 }
                 else
                 {
-                    groupStats["Ids"] = ids;
+                    groupStats[nameof(MemoryInfoThreads.Ids)] = ids;
                 }
 
                 threads.Add(groupStats);
@@ -333,8 +333,7 @@ namespace Raven.Server.Documents.Handlers.Debugging
                     [nameof(MemoryInfoHumane.TotalMemoryMapped)] = Size.Humane(totalMapping)
                 },
 
-                ["Threads"] = threads,
-
+                [nameof(MemoryInfo.Threads)] = threads,
                 [nameof(MemoryInfo.Mappings)] = fileMappings
             };
             return djv;
@@ -416,8 +415,25 @@ namespace Raven.Server.Documents.Handlers.Debugging
             public string LowMemSinceStartup { get; set; }
             public MemoryInfoHumane Humane { get; set; }
             public MemoryInfoMappingItem[] Mappings { get; set; }
-            //TODO: threads
+            public MemoryInfoThreads[] Threads { get; set; }
+        }
 
+        internal class MemoryInfoThreads
+        {
+            public string Name { get; set; }
+            public long Allocations { get; set; }
+            public string HumaneAllocations { get; set; }
+            public long? Id { get; set; }
+            public long? ManagedThreadId { get; set; }
+            public MemoryInfoThreadsGroup[] Ids { get; set; }
+        }
+
+        internal class MemoryInfoThreadsGroup
+        {
+            public long? Id { get; set; }
+            public long? ManagedThreadId { get; set; }
+            public long Allocations { get; set; }
+            public string HumaneAllocations { get; set; }
         }
 
         internal class MemoryInfoHumane
