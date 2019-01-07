@@ -56,6 +56,7 @@ using Raven.Server.Documents.Queries.Dynamic;
 using Raven.Server.Documents.Studio;
 using Raven.Server.Documents.Subscriptions;
 using Raven.Server.Documents.Replication;
+using Raven.Server.Documents.Revisions;
 using Raven.Server.Documents.TcpHandlers;
 using Raven.Server.Web.System;
 using Raven.Server.NotificationCenter.Notifications;
@@ -245,6 +246,8 @@ namespace TypingsGenerator
 
             // revisions
             scripter.AddType(typeof(RevisionsConfiguration));
+            scripter.AddType(typeof(RevertRevisionsRequest));
+            scripter.AddType(typeof(RevertResult));
             
             // server dashboard
             scripter.AddType(typeof(DashboardNotificationType));

@@ -43,6 +43,7 @@ interface computedAppUrls {
     visualizer: KnockoutComputed<string>;
     databaseRecord: KnockoutComputed<string>;
     revisions: KnockoutComputed<string>;
+    revertRevisions: KnockoutComputed<string>;
     expiration: KnockoutComputed<string>;
     connectionStrings: KnockoutComputed<string>;
     conflictResolution: KnockoutComputed<string>;
