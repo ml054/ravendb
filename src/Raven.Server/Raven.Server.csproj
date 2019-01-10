@@ -22,6 +22,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\CommonAssemblyInfo.cs" Link="Properties\CommonAssemblyInfo.cs" />
+    <EmbeddedResource Include="Web\Assets\DependenciesValidationError.html" />
     <EmbeddedResource Include="Web\Assets\Unsafe.html" />
     <EmbeddedResource Include="Web\Assets\AuthError.html" />
     <EmbeddedResource Include="..\..\LICENSE" Link="Commercial\RavenDB.license.txt" />

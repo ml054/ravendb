@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +25,7 @@ using Raven.Client.Exceptions.Routing;
 using Raven.Client.Exceptions.Security;
 using Raven.Client.Properties;
 using Raven.Server.Config;
+using Raven.Server.Json;
 using Raven.Server.Rachis;
 using Raven.Server.Routing;
 using Raven.Server.TrafficWatch;
@@ -33,6 +36,7 @@ using Sparrow.Json.Parsing;
 using Sparrow.Logging;
 using Sparrow.LowMemory;
 using Voron.Exceptions;
+using Voron.Platform;
 
 namespace Raven.Server
 {
@@ -68,14 +72,12 @@ namespace Raven.Server
                     context => context.Request.Path.StartsWithSegments("/studio") == false && context.Request.Path.StartsWithSegments("/wizard") == false,
                     appBuilder => appBuilder.UseResponseCompression());
             }
-
-            if(IsMissingRequiredDependencies(out var msgs) )
+            
+            if (IsMissingRequiredDependencies(out var msgs, out var validDependencies))
             {
-                msgs.InsertRange(0, MissingDependeciesWarning);
-
                 _server.StartupWarnings.AddRange(msgs);
 
-                var deps = new MissingDependencies { Messages = msgs, Parent = this };
+                var deps = new MissingDependencies { Messages = msgs, Parent = this, Dependencies = validDependencies };
                 app.Use(_ => deps.Handler);
                 return;
             }
@@ -91,14 +93,40 @@ namespace Raven.Server
             app.Use(_ => RequestHandler);
         }
 
-        private unsafe bool IsMissingRequiredDependencies(out List<string> msgs)
+        private unsafe bool IsMissingRequiredDependencies(out List<string> msgs, out ValidDependencies validDependencies)
+        {
+            bool hasErrors = false;
+            msgs = new List<string>();
+            validDependencies = new ValidDependencies
+            {
+                Pal = true,
+                Sodium = true
+            };
+            
+            if (PerformDependencyCheck(() => Sparrow.Sodium.GenerateRandomBuffer(32), out var sodiumMessages) == false)
+            {
+                hasErrors = true;
+                validDependencies.Sodium = false;
+                msgs.AddRange(sodiumMessages);
+            }
+
+            if (PerformDependencyCheck(() => Pal.rvn_get_error_string(0, null, 0, out _), out var palMessages) == false)
+            {
+                hasErrors = true;
+                validDependencies.Pal = false;
+                msgs.AddRange(palMessages);
+            }
+
+            return hasErrors;
+        }
+        
+        private bool PerformDependencyCheck(Action check, out List<string> msgs)
         {
             try
             {
-                Sparrow.Sodium.GenerateRandomBuffer(32);
-                Voron.Platform.Pal.rvn_get_error_string(0, null, 0, out _);
+                check();
                 msgs = null;
-                return false;
+                return true;
             }
             catch (Exception e)
             {
@@ -110,10 +138,10 @@ namespace Raven.Server
                     e = e.InnerException;
                 }
                 msgs.Reverse();
-                return true;
+                return false;
             }
         }
-
+        
         private bool IsServerRunningInASafeManner()
         {
             if (_server.Configuration.Security.AuthenticationEnabled)
@@ -130,6 +158,7 @@ namespace Raven.Server
 
         private class MissingDependencies
         {
+            public ValidDependencies Dependencies;
             public List<string> Messages;
             public RavenServerStartup Parent;
             public Task Handler(HttpContext context)
@@ -139,8 +168,7 @@ namespace Raven.Server
                 if (IsHtmlAcceptable(context))
                 {
                     context.Response.Headers["Content-Type"] = "text/html; charset=utf-8";
-                    //TODO: Fix this
-                    return context.Response.WriteAsync(HtmlUtil.RenderUnsafePage());
+                    return context.Response.WriteAsync(HtmlUtil.RenderDependenciesValidationErrorPage(Dependencies, Messages));
                 }
 
                 context.Response.Headers["Content-Type"] = "application/json; charset=utf-8";
@@ -148,8 +176,14 @@ namespace Raven.Server
 
                 return Task.CompletedTask;
             }
-
         }
+
+        internal class ValidDependencies
+        {
+            public bool Pal;
+            public bool Sodium;
+        }
+        
         private Task UnsafeRequestHandler(HttpContext context)
         {
             if (RoutesAllowedInUnsafeMode.Contains(context.Request.Path.Value))
@@ -217,11 +251,6 @@ namespace Raven.Server
             "Server certificate information has not been set up and the server address is not configured within allowed unsecured access address range.",
             $"Please find the RavenDB settings file *settings.json* in the server directory and fill in your certificate information in either { RavenConfiguration.GetKey(x => x.Security.CertificatePath) } or { RavenConfiguration.GetKey(x => x.Security.CertificateExec) }",
             $"If you would rather like to keep your server unsecured, please relax the { RavenConfiguration.GetKey(x => x.Security.UnsecuredAccessAllowed) } setting to match the { RavenConfiguration.GetKey(x => x.Core.ServerUrls) } setting value."
-        };
-
-        private static readonly string[] MissingDependeciesWarning = {
-            //TODO: provide actual required file names for the platform, such as librvnpal.linux.x64.so, libsodium.arm.so, etc
-            "RavenDB is missing required dependecies: (libsodium, librvnpal). Make sure that the files are located in the same directory as Raven.Server.dll.",
         };
 
         private async Task RequestHandler(HttpContext context)

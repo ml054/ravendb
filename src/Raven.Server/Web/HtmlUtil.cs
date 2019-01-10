@@ -18,13 +18,57 @@ namespace Raven.Server.Web
             return Regex.Replace(html, @"{{\s*(\w+)\s*}}", match => substitutions[match.Groups[1].Value], RegexOptions.Multiline);
         }
 
+        private const string DependenciesValidationErrorPageHtmlResource = "Raven.Server.Web.Assets.DependenciesValidationError.html";
+        
         private const string UnsafePageHtmlResource = "Raven.Server.Web.Assets.Unsafe.html";
         
         private const string AuthErrorPageHtmlResource = "Raven.Server.Web.Assets.AuthError.html";
 
         private static string _unsafePageRenderedHtml;
+        
+        private static string _dependenciesValidationErrorRenderedHtml;
 
-        public static string RenderUnsafePage()
+        internal static string RenderDependenciesValidationErrorPage(RavenServerStartup.ValidDependencies dependencies, List<string> messages) 
+        {
+            if (_dependenciesValidationErrorRenderedHtml == null)
+            {
+                using (var reader = new StreamReader(
+                    typeof(RavenServer).GetTypeInfo().Assembly.GetManifestResourceStream(DependenciesValidationErrorPageHtmlResource)))
+                {
+                    var html = reader.ReadToEnd();
+
+                    string depsText;
+                    string depsList;
+                    if (dependencies.Pal == false && dependencies.Sodium == false)
+                    {
+                        depsText = "dependencies";
+                        depsList = "libsodium, librvnpal";
+                    } 
+                    else if (dependencies.Pal == false)
+                    {
+                        depsText = "dependency";
+                        depsList = "librvnpal";
+                    }
+                    else
+                    {
+                        depsText = "dependency";
+                        depsList = "libsodium";
+                    }
+                    
+                    _dependenciesValidationErrorRenderedHtml = RenderPlaceholders(html, new Dictionary<string, string>
+                    {
+                        {"MESSAGES", string.Join(Environment.NewLine, messages)},
+                        {"DEPS_TEXT", depsText},
+                        {"DEPS_LIST", depsList},
+                        {"SERVER_LOCATION", Path.GetDirectoryName(typeof(RavenServer).Assembly.Location)}
+                    });
+                }
+            }
+            
+            return _dependenciesValidationErrorRenderedHtml;
+        }
+        
+        internal static string RenderUnsafePage()
         {
             if (_unsafePageRenderedHtml == null)
             {
