@@ -16,11 +16,6 @@ function deselect() {
     }
 }
 
-
-function nl2br(str: string) {
-    return str = str.replace(/(?:\r\n|\r|\n)/g, '<br>');
-}
-
 function widthToPixels(column: virtualColumn) {
     if (!column.width.endsWith("px")) {
         throw new Error("Excepted column width in pixels (px)");
@@ -29,7 +24,6 @@ function widthToPixels(column: virtualColumn) {
 }
 
 export = {
-    nl2br,
     widthToPixels: widthToPixels,
     deselect: deselect
 };
