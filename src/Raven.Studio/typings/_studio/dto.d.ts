@@ -610,3 +610,12 @@ interface rawStackTraceResponseItem {
 }
 
 type indexStatusFilter = "Normal" | "ErrorOrFaulty" | "Stale" | "Paused" | "Disabled" | "Idle";
+
+
+
+interface confirmationDialogOptions {
+    buttons?: string[];
+    forceRejectWithResolve?: boolean;
+    defaultOption?: string;
+    html?: boolean;
+}

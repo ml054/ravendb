@@ -1,12 +1,11 @@
 ﻿/// <reference path="../../../typings/tsd.d.ts"/>
 
 import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import generalUtils = require("common/generalUtils");
 
 function deselect() {
     try {
         if ((document as any).selection) {
-            // Timeout neccessary for IE9					
+            // Timeout necessary for IE9					
             setTimeout(function () {
                 (document as any).selection.empty();
             });
@@ -30,8 +29,7 @@ function widthToPixels(column: virtualColumn) {
 }
 
 export = {
-    escape: generalUtils.escapeHtml,
-    widthToPixels,
-    deselect,
-    nl2br
+    nl2br,
+    widthToPixels: widthToPixels,
+    deselect: deselect
 };
