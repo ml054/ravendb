@@ -134,11 +134,11 @@
     <Optimize>true</Optimize>
   </PropertyGroup>
 
-  <Target Name="PlatformMessage" AfterTargets="Build" >
-    <Message Text="Building for platform: $(Platform)" Importance="high"/>
+  <Target Name="PlatformMessage" AfterTargets="Build">
+    <Message Text="Building for platform: $(Platform)" Importance="high" />
   </Target>
   
-  <PropertyGroup Condition="'$(Platform)' != 'x86'" >
+  <PropertyGroup Condition="'$(Platform)' != 'x86'">
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
     <RetainVMGarbageCollection>true</RetainVMGarbageCollection>

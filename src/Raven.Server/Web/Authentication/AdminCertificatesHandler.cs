@@ -448,7 +448,7 @@ namespace Raven.Server.Web.Authentication
             }
         }
 
-        [RavenAction("/admin/certificates", "GET", AuthorizationStatus.Operator)]
+        [RavenAction("/admin/certificates", "GET", AuthorizationStatus.UnauthenticatedClients)]
         public Task GetCertificates()
         {
             var thumbprint = GetStringQueryString("thumbprint", required: false);
