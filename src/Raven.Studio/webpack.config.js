@@ -24,11 +24,26 @@ module.exports = (env, args) => {
                 cwd: process.cwd(),
             }),
             new webpack.ProvidePlugin({
-                ko: "knockout"
+                ko: "knockout",
+                "_": "lodash"
             })
         ],
         module: {
             rules: [
+                { //TODO: inject styles!
+                    test: /\.css$/,
+                    use: [
+                        {
+                            loader: 'style-loader'
+                        },
+                        {
+                            loader: "css-loader",
+                            options: {
+                                url: true
+                            }
+                        }
+                    ]
+                },
                 {
                     test: /\.ts$/,
                     use: 'ts-loader'
@@ -59,8 +74,8 @@ module.exports = (env, args) => {
             modules: [path.resolve(__dirname, "../node_modules"), "node_modules"],
             extensions: ['.js', '.ts', '.tsx'],
             alias: {
-                durandal: path.resolve(__dirname, 'wwwroot/lib/Durandal/js'),
-                plugins: path.resolve(__dirname, 'wwwroot/lib/Durandal/js/plugins'),
+                durandal: path.resolve(__dirname, 'node_modules/durandal/js'),
+                plugins: path.resolve(__dirname, 'node_modules/durandal/js/plugins'),
                 toastr: path.resolve(__dirname, 'wwwroot/lib/toastr/toastr'),
                 moment: path.resolve(__dirname, 'wwwroot/lib/moment/moment'),
                 jquery: path.resolve(__dirname, 'wwwroot/lib/jquery/dist/jquery'),

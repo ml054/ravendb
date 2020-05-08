@@ -38,6 +38,7 @@
     "imports-loader": "^0.8.0",
     "natives": "^1.1.6",
     "raw-loader": "^4.0.1",
+    "styles-loader": "^2.0.0",
     "through2": "^3.0.1",
     "ts-loader": "^7.0.0",
     "typescript": "^3.8.3",
@@ -46,11 +47,16 @@
   },
   "dependencies": {
     "@types/jquery": "^2.0.46",
+    "@types/lodash": "^4.14.150",
+    "@types/node-forge": "^0.6.11",
+    "@types/requirejs": "^2.1.31",
+    "durandal": "^2.2.0",
     "knockout": "^3.4.0",
     "knockout-delegated-events": "^0.6.1",
     "knockout-postbox": "^0.5.2",
     "knockout.validation": "^2.0.4",
-    "lodash": "^4.17.5",
+    "lodash": "^4.17.15",
+    "node-forge": "^0.6.49",
     "rbush": "^2.0.1"
   }
 }

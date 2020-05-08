@@ -13,7 +13,7 @@ import getOngoingTaskInfoCommand = require("commands/database/tasks/getOngoingTa
 import messagePublisher = require("common/messagePublisher");
 import discoveryUrl = require("models/database/settings/discoveryUrl");
 import pullReplicationCertificate = require("models/database/tasks/pullReplicationCertificate");
-import forge = require("forge/forge");
+import forge = require("node-forge");
 import fileImporter = require("common/fileImporter");
 
 class editPullReplicationSinkTask extends viewModelBase {

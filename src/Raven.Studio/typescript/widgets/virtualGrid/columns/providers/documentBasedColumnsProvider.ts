@@ -17,7 +17,6 @@ import app = require("durandal/app");
 import showDataDialog = require("viewmodels/common/showDataDialog");
 import generalUtils = require("common/generalUtils");
 
-
 type columnOptionsDto = {
     extraClass?: (item: document) => string;
 }

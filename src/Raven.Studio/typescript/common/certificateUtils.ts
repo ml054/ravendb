@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../typings/tsd.d.ts" />
 
-import forge = require("forge/forge");
+import forge = require("node-forge");
 
 class certificateUtils {
     public static readonly certificatePrefix = "-----BEGIN CERTIFICATE-----";

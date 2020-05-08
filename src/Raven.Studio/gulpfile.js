@@ -42,7 +42,7 @@ function z_clean(cb) {
     del.sync(['./wwwroot/App/**/*.js']);
     del.sync(['./wwwroot/App/**/*.js.map']);
     del.sync(PATHS.releaseTarget);
-    del.sync(['./typings/*', '!./typings/_studio/**', '!./typings/tsd.d.ts', '!./typings/npmTypes.d.ts']);
+    del.sync(['./typings/*', '!./typings/_studio/**', '!./typings/tsd.d.ts']);
     del.sync([PATHS.bowerSource]);
     cb();
 }

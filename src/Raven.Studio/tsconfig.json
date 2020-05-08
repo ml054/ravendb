@@ -10,8 +10,19 @@
     "skipLibCheck": true,
     "module": "AMD",
     "typeRoots": [
+        "./node_modules/@types",
         "./typings/**/*"
-    ]
+    ],
+      "types": [
+          "durandal",
+          "jquery",
+          "knockout",
+          "knockout-postbox",
+          "knockout.validation",
+          "lodash",
+          "rbush",
+          "requirejs"
+      ]
   },
   "exclude": [
     "node_modules",

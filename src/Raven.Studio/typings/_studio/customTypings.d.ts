@@ -1,8 +1,15 @@
 /// QRCode
+/// <reference types="lodash" />
+
 declare const QRCode: any;
+
+declare var require: any;
 
 /// Sortable
 declare const Sortable: any;
+
+declare const _: LoDashStatic;
+
 
 ///
 /// JSZip
@@ -16,116 +23,10 @@ declare module "jszip-utils" {
     export = JSZipUtils;
 }
 
-
-/// forge 
-
-declare module "forge/forge" {
-    
-    namespace util {
-        function decode64(encoded: Base64): Bytes;
-        function encode64(bytes: Bytes, maxline?: number): Base64;
-
-        namespace binary {
-            namespace raw {
-                function encode(x: Uint8Array): Bytes;
-                function decode(str: Bytes, output?: Uint8Array, offset?: number): Uint8Array;
-            }
-            namespace hex {
-                function encode(bytes: Bytes | ArrayBuffer | ArrayBufferView | ByteStringBuffer): Hex;
-                function decode(hex: Hex, output?: Uint8Array, offset?: number): Uint8Array;
-            }
-            namespace base64 {
-                function encode(input: Uint8Array, maxline?: number): Base64;
-                function decode(input: Base64, output?: Uint8Array, offset?: number): Uint8Array;
-            }
-        }
-        
-    }
-
-    namespace pkcs12 {
-
-        interface BagsFilter {
-            localKeyId?: string;
-            localKeyIdHex?: string;
-            friendlyName?: string;
-            bagType?: string;
-        }
-
-        interface Bag {
-            type: string;
-            attributes: any;
-            key?: pki.Key;
-            cert?: pki.Certificate;
-            asn1: asn1.Asn1
-        }
-
-        interface Pkcs12Pfx {
-            version: string;
-            safeContents: [{
-                encrypted: boolean;
-                safeBags: Bag[];
-            }];
-            getBags: (filter: BagsFilter) => {
-                [key: string]: Bag[]|undefined;
-                localKeyId?: Bag[];
-                friendlyName?: Bag[];
-            };
-            getBagsByFriendlyName: (fiendlyName: string, bagType: string) => Bag[]
-            getBagsByLocalKeyId: (localKeyId: string, bagType: string) => Bag[]
-        }
-
-        function pkcs12FromAsn1(obj: any, strict?: boolean, password?: string) : Pkcs12Pfx;
-        function pkcs12FromAsn1(obj: any, password?: string) : Pkcs12Pfx;
-    }
-    
-    namespace asn1 {
-        function toDer(obj: Asn1): any;
-        function fromDer(bytes: any, strict?: boolean): Asn1;
-    }
-    
+declare module "node-forge" {
     namespace pki {
-        interface oids {
-            [key: string]: string;
-        }
-        var oids: oids;
-
-        function certificateToPem(cert: Certificate, maxline?: number): PEM;
-        
-        function certificateFromPem(certificate: string): pki.Certificate;
-        
-        function certificateToAsn1(certifivcate: pki.Certificate): asn1.Asn1;
-
-        interface Certificate {
-            version: number;
-            serialNumber: string;
-            signature: any;
-            siginfo: any;
-            validity: {
-                notBefore: Date;
-                notAfter: Date;
-            };
-            issuer: {
-                getField(sn: string | CertificateFieldOptions): any;
-                addField(attr: CertificateField): void;
-                attributes: any[];
-                hash: any;
-            };
-            subject: {
-                getField(sn: string | CertificateFieldOptions): any;
-                addField(attr: CertificateField): void;
-                attributes: any[];
-                hash: any;
-            };
-            extensions: any[];
-            publicKey: any;
-            md: any;
-        }
-    }
-    
-    namespace md {
-        namespace sha1 {
-            function create(): any;
-        }
+        function certificateFromPem(pem: string): any;
+        function certificateToAsn1(cert: pki.Certificate): any;
     }
 }
 

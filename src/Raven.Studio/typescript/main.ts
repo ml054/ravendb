@@ -4,6 +4,8 @@ import { overrideViews } from "./overrides/views";
 import { overrideComposition } from "./overrides/composition";
 import { overrideSystem } from "./overrides/system";
 
+import "durandal/../css/durandal.css";
+
 import system from "durandal/system";
 import app from "durandal/app";
 
