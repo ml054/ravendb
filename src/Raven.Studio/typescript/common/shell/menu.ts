@@ -121,11 +121,13 @@ class menu {
         }
 
         if (this.shouldOpenAsDialog($data)) {
+            throw new Error("Not yet supported");
+            /* TODO
             const leafItem = $data as leafMenuItem;
             require([leafItem.moduleId],
                 (viewModel: any) => {
                     app.showBootstrapDialog(new viewModel);
-                });
+                });*/
         } else {
             let a = $event.currentTarget as HTMLAnchorElement;
 

@@ -63,8 +63,11 @@ class feedback extends dialogViewModelBase {
 
         const instruction = router.activeInstruction();
         if (instruction) {
+            /*
             this.moduleTitle(instruction.config.title);
             this.moduleId(instruction.config.moduleId);
+            
+             */
         }
 
         studioSettings.default.globalSettings()

@@ -255,7 +255,7 @@ export class about extends viewModelBase {
     }
 
     openFeedbackForm() {
-        shell.openFeedbackForm();
+        //TODO: shell.openFeedbackForm();
     }
 
     activate(args: any) {

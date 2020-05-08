@@ -90,26 +90,6 @@ function z_generate_typings(cb) {
     });
 }
 
-function z_compile_app() {
-    return gulp.src([PATHS.tsSource])
-        .pipe(naturalSort())
-        .pipe(sourcemaps.init())
-        .pipe(tsProject())
-        .js
-        .pipe(sourcemaps.write("."))
-        .pipe(gulp.dest(PATHS.tsOutput));
-}
-
-function z_compile_test() {
-    return gulp.src([PATHS.test.tsSource])
-        .pipe(naturalSort())
-        .pipe(sourcemaps.init())
-        .pipe(testTsProject())
-        .js
-        .pipe(sourcemaps.write("."))
-        .pipe(gulp.dest(PATHS.test.tsOutput));
-}
-
 function z_compile_app_changed() {
     return gulp.src([PATHS.tsSource])
         .pipe(changed(PATHS.tsOutput, { extension: '.js' }))
@@ -307,6 +287,8 @@ const release_chain = gulp.series(
         z_release_durandal
     ), 
     z_release_package);
+
+//TODO: use https://www.npmjs.com/package/webpack-stream
 
 exports.less = less;
 exports.compile = compile_chain;

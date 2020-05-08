@@ -389,10 +389,11 @@ class indexes extends viewModelBase {
             return;
         }
         
+        /* TODO
         if (shell.showConnectionLost()) {
             // looks like we don't have connection to server, skip index progress update 
             return $.Deferred().fail();
-        }
+        }*/
 
         if (this.requestedIndexingInProgress) {
             return $.Deferred().resolve();
