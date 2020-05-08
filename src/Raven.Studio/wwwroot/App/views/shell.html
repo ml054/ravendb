@@ -284,7 +284,7 @@
     <div id="page-host-root" class="content-container">
         <div id="page-host" class="page-host" data-bind="router: { cacheViews: false }"></div>
     </div>
-    <div class="notification-center-container" data-bind="compose: 'notifications/notificationCenter.html'"></div>
+    <div class="notification-center-container" data-bind="compose: notificationCenterView"></div>
 </div>
 
 <footer class="status-footer" data-bind="with: $root.footer">
@@ -394,4 +394,4 @@
 <div data-bind="if: displayUsageStatsInfo()">
     <div data-bind="compose: 'usageStats.html'"></div>
 </div>
-<div class="graph-helper" data-bind="compose: 'common/graphHelper.html'"></div>
+<div class="graph-helper" data-bind="compose: graphHelperView"></div>

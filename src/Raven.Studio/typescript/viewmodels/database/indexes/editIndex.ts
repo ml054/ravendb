@@ -33,6 +33,8 @@ import fileImporter = require("common/fileImporter");
 import popoverUtils = require("common/popoverUtils");
 
 class editIndex extends viewModelBase {
+    
+    view = require('views/database/indexes/editIndex.html');
 
     static readonly $body = $("body");
 

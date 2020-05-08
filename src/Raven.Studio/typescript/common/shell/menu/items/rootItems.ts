@@ -1,10 +1,11 @@
 ﻿import leafMenuItem = require("common/shell/menu/leafMenuItem");
 import appUrl = require("common/appUrl");
+import { about } from "../../../../viewmodels/shell/about";
 
 function aboutItem() {
     return new leafMenuItem({
         route: 'about',
-        moduleId: 'viewmodels/shell/about',
+        moduleId: about,
         title: 'About',
         tooltip: "About",
         nav: true,
@@ -16,7 +17,7 @@ function aboutItem() {
 function serverDashboard() {
     return new leafMenuItem({
         route: ["", "dashboard"],
-        moduleId: 'viewmodels/resources/serverDashboard',
+        moduleId: require('viewmodels/resources/serverDashboard'),
         title: 'Server Dashboard',
         tooltip: "Server Dashboard",
         nav: true,

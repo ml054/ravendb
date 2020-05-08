@@ -28,6 +28,8 @@ import generalUtils = require("common/generalUtils");
 
 class createDatabase extends dialogViewModelBase {
     
+    view = require("views/resources/createDatabase.html");
+    
     static readonly legacyKeySizes = [128, 192, 256];
     static readonly legacyEncryptionAlgorithms = ['DES', 'RC2', 'Rijndael', 'Triple DES'] as legacyEncryptionAlgorithms[];
 

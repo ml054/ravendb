@@ -67,7 +67,9 @@
     </div>
     <div class="processing-spinner"></div>
     <iframe id="downloadFrame" style="display: none" name="hidden-form"></iframe>
-
+    
+    <script type="text/javascript" src="lib/app.js"></script>
+    
     <!-- build:js App/external-libs.js -->
         <script type="text/javascript" src="lib/es6-shim/es6-shim.js"></script>
         <script type="text/javascript" src="Content/modernizr.js"></script>
@@ -78,11 +80,6 @@
         <script type="text/javascript" src="lib/prism/components/prism-javascript.js"></script>
         <script type="text/javascript" src="lib/prism/components/prism-csharp.js"></script>
         <script type="text/javascript" src="lib/blockUI/jquery.blockUI.js"></script>
-        <script type="text/javascript" src="lib/knockout/dist/knockout.debug.js"></script>
-        <script type="text/javascript" src="lib/knockout-validation/dist/knockout.validation.js"></script>
-        <script type="text/javascript" src="lib/knockout.dirtyFlag/index.js"></script>
-        <script type="text/javascript" src="lib/knockout-delegatedEvents/build/knockout-delegatedEvents.js"></script>
-        <script type="text/javascript" src="lib/knockout-postbox/build/knockout-postbox.js"></script>
         <script type="text/javascript" src="lib/moment/moment.js"></script>
         <script type="text/javascript" src="lib/cronstrue/dist/cronstrue.js"></script>
         <script type="text/javascript" src="lib/bootstrap/dist/js/bootstrap.js"></script>
@@ -99,10 +96,8 @@
         <script type="text/javascript" src="lib/css-escape/css.escape.js"></script>
         <script type="text/javascript" src="lib/favico.js/favico.js"></script>
     <!-- /build -->
-
-    <script data-main="App/main"></script>
     <!-- build:js App/main.js -->
-        <script type="text/javascript" src="lib/requirejs/require.js"></script>
+        
         <script type="text/javascript" src="Content/ace/ace.js"></script>
         <script type="text/javascript" src="Content/ace/ext-language_tools.js"></script>
         <script type="text/javascript" src="Content/ace/worker-json.js"></script>

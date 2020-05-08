@@ -18,7 +18,6 @@ import getIndexesProgressCommand = require("commands/database/index/getIndexesPr
 import indexProgress = require("models/database/index/indexProgress");
 import indexStalenessReasons = require("viewmodels/database/indexes/indexStalenessReasons");
 import generalUtils = require("common/generalUtils");
-import shell = require("viewmodels/shell");
 
 type indexGroup = {
     entityName: string;
@@ -27,6 +26,8 @@ type indexGroup = {
 };
 
 class indexes extends viewModelBase {
+
+    view = require("views/database/indexes/indexes.html");
 
     indexGroups = ko.observableArray<indexGroup>();
     sortedGroups: KnockoutComputed<indexGroup[]>;

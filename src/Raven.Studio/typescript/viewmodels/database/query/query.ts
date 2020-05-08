@@ -69,8 +69,9 @@ class perCollectionIncludes {
     }
 }
 
-
 class query extends viewModelBase {
+
+    view = require("views/database/query/query.html");
 
     static readonly recentQueryLimit = 6;
     static readonly recentKeyword = 'Recent Query';

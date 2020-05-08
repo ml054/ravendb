@@ -264,6 +264,7 @@ interface DurandalRouteConfiguration {
     tooltip?: string;
     dynamicHash?: KnockoutObservable<string> | (() => string);
     tabName?: string;
+    moduleId: Function | string;
 }
 
 declare module AceAjax {

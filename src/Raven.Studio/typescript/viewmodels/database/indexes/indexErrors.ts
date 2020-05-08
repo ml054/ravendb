@@ -24,6 +24,8 @@ type indexActionAndCount = {
 }
 
 class indexErrors extends viewModelBase {
+    
+    view = require("views/database/indexes/indexErrors.html");
 
     private allIndexErrors: IndexErrorPerDocument[] = null;
     private filteredIndexErrors: IndexErrorPerDocument[] = null;

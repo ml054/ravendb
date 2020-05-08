@@ -22,6 +22,8 @@ type termsForField = {
 type fieldType = "static" | "dynamic";
 
 class indexTerms extends viewModelBase {
+    
+    view = require("views/database/indexes/indexTerms.html");
 
     fields = ko.observableArray<termsForField>();
     indexName: string;

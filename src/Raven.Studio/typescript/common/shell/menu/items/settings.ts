@@ -183,7 +183,7 @@ function getSettingsMenuItem(appUrls: computedAppUrls) {
         }),
         new leafMenuItem({
             route: 'databases/tasks/sampleData',
-            moduleId: 'viewmodels/database/tasks/createSampleData',
+            moduleId: require('viewmodels/database/tasks/createSampleData'),
             title: 'Create Sample Data',
             nav: true,
             css: 'icon-create-sample-data',

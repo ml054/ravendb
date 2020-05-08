@@ -17,6 +17,8 @@ import eventsCollector = require("common/eventsCollector");
 
 class editCmpXchg extends viewModelBase {
 
+    view = require("views/database/cmpXchg/editCmpXchg.html");
+
     spinners = {
         delete: ko.observable<boolean>(false)
     };

@@ -6,9 +6,12 @@
   },
   "private": true,
   "devDependencies": {
+    "@types/durandal": "^2.1.38",
+    "@types/knockout-postbox": "0.0.0",
+    "@types/knockout.validation": "0.0.37",
+    "@types/rbush": "^2.0.1",
+    "circular-dependency-plugin": "^5.2.0",
     "del": "^5.1.0",
-    "es6-map": "^0.1.4",
-    "es6-set": "^0.1.4",
     "file-exists": "^5.0.1",
     "glob": "^7.1.6",
     "gulp": "^4.0.2",
@@ -31,9 +34,23 @@
     "gulp-uglify": "^3.0.2",
     "gulp-util": "^3.0.7",
     "gulp-zip": "^5.0.1",
+    "html-loader": "^1.1.0",
+    "imports-loader": "^0.8.0",
     "natives": "^1.1.6",
+    "raw-loader": "^4.0.1",
     "through2": "^3.0.1",
-    "typescript": "^3.8.3"
+    "ts-loader": "^7.0.0",
+    "typescript": "^3.8.3",
+    "url-loader": "^4.1.0",
+    "webpack": "^4.42.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@types/jquery": "^2.0.46",
+    "knockout": "^3.4.0",
+    "knockout-delegated-events": "^0.6.1",
+    "knockout-postbox": "^0.5.2",
+    "knockout.validation": "^2.0.4",
+    "lodash": "^4.17.5",
+    "rbush": "^2.0.1"
+  }
 }

@@ -5,9 +5,10 @@
     "removeComments": false,
     "declaration": false,
     "sourceMap": true,
-    "target": "es5", 
+    "target": "ES6", 
+      "esModuleInterop": true,
     "skipLibCheck": true,
-    "module": "amd",
+    "module": "AMD",
     "typeRoots": [
         "./typings/**/*"
     ]

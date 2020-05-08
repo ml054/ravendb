@@ -391,7 +391,7 @@ class extensions {
                 const showDays = bindings.durationPickerOptions ? bindings.durationPickerOptions.showDays : false;
                 const showSeconds = bindings.durationPickerOptions ? bindings.durationPickerOptions.showSeconds : false;
 
-                $element.durationPicker({
+                ($element as any).durationPicker({
                     showDays: showDays,
                     showSeconds: showSeconds,
                     onChanged: (value: string, isInit: boolean) => {

@@ -3,7 +3,7 @@
 /// <reference path="_studio/customTypings.d.ts" />
 /// <reference path="index.d.ts"/>
 /// <reference path="server/include.ts"/>
-
+/// <reference path="npmTypes.d.ts"/>
 
 declare module "*.html" {
     var _temp: string;

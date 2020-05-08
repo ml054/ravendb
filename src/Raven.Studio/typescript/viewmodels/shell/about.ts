@@ -1,5 +1,4 @@
 import viewModelBase = require("viewmodels/viewModelBase");
-import shell = require("viewmodels/shell");
 import license = require("models/auth/licenseModel");
 import registration = require("viewmodels/shell/registration");
 import buildInfo = require("models/resources/buildInfo");
@@ -9,7 +8,9 @@ import forceLicenseUpdateCommand = require("commands/licensing/forceLicenseUpdat
 import getLatestVersionInfoCommand = require("commands/version/getLatestVersionInfoCommand");
 import getLicenseConfigurationSettingsCommand = require("commands/licensing/getLicenseConfigurationSettingsCommand");
 
-class about extends viewModelBase {
+export class about extends viewModelBase {
+
+    view = require("views/shell/about.html");
 
     accessManager = accessManager.default.aboutView;
     licenseCssClass = license.licenseCssClass;
@@ -18,7 +19,7 @@ class about extends viewModelBase {
     supportLabel = license.supportLabel;
     supportTableCssClass = license.supportTableCssClass;
     
-    clientVersion = shell.clientVersion;
+    clientVersion = viewModelBase.clientVersion;
     serverVersion = buildInfo.serverBuildVersion;
 
     developerLicense = license.developerLicense;
@@ -262,5 +263,3 @@ class about extends viewModelBase {
         return $.when<any>(this.getLicenseConfigurationSettings(), this.pullLatestVersionInfo());
     }
 }
-
-export = about;

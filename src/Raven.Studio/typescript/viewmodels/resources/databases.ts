@@ -32,6 +32,8 @@ import storageKeyProvider = require("common/storage/storageKeyProvider");
 
 class databases extends viewModelBase {
     
+    view = require("views/resources/databases.html")
+    
     static readonly sizeLimits = {
         databaseName: {
             min: 150,
