@@ -29,6 +29,7 @@ using Raven.Server.Documents.Replication;
 using Raven.Server.Documents.Subscriptions;
 using Raven.Server.Documents.TcpHandlers;
 using Raven.Server.Documents.TimeSeries;
+using Raven.Server.Indexing;
 using Raven.Server.Json;
 using Raven.Server.NotificationCenter.Notifications;
 using Raven.Server.NotificationCenter.Notifications.Details;
@@ -95,6 +96,8 @@ namespace Raven.Server.Documents
         {
             _lastIdleTicks = DateTime.MinValue.Ticks;
         }
+
+        public StorageEnvironmentSynchronization IndexWritesSynchronization { get; private set; }
 
         public DocumentDatabase(string name, RavenConfiguration configuration, ServerStore serverStore, Action<string> addToInitLog)
         {
@@ -168,6 +171,20 @@ namespace Raven.Server.Documents
                 });
                 _hasClusterTransaction = new AsyncManualResetEvent(DatabaseShutdown);
                 IdentityPartsSeparator = '/';
+
+                this.IndexWritesSynchronization = new StorageEnvironmentSynchronization();
+
+                switch (serverStore.Configuration.Indexing.JournalSynchronizationMode)
+                {
+                    case IndexWriteSynchronizationMode.Server:
+                        this.IndexWritesSynchronization = serverStore.IndexWritesSynchronization;
+                        break;
+                    case IndexWriteSynchronizationMode.Database:
+                        this.IndexWritesSynchronization = new StorageEnvironmentSynchronization(
+                                  serverStore.Configuration.Indexing.JournalMaxConcurrentWrites,
+                                  serverStore.Configuration.Indexing.JournalMaxConcurrentWritesSizeInMegabytes * Sparrow.Global.Constants.Size.Megabyte);
+                        break;
+                }
             }
             catch (Exception)
             {
