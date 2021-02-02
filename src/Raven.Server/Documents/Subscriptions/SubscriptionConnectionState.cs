@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Raven.Client.Documents.Subscriptions;
 using Raven.Client.Exceptions.Documents.Subscriptions;
 using Raven.Client.Util;
+using Raven.Server.Documents.Subscriptions.Stats;
 using Raven.Server.Documents.TcpHandlers;
 using Sparrow.Server;
 using Sparrow.Threading;
@@ -33,7 +34,6 @@ namespace Raven.Server.Documents.Subscriptions
         }
 
         private SubscriptionConnection _currentConnection;
-
 
         private readonly ConcurrentQueue<SubscriptionConnection> _recentConnections = new ConcurrentQueue<SubscriptionConnection>();
         private readonly ConcurrentQueue<SubscriptionConnection> _rejectedConnections = new ConcurrentQueue<SubscriptionConnection>();
@@ -84,6 +84,7 @@ namespace Raven.Server.Documents.Subscriptions
             catch (SubscriptionException e)
             {
                 RegisterRejectedConnection(incomingConnection, e);
+                //TODO: call an event!
                 throw;
             }
 
@@ -98,11 +99,14 @@ namespace Raven.Server.Documents.Subscriptions
 
             return new DisposeOnce<SingleAttempt>(() =>
             {
+                Console.WriteLine("disposing subscription connection");
+                
                 while (_recentConnections.Count > 10)
                 {
                     _recentConnections.TryDequeue(out SubscriptionConnection _);
                 }
                 _recentConnections.Enqueue(incomingConnection);
+                //TODO: call event - connection was ended
                 Interlocked.CompareExchange(ref _currentConnection, null, incomingConnection);
                 ConnectionInUse.Set();
             });

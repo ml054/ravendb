@@ -78,7 +78,7 @@ namespace Raven.Server.Documents.Replication
         {
             _incomingErrors.AddOrUpdate(node, incomingFailureReporter, (_, __) => incomingFailureReporter);
         }
-        protected IEnumerable<IReplicationPerformanceStats> PrepareInitialPerformanceStats()
+        protected IEnumerable<IReplicationPerformanceStats> PrepareInitialPerformanceStats()  //todo we call this once for a first time!
         {
             foreach (var handler in Database.ReplicationLoader.IncomingHandlers)
             {
@@ -99,7 +99,7 @@ namespace Raven.Server.Documents.Replication
             }
         }
 
-        protected override List<IReplicationPerformanceStats> PreparePerformanceStats()
+        protected override List<IReplicationPerformanceStats> PreparePerformanceStats() // we call that in the loop!
         {
             var results = new List<IReplicationPerformanceStats>(_incoming.Count + _outgoing.Count + _incomingErrors.Count + _outgoingErrors.Count);
 

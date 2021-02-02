@@ -110,14 +110,14 @@ namespace Raven.Server.Documents.ETL
         private CancellationTokenSource _cts;
         private readonly HashSet<string> _collections;
 
-        private readonly ConcurrentQueue<EtlStatsAggregator> _lastEtlStats =
+        private readonly ConcurrentQueue<EtlStatsAggregator> _lastEtlStats =   // history  - up to 25 last items!
             new ConcurrentQueue<EtlStatsAggregator>();
 
         private Size _currentMaximumAllowedMemory = DefaultMaximumMemoryAllocation;
         private NativeMemory.ThreadStats _threadAllocations;
         private PoolOfThreads.LongRunningWork _longRunningWork;
         private readonly MultipleUseFlag _lowMemoryFlag = new MultipleUseFlag();
-        private EtlStatsAggregator _lastStats;
+        private EtlStatsAggregator _lastStats; // in progress item 
         private EtlProcessState _lastProcessState;
         private int _statsId;
 

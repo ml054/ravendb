@@ -24,6 +24,7 @@ using Raven.Server.Documents.Queries.AST;
 using Raven.Server.Documents.Queries.TimeSeries;
 using Raven.Server.Documents.Replication;
 using Raven.Server.Documents.Subscriptions;
+using Raven.Server.Documents.Subscriptions.Stats;
 using Raven.Server.Json;
 using Raven.Server.Rachis;
 using Raven.Server.ServerWide;
@@ -58,9 +59,17 @@ namespace Raven.Server.Documents.TcpHandlers
         public readonly string ClientUri;
         private readonly MemoryStream _buffer = new MemoryStream();
         private readonly Logger _logger;
-        public readonly SubscriptionConnectionStats Stats;
+        public readonly SubscriptionConnectionStats Stats; // ignore for now!
+
+        public SubscriptionConnectionStatsAggregator PerfStats; ///TODO: is it duplicate? 
+        
         public readonly CancellationTokenSource CancellationTokenSource;
         private readonly AsyncManualResetEvent _waitForMoreDocuments;
+        
+        public readonly ConcurrentQueue<SubscriptionBatchStatsAggregator> _lastBatchesStats =
+            new ConcurrentQueue<SubscriptionBatchStatsAggregator>(); //TODO make it private and expose method!
+        private SubscriptionBatchStatsAggregator _lastStats;
+        private int _statsId;
 
         private SubscriptionWorkerOptions _options;
 
@@ -701,6 +710,9 @@ namespace Raven.Server.Documents.TcpHandlers
         {
             AddToStatusDescription("Starting trying to sent docs to client");
 
+            var statsAggregator = _lastStats = new SubscriptionBatchStatsAggregator(Interlocked.Increment(ref _statsId), _lastStats);
+            AddPerformanceStats(statsAggregator);
+            
             bool anyDocumentsSentInCurrentIteration = false;
             int docsToFlush = 0;
             using (var writer = new BlittableJsonTextWriter(docsContext, _buffer))
@@ -1293,6 +1305,14 @@ namespace Raven.Server.Documents.TcpHandlers
                 Includes = includes?.ToArray(),
                 CounterIncludes = counterIncludes?.ToArray()
             };
+        }
+        
+        private void AddPerformanceStats(SubscriptionBatchStatsAggregator stats)
+        {
+            _lastBatchesStats.Enqueue(stats);
+
+            while (_lastBatchesStats.Count > 25)
+                _lastBatchesStats.TryDequeue(out stats);
         }
     }
 
