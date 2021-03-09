@@ -209,6 +209,10 @@ class appUrl {
     static forServerDashboard(): string {
         return "#dashboard";
     }
+    
+    static forClusterDashboard(): string {
+        return "#clusterDashboard";
+    }
 
     static forEditCmpXchg(key: string, db: database | databaseInfo) {
         const databaseUrlPart = appUrl.getEncodedDbPart(db);
