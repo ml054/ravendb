@@ -5,54 +5,28 @@ import { RqlQueryVisitor } from "./rqlQueryVisitor";
 import { RqlParser } from "./generated/RqlParser";
 import { ParseTree } from "antlr4ts/tree/ParseTree";
 import { CodeCompletionCore, SymbolTable } from "antlr4-c3";
-import { TerminalNode } from "antlr4ts/tree/TerminalNode";
-import { CandidatesCollection } from "antlr4-c3/out/src/CodeCompletionCore";
-
-function filterTokens(text: string, candidates: string[]) {
-    if (text.trim().length == 0) {
-        return candidates;
-    } else {
-        return candidates.filter(c => c.toLowerCase().startsWith(text.toLowerCase()));
-    }
-}
+import { AutocompleteProvider } from "./providers/common";
+import { AutocompleteFrom } from "./providers/from";
+import { AutocompleteKeywords } from "./providers/keywords";
 
 const ignoredTokens: number[] = [
     RqlParser.OP_PAR,
     RqlParser.CL_PAR,
     RqlParser.OP_Q,
-    RqlParser.CL_Q
+    RqlParser.CL_Q,
+    RqlParser.WORD,
+    RqlParser.STRING,
+    RqlParser.COMMA,
+    RqlParser.DOL,
+    RqlParser.NUM,
+    RqlParser.PLUS,
+    RqlParser.MINUS
 ];
 
-
-function completeKeywords(position: TokenPosition, candidates: CandidatesCollection, parser: RqlParser): autoCompleteWordList[] {
-    
-    //TODO: review me!
-    
-    const completions: autoCompleteWordList[] = [];
-    
-    const tokens: string[] = [];
-    candidates.tokens.forEach((_, k) => {
-        const symbolicName = parser.vocabulary.getSymbolicName(k);
-        if (symbolicName) {
-            tokens.push(symbolicName.toLowerCase());
-        }
-    });
-
-    const isIgnoredToken =
-        position.context instanceof TerminalNode &&
-        ignoredTokens.indexOf(position.context.symbol.type) >= 0;
-
-    const textToMatch = isIgnoredToken ? '' : position.text;
-
-    completions.push(...filterTokens(textToMatch, tokens).map(x => ({
-        caption: x,
-        value: x,
-        score: 100,
-        meta: "keyword"
-    })));
-    
-    return completions;
-}
+const providers: AutocompleteProvider[] = [
+    new AutocompleteKeywords(ignoredTokens),
+    new AutocompleteFrom()
+];
 
 export async function getSuggestionsForParseTree(
     parser: RqlParser, parseTree: ParseTree, symbolTableFn: () => SymbolTable, position: TokenPosition): Promise<autoCompleteWordList[]> {
@@ -69,16 +43,19 @@ export async function getSuggestionsForParseTree(
 
     const candidates = core.collectCandidates(position.index);
 
-    if (candidates.rules.has(RqlParser.RULE_collectionName)) {
-        //TODO: collection name
-    }
-    console.log(candidates); //TODO:
-    
     const completions: autoCompleteWordList[] = [];
 
-    completions.push(...completeKeywords(position, candidates, parser));
-    
-    //TODO: allow to supply list with additional completion providers
+    for (const provider of providers) {
+        if (provider.collect) {
+            completions.push(...provider.collect(position, candidates, parser));
+        }
+        if (provider.collectAsync) {
+            const providerCompletions = await provider.collectAsync(position, candidates, parser);
+            if (providerCompletions.length > 0) {
+                completions.push(...providerCompletions);
+            }
+        }
+    }
 
     return completions;
 }

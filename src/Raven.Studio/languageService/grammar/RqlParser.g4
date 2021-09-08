@@ -18,13 +18,14 @@ prog:
     ;
 
 fromStatement:
-     FROM collectionName fromAlias? #CollectionByName 
-    |FROM INDEX indexName fromAlias? #CollectionByIndex
-    |FROM ALL_DOCS #AllCollections 
+    FROM INDEX indexName fromAlias? #CollectionByIndex
+    | FROM ALL_DOCS #AllCollections
+    | FROM collectionName fromAlias? #CollectionByName 
     ;
 
 indexName:
-    STRING;
+    STRING
+    | WORD;
 
 loadStatement:
     LOAD 

@@ -1,6 +1,9 @@
 import { handleAutoComplete } from "../src/autocomplete";
 import { CaretPosition } from "../src/types";
 
+import 'jest-extended';
+
+
 const caret = "|";
 
 export async function autocomplete(input: string): Promise<autoCompleteWordList[]> {
