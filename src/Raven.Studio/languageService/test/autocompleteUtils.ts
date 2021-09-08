@@ -3,7 +3,7 @@ import { CaretPosition } from "../src/types";
 
 const caret = "|";
 
-export function autocomplete(input: string): Promise<autoCompleteWordList[]> {
+export async function autocomplete(input: string): Promise<autoCompleteWordList[]> {
     const caretIdx = input.indexOf(caret);
     if (caretIdx === -1) {
         throw new Error("Unable to find caret (|) in input string: " + input);
@@ -21,6 +21,6 @@ export function autocomplete(input: string): Promise<autoCompleteWordList[]> {
         column,
         line: row + 1
     };
-    
-    return handleAutoComplete(inputWithoutCaret, caretPosition);
+
+    return await handleAutoComplete(inputWithoutCaret, caretPosition);
 }
