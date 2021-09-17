@@ -113,6 +113,8 @@ class query extends viewModelBase {
 
     static readonly timeSeriesFormat = "YYYY-MM-DD HH:mm:ss.SSS";
 
+    view = require("views/database/query/query.html");
+
     static readonly recentQueryLimit = 6;
     static readonly recentKeyword = 'Recent Query';
 
