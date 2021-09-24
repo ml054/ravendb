@@ -1,16 +1,35 @@
 {
   "compilerOptions": {
+      "baseUrl": ".",
     "noImplicitAny": true,
     "noEmitOnError": true,
     "removeComments": false,
     "declaration": false,
     "sourceMap": true,
-    "target": "es5", 
+    "target": "ES6", 
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "module": "amd",
+    "module": "AMD",
     "typeRoots": [
+        "./node_modules/@types",
         "./typings/**/*"
-    ]
+    ],
+      "types": [
+          "durandal",
+          "jquery",
+          "knockout",
+          "knockout-postbox",
+          "knockout.validation",
+          "lodash",
+          "rbush",
+          "requirejs",
+          "webcola",
+          "bootstrap",
+          "eonasdan-bootstrap-datetimepicker"
+      ],
+      "paths": {
+          "webcola": ["node_modules/webcola/dist/index.d.ts"]
+      }
   },
   "exclude": [
     "node_modules",

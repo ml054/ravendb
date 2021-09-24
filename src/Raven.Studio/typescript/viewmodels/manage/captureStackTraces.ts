@@ -71,6 +71,8 @@ class stackInfo {
 
 class captureStackTraces extends viewModelBase {
     
+    view = require("views/manage/captureStackTraces.html");
+    
     spinners = {
         loading: ko.observable<boolean>(false)
     };
