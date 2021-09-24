@@ -1,5 +1,4 @@
 import viewModelBase = require("viewmodels/viewModelBase");
-import shell = require("viewmodels/shell");
 import license = require("models/auth/licenseModel");
 import registration = require("viewmodels/shell/registration");
 import buildInfo = require("models/resources/buildInfo");
@@ -11,7 +10,9 @@ import getLicenseConfigurationSettingsCommand = require("commands/licensing/getL
 import clusterTopologyManager = require("common/shell/clusterTopologyManager");
 import appUrl = require("common/appUrl");
 
-class about extends viewModelBase {
+export class about extends viewModelBase {
+
+    view = require("views/shell/about.html");
 
     accessManager = accessManager.default.aboutView;
     
@@ -24,7 +25,7 @@ class about extends viewModelBase {
     supportLabel = license.supportLabel;
     supportTableCssClass = license.supportTableCssClass;
     
-    clientVersion = shell.clientVersion;
+    clientVersion = viewModelBase.clientVersion;
     serverVersion = buildInfo.serverBuildVersion;
 
     developerLicense = license.developerLicense;
@@ -304,5 +305,3 @@ class about extends viewModelBase {
         return $.when<any>(this.getLicenseConfigurationSettings(), this.pullLatestVersionInfo(), license.fetchLicenseStatus());
     }
 }
-
-export = about;

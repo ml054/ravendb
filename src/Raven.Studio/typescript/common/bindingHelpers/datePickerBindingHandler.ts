@@ -2,6 +2,7 @@
 
 import composition = require("durandal/composition");
 import moment = require("moment");
+import 'eonasdan-bootstrap-datetimepicker';
 
 class datePickerBindingHandler {
 

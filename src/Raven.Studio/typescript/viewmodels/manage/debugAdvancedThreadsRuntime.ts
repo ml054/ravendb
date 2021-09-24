@@ -1,4 +1,5 @@
 import viewModelBase = require("viewmodels/viewModelBase");
+import moment = require("moment");
 
 import virtualGridController = require("widgets/virtualGrid/virtualGridController");
 import textColumn = require("widgets/virtualGrid/columns/textColumn");

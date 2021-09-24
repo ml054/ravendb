@@ -18,6 +18,7 @@
           "durandal",
           "jquery",
           "knockout",
+          "moment",
           "knockout-postbox",
           "knockout.validation",
           "lodash",
@@ -28,7 +29,9 @@
           "eonasdan-bootstrap-datetimepicker"
       ],
       "paths": {
-          "webcola": ["node_modules/webcola/dist/index.d.ts"]
+          "webcola": ["node_modules/webcola/dist/index.d.ts"],
+          "Favico":  ["node_modules/favico.js/favico.js"],
+          "moment": ["node_modules/moment/moment.d.ts"]
       }
   },
   "exclude": [

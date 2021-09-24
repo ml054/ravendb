@@ -3,6 +3,7 @@ import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
 import database = require("models/resources/database");
 import timeSeriesEntryModel = require("models/database/timeSeries/timeSeriesEntryModel");
 import saveTimeSeriesCommand = require("commands/database/documents/timeSeries/saveTimeSeriesCommand");
+import moment = require("moment");
 
 class editTimeSeriesEntry extends dialogViewModelBase {
 

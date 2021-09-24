@@ -42,6 +42,7 @@ import spatialQueryMap = require("viewmodels/database/query/spatialQueryMap");
 import popoverUtils = require("common/popoverUtils");
 import spatialCircleModel = require("models/database/query/spatialCircleModel");
 import spatialPolygonModel = require("models/database/query/spatialPolygonModel");
+import moment = require("moment");
 
 type queryResultTab = "results" | "explanations" | "timings" | "graph";
 
