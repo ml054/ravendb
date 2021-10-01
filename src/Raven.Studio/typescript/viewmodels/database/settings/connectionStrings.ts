@@ -17,6 +17,8 @@ import testPeriodicBackupCredentialsCommand = require("commands/serverWide/testP
 
 class connectionStrings extends viewModelBase {
 
+    view = require("views/database/settings/connectionStrings.html");
+
     ravenEtlConnectionStringsNames = ko.observableArray<string>([]);
     sqlEtlConnectionStringsNames = ko.observableArray<string>([]);
     olapEtlConnectionStringsNames = ko.observableArray<string>([]);

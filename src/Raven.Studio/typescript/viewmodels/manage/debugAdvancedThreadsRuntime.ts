@@ -9,6 +9,8 @@ import getDebugThreadsRunawayCommand = require("commands/database/debug/getDebug
 
 class debugAdvancedThreadsRuntime extends viewModelBase {
 
+    view = require("views/manage/debugAdvancedThreadsRuntime.html");
+
     allData = ko.observable<Raven.Server.Dashboard.ThreadInfo[]>();
     filteredData = ko.observable<Raven.Server.Dashboard.ThreadInfo[]>();
 

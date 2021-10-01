@@ -26,6 +26,8 @@ class runningRecording {
 
 class debugAdvancedRecordTransactionCommands extends viewModelBase {
 
+    view = require("views/manage/debugAdvancedRecordTransactionCommands.html");
+    
     private highlightDatabase: string;
     
     databaseNames = ko.observableArray<string>([]);
