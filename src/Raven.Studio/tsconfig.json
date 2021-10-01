@@ -50,7 +50,8 @@
           "common/*": ["typescript/common/*"],
           "widgets/*": ["typescript/widgets/*"],
           "commands/*": ["typescript/commands/*"],
-          "knockout": ["node_modules/@types/knockout"]
+          "knockout": ["node_modules/@types/knockout"],
+          "endpoints": ["typescript/endpoints"]
       }
   },
   "exclude": [

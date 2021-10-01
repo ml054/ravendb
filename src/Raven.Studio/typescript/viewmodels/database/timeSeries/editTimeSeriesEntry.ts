@@ -6,6 +6,8 @@ import saveTimeSeriesCommand = require("commands/database/documents/timeSeries/s
 import moment = require("moment");
 
 class editTimeSeriesEntry extends dialogViewModelBase {
+    
+    view = require("views/database/timeSeries/editTimeSeriesEntry.html");
 
     static aggregationColumns = timeSeriesEntryModel.aggregationColumns;
     
