@@ -43,6 +43,7 @@ import popoverUtils = require("common/popoverUtils");
 import spatialCircleModel = require("models/database/query/spatialCircleModel");
 import spatialPolygonModel = require("models/database/query/spatialPolygonModel");
 import moment = require("moment");
+import { highlight, languages } from "prismjs";
 
 type queryResultTab = "results" | "explanations" | "timings" | "graph";
 
@@ -680,7 +681,7 @@ class query extends viewModelBase {
             const showPreview = (value: any) => {
                 if (!_.isUndefined(value)) {
                     const json = JSON.stringify(value, null, 4);
-                    const html = Prism.highlight(json, (Prism.languages as any).javascript);
+                    const html = highlight(json, languages.javascript);
                     onValue(html, json);
                 }
             };

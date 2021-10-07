@@ -1,5 +1,6 @@
 import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
 import copyToClipboard = require("common/copyToClipboard");
+import { highlight, languages } from "prismjs";
 
 class transformationScriptSyntax extends dialogViewModelBase {
 
@@ -175,7 +176,7 @@ loadToOrders(partitionBy(['year', year], ['customPartitionName', $customPartitio
     olapEtlSampleCustomPartitionHtml = transformationScriptSyntax.highlightJavascript(transformationScriptSyntax.olapEtlSampleCustomPartitionText);
 
     static highlightJavascript(source: string) {
-        return Prism.highlight(source, (Prism.languages as any).javascript);
+        return highlight(source, languages.javascript);
     }
 }
 

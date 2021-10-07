@@ -22,6 +22,7 @@ import eventsCollector = require("common/eventsCollector");
 import generalUtils = require("common/generalUtils");
 import popoverUtils = require("common/popoverUtils");
 import tasksCommonContent = require("models/database/tasks/tasksCommonContent");
+import { highlight, languages } from "prismjs";
 
 type testTabName = "results" | perCollectionIncludes;
 type fetcherType = (skip: number, take: number) => JQueryPromise<pagedResult<documentObject>>;
@@ -247,7 +248,7 @@ class editSubscriptionTask extends viewModelBase {
                             onValue(formattedValue, value);
                         } else {
                             const json = JSON.stringify(value, null, 4);
-                            const html = Prism.highlight(json, (Prism.languages as any).javascript);
+                            const html = highlight(json, languages.javascript);
                             onValue(html, json);
                         }
                     }
