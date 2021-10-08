@@ -99,7 +99,8 @@ function BuildStudio ( $srcDir, $version ) {
 
         "{ ""Version"": ""$version"" }" | Out-File $versionJsonPath -Encoding UTF8
 
-        exec { npm run gulp release }
+        exec { npm run gulp prepare }
+        exec { npm run release }
         CheckLastExitCode
     } 
     finally {
