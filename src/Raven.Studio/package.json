@@ -5,7 +5,8 @@
     "gulp": "gulp",
     "webpack": "webpack --config webpack.config.js",
     "webpack-watch": "webpack --config webpack.config.js --watch",
-    "release": "webpack  --config webpack.config.js --mode production"
+    "release": "webpack  --config webpack.config.js --mode production",
+    "postinstall": "node scripts/fix_durandal.js"
   },
   "private": true,
   "devDependencies": {

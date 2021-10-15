@@ -2,13 +2,14 @@ import viewModelBase = require("viewmodels/viewModelBase");
 import license = require("models/auth/licenseModel");
 import registration = require("viewmodels/shell/registration");
 import buildInfo = require("models/resources/buildInfo");
-import generalUtils = require("common/generalUtils");
 import accessManager = require("common/shell/accessManager");
 import forceLicenseUpdateCommand = require("commands/licensing/forceLicenseUpdateCommand");
 import getLatestVersionInfoCommand = require("commands/version/getLatestVersionInfoCommand");
 import getLicenseConfigurationSettingsCommand = require("commands/licensing/getLicenseConfigurationSettingsCommand");
 import clusterTopologyManager = require("common/shell/clusterTopologyManager");
 import appUrl = require("common/appUrl");
+import app = require("durandal/app");
+import feedback from "viewmodels/shell/feedback";
 
 export class about extends viewModelBase {
 
@@ -297,7 +298,8 @@ export class about extends viewModelBase {
     }
 
     openFeedbackForm() {
-        shell.openFeedbackForm();
+        const dialog = new feedback(viewModelBase.clientVersion(), buildInfo.serverBuildVersion().FullVersion);
+        app.showBootstrapDialog(dialog);
     }
 
     activate(args: any) {
