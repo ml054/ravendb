@@ -238,7 +238,7 @@ class customSorters extends viewModelBase {
                             onValue(formattedValue, value);
                         } else {
                             const json = JSON.stringify(value, null, 4);
-                            const html = highlight(json, languages.javascript);
+                            const html = highlight(json, languages.javascript, "js");
                             onValue(html, json);
                         }
                     }

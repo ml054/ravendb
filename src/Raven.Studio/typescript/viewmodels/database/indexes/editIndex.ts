@@ -157,7 +157,7 @@ class editIndex extends viewModelBase {
             const source = this.selectedSourcePreview();
             
             if (source) {
-                return '<pre class="form-control sourcePreview">' + highlight(source.code(), languages.csharp) + '</pre>';
+                return '<pre class="form-control sourcePreview">' + highlight(source.code(), languages.csharp, "csharp") + '</pre>';
             }
             
             const hasAdditionalSources = this.editedIndex().additionalSources().length > 0;
