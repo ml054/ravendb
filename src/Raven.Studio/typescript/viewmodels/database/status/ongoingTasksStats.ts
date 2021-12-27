@@ -1871,9 +1871,13 @@ class ongoingTasksStats extends viewModelBase {
                         if (elementWithData.HasLoadErrors) {
                             tooltipHtml += `<div class="tooltip-li text-danger">ETL task has Load errors:<div class="value">Open Notification Center for details </div></div>`;
                         }
+
+                        if (elementWithData.BatchStopReason) {
+                            tooltipHtml += `<div class="tooltip-li">Batch complete reason: <div class="value">${elementWithData.BatchStopReason} </div></div>`;
+                        }
                         
                         if (elementWithData.BatchTransformationCompleteReason) {
-                            tooltipHtml += `<div class="tooltip-li">Batch complete reason: <div class="value">${elementWithData.BatchTransformationCompleteReason} </div></div>`;
+                            tooltipHtml += `<div class="tooltip-li">Transformation complete reason: <div class="value">${elementWithData.BatchTransformationCompleteReason} </div></div>`;
                         }
 
                         if (elementWithData.CurrentlyAllocated && elementWithData.CurrentlyAllocated.SizeInBytes) {

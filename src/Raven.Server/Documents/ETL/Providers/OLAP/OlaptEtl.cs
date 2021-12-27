@@ -153,10 +153,13 @@ namespace Raven.Server.Documents.ETL.Providers.OLAP
                 {
                     outerScope.NumberOfFiles++;
 
+                    UploadInfo uploadInfo;
+                    string localPath;
+                    
                     using (outerScope.Start())
                     using (var loadScope = outerScope.For($"{EtlOperations.LoadLocal}/{outerScope.NumberOfFiles}"))
                     {
-                        string localPath = transformed.GenerateFile(out UploadInfo uploadInfo);
+                        localPath = transformed.GenerateFile(out uploadInfo);
                         localFiles.Add(localPath);
 
                         loadScope.FileName = uploadInfo.FileName;
@@ -166,10 +169,10 @@ namespace Raven.Server.Documents.ETL.Providers.OLAP
 
                         if (AnyRemoteDestinations == false) 
                             continue;
-
-                        UploadToRemoteDestinations(localPath, uploadInfo, scope);
-                        uploadedFiles.Add(uploadInfo);
                     }
+                    
+                    UploadToRemoteDestinations(localPath, uploadInfo, scope);
+                    uploadedFiles.Add(uploadInfo);
                 }
             }
             catch (Exception)
