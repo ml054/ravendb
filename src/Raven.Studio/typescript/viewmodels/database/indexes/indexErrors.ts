@@ -14,6 +14,8 @@ import generalUtils = require("common/generalUtils");
 import clearIndexErrorsConfirm = require("viewmodels/database/indexes/clearIndexErrorsConfirm");
 import shardViewModelBase from "viewmodels/shardViewModelBase";
 import database from "models/resources/database";
+import { Button } from "viewmodels/database/indexes/Button";
+import getDatabasesCommand from "commands/resources/getDatabasesCommand";
 
 type indexNameAndCount = {
     indexName: string;
@@ -26,6 +28,19 @@ type indexActionAndCount = {
 }
 
 class indexErrors extends shardViewModelBase {
+    
+    externalCounter = ko.observable<number>(0);
+
+    reactOptions = ko.pureComputed(() => ( {
+        component: Button,
+        props: {
+            counter: this.externalCounter()
+        }
+    }));
+    
+    incc() {
+        this.externalCounter(this.externalCounter() + 1);
+    }
     
     view = require("views/database/indexes/indexErrors.html");
 
@@ -137,50 +152,8 @@ class indexErrors extends shardViewModelBase {
 
     compositionComplete() {
         super.compositionComplete();
-        const grid = this.gridController();
-        grid.headerVisible(true);
-        grid.init(() => this.fetchIndexErrors(), () =>
-            [
-                new actionColumn<IndexErrorPerDocument>(grid, (error, index) => this.showErrorDetails(index), "Show", `<i class="icon-preview"></i>`, "72px",
-                    {
-                        title: () => 'Show indexing error details'
-                    }),
-                new hyperlinkColumn<IndexErrorPerDocument>(grid, x => x.IndexName, x => appUrl.forEditIndex(x.IndexName, this.db), "Index name", "25%", {
-                    sortable: "string",
-                    customComparator: generalUtils.sortAlphaNumeric
-                }),
-                new hyperlinkColumn<IndexErrorPerDocument>(grid, x => x.Document, x => appUrl.forEditDoc(x.Document, this.db), "Document Id", "20%", {
-                    sortable: "string",
-                    customComparator: generalUtils.sortAlphaNumeric
-                }),
-                new textColumn<IndexErrorPerDocument>(grid, x => generalUtils.formatUtcDateAsLocal(x.Timestamp), "Date", "20%", {
-                    sortable: "string"
-                }),
-                new textColumn<IndexErrorPerDocument>(grid, x => x.Action, "Action", "10%", {
-                    sortable: "string"
-                }),
-                new textColumn<IndexErrorPerDocument>(grid, x => x.Error, "Error", "15%", {
-                    sortable: "string"
-                })
-            ]
-        );
-
-        this.columnPreview.install("virtual-grid", ".js-index-errors-tooltip", 
-            (indexError: IndexErrorPerDocument, column: textColumn<IndexErrorPerDocument>, e: JQueryEventObject, 
-             onValue: (context: any, valueToCopy?: string) => void) => {
-            if (column.header === "Action" || column.header === "Show") {
-                // do nothing
-            } else if (column.header === "Date") {
-                onValue(moment.utc(indexError.Timestamp), indexError.Timestamp);
-            } else {
-                const value = column.getCellValue(indexError);
-                if (!_.isUndefined(value)) {
-                    onValue(generalUtils.escapeHtml(value), value);
-                }
-            }
-        });
-        this.registerDisposable(timeHelpers.utcNowWithMinutePrecision.subscribe(() => this.onTick()));
-        indexErrors.syncMultiSelect();
+        
+        
     }
 
     private showErrorDetails(errorIdx: number) {

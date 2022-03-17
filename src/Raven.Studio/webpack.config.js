@@ -155,7 +155,7 @@ module.exports = (env, args) => {
                     ]
                 },
                 {
-                    test: /\.ts$/,
+                    test: /\.tsx?$/,
                     use: 'ts-loader'
                 },
                 {

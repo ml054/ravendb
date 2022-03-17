@@ -1,6 +1,8 @@
 import composition = require("durandal/composition");
 import viewModelBase = require("viewmodels/viewModelBase");
 
+require("knockout-bind-react/knockout-bind-react");
+
 class helpBindingHandler {
 
     link: JQuery;

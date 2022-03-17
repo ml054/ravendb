@@ -68,6 +68,8 @@
         "zip-webpack-plugin": "^4.0.1"
     },
     "dependencies": {
+        "@types/react": "^17.0.40",
+        "@types/react-dom": "^17.0.13",
         "animate.css": "^3.5.2",
         "antlr4-c3": "^1.1.16",
         "antlr4ts": "^0.5.0-alpha.4",
@@ -90,6 +92,7 @@
         "jwerty": "^0.3.2",
         "jwerty-globals-fixed": "^0.3.3",
         "knockout": "^3.4.0",
+        "knockout-bind-react": "^2.1.1",
         "knockout-delegated-events": "^0.6.1",
         "knockout-postbox": "^0.5.2",
         "knockout.validation": "^2.0.4",
@@ -101,6 +104,8 @@
         "packery": "^2.1.2",
         "prismjs": "^1.27.0",
         "rbush": "^2.0.1",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2",
         "sortablejs": "^1.14.0",
         "style-loader": "^3.3.1",
         "toastr": "^2.1.4",
