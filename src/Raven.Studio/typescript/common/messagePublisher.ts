@@ -1,8 +1,8 @@
-import EVENTS = require("common/constants/events");
-import toastr = require("toastr");
-import recentError = require("common/notifications/models/recentError");
-import recentLicenseLimitError = require("common/notifications/models/recentLicenseLimitError");
-import generalUtils = require("common/generalUtils");
+import EVENTS from "common/constants/events";
+import toastr from "toastr";
+import generalUtils from "common/generalUtils";
+import recentLicenseLimitError from "common/notifications/models/recentLicenseLimitError";
+import recentError from "common/notifications/models/recentError";
 
 class messagePublisher {
 

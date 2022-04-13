@@ -39,13 +39,13 @@ class databaseInfo {
     performanceHints = ko.observable<number>();
 
     environment = ko.observable<Raven.Client.Documents.Operations.Configuration.StudioConfiguration.StudioEnvironment>();
-    
+
     online: KnockoutComputed<boolean>;
     isLoading: KnockoutComputed<boolean>;
     hasLoadError: KnockoutComputed<boolean>;
     canNavigateToDatabase: KnockoutComputed<boolean>;
     isCurrentlyActiveDatabase: KnockoutComputed<boolean>;
-    
+
     databaseAccessText = ko.observable<string>();
     databaseAccessColor = ko.observable<string>();
     databaseAccessClass = ko.observable<string>();
@@ -80,6 +80,10 @@ class databaseInfo {
         return "databases";
     }
 
+    static extractQualifierAndNameFromNotification(input: string): { qualifier: string, name: string } {
+        return { qualifier: input.substr(0, 2), name: input.substr(3) };
+    }
+
     asDatabase(): database {
         const casted = databasesManager.default.getDatabaseByName(this.name);
         if (!casted) {
@@ -88,8 +92,57 @@ class databaseInfo {
         return casted;
     }
 
-    static extractQualifierAndNameFromNotification(input: string): { qualifier: string, name: string } {
-        return { qualifier: input.substr(0, 2), name: input.substr(3) };
+    isLocal(currentNodeTag: string) {
+        return _.includes(this.nodes().map(x => x.tag()), currentNodeTag);
+    }
+
+    update(dto: Raven.Client.ServerWide.Operations.DatabaseInfo): void {
+        this.name = dto.Name;
+        this.lockMode(dto.LockMode);
+        this.disabled(dto.Disabled);
+        this.isAdmin(dto.IsAdmin);
+        this.isEncrypted(dto.IsEncrypted);
+        this.totalSize(dto.TotalSize ? dto.TotalSize.SizeInBytes : 0);
+        this.totalTempBuffersSize(dto.TempBuffersSize ? dto.TempBuffersSize.SizeInBytes : 0);
+        this.indexingErrors(dto.IndexingErrors);
+        this.alerts(dto.Alerts);
+        this.performanceHints(dto.PerformanceHints);
+        this.loadError(dto.LoadError);
+        this.uptime(generalUtils.timeSpanAsAgo(dto.UpTime, false));
+        this.dynamicDatabaseDistribution(dto.DynamicNodesDistribution);
+
+        this.environment(dto.Environment);
+
+        if (dto.BackupInfo && dto.BackupInfo.LastBackup) {
+            this.lastFullOrIncrementalBackup(moment.utc(dto.BackupInfo.LastBackup).local().fromNow());
+        }
+
+        this.backupStatus(this.computeBackupStatus(dto.BackupInfo));
+
+        this.rejectClients(dto.RejectClients);
+        this.indexingStatus(dto.IndexingStatus);
+        this.indexingDisabled(dto.IndexingStatus === "Disabled");
+        this.indexingPaused(dto.IndexingStatus === "Paused");
+        this.documentsCount(dto.DocumentsCount);
+        this.indexesCount(dto.IndexesCount);
+        this.deletionInProgress(dto.DeletionInProgress ? Object.keys(dto.DeletionInProgress) : []);
+
+        const topologyDto = dto.NodesTopology;
+        if (topologyDto) {
+            const members = this.mapNodes("Member", topologyDto.Members);
+            const promotables = this.mapNodes("Promotable", topologyDto.Promotables);
+            const rehabs = this.mapNodes("Rehab", topologyDto.Rehabs);
+            const joinedNodes = _.concat<databaseGroupNode>(members, promotables, rehabs);
+            this.applyNodesStatuses(joinedNodes, topologyDto.Status);
+
+            this.priorityOrder(topologyDto.PriorityOrder);
+
+            this.nodes(joinedNodes);
+        }
+
+        this.databaseAccessText(accessManager.default.getDatabaseAccessLevelTextByDbName(this.name));
+        this.databaseAccessColor(accessManager.default.getAccessColorByDbName(this.name));
+        this.databaseAccessClass(accessManager.default.getAccessIconByDbName(this.name))
     }
 
     private computeBackupStatus(backupInfo: Raven.Client.ServerWide.Operations.BackupInfo) {
@@ -104,10 +157,6 @@ class databaseInfo {
 
         this.lastBackupText(`Backed up ${this.lastFullOrIncrementalBackup()}`);
         return durationInSeconds > databaseInfo.dayAsSeconds ? "text-warning" : "text-success";
-    }
-    
-    isLocal(currentNodeTag: string) {
-        return _.includes(this.nodes().map(x => x.tag()), currentNodeTag);
     }
 
     private initializeObservables() {
@@ -140,56 +189,7 @@ class databaseInfo {
         });
     }
 
-    update(dto: Raven.Client.ServerWide.Operations.DatabaseInfo): void {
-        this.name = dto.Name;
-        this.lockMode(dto.LockMode);
-        this.disabled(dto.Disabled);
-        this.isAdmin(dto.IsAdmin);
-        this.isEncrypted(dto.IsEncrypted);
-        this.totalSize(dto.TotalSize ? dto.TotalSize.SizeInBytes : 0);
-        this.totalTempBuffersSize(dto.TempBuffersSize ? dto.TempBuffersSize.SizeInBytes : 0);
-        this.indexingErrors(dto.IndexingErrors);
-        this.alerts(dto.Alerts);
-        this.performanceHints(dto.PerformanceHints);
-        this.loadError(dto.LoadError);
-        this.uptime(generalUtils.timeSpanAsAgo(dto.UpTime, false));
-        this.dynamicDatabaseDistribution(dto.DynamicNodesDistribution);
-        
-        this.environment(dto.Environment);
-
-        if (dto.BackupInfo && dto.BackupInfo.LastBackup) {
-            this.lastFullOrIncrementalBackup(moment.utc(dto.BackupInfo.LastBackup).local().fromNow());
-        }
-            
-        this.backupStatus(this.computeBackupStatus(dto.BackupInfo));
-
-        this.rejectClients(dto.RejectClients);
-        this.indexingStatus(dto.IndexingStatus);
-        this.indexingDisabled(dto.IndexingStatus === "Disabled");
-        this.indexingPaused(dto.IndexingStatus === "Paused");
-        this.documentsCount(dto.DocumentsCount);
-        this.indexesCount(dto.IndexesCount);
-        this.deletionInProgress(dto.DeletionInProgress ? Object.keys(dto.DeletionInProgress) : []);
-
-        const topologyDto = dto.NodesTopology;
-        if (topologyDto) {
-            const members = this.mapNodes("Member", topologyDto.Members);
-            const promotables = this.mapNodes("Promotable", topologyDto.Promotables);
-            const rehabs = this.mapNodes("Rehab", topologyDto.Rehabs);
-            const joinedNodes = _.concat<databaseGroupNode>(members, promotables, rehabs);
-            this.applyNodesStatuses(joinedNodes, topologyDto.Status);
-
-            this.priorityOrder(topologyDto.PriorityOrder);
-            
-            this.nodes(joinedNodes);
-        }
-
-        this.databaseAccessText(accessManager.default.getDatabaseAccessLevelTextByDbName(this.name));
-        this.databaseAccessColor(accessManager.default.getAccessColorByDbName(this.name));
-        this.databaseAccessClass(accessManager.default.getAccessIconByDbName(this.name))
-    }
-
-    private applyNodesStatuses(nodes: databaseGroupNode[], statuses: { [key: string]: Raven.Client.ServerWide.Operations.DatabaseGroupNodeStatus;}) {
+    private applyNodesStatuses(nodes: databaseGroupNode[], statuses: { [key: string]: Raven.Client.ServerWide.Operations.DatabaseGroupNodeStatus; }) {
         nodes.forEach(node => {
             if (node.tag() in statuses) {
                 const nodeStatus = statuses[node.tag()];
