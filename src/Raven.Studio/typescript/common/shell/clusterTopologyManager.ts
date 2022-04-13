@@ -1,10 +1,10 @@
 ﻿/// <reference path="../../../typings/tsd.d.ts"/>
 
-import clusterTopology = require("models/database/cluster/clusterTopology");
-import getClusterTopologyCommand = require("commands/database/cluster/getClusterTopologyCommand");
-import changesContext = require("common/changesContext");
-import licenseModel = require("models/auth/licenseModel");
-import getClusterNodeInfoCommand = require("commands/database/cluster/getClusterNodeInfoCommand");
+import clusterTopology from "models/database/cluster/clusterTopology";
+import getClusterTopologyCommand from "commands/database/cluster/getClusterTopologyCommand";
+import changesContext from "common/changesContext";
+import licenseModel from "models/auth/licenseModel";
+import getClusterNodeInfoCommand from "commands/database/cluster/getClusterNodeInfoCommand";
 
 class clusterTopologyManager {
 
