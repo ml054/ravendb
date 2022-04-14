@@ -10,7 +10,7 @@ module.exports = {
     builder: "webpack5"
   },
     babel: async (options) => {
-      options.plugins.push(require.resolve("babel-plugin-replace-ts-export-assignment2"));
+      options.plugins.push(require.resolve("./import_plugin.js"));
       return {
           ...options,
           sourceType: "unambiguous"

@@ -1,5 +1,6 @@
 ﻿import "../wwwroot/Content/css/styles.less"
 
+import "knockout-postbox";
 
 import "bootstrap/dist/js/bootstrap";
 import "jquery-fullscreen-plugin/jquery.fullscreen";
