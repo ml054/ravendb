@@ -28,6 +28,8 @@ module.exports = {
     webpackFinal: async config => {
         config.resolve.alias = { ...config.resolve.alias, ...webpackConfig.resolve.alias };
 
+        config.output.publicPath = "/";
+        
         config.plugins.unshift(webpackConfig.plugins.find(x => x.constructor.name === "ProvidePlugin"));
         
         //console.log(webpackConfig.module.rules.map(x => x.use));
@@ -48,7 +50,7 @@ module.exports = {
                     }
                 }
             },
-            ...assetsRules, 
+            //...assetsRules, 
             ...config.module.rules, 
             webpackConfig.module.rules[1] // less rule
         ];
