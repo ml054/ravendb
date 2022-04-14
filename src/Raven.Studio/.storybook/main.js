@@ -10,7 +10,7 @@ module.exports = {
     builder: "webpack5"
   },
     babel: async (options) => {
-      options.plugins.push(require.resolve("babel-plugin-replace-ts-export-assignment"));
+      options.plugins.push(require.resolve("babel-plugin-replace-ts-export-assignment2"));
       return {
           ...options,
           sourceType: "unambiguous"
@@ -37,6 +37,17 @@ module.exports = {
         
         const assetsRules = webpackConfig.module.rules.filter(x => x.type && x.type.startsWith("asset"));
         config.module.rules = [
+            {
+                test: /\.html$/,
+                use: {
+                    loader: 'html-loader',
+                    options: {
+                        minimize: {
+                            removeComments: false
+                        }
+                    }
+                }
+            },
             ...assetsRules, 
             ...config.module.rules, 
             webpackConfig.module.rules[1] // less rule
