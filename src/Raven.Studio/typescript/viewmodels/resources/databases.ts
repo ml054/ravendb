@@ -1,4 +1,4 @@
-import viewModelBase = require("viewmodels/viewModelBase");
+import viewModelBase from "viewmodels/viewModelBase";
 import { DatabasesPage } from "../../components/pages/resources/databases/DatabasesPage";
 
 class databases extends viewModelBase {

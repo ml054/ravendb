@@ -1,11 +1,11 @@
-﻿/// <reference path="../../../typings/tsd.d.ts" />
+/// <reference path="../../../typings/tsd.d.ts" />
 
-import database = require("models/resources/database");
-import getDatabaseFooterStatsCommand = require("commands/resources/getDatabaseFooterStatsCommand");
-import changesContext = require("common/changesContext");
-import changeSubscription = require("common/changeSubscription");
-import appUrl = require("common/appUrl");
-import license = require("models/auth/licenseModel");
+import database from "models/resources/database";
+import getDatabaseFooterStatsCommand from "commands/resources/getDatabaseFooterStatsCommand";
+import changesContext from "common/changesContext";
+import changeSubscription from "common/changeSubscription";
+import appUrl from "common/appUrl";
+import license from "models/auth/licenseModel";
 import shardedDatabase from "models/resources/shardedDatabase";
 import { shardingTodo } from "common/developmentHelper";
 

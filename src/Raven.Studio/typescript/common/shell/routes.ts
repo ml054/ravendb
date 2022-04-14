@@ -1,5 +1,5 @@
-﻿
-import MENU_BASED_ROUTER_CONFIGURATION = require("common/shell/routerConfiguration");
+
+import MENU_BASED_ROUTER_CONFIGURATION from "common/shell/routerConfiguration";
 
 class Routes {
 

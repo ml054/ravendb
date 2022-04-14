@@ -1,8 +1,8 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
-import database = require("models/resources/database");
-import verifyDocumentsIDsCommand = require("commands/database/documents/verifyDocumentsIDsCommand");
-import storageKeyProvider = require("common/storage/storageKeyProvider");
+import database from "models/resources/database";
+import verifyDocumentsIDsCommand from "commands/database/documents/verifyDocumentsIDsCommand";
+import storageKeyProvider from "common/storage/storageKeyProvider";
 
 class starredDocumentsStorage {
 

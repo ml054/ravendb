@@ -1,12 +1,12 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
 
-import database = require("models/resources/database");
-import databasesManager = require("common/shell/databasesManager");
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import generalUtils = require("common/generalUtils");
-import databaseGroupNode = require("models/resources/info/databaseGroupNode");
-import accessManager = require("common/shell/accessManager");
-import moment = require("moment");
+import database from "models/resources/database";
+import databasesManager from "common/shell/databasesManager";
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
+import generalUtils from "common/generalUtils";
+import databaseGroupNode from "models/resources/info/databaseGroupNode";
+import accessManager from "common/shell/accessManager";
+import moment from "moment";
 
 class databaseInfo {
 

@@ -1,10 +1,10 @@
-import viewModelBase = require("viewmodels/viewModelBase");
+import viewModelBase from "viewmodels/viewModelBase";
 
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import generalUtils = require("common/generalUtils");
-import getDebugMemoryStatsCommand = require("commands/database/debug/getDebugMemoryStatsCommand");
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import generalUtils from "common/generalUtils";
+import getDebugMemoryStatsCommand from "commands/database/debug/getDebugMemoryStatsCommand";
 import { highlight, languages } from "prismjs";
 
 type memoryMappingItem = {

@@ -1,9 +1,9 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import sendFeedbackCommand = require("commands/resources/sendFeedbackCommand");
-import dialog = require("plugins/dialog");
-import router = require("plugins/router");
-import studioSettings = require("common/settings/studioSettings");
-import globalSettings = require("common/settings/globalSettings");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import sendFeedbackCommand from "commands/resources/sendFeedbackCommand";
+import dialog from "plugins/dialog";
+import router from "plugins/router";
+import studioSettings from "common/settings/studioSettings";
+import globalSettings from "common/settings/globalSettings";
 
 type featureImpression = 'positive' | 'negative';
 

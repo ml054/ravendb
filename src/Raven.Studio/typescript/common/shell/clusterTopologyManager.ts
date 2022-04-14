@@ -1,4 +1,4 @@
-﻿/// <reference path="../../../typings/tsd.d.ts"/>
+/// <reference path="../../../typings/tsd.d.ts"/>
 
 import clusterTopology from "models/database/cluster/clusterTopology";
 import getClusterTopologyCommand from "commands/database/cluster/getClusterTopologyCommand";

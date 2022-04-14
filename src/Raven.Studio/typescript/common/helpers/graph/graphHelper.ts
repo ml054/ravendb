@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
 
-import colorsManager = require("common/colorsManager");
+import colorsManager from "common/colorsManager";
 
 class graphHelper {
 

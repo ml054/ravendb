@@ -1,4 +1,4 @@
-import studioSettings = require("common/settings/studioSettings");
+import studioSettings from "common/settings/studioSettings";
 
 class detectBrowser {
     

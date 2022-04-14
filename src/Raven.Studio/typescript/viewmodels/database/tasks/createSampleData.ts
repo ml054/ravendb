@@ -1,16 +1,16 @@
-import copyToClipboard = require("common/copyToClipboard");
-import createSampleDataCommand = require("commands/database/studio/createSampleDataCommand");
-import createSampleDataClassCommand = require("commands/database/studio/createSampleDataClassCommand");
-import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
-import eventsCollector = require("common/eventsCollector");
-import getCollectionsStatsCommand = require("commands/database/documents/getCollectionsStatsCommand");
-import collectionsStats = require("models/database/documents/collectionsStats");
-import appUrl = require("common/appUrl");
-import database = require("models/resources/database");
-import getDatabaseCommand = require("commands/resources/getDatabaseCommand");
-import collectionsTracker = require("common/helpers/database/collectionsTracker");
+import copyToClipboard from "common/copyToClipboard";
+import createSampleDataCommand from "commands/database/studio/createSampleDataCommand";
+import createSampleDataClassCommand from "commands/database/studio/createSampleDataClassCommand";
+import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
+import eventsCollector from "common/eventsCollector";
+import getCollectionsStatsCommand from "commands/database/documents/getCollectionsStatsCommand";
+import collectionsStats from "models/database/documents/collectionsStats";
+import appUrl from "common/appUrl";
+import database from "models/resources/database";
+import getDatabaseCommand from "commands/resources/getDatabaseCommand";
+import collectionsTracker from "common/helpers/database/collectionsTracker";
 import { highlight, languages } from "prismjs";
-import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import shardViewModelBase from "viewmodels/shardViewModelBase";
 
 class createSampleData extends shardViewModelBase {
     

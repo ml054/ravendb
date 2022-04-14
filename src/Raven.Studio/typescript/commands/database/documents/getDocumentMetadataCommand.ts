@@ -1,8 +1,8 @@
-import commandBase = require("commands/commandBase");
-import database = require("models/resources/database");
-import document = require("models/database/documents/document");
-import endpoints = require("endpoints");
-import documentMetadata = require("models/database/documents/documentMetadata");
+import commandBase from "commands/commandBase";
+import database from "models/resources/database";
+import document from "models/database/documents/document";
+import endpoints from "endpoints";
+import documentMetadata from "models/database/documents/documentMetadata";
 
 class getDocumentMetadataCommand extends commandBase {
 

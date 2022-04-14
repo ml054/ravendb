@@ -1,4 +1,4 @@
-import commandBase = require("commands/commandBase");
+import commandBase from "commands/commandBase";
 
 class getClientBuildVersionCommand extends commandBase {
 

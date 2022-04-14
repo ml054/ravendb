@@ -1,7 +1,7 @@
-import commandBase = require("commands/commandBase");
-import database = require("models/resources/database");
-import endpoints = require("endpoints");
-import pluralizeHelpers = require("common/helpers/text/pluralizeHelpers");
+import commandBase from "commands/commandBase";
+import database from "models/resources/database";
+import endpoints from "endpoints";
+import pluralizeHelpers from "common/helpers/text/pluralizeHelpers";
 
 class deleteDatabaseFromNodeCommand extends commandBase {
 

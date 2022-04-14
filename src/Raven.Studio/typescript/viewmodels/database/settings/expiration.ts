@@ -1,9 +1,9 @@
-import appUrl = require("common/appUrl");
-import database = require("models/resources/database");
-import eventsCollector = require("common/eventsCollector");
-import messagePublisher = require("common/messagePublisher");
-import getExpirationConfigurationCommand = require("commands/database/documents/getExpirationConfigurationCommand");
-import saveExpirationConfigurationCommand = require("commands/database/documents/saveExpirationConfigurationCommand");
+import appUrl from "common/appUrl";
+import database from "models/resources/database";
+import eventsCollector from "common/eventsCollector";
+import messagePublisher from "common/messagePublisher";
+import getExpirationConfigurationCommand from "commands/database/documents/getExpirationConfigurationCommand";
+import saveExpirationConfigurationCommand from "commands/database/documents/saveExpirationConfigurationCommand";
 import { highlight, languages } from "prismjs";
 import shardViewModelBase from "viewmodels/shardViewModelBase";
 

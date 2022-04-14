@@ -1,6 +1,6 @@
-﻿import commandBase = require("commands/commandBase");
-import database = require("models/resources/database");
-import endpoints = require("endpoints");
+import commandBase from "commands/commandBase";
+import database from "models/resources/database";
+import endpoints from "endpoints";
 import genUtils from "common/generalUtils";
 
 class getIndexesErrorCommand extends commandBase {

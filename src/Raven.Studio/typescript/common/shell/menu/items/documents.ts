@@ -1,7 +1,7 @@
-﻿import intermediateMenuItem = require("common/shell/menu/intermediateMenuItem");
-import leafMenuItem = require("common/shell/menu/leafMenuItem");
-import collectionMenuItem = require("common/shell/menu/collectionMenuItem");
-import collectionsTracker = require("common/helpers/database/collectionsTracker");
+import intermediateMenuItem from "common/shell/menu/intermediateMenuItem";
+import leafMenuItem from "common/shell/menu/leafMenuItem";
+import collectionMenuItem from "common/shell/menu/collectionMenuItem";
+import collectionsTracker from "common/helpers/database/collectionsTracker";
 
 export = getDocumentsMenuItem;
 

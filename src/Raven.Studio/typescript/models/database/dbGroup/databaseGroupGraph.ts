@@ -1,9 +1,9 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import d3 = require("d3");
-import graphHelper = require("common/helpers/graph/graphHelper");
+import d3 from "d3";
+import graphHelper from "common/helpers/graph/graphHelper";
 import { d3adaptor, ID3StyleLayoutAdaptor, Link, Node, Layout } from "webcola";
-import ongoingTaskBackupListModel = require("models/database/tasks/ongoingTaskBackupListModel");
-import ongoingTaskModel = require("models/database/tasks/ongoingTaskModel");
+import ongoingTaskBackupListModel from "models/database/tasks/ongoingTaskBackupListModel";
+import ongoingTaskModel from "models/database/tasks/ongoingTaskModel";
 
 abstract class layoutable {
     x: number;

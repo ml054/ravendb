@@ -1,9 +1,9 @@
-import appUrl = require("common/appUrl");
-import database = require("models/resources/database");
-import eventsCollector = require("common/eventsCollector");
-import collectionsTracker = require("common/helpers/database/collectionsTracker");
-import getDocumentsCompressionConfigurationCommand = require("commands/database/documents/getDocumentsCompressionConfigurationCommand");
-import saveDocumentsCompressionCommand = require("commands/database/documents/saveDocumentsCompressionCommand");
+import appUrl from "common/appUrl";
+import database from "models/resources/database";
+import eventsCollector from "common/eventsCollector";
+import collectionsTracker from "common/helpers/database/collectionsTracker";
+import getDocumentsCompressionConfigurationCommand from "commands/database/documents/getDocumentsCompressionConfigurationCommand";
+import saveDocumentsCompressionCommand from "commands/database/documents/saveDocumentsCompressionCommand";
 import shardViewModelBase from "viewmodels/shardViewModelBase";
 
 class documentsCompression extends shardViewModelBase {

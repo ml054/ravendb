@@ -1,18 +1,18 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import revisionsConfigurationEntry = require("models/database/documents/revisionsConfigurationEntry");
-import appUrl = require("common/appUrl");
-import database = require("models/resources/database");
-import saveRevisionsConfigurationCommand = require("commands/database/documents/saveRevisionsConfigurationCommand");
-import saveRevisionsForConflictsConfigurationCommand = require("commands/database/documents/saveRevisionsForConflictsConfigurationCommand");
-import eventsCollector = require("common/eventsCollector");
-import generalUtils = require("common/generalUtils");
-import messagePublisher = require("common/messagePublisher");
-import collectionsTracker = require("common/helpers/database/collectionsTracker");
-import getRevisionsConfigurationCommand = require("commands/database/documents/getRevisionsConfigurationCommand");
-import getRevisionsForConflictsConfigurationCommand = require("commands/database/documents/getRevisionsForConflictsConfigurationCommand");
-import enforceRevisionsConfigurationCommand = require("commands/database/settings/enforceRevisionsConfigurationCommand");
-import notificationCenter = require("common/notifications/notificationCenter");
-import popoverUtils = require("common/popoverUtils");
+import viewModelBase from "viewmodels/viewModelBase";
+import revisionsConfigurationEntry from "models/database/documents/revisionsConfigurationEntry";
+import appUrl from "common/appUrl";
+import database from "models/resources/database";
+import saveRevisionsConfigurationCommand from "commands/database/documents/saveRevisionsConfigurationCommand";
+import saveRevisionsForConflictsConfigurationCommand from "commands/database/documents/saveRevisionsForConflictsConfigurationCommand";
+import eventsCollector from "common/eventsCollector";
+import generalUtils from "common/generalUtils";
+import messagePublisher from "common/messagePublisher";
+import collectionsTracker from "common/helpers/database/collectionsTracker";
+import getRevisionsConfigurationCommand from "commands/database/documents/getRevisionsConfigurationCommand";
+import getRevisionsForConflictsConfigurationCommand from "commands/database/documents/getRevisionsForConflictsConfigurationCommand";
+import enforceRevisionsConfigurationCommand from "commands/database/settings/enforceRevisionsConfigurationCommand";
+import notificationCenter from "common/notifications/notificationCenter";
+import popoverUtils from "common/popoverUtils";
 
 class revisions extends viewModelBase {
 

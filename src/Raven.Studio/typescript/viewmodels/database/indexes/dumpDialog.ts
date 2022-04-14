@@ -1,7 +1,7 @@
-import dialog = require("plugins/dialog");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import dumpIndexCommand = require("commands/database/index/dumpIndexCommand");
-import getFolderPathOptionsCommand = require("commands/resources/getFolderPathOptionsCommand");
+import dialog from "plugins/dialog";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import dumpIndexCommand from "commands/database/index/dumpIndexCommand";
+import getFolderPathOptionsCommand from "commands/resources/getFolderPathOptionsCommand";
 
 class dumpDialog extends dialogViewModelBase {
     

@@ -1,6 +1,6 @@
-﻿import setupEncryptionKey = require("viewmodels/resources/setupEncryptionKey");
-import jsonUtil = require("common/jsonUtil");
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
+import setupEncryptionKey from "viewmodels/resources/setupEncryptionKey";
+import jsonUtil from "common/jsonUtil";
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
 
 class encryptionSettings {
     

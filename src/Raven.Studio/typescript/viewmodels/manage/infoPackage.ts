@@ -1,12 +1,12 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import endpoints = require("endpoints");
-import appUrl = require("common/appUrl");
-import eventsCollector = require("common/eventsCollector");
-import getNextOperationId = require("commands/database/studio/getNextOperationId");
-import messagePublisher = require("common/messagePublisher");
-import notificationCenter = require("common/notifications/notificationCenter");
-import viewHelpers = require("common/helpers/view/viewHelpers");
-import killOperationCommand = require("commands/operations/killOperationCommand");
+import viewModelBase from "viewmodels/viewModelBase";
+import endpoints from "endpoints";
+import appUrl from "common/appUrl";
+import eventsCollector from "common/eventsCollector";
+import getNextOperationId from "commands/database/studio/getNextOperationId";
+import messagePublisher from "common/messagePublisher";
+import notificationCenter from "common/notifications/notificationCenter";
+import viewHelpers from "common/helpers/view/viewHelpers";
+import killOperationCommand from "commands/operations/killOperationCommand";
 
 class infoPackage extends viewModelBase {
 

@@ -1,8 +1,8 @@
 ﻿/// <reference path="../../../../typings/tsd.d.ts"/>
 
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import document = require("models/database/documents/document");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import document from "models/database/documents/document";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
 
 class flagsColumn implements virtualColumn {
     constructor(protected gridController: virtualGridController<any>) {

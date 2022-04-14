@@ -1,8 +1,8 @@
 ﻿/// <reference path="../../../../typings/tsd.d.ts"/>
 
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import generalUtils = require("common/generalUtils");
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import generalUtils from "common/generalUtils";
 
 type preparedValue = {
     rawText: string;

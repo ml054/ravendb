@@ -1,9 +1,9 @@
 /// <reference path="../../typings/tsd.d.ts"/>
-import virtualGrid = require("widgets/virtualGrid/virtualGrid");
-import listView = require("widgets/listView/listView");
-import genUtils = require("common/generalUtils");
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import accessManager = require("common/shell/accessManager");
+import virtualGrid from "widgets/virtualGrid/virtualGrid";
+import listView from "widgets/listView/listView";
+import genUtils from "common/generalUtils";
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
+import accessManager from "common/shell/accessManager";
 import React from "react";
 import ReactDOM from "react-dom";
 

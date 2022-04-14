@@ -1,4 +1,4 @@
-﻿
+
 class notificationCenterSettings {
 
     static readonly postponeOptions: valueAndLabelItem<number, string>[] = [

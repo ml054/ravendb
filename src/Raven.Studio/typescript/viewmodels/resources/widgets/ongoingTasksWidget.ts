@@ -1,5 +1,5 @@
-import clusterDashboard = require("viewmodels/resources/clusterDashboard");
-import websocketBasedWidget = require("viewmodels/resources/widgets/websocketBasedWidget");
+import clusterDashboard from "viewmodels/resources/clusterDashboard";
+import websocketBasedWidget from "viewmodels/resources/widgets/websocketBasedWidget";
 
 class taskNodes {
     nodes = ko.observable<Set<string>>();

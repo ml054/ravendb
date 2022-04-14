@@ -1,7 +1,7 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import copyToClipboard = require("common/copyToClipboard");
-import getStackTraceForThreadCommand = require("commands/maintenance/getStackTraceForThreadCommand");
-import generalUtils = require("common/generalUtils");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import copyToClipboard from "common/copyToClipboard";
+import getStackTraceForThreadCommand from "commands/maintenance/getStackTraceForThreadCommand";
+import generalUtils from "common/generalUtils";
 
 class threadStackTrace extends dialogViewModelBase {
 

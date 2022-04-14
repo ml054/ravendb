@@ -1,7 +1,7 @@
-﻿
-import document = require("models/database/documents/document");
-import saveDocumentCommand = require("commands/database/documents/saveDocumentCommand");
-import databasesManager = require("common/shell/databasesManager");
+
+import document from "models/database/documents/document";
+import saveDocumentCommand from "commands/database/documents/saveDocumentCommand";
+import databasesManager from "common/shell/databasesManager";
 
 class continueTest {
     static default = new continueTest();

@@ -1,4 +1,4 @@
-﻿require("google.analytics");
+require("google.analytics");
 
 class eventsCollector {
     static UACode = "UA-82335022-3";

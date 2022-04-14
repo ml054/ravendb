@@ -1,8 +1,8 @@
 
-import lineChart = require("models/resources/clusterDashboard/lineChart");
-import clusterDashboard = require("viewmodels/resources/clusterDashboard");
-import cpuUsage = require("models/resources/widgets/cpuUsage");
-import abstractChartsWebsocketWidget = require("viewmodels/resources/widgets/abstractChartsWebsocketWidget");
+import lineChart from "models/resources/clusterDashboard/lineChart";
+import clusterDashboard from "viewmodels/resources/clusterDashboard";
+import cpuUsage from "models/resources/widgets/cpuUsage";
+import abstractChartsWebsocketWidget from "viewmodels/resources/widgets/abstractChartsWebsocketWidget";
 
 class cpuUsageWidget extends abstractChartsWebsocketWidget<Raven.Server.Dashboard.Cluster.Notifications.CpuUsagePayload, cpuUsage> {
 

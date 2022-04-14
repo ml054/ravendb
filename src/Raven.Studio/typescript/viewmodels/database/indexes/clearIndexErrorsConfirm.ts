@@ -1,8 +1,8 @@
-import dialog = require("plugins/dialog");
-import database = require("models/resources/database");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import clearIndexErrorsCommand = require("commands/database/index/clearIndexErrorsCommand");
-import messagePublisher = require("common/messagePublisher");
+import dialog from "plugins/dialog";
+import database from "models/resources/database";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import clearIndexErrorsCommand from "commands/database/index/clearIndexErrorsCommand";
+import messagePublisher from "common/messagePublisher";
 
 class clearIndexErrorsConfirm extends dialogViewModelBase {
 

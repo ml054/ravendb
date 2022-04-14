@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import timeValueEntry = require("models/database/documents/timeValueEntry");
-import generalUtils = require("common/generalUtils");
+import timeValueEntry from "models/database/documents/timeValueEntry";
+import generalUtils from "common/generalUtils";
 
 class timeSeriesPolicy {
 

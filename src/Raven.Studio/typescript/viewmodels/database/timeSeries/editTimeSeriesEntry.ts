@@ -1,10 +1,10 @@
-import dialog = require("plugins/dialog");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import database = require("models/resources/database");
-import timeSeriesEntryModel = require("models/database/timeSeries/timeSeriesEntryModel");
-import saveTimeSeriesCommand = require("commands/database/documents/timeSeries/saveTimeSeriesCommand");
-import popoverUtils = require("common/popoverUtils");
-import moment = require("moment");
+import dialog from "plugins/dialog";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import database from "models/resources/database";
+import timeSeriesEntryModel from "models/database/timeSeries/timeSeriesEntryModel";
+import saveTimeSeriesCommand from "commands/database/documents/timeSeries/saveTimeSeriesCommand";
+import popoverUtils from "common/popoverUtils";
+import moment from "moment";
 
 class editTimeSeriesEntry extends dialogViewModelBase {
     

@@ -1,6 +1,6 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import eventsCollector = require("common/eventsCollector");
-import setLicenseLimitsCommand = require("commands/database/cluster/setLicenseLimitsCommand");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import eventsCollector from "common/eventsCollector";
+import setLicenseLimitsCommand from "commands/database/cluster/setLicenseLimitsCommand";
 
 class assignCores extends dialogViewModelBase {
 

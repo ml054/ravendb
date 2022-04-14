@@ -1,14 +1,14 @@
-﻿/*
+/*
     Events emitted through ko.postbox
         * SearchBox.Show - when searchbox is opened
         * SearchBox.Hide - when searchbox is hidden
 */
 
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import recentDocuments = require("models/database/documents/recentDocuments");
-import getDocumentsMetadataByIDPrefixCommand = require("commands/database/documents/getDocumentsMetadataByIDPrefixCommand");
-import appUrl = require("common/appUrl");
-import router = require("plugins/router");
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
+import recentDocuments from "models/database/documents/recentDocuments";
+import getDocumentsMetadataByIDPrefixCommand from "commands/database/documents/getDocumentsMetadataByIDPrefixCommand";
+import appUrl from "common/appUrl";
+import router from "plugins/router";
 
 class searchBox {
 

@@ -1,8 +1,8 @@
-import app = require("durandal/app");
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import notificationCenter = require("common/notifications/notificationCenter");
-import recentError = require("common/notifications/models/recentError");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
+import app from "durandal/app";
+import abstractNotification from "common/notifications/models/abstractNotification";
+import notificationCenter from "common/notifications/notificationCenter";
+import recentError from "common/notifications/models/recentError";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
 
 class recentErrorDetails extends dialogViewModelBase {
 

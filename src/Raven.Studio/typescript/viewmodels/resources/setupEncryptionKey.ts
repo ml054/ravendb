@@ -1,8 +1,8 @@
-import generateSecretCommand = require("commands/database/secrets/generateSecretCommand");
-import distributeSecretCommand = require("commands/database/secrets/distributeSecretCommand");
-import copyToClipboard = require("common/copyToClipboard");
-import fileDownloader = require("common/fileDownloader");
-import moment = require("moment");
+import generateSecretCommand from "commands/database/secrets/generateSecretCommand";
+import distributeSecretCommand from "commands/database/secrets/distributeSecretCommand";
+import copyToClipboard from "common/copyToClipboard";
+import fileDownloader from "common/fileDownloader";
+import moment from "moment";
 import { QRCode } from "qrcodejs";
 
 abstract class setupEncryptionKey {

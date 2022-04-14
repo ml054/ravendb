@@ -1,6 +1,6 @@
-import commandBase = require("commands/commandBase");
-import database = require("models/resources/database");
-import endpoints = require("endpoints");
+import commandBase from "commands/commandBase";
+import database from "models/resources/database";
+import endpoints from "endpoints";
 
 class getIndexesDefinitionsCommand extends commandBase {
     constructor(private db: database, private skip = 0, private take = 256) {

@@ -1,13 +1,13 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import appUrl = require("common/appUrl");
-import router = require("plugins/router");
-import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
-import customAnalyzer = require("models/database/settings/customAnalyzer");
-import saveCustomAnalyzerCommand = require("commands/database/settings/saveCustomAnalyzerCommand");
-import getCustomAnalyzersCommand = require("commands/database/settings/getCustomAnalyzersCommand");
-import messagePublisher = require("common/messagePublisher");
-import fileImporter = require("common/fileImporter");
-import viewHelpers = require("common/helpers/view/viewHelpers");
+import viewModelBase from "viewmodels/viewModelBase";
+import appUrl from "common/appUrl";
+import router from "plugins/router";
+import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
+import customAnalyzer from "models/database/settings/customAnalyzer";
+import saveCustomAnalyzerCommand from "commands/database/settings/saveCustomAnalyzerCommand";
+import getCustomAnalyzersCommand from "commands/database/settings/getCustomAnalyzersCommand";
+import messagePublisher from "common/messagePublisher";
+import fileImporter from "common/fileImporter";
+import viewHelpers from "common/helpers/view/viewHelpers";
 
 class editCustomAnalyzer extends viewModelBase {
 

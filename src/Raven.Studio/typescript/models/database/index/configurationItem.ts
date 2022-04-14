@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import jsonUtil = require("common/jsonUtil");
-import configuration = require("configuration");
+import jsonUtil from "common/jsonUtil";
+import configuration from "configuration";
 
 class configurationItem {
 

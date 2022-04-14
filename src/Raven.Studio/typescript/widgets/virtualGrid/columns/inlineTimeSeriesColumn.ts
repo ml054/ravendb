@@ -1,7 +1,7 @@
 ﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import timeSeriesColumn = require("widgets/virtualGrid/columns/timeSeriesColumn");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import document = require("models/database/documents/document");
+import timeSeriesColumn from "widgets/virtualGrid/columns/timeSeriesColumn";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import document from "models/database/documents/document";
 
 /**
  * Virtual grid column that renders inline time series - see RavenDB-14431

@@ -1,8 +1,8 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import getSystemStorageReportCommand = require("commands/resources/getSystemStorageReportCommand");
-import generalUtils = require("common/generalUtils");
-import storageReportItem = require("models/database/status/storageReportItem");
-import d3 = require("d3");
+import viewModelBase from "viewmodels/viewModelBase";
+import getSystemStorageReportCommand from "commands/resources/getSystemStorageReportCommand";
+import generalUtils from "common/generalUtils";
+import storageReportItem from "models/database/status/storageReportItem";
+import d3 from "d3";
 
 type positionAndSizes = {
     dx: number,

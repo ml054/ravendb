@@ -1,4 +1,4 @@
-﻿const Menu = {
+const Menu = {
     LevelChanged: 'MainMenu.LevelChanged'
 };
 

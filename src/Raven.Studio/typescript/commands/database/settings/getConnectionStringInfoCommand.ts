@@ -1,6 +1,6 @@
-import commandBase = require("commands/commandBase");
-import database = require("models/resources/database");
-import endpoints = require("endpoints");
+import commandBase from "commands/commandBase";
+import database from "models/resources/database";
+import endpoints from "endpoints";
 
 class getConnectionStringInfoCommand extends commandBase {
     private constructor(private db: database, private type: Raven.Client.Documents.Operations.ConnectionStrings.ConnectionStringType, private connectionStringName: string) {

@@ -1,8 +1,8 @@
 /// <reference path="../../../../../typings/tsd.d.ts" />
 
-import registration = require("viewmodels/shell/registration");
-import license = require("models/auth/licenseModel");
-import moment = require("moment");
+import registration from "viewmodels/shell/registration";
+import license from "models/auth/licenseModel";
+import moment from "moment";
 
 class licenseAgpl  {
     

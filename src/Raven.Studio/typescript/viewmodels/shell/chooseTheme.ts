@@ -1,4 +1,4 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
 
 class chooseTheme extends dialogViewModelBase {
 

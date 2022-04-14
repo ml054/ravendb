@@ -1,4 +1,4 @@
-import confirmViewModelBase = require("viewmodels/confirmViewModelBase");
+import confirmViewModelBase from "viewmodels/confirmViewModelBase";
 import { highlight, languages } from "prismjs";
 
 class saveDatabaseSettingsConfirm extends confirmViewModelBase<confirmDialogResult> {

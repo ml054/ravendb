@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
 
-import jsonUtil = require("common/jsonUtil");
+import jsonUtil from "common/jsonUtil";
 
 interface globalStudioConfigurationOptions extends Raven.Client.ServerWide.Operations.Configuration.ServerWideStudioConfiguration {
     SendUsageStats: boolean;

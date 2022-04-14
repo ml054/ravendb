@@ -1,4 +1,4 @@
-﻿interface compressionLevelOption {
+interface compressionLevelOption {
     name: string;
     fullName: System.IO.Compression.CompressionLevel;
 }

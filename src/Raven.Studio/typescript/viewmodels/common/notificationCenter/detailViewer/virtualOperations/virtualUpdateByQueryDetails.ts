@@ -1,15 +1,15 @@
-import app = require("durandal/app");
+import app from "durandal/app";
 
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import actionColumn = require("widgets/virtualGrid/columns/actionColumn");
-import notificationCenter = require("common/notifications/notificationCenter");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import generalUtils = require("common/generalUtils");
-import virtualUpdateByQuery = require("common/notifications/models/virtualUpdateByQuery");
-import moment = require("moment");
+import abstractNotification from "common/notifications/models/abstractNotification";
+import actionColumn from "widgets/virtualGrid/columns/actionColumn";
+import notificationCenter from "common/notifications/notificationCenter";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import generalUtils from "common/generalUtils";
+import virtualUpdateByQuery from "common/notifications/models/virtualUpdateByQuery";
+import moment from "moment";
 
 class virtualUpdateByQueryDetails extends dialogViewModelBase {
 

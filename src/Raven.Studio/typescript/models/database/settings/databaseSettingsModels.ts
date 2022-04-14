@@ -1,8 +1,8 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import jsonUtil = require("common/jsonUtil");
-import getFolderPathOptionsCommand = require("commands/resources/getFolderPathOptionsCommand");
-import genUtils = require("common/generalUtils");
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import jsonUtil from "common/jsonUtil";
+import getFolderPathOptionsCommand from "commands/resources/getFolderPathOptionsCommand";
+import genUtils from "common/generalUtils";
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
 import { shardingTodo } from "common/developmentHelper";
 
 type configurationOrigin = "Default" | "Server" | "Database";

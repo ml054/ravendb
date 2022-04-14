@@ -1,10 +1,10 @@
-import app = require("durandal/app");
-import document = require("models/database/documents/document");
-import documentMetadata = require("models/database/documents/documentMetadata");
-import showDataDialog = require("viewmodels/common/showDataDialog");
-import database = require("models/resources/database");
-import viewHelpers = require("common/helpers/view/viewHelpers");
-import getDocumentWithMetadataCommand = require("commands/database/documents/getDocumentWithMetadataCommand");
+import app from "durandal/app";
+import document from "models/database/documents/document";
+import documentMetadata from "models/database/documents/documentMetadata";
+import showDataDialog from "viewmodels/common/showDataDialog";
+import database from "models/resources/database";
+import viewHelpers from "common/helpers/view/viewHelpers";
+import getDocumentWithMetadataCommand from "commands/database/documents/getDocumentWithMetadataCommand";
 
 class documentPreviewer {
     static preview(documentId: KnockoutObservable<string>, db: KnockoutObservable<database>, validationGroup: KnockoutValidationGroup, spinner?: KnockoutObservable<boolean>){

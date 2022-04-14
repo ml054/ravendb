@@ -1,9 +1,9 @@
-import appUrl = require("common/appUrl");
-import database = require("models/resources/database");
-import eventsCollector = require("common/eventsCollector");
-import messagePublisher = require("common/messagePublisher");
-import getRefreshConfigurationCommand = require("commands/database/documents/getRefreshConfigurationCommand");
-import saveRefreshConfigurationCommand = require("commands/database/documents/saveRefreshConfigurationCommand");
+import appUrl from "common/appUrl";
+import database from "models/resources/database";
+import eventsCollector from "common/eventsCollector";
+import messagePublisher from "common/messagePublisher";
+import getRefreshConfigurationCommand from "commands/database/documents/getRefreshConfigurationCommand";
+import saveRefreshConfigurationCommand from "commands/database/documents/saveRefreshConfigurationCommand";
 import { highlight, languages } from "prismjs";
 import shardViewModelBase from "viewmodels/shardViewModelBase";
 

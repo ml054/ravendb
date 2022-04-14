@@ -1,11 +1,11 @@
-import appUrl = require("common/appUrl");
-import viewModelBase = require("viewmodels/viewModelBase");
-import analyzerListItemModel = require("models/database/settings/analyzerListItemModel");
-import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
-import getServerWideCustomAnalyzersCommand = require("commands/serverWide/analyzers/getServerWideCustomAnalyzersCommand");
-import router = require("plugins/router");
-import generalUtils = require("common/generalUtils");
-import deleteServerWideCustomAnalyzerCommand = require("commands/serverWide/analyzers/deleteServerWideCustomAnalyzerCommand");
+import appUrl from "common/appUrl";
+import viewModelBase from "viewmodels/viewModelBase";
+import analyzerListItemModel from "models/database/settings/analyzerListItemModel";
+import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
+import getServerWideCustomAnalyzersCommand from "commands/serverWide/analyzers/getServerWideCustomAnalyzersCommand";
+import router from "plugins/router";
+import generalUtils from "common/generalUtils";
+import deleteServerWideCustomAnalyzerCommand from "commands/serverWide/analyzers/deleteServerWideCustomAnalyzerCommand";
 
 class serverWideCustomAnalyzers extends viewModelBase {
 

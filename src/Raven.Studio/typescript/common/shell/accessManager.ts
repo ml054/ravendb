@@ -1,5 +1,5 @@
 ﻿/// <reference path="../../../typings/tsd.d.ts"/>
-import database = require("models/resources/database");
+import database from "models/resources/database";
 
 class accessManager {
 
@@ -207,4 +207,4 @@ class accessManager {
     };
 }
 
-export = accessManager;
+export default accessManager;

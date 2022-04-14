@@ -1,11 +1,11 @@
-import setupStep = require("viewmodels/wizard/setupStep");
-import router = require("plugins/router");
-import nodeInfo = require("models/wizard/nodeInfo");
-import serverSetup = require("models/wizard/serverSetup");
-import popoverUtils = require("common/popoverUtils");
-import ipEntry = require("models/wizard/ipEntry");
-import moment = require("moment");
-import studioConfigurationDatabaseModel = require("models/database/settings/studioConfigurationDatabaseModel");
+import setupStep from "viewmodels/wizard/setupStep";
+import router from "plugins/router";
+import nodeInfo from "models/wizard/nodeInfo";
+import serverSetup from "models/wizard/serverSetup";
+import popoverUtils from "common/popoverUtils";
+import ipEntry from "models/wizard/ipEntry";
+import moment from "moment";
+import studioConfigurationDatabaseModel from "models/database/settings/studioConfigurationDatabaseModel";
 
 class nodes extends setupStep {
 

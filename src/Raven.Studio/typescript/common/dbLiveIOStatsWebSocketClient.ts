@@ -1,7 +1,7 @@
 /// <reference path="../../typings/tsd.d.ts" />
-import database = require("models/resources/database");
-import endpoints = require("endpoints");
-import liveIOStatsWebSocketClient = require("common/liveIOStatsWebSocketClient");
+import database from "models/resources/database";
+import endpoints from "endpoints";
+import liveIOStatsWebSocketClient from "common/liveIOStatsWebSocketClient";
 
 class dbLiveIOStatsWebSocketClient extends liveIOStatsWebSocketClient {
 

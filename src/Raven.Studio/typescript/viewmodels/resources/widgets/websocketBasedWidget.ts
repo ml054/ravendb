@@ -1,5 +1,5 @@
-import widget = require("viewmodels/resources/widgets/widget");
-import clusterDashboardWebSocketClient = require("common/clusterDashboardWebSocketClient");
+import widget from "viewmodels/resources/widgets/widget";
+import clusterDashboardWebSocketClient from "common/clusterDashboardWebSocketClient";
 
 abstract class websocketBasedWidget<TData, TConfig = unknown, TState = unknown> extends widget<TConfig, TState> {
     

@@ -1,5 +1,5 @@
-﻿import backupSettings = require("models/database/tasks/periodicBackup/backupSettings");
-import jsonUtil = require("common/jsonUtil");
+import backupSettings from "models/database/tasks/periodicBackup/backupSettings";
+import jsonUtil from "common/jsonUtil";
 
 abstract class amazonSettings extends backupSettings {
     awsAccessKey = ko.observable<string>();

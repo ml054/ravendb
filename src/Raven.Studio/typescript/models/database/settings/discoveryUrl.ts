@@ -1,5 +1,5 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import jsonUtil = require("common/jsonUtil");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import jsonUtil from "common/jsonUtil";
 
 class discoveryUrl {
     discoveryUrlName = ko.observable<string>();

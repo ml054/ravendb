@@ -1,8 +1,8 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
 
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import generalUtils = require("common/generalUtils");
-import moment = require("moment");
+import abstractNotification from "common/notifications/models/abstractNotification";
+import generalUtils from "common/generalUtils";
+import moment from "moment";
 
 class recentError extends abstractNotification {
 

@@ -1,9 +1,9 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import setupEncryptionKey = require("viewmodels/resources/setupEncryptionKey");
-import distributeSecretCommand = require("commands/database/secrets/distributeSecretCommand");
-import clusterTopologyManager = require("common/shell/clusterTopologyManager");
-import addNodeToDatabaseGroupCommand = require("commands/database/dbGroup/addNodeToDatabaseGroupCommand");
-import databaseGroupNode = require("models/resources/info/databaseGroupNode");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import setupEncryptionKey from "viewmodels/resources/setupEncryptionKey";
+import distributeSecretCommand from "commands/database/secrets/distributeSecretCommand";
+import clusterTopologyManager from "common/shell/clusterTopologyManager";
+import addNodeToDatabaseGroupCommand from "commands/database/dbGroup/addNodeToDatabaseGroupCommand";
+import databaseGroupNode from "models/resources/info/databaseGroupNode";
 
 class addNewNodeToDatabaseGroup extends dialogViewModelBase {
 

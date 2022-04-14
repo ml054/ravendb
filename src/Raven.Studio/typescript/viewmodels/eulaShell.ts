@@ -1,18 +1,18 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import router = require("plugins/router");
-import sys = require("durandal/system");
-import eulaRoutes = require("common/eula/routes");
-import getClientBuildVersionCommand = require("commands/database/studio/getClientBuildVersionCommand");
-import getServerBuildVersionCommand = require("commands/resources/getServerBuildVersionCommand");
-import messagePublisher = require("common/messagePublisher");
-import extensions = require("common/extensions");
-import viewModelBase = require("viewmodels/viewModelBase");
-import autoCompleteBindingHandler = require("common/bindingHelpers/autoCompleteBindingHandler");
-import requestExecution = require("common/notifications/requestExecution");
-import protractedCommandsDetector = require("common/notifications/protractedCommandsDetector");
-import buildInfo = require("models/resources/buildInfo");
-import constants = require("common/constants/constants");
+import router from "plugins/router";
+import sys from "durandal/system";
+import eulaRoutes from "common/eula/routes";
+import getClientBuildVersionCommand from "commands/database/studio/getClientBuildVersionCommand";
+import getServerBuildVersionCommand from "commands/resources/getServerBuildVersionCommand";
+import messagePublisher from "common/messagePublisher";
+import extensions from "common/extensions";
+import viewModelBase from "viewmodels/viewModelBase";
+import autoCompleteBindingHandler from "common/bindingHelpers/autoCompleteBindingHandler";
+import requestExecution from "common/notifications/requestExecution";
+import protractedCommandsDetector from "common/notifications/protractedCommandsDetector";
+import buildInfo from "models/resources/buildInfo";
+import constants from "common/constants/constants";
 
 class eulaShell extends viewModelBase {
 

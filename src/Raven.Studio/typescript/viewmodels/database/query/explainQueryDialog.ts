@@ -1,8 +1,8 @@
-import appUrl = require("common/appUrl");
-import dialog = require("plugins/dialog");
-import database = require("models/resources/database");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import explainQueryCommand = require("commands/database/index/explainQueryCommand");
+import appUrl from "common/appUrl";
+import dialog from "plugins/dialog";
+import database from "models/resources/database";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import explainQueryCommand from "commands/database/index/explainQueryCommand";
 
 class explainQueryDialog extends dialogViewModelBase {
 

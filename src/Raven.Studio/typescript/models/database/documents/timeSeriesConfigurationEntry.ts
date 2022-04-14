@@ -1,7 +1,7 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import rawTimeSeriesPolicy = require("models/database/documents/rawTimeSeriesPolicy");
-import timeSeriesPolicy = require("models/database/documents/timeSeriesPolicy");
-import timeSeriesNamedValues = require("models/database/documents/timeSeriesNamedValues");
+import rawTimeSeriesPolicy from "models/database/documents/rawTimeSeriesPolicy";
+import timeSeriesPolicy from "models/database/documents/timeSeriesPolicy";
+import timeSeriesNamedValues from "models/database/documents/timeSeriesNamedValues";
 
 class timeSeriesConfigurationEntry {
 

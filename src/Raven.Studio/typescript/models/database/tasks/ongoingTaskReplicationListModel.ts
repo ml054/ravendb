@@ -1,8 +1,8 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import appUrl = require("common/appUrl");
-import ongoingTaskListModel = require("models/database/tasks/ongoingTaskListModel"); 
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import generalUtils = require("common/generalUtils");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import appUrl from "common/appUrl";
+import ongoingTaskListModel from "models/database/tasks/ongoingTaskListModel"; 
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
+import generalUtils from "common/generalUtils";
 
 class ongoingTaskReplicationListModel extends ongoingTaskListModel {
 

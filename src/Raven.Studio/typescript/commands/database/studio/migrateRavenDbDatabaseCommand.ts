@@ -1,7 +1,7 @@
-import commandBase = require("commands/commandBase");
-import database = require("models/resources/database");
-import migrateRavenDbDatabaseModel = require("models/database/tasks/migrateRavenDbDatabaseModel");
-import endpoints = require("endpoints");
+import commandBase from "commands/commandBase";
+import database from "models/resources/database";
+import migrateRavenDbDatabaseModel from "models/database/tasks/migrateRavenDbDatabaseModel";
+import endpoints from "endpoints";
 
 class migrateRavenDbDatabaseCommand extends commandBase {
 

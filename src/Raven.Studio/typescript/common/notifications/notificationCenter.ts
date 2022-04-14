@@ -1,55 +1,55 @@
-﻿import EVENTS = require("common/constants/events");
-import database = require("models/resources/database");
+﻿import EVENTS from "common/constants/events";
+import database from "models/resources/database";
 
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import viewHelpers = require("common/helpers/view/viewHelpers");
-import alert = require("common/notifications/models/alert");
-import performanceHint = require("common/notifications/models/performanceHint");
-import recentError = require("common/notifications/models/recentError");
-import attachmentUpload = require("common/notifications/models/attachmentUpload");
-import recentLicenseLimitError = require("common/notifications/models/recentLicenseLimitError");
-import operation = require("common/notifications/models/operation");
+import abstractNotification from "common/notifications/models/abstractNotification";
+import viewHelpers from "common/helpers/view/viewHelpers";
+import alert from "common/notifications/models/alert";
+import performanceHint from "common/notifications/models/performanceHint";
+import recentError from "common/notifications/models/recentError";
+import attachmentUpload from "common/notifications/models/attachmentUpload";
+import recentLicenseLimitError from "common/notifications/models/recentLicenseLimitError";
+import operation from "common/notifications/models/operation";
 
-import databaseNotificationCenterClient = require("common/databaseNotificationCenterClient");
-import serverNotificationCenterClient = require("common/serverNotificationCenterClient");
-import changeSubscription = require("common/changeSubscription");
-import notificationCenterOperationsWatch = require("common/notifications/notificationCenterOperationsWatch");
+import databaseNotificationCenterClient from "common/databaseNotificationCenterClient";
+import serverNotificationCenterClient from "common/serverNotificationCenterClient";
+import changeSubscription from "common/changeSubscription";
+import notificationCenterOperationsWatch from "common/notifications/notificationCenterOperationsWatch";
 
-import postponeNotificationCommand = require("commands/operations/postponeNotificationCommand");
-import dismissNotificationCommand = require("commands/operations/dismissNotificationCommand");
-import killOperationCommand = require("commands/operations/killOperationCommand");
-import collectionsTracker = require("common/helpers/database/collectionsTracker");
+import postponeNotificationCommand from "commands/operations/postponeNotificationCommand";
+import dismissNotificationCommand from "commands/operations/dismissNotificationCommand";
+import killOperationCommand from "commands/operations/killOperationCommand";
+import collectionsTracker from "common/helpers/database/collectionsTracker";
 
-import smugglerDatabaseDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/smugglerDatabaseDetails");
-import sqlMigrationDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/sqlMigrationDetails");
-import patchDocumentsDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/patchDocumentsDetails");
-import virtualBulkInsertDetails = require("viewmodels/common/notificationCenter/detailViewer/virtualOperations/virtualBulkInsertDetails");
-import virtualUpdateByQueryDetails = require("viewmodels/common/notificationCenter/detailViewer/virtualOperations/virtualUpdateByQueryDetails");
-import virtualDeleteByQueryDetails = require("viewmodels/common/notificationCenter/detailViewer/virtualOperations/virtualDeleteByQueryDetails");
-import bulkInsertDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/bulkInsertDetails");
-import revertRevisionsDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/revertRevisionsDetails");
-import enforceRevisionsConfigurationDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/enforceRevisionsConfigurationDetails");
-import replayTransactionCommandsDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/replayTransactionCommandsDetails");
-import deleteDocumentsDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/deleteDocumentsDetails");
-import generateClientCertificateDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/generateClientCertificateDetails");
-import compactDatabaseDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/compactDatabaseDetails");
-import indexingDetails = require("viewmodels/common/notificationCenter/detailViewer/performanceHint/indexingDetails");
-import slowSqlDetails = require("viewmodels/common/notificationCenter/detailViewer/performanceHint/slowSqlDetails");
-import indexingReferencesDetails = require("viewmodels/common/notificationCenter/detailViewer/performanceHint/indexingReferencesDetails");
-import slowWriteDetails = require("viewmodels/common/notificationCenter/detailViewer/performanceHint/slowWriteDetails");
-import pagingDetails = require("viewmodels/common/notificationCenter/detailViewer/performanceHint/pagingDetails");
-import hugeDocumentsDetails = require("viewmodels/common/notificationCenter/detailViewer/performanceHint/hugeDocumentsDetails");
-import newVersionAvailableDetails = require("viewmodels/common/notificationCenter/detailViewer/alerts/newVersionAvailableDetails");
-import etlTransformOrLoadErrorDetails = require("viewmodels/common/notificationCenter/detailViewer/alerts/etlTransformOrLoadErrorDetails");
-import genericAlertDetails = require("viewmodels/common/notificationCenter/detailViewer/alerts/genericAlertDetails");
-import recentErrorDetails = require("viewmodels/common/notificationCenter/detailViewer/recentErrorDetails");
-import notificationCenterSettings = require("common/notifications/notificationCenterSettings");
-import licenseLimitDetails = require("viewmodels/common/notificationCenter/detailViewer/licenseLimitDetails");
-import requestLatencyDetails = require("viewmodels/common/notificationCenter/detailViewer/performanceHint/requestLatencyDetails");
-import transactionCommandsDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/transactionCommandsDetails");
-import dumpRawIndexDataDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/dumpRawIndexDataDetails");
+import smugglerDatabaseDetails from "viewmodels/common/notificationCenter/detailViewer/operations/smugglerDatabaseDetails";
+import sqlMigrationDetails from "viewmodels/common/notificationCenter/detailViewer/operations/sqlMigrationDetails";
+import patchDocumentsDetails from "viewmodels/common/notificationCenter/detailViewer/operations/patchDocumentsDetails";
+import virtualBulkInsertDetails from "viewmodels/common/notificationCenter/detailViewer/virtualOperations/virtualBulkInsertDetails";
+import virtualUpdateByQueryDetails from "viewmodels/common/notificationCenter/detailViewer/virtualOperations/virtualUpdateByQueryDetails";
+import virtualDeleteByQueryDetails from "viewmodels/common/notificationCenter/detailViewer/virtualOperations/virtualDeleteByQueryDetails";
+import bulkInsertDetails from "viewmodels/common/notificationCenter/detailViewer/operations/bulkInsertDetails";
+import revertRevisionsDetails from "viewmodels/common/notificationCenter/detailViewer/operations/revertRevisionsDetails";
+import enforceRevisionsConfigurationDetails from "viewmodels/common/notificationCenter/detailViewer/operations/enforceRevisionsConfigurationDetails";
+import replayTransactionCommandsDetails from "viewmodels/common/notificationCenter/detailViewer/operations/replayTransactionCommandsDetails";
+import deleteDocumentsDetails from "viewmodels/common/notificationCenter/detailViewer/operations/deleteDocumentsDetails";
+import generateClientCertificateDetails from "viewmodels/common/notificationCenter/detailViewer/operations/generateClientCertificateDetails";
+import compactDatabaseDetails from "viewmodels/common/notificationCenter/detailViewer/operations/compactDatabaseDetails";
+import indexingDetails from "viewmodels/common/notificationCenter/detailViewer/performanceHint/indexingDetails";
+import slowSqlDetails from "viewmodels/common/notificationCenter/detailViewer/performanceHint/slowSqlDetails";
+import indexingReferencesDetails from "viewmodels/common/notificationCenter/detailViewer/performanceHint/indexingReferencesDetails";
+import slowWriteDetails from "viewmodels/common/notificationCenter/detailViewer/performanceHint/slowWriteDetails";
+import pagingDetails from "viewmodels/common/notificationCenter/detailViewer/performanceHint/pagingDetails";
+import hugeDocumentsDetails from "viewmodels/common/notificationCenter/detailViewer/performanceHint/hugeDocumentsDetails";
+import newVersionAvailableDetails from "viewmodels/common/notificationCenter/detailViewer/alerts/newVersionAvailableDetails";
+import etlTransformOrLoadErrorDetails from "viewmodels/common/notificationCenter/detailViewer/alerts/etlTransformOrLoadErrorDetails";
+import genericAlertDetails from "viewmodels/common/notificationCenter/detailViewer/alerts/genericAlertDetails";
+import recentErrorDetails from "viewmodels/common/notificationCenter/detailViewer/recentErrorDetails";
+import notificationCenterSettings from "common/notifications/notificationCenterSettings";
+import licenseLimitDetails from "viewmodels/common/notificationCenter/detailViewer/licenseLimitDetails";
+import requestLatencyDetails from "viewmodels/common/notificationCenter/detailViewer/performanceHint/requestLatencyDetails";
+import transactionCommandsDetails from "viewmodels/common/notificationCenter/detailViewer/operations/transactionCommandsDetails";
+import dumpRawIndexDataDetails from "viewmodels/common/notificationCenter/detailViewer/operations/dumpRawIndexDataDetails";
 
-import studioSettings = require("common/settings/studioSettings");
+import studioSettings from "common/settings/studioSettings";
 
 interface detailsProvider {
     supportsDetailsFor(notification: abstractNotification): boolean;
@@ -113,8 +113,6 @@ class notificationCenter {
     constructor() {
         this.initializeObservables();
 
-        ko.postbox.subscribe(EVENTS.NotificationCenter.RecentError, (error: recentError) => this.onRecentError(error));
-        ko.postbox.subscribe(EVENTS.NotificationCenter.OpenNotification, (error: recentError) => this.openDetails(error));
 
         _.bindAll(this, "dismiss", "postpone", "killOperation", "openDetails", "killAttachmentUpload");
     }

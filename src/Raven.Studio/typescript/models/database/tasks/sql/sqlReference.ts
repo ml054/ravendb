@@ -1,8 +1,8 @@
-﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
+/// <reference path="../../../../../typings/tsd.d.ts"/>
 
-import abstractSqlTable = require("models/database/tasks/sql/abstractSqlTable");
-import innerSqlTable = require("models/database/tasks/sql/innerSqlTable");
-import rootSqlTable = require("models/database/tasks/sql/rootSqlTable");
+import abstractSqlTable from "models/database/tasks/sql/abstractSqlTable";
+import innerSqlTable from "models/database/tasks/sql/innerSqlTable";
+import rootSqlTable from "models/database/tasks/sql/rootSqlTable";
 
 class sqlReference {
     

@@ -1,13 +1,13 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import app = require("durandal/app");
-import dialog = require("plugins/dialog");
-import licenseActivateCommand = require("commands/licensing/licenseActivateCommand");
-import moment = require("moment");
-import license = require("models/auth/licenseModel");
-import messagePublisher = require("common/messagePublisher");
-import forceLicenseUpdateCommand = require("commands/licensing/forceLicenseUpdateCommand");
-import renewLicenseCommand = require("commands/licensing/renewLicenseCommand");
-import getServerCertificateSetupModeCommand = require("commands/auth/getServerCertificateSetupModeCommand");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import app from "durandal/app";
+import dialog from "plugins/dialog";
+import licenseActivateCommand from "commands/licensing/licenseActivateCommand";
+import moment from "moment";
+import license from "models/auth/licenseModel";
+import messagePublisher from "common/messagePublisher";
+import forceLicenseUpdateCommand from "commands/licensing/forceLicenseUpdateCommand";
+import renewLicenseCommand from "commands/licensing/renewLicenseCommand";
+import getServerCertificateSetupModeCommand from "commands/auth/getServerCertificateSetupModeCommand";
 
 class licenseKeyModel {
 

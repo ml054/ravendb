@@ -1,5 +1,5 @@
-import generalUtils = require("common/generalUtils");
-import historyAwareNodeStats = require("models/resources/widgets/historyAwareNodeStats");
+import generalUtils from "common/generalUtils";
+import historyAwareNodeStats from "models/resources/widgets/historyAwareNodeStats";
 
 class serverTraffic extends historyAwareNodeStats<Raven.Server.Dashboard.Cluster.Notifications.TrafficWatchPayload> {
 

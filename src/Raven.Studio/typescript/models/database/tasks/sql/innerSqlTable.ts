@@ -1,7 +1,7 @@
-﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
+/// <reference path="../../../../../typings/tsd.d.ts"/>
 
-import abstractSqlTable = require("models/database/tasks/sql/abstractSqlTable");
-import sqlReference = require("models/database/tasks/sql/sqlReference");
+import abstractSqlTable from "models/database/tasks/sql/abstractSqlTable";
+import sqlReference from "models/database/tasks/sql/sqlReference";
 
 class innerSqlTable extends abstractSqlTable {
     parentReference: sqlReference;

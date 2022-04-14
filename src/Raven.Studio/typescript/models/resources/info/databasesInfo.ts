@@ -1,7 +1,7 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
 
-import databaseInfo = require("models/resources/info/databaseInfo");
-import generalUtils = require("common/generalUtils");
+import databaseInfo from "models/resources/info/databaseInfo";
+import generalUtils from "common/generalUtils";
 
 class databasesInfo {
 

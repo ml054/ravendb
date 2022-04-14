@@ -1,11 +1,11 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import database = require("models/resources/database");
-import dialog = require("plugins/dialog");
-import deleteTimeSeriesCommand = require("commands/database/documents/timeSeries/deleteTimeSeriesCommand");
-import messagePublisher = require("common/messagePublisher");
-import datePickerBindingHandler = require("common/bindingHelpers/datePickerBindingHandler");
-import generalUtils = require("common/generalUtils");
-import moment = require("moment");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import database from "models/resources/database";
+import dialog from "plugins/dialog";
+import deleteTimeSeriesCommand from "commands/database/documents/timeSeries/deleteTimeSeriesCommand";
+import messagePublisher from "common/messagePublisher";
+import datePickerBindingHandler from "common/bindingHelpers/datePickerBindingHandler";
+import generalUtils from "common/generalUtils";
+import moment from "moment";
 
 class deleteTimeSeries extends dialogViewModelBase {
 

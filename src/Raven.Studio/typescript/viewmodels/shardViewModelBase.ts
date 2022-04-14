@@ -1,4 +1,4 @@
-import viewModelBase = require("viewmodels/viewModelBase");
+import viewModelBase from "viewmodels/viewModelBase";
 import database from "models/resources/database";
 import shard from "models/resources/shard";
 import { shardingTodo } from "common/developmentHelper";

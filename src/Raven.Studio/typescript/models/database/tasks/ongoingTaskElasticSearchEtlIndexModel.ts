@@ -1,7 +1,7 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import jsonUtil = require("common/jsonUtil");
-import generalUtils = require("common/generalUtils");
-import validateNameCommand = require("commands/resources/validateNameCommand");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import jsonUtil from "common/jsonUtil";
+import generalUtils from "common/generalUtils";
+import validateNameCommand from "commands/resources/validateNameCommand";
 
 class ongoingTaskElasticSearchEtlIndexModel {
     indexName = ko.observable<string>();

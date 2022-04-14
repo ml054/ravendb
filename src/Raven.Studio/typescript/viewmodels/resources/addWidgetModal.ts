@@ -1,4 +1,4 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
 
 interface widgetToAdd {
     name: string;

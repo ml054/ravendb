@@ -1,9 +1,9 @@
-import app = require("durandal/app");
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import notificationCenter = require("common/notifications/notificationCenter");
-import alert = require("common/notifications/models/alert");
-import abstractAlertDetails = require("viewmodels/common/notificationCenter/detailViewer/alerts/abstractAlertDetails");
-import moment = require("moment");
+import app from "durandal/app";
+import abstractNotification from "common/notifications/models/abstractNotification";
+import notificationCenter from "common/notifications/notificationCenter";
+import alert from "common/notifications/models/alert";
+import abstractAlertDetails from "viewmodels/common/notificationCenter/detailViewer/alerts/abstractAlertDetails";
+import moment from "moment";
 
 class newVersionAvailableDetails extends abstractAlertDetails {
 

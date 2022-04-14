@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
+/// <reference path="../../../../typings/tsd.d.ts"/>
 
-import jsonUtil = require("common/jsonUtil");
+import jsonUtil from "common/jsonUtil";
 
 class ongoingTaskSqlEtlTableModel {
     tableName = ko.observable<string>();

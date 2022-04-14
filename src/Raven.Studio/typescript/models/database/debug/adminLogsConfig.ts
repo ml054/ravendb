@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
 
-import adminLogsConfigEntry = require("models/database/debug/adminLogsConfigEntry");
+import adminLogsConfigEntry from "models/database/debug/adminLogsConfigEntry";
 
 class adminLogsConfig {
     entries = ko.observableArray<adminLogsConfigEntry>([]);

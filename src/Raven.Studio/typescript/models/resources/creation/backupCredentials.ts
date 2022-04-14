@@ -1,11 +1,11 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import generalUtils = require("common/generalUtils");
-import amazonSettings = require("models/database/tasks/periodicBackup/amazonSettings");
-import s3Settings = require("viewmodels/database/tasks/destinations/s3Settings");
-import getRestorePointsCommand = require("commands/resources/getRestorePointsCommand");
-import getFolderPathOptionsCommand = require("commands/resources/getFolderPathOptionsCommand");
-import commandBase = require("commands/commandBase");
-import moment = require("moment");
+import generalUtils from "common/generalUtils";
+import amazonSettings from "models/database/tasks/periodicBackup/amazonSettings";
+import s3Settings from "viewmodels/database/tasks/destinations/s3Settings";
+import getRestorePointsCommand from "commands/resources/getRestorePointsCommand";
+import getFolderPathOptionsCommand from "commands/resources/getFolderPathOptionsCommand";
+import commandBase from "commands/commandBase";
+import moment from "moment";
 
 export abstract class restoreSettings {
     backupStorageType: restoreSource;

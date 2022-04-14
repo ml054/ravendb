@@ -1,8 +1,8 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
+/// <reference path="../../../../typings/tsd.d.ts"/>
 import appUrl from "common/appUrl";
-import router = require("plugins/router");
-import generalUtils = require("common/generalUtils");
-import ongoingTaskReplicationHubListModel = require("models/database/tasks/ongoingTaskReplicationHubListModel");
+import router from "plugins/router";
+import generalUtils from "common/generalUtils";
+import ongoingTaskReplicationHubListModel from "models/database/tasks/ongoingTaskReplicationHubListModel";
 
 class ongoingTaskReplicationHubDefinitionListModel {
     

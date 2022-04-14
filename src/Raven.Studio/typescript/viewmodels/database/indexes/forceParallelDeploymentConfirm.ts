@@ -1,8 +1,8 @@
-import dialog = require("plugins/dialog");
-import database = require("models/resources/database");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import indexProgress = require("models/database/index/indexProgressOLD");
-import finishRollingCommand = require("commands/database/index/finishRollingCommand");
+import dialog from "plugins/dialog";
+import database from "models/resources/database";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import indexProgress from "models/database/index/indexProgressOLD";
+import finishRollingCommand from "commands/database/index/finishRollingCommand";
 
 class forceParallelDeploymentConfirm extends dialogViewModelBase {
     view = require("views/database/indexes/forceParallelDeploymentConfirm.html");

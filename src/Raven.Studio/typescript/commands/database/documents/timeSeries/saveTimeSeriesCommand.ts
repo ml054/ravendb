@@ -1,7 +1,7 @@
-import database = require("models/resources/database");
-import commandBase = require("commands/commandBase");
-import endpoints = require("endpoints");
-import timeSeriesEntryModel = require("models/database/timeSeries/timeSeriesEntryModel");
+import database from "models/resources/database";
+import commandBase from "commands/commandBase";
+import endpoints from "endpoints";
+import timeSeriesEntryModel from "models/database/timeSeries/timeSeriesEntryModel";
 
 class saveTimeSeriesCommand extends commandBase {
     constructor(private documentId: string, private name: string,

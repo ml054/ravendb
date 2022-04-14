@@ -1,8 +1,8 @@
 /// <reference path="../../typings/tsd.d.ts" />
-import abstractWebSocketClient = require("common/abstractWebSocketClient");
-import endpoints = require("endpoints");
-import adminLogsConfig = require("models/database/debug/adminLogsConfig");
-import appUrl = require("common/appUrl");
+import abstractWebSocketClient from "common/abstractWebSocketClient";
+import endpoints from "endpoints";
+import adminLogsConfig from "models/database/debug/adminLogsConfig";
+import appUrl from "common/appUrl";
 
 class adminLogsWebSocketClient extends abstractWebSocketClient<string> {
 

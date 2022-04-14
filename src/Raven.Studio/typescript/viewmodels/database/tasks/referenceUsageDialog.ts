@@ -1,6 +1,6 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import rootSqlTable = require("models/database/tasks/sql/rootSqlTable");
-import sqlReference = require("models/database/tasks/sql/sqlReference");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import rootSqlTable from "models/database/tasks/sql/rootSqlTable";
+import sqlReference from "models/database/tasks/sql/sqlReference";
 
 class referenceUsageDialog extends dialogViewModelBase {
 

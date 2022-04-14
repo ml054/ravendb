@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import moment = require("moment");
-import genUtils = require("common/generalUtils");
+import moment from "moment";
+import genUtils from "common/generalUtils";
 
 class patchDocument {
 

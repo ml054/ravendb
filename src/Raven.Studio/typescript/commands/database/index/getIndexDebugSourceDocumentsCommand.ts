@@ -1,6 +1,6 @@
-import commandBase = require("commands/commandBase");
-import database = require("models/resources/database");
-import endpoints = require("endpoints");
+import commandBase from "commands/commandBase";
+import database from "models/resources/database";
+import endpoints from "endpoints";
 
 class getIndexDebugSourceDocumentsCommand extends commandBase {
     constructor(private db: database, private indexName: string, private startsWith: string, private skip = 0, private take = 256) {

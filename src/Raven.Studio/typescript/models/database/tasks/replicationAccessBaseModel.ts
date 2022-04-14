@@ -1,7 +1,7 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import replicationCertificateModel = require("models/database/tasks/replicationCertificateModel");
-import prefixPathModel = require("models/database/tasks/prefixPathModel");
-import jsonUtil = require("common/jsonUtil");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import replicationCertificateModel from "models/database/tasks/replicationCertificateModel";
+import prefixPathModel from "models/database/tasks/prefixPathModel";
+import jsonUtil from "common/jsonUtil";
 
 class replicationAccessBaseModel {
     replicationAccessName = ko.observable<string>();

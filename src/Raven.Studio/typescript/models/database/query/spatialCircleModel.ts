@@ -1,4 +1,4 @@
-import genUtils = require("common/generalUtils");
+import genUtils from "common/generalUtils";
 
 class spatialCircleModel {
 

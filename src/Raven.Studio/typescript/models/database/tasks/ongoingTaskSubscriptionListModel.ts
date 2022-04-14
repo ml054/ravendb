@@ -1,12 +1,12 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import appUrl = require("common/appUrl");
-import generalUtils = require("common/generalUtils");
-import ongoingTaskListModel = require("models/database/tasks/ongoingTaskListModel");
-import ongoingTaskInfoCommand = require("commands/database/tasks/getOngoingTaskInfoCommand");
-import subscriptionConnectionDetailsCommand = require("commands/database/tasks/getSubscriptionConnectionDetailsCommand");
-import dropSubscriptionConnectionCommand = require("commands/database/tasks/dropSubscriptionConnectionCommand");
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import moment = require("moment");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import appUrl from "common/appUrl";
+import generalUtils from "common/generalUtils";
+import ongoingTaskListModel from "models/database/tasks/ongoingTaskListModel";
+import ongoingTaskInfoCommand from "commands/database/tasks/getOngoingTaskInfoCommand";
+import subscriptionConnectionDetailsCommand from "commands/database/tasks/getSubscriptionConnectionDetailsCommand";
+import dropSubscriptionConnectionCommand from "commands/database/tasks/dropSubscriptionConnectionCommand";
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
+import moment from "moment";
 
 type PerConnectionStats = {
     clientUri: string;

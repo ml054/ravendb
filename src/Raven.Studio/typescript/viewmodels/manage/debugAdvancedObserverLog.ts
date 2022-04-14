@@ -1,16 +1,16 @@
-import viewModelBase = require("viewmodels/viewModelBase");
+import viewModelBase from "viewmodels/viewModelBase";
 
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import generalUtils = require("common/generalUtils");
-import moment = require("moment");
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import generalUtils from "common/generalUtils";
+import moment from "moment";
 
-import getClusterObserverDecisionsCommand = require("commands/database/cluster/getClusterObserverDecisionsCommand");
-import toggleClusterObserverCommand = require("commands/database/cluster/toggleClusterObserverCommand");
-import eventsCollector = require("common/eventsCollector");
-import clusterTopologyManager = require("common/shell/clusterTopologyManager");
-import fileDownloader = require("common/fileDownloader");
+import getClusterObserverDecisionsCommand from "commands/database/cluster/getClusterObserverDecisionsCommand";
+import toggleClusterObserverCommand from "commands/database/cluster/toggleClusterObserverCommand";
+import eventsCollector from "common/eventsCollector";
+import clusterTopologyManager from "common/shell/clusterTopologyManager";
+import fileDownloader from "common/fileDownloader";
 
 class clusterObserverLog extends viewModelBase {
 

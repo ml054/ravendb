@@ -1,9 +1,9 @@
 ﻿/// <reference path="../../../typings/tsd.d.ts"/>
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import virtualGrid = require("widgets/virtualGrid/virtualGrid");
-import copyToClipboard = require("common/copyToClipboard");
-import generalUtils = require("common/generalUtils");
-import moment = require("moment");
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import virtualGrid from "widgets/virtualGrid/virtualGrid";
+import copyToClipboard from "common/copyToClipboard";
+import generalUtils from "common/generalUtils";
+import moment from "moment";
 
 
 class copyFeature implements columnPreviewFeature {

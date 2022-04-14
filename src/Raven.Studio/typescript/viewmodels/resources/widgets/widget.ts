@@ -1,8 +1,8 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
 
-import clusterDashboardWebSocketClient = require("common/clusterDashboardWebSocketClient");
-import clusterDashboard = require("viewmodels/resources/clusterDashboard");
-import generalUtils = require("common/generalUtils");
+import clusterDashboardWebSocketClient from "common/clusterDashboardWebSocketClient";
+import clusterDashboard from "viewmodels/resources/clusterDashboard";
+import generalUtils from "common/generalUtils";
 
 abstract class widget<TConfig = unknown, TState = unknown> {
     

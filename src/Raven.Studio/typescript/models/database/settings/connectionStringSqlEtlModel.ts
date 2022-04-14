@@ -1,9 +1,9 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import connectionStringModel = require("models/database/settings/connectionStringModel");
-import database = require("models/resources/database");
-import testSqlConnectionStringCommand = require("commands/database/cluster/testSqlConnectionStringCommand");
-import saveConnectionStringCommand = require("commands/database/settings/saveConnectionStringCommand");
-import jsonUtil = require("common/jsonUtil");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import connectionStringModel from "models/database/settings/connectionStringModel";
+import database from "models/resources/database";
+import testSqlConnectionStringCommand from "commands/database/cluster/testSqlConnectionStringCommand";
+import saveConnectionStringCommand from "commands/database/settings/saveConnectionStringCommand";
+import jsonUtil from "common/jsonUtil";
 
 class connectionStringSqlEtlModel extends connectionStringModel {
 

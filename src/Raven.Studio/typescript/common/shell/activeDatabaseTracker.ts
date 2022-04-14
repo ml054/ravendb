@@ -1,10 +1,11 @@
-﻿import EVENTS = require("common/constants/events");
-import database = require("models/resources/database");
-import databaseDisconnectedEventArgs = require("viewmodels/resources/databaseDisconnectedEventArgs");
-import router = require("plugins/router");
-import messagePublisher = require("common/messagePublisher");
-import databaseSettings = require("common/settings/databaseSettings");
-import studioSettings = require("common/settings/studioSettings");
+
+import EVENTS from "common/constants/events";
+import database from "models/resources/database";
+import databaseDisconnectedEventArgs from "viewmodels/resources/databaseDisconnectedEventArgs";
+import router from "plugins/router";
+import messagePublisher from "common/messagePublisher";
+import databaseSettings from "common/settings/databaseSettings";
+import studioSettings from "common/settings/studioSettings";
 
 class activeDatabaseTracker {
 
@@ -15,27 +16,7 @@ class activeDatabaseTracker {
     settings: KnockoutObservable<databaseSettings> = ko.observable<databaseSettings>();
 
     constructor() {
-        ko.postbox.subscribe(EVENTS.Database.Disconnect, (e: databaseDisconnectedEventArgs) => {
-            if (e.databaseName === this.database().name) {
-                this.database(null);
-            }
-
-            // display warning to user if another user deleted or disabled active database
-            // but don't do this on databases page
-            if (!this.onDatabasesPage()) {
-                if (e.cause === "DatabaseDeleted") {
-                    /* TODO
-                    messagePublisher.reportWarning("Database " + e.databaseName + " was deleted");
-                    router.navigate("#databases"); // don't use appUrl since it will create dependency cycle*/
-                } else if (e.cause === "DatabaseDisabled") {
-                    messagePublisher.reportWarning("Database " + e.databaseName + " was disabled");
-                    router.navigate("#databases"); // don't use appUrl since it will create dependency cycle
-                } else if (e.cause === "DatabaseIsNotRelevant") {
-                    messagePublisher.reportWarning("Database " + e.databaseName + " is not longer relevant on this node");
-                    router.navigate("#databases"); // don't use appUrl since it will create dependency cycle
-                }
-            }
-        });
+;
 
         studioSettings.default.init(this.settings);
     }

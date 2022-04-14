@@ -1,13 +1,13 @@
-import app = require("durandal/app");
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import notificationCenter = require("common/notifications/notificationCenter");
-import performanceHint = require("common/notifications/models/performanceHint");
-import abstractPerformanceHintDetails = require("viewmodels/common/notificationCenter/detailViewer/performanceHint/abstractPerformanceHintDetails");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import generalUtils = require("common/generalUtils");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import moment = require("moment");
+import app from "durandal/app";
+import abstractNotification from "common/notifications/models/abstractNotification";
+import notificationCenter from "common/notifications/notificationCenter";
+import performanceHint from "common/notifications/models/performanceHint";
+import abstractPerformanceHintDetails from "viewmodels/common/notificationCenter/detailViewer/performanceHint/abstractPerformanceHintDetails";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import generalUtils from "common/generalUtils";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import moment from "moment";
 
 class requestLatencyDetails extends abstractPerformanceHintDetails {
 

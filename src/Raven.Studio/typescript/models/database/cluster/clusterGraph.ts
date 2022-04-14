@@ -1,8 +1,8 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
 
-import d3 = require("d3");
-import clusterNode = require("models/database/cluster/clusterNode");
-import graphHelper = require("common/helpers/graph/graphHelper");
+import d3 from "d3";
+import clusterNode from "models/database/cluster/clusterNode";
+import graphHelper from "common/helpers/graph/graphHelper";
 
 interface clusterNodeWithLayout extends clusterNode {
     x: number;

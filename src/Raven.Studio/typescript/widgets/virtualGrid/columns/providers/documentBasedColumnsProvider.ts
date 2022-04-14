@@ -1,23 +1,23 @@
 ﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
 
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import checkedColumn = require("widgets/virtualGrid/columns/checkedColumn");
-import actionColumn = require("widgets/virtualGrid/columns/actionColumn");
-import customColumn = require("widgets/virtualGrid/columns/customColumn");
-import flagsColumn = require("widgets/virtualGrid/columns/flagsColumn");
-import hyperlinkColumn = require("widgets/virtualGrid/columns/hyperlinkColumn");
-import timeSeriesColumn = require("widgets/virtualGrid/columns/timeSeriesColumn");
-import inlineTimeSeriesColumn = require("widgets/virtualGrid/columns/inlineTimeSeriesColumn");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import appUrl = require("common/appUrl");
-import collectionsTracker = require("common/helpers/database/collectionsTracker");
-import database = require("models/resources/database");
-import document = require("models/database/documents/document");
-import virtualGridUtils = require("widgets/virtualGrid/virtualGridUtils");
-import app = require("durandal/app");
-import showDataDialog = require("viewmodels/common/showDataDialog");
-import generalUtils = require("common/generalUtils");
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import checkedColumn from "widgets/virtualGrid/columns/checkedColumn";
+import actionColumn from "widgets/virtualGrid/columns/actionColumn";
+import customColumn from "widgets/virtualGrid/columns/customColumn";
+import flagsColumn from "widgets/virtualGrid/columns/flagsColumn";
+import hyperlinkColumn from "widgets/virtualGrid/columns/hyperlinkColumn";
+import timeSeriesColumn from "widgets/virtualGrid/columns/timeSeriesColumn";
+import inlineTimeSeriesColumn from "widgets/virtualGrid/columns/inlineTimeSeriesColumn";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import appUrl from "common/appUrl";
+import collectionsTracker from "common/helpers/database/collectionsTracker";
+import database from "models/resources/database";
+import document from "models/database/documents/document";
+import virtualGridUtils from "widgets/virtualGrid/virtualGridUtils";
+import app from "durandal/app";
+import showDataDialog from "viewmodels/common/showDataDialog";
+import generalUtils from "common/generalUtils";
 
 type columnOptionsDto = {
     extraClass?: (item: document) => string;

@@ -1,6 +1,6 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import database = require("models/resources/database")
-import eventsCollector = require("common/eventsCollector");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import database from "models/resources/database"
+import eventsCollector from "common/eventsCollector";
 import CountersDetail = Raven.Client.Documents.Operations.Counters.CountersDetail;
 
 type setCounterDialogSaveAction = (newCounter: boolean, counterName: string, newValue: number,

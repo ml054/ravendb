@@ -1,16 +1,16 @@
 ﻿/// <reference path="../../../typings/tsd.d.ts"/>
 
-import virtualRow = require("widgets/virtualGrid/virtualRow");
-import itemFetch = require("widgets/virtualGrid/itemFetch");
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import sortableVirtualColumn = require("widgets/virtualGrid/columns/sortableVirtualColumn");
-import virtualGridConfig = require("widgets/virtualGrid/virtualGridConfig");
-import actionColumn = require("widgets/virtualGrid/columns/actionColumn");
-import hyperlinkColumn = require("widgets/virtualGrid/columns/hyperlinkColumn");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import virtualGridUtils = require("widgets/virtualGrid/virtualGridUtils");
-import virtualGridSelection = require("widgets/virtualGrid/virtualGridSelection");
-import shiftSelectionPreview = require("widgets/virtualGrid/shiftSelectionPreview");
+import virtualRow from "widgets/virtualGrid/virtualRow";
+import itemFetch from "widgets/virtualGrid/itemFetch";
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import sortableVirtualColumn from "widgets/virtualGrid/columns/sortableVirtualColumn";
+import virtualGridConfig from "widgets/virtualGrid/virtualGridConfig";
+import actionColumn from "widgets/virtualGrid/columns/actionColumn";
+import hyperlinkColumn from "widgets/virtualGrid/columns/hyperlinkColumn";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import virtualGridUtils from "widgets/virtualGrid/virtualGridUtils";
+import virtualGridSelection from "widgets/virtualGrid/virtualGridSelection";
+import shiftSelectionPreview from "widgets/virtualGrid/shiftSelectionPreview";
 
 class virtualGrid<T> {
     

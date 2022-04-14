@@ -1,7 +1,7 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import setupEncryptionKey = require("viewmodels/resources/setupEncryptionKey");
-import smugglerDatabaseRecord = require("models/database/tasks/smugglerDatabaseRecord");
-import genUtils = require("common/generalUtils");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import setupEncryptionKey from "viewmodels/resources/setupEncryptionKey";
+import smugglerDatabaseRecord from "models/database/tasks/smugglerDatabaseRecord";
+import genUtils from "common/generalUtils";
 
 class exportDatabaseModel {
     includeDatabaseRecord = ko.observable(true);

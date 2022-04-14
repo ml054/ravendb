@@ -1,6 +1,6 @@
-import commandBase = require("commands/commandBase");
-import database = require("models/resources/database");
-import endpoints = require("endpoints");
+import commandBase from "commands/commandBase";
+import database from "models/resources/database";
+import endpoints from "endpoints";
 
 class savePeriodicBackupConfigurationCommand extends commandBase {
     constructor(private db: database, private configuration: Raven.Client.Documents.Operations.Backups.PeriodicBackupConfiguration) {

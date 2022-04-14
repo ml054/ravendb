@@ -1,5 +1,5 @@
-import commandBase = require("commands/commandBase");
-import endpoints = require("endpoints");
+import commandBase from "commands/commandBase";
+import endpoints from "endpoints";
 
 class testPeriodicBackupCredentialsCommand extends commandBase {
     constructor(private type: Raven.Server.Documents.PeriodicBackup.PeriodicBackupConnectionType,

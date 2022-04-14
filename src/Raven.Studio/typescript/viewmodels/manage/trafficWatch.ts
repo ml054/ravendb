@@ -1,21 +1,21 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import moment = require("moment");
-import fileDownloader = require("common/fileDownloader");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import eventsCollector = require("common/eventsCollector");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import trafficWatchWebSocketClient = require("common/trafficWatchWebSocketClient");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import generalUtils = require("common/generalUtils");
-import awesomeMultiselect = require("common/awesomeMultiselect");
-import getCertificatesCommand = require("commands/auth/getCertificatesCommand");
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import recentQueriesStorage = require("common/storage/savedQueriesStorage");
-import queryCriteria = require("models/database/query/queryCriteria");
-import databasesManager = require("common/shell/databasesManager");
+import viewModelBase from "viewmodels/viewModelBase";
+import moment from "moment";
+import fileDownloader from "common/fileDownloader";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import eventsCollector from "common/eventsCollector";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import trafficWatchWebSocketClient from "common/trafficWatchWebSocketClient";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import generalUtils from "common/generalUtils";
+import awesomeMultiselect from "common/awesomeMultiselect";
+import getCertificatesCommand from "commands/auth/getCertificatesCommand";
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import recentQueriesStorage from "common/storage/savedQueriesStorage";
+import queryCriteria from "models/database/query/queryCriteria";
+import databasesManager from "common/shell/databasesManager";
 import TrafficWatchHttpChange = Raven.Client.Documents.Changes.TrafficWatchHttpChange;
 import trafficWatchQueriesDialog from "viewmodels/manage/trafficWatchQueriesDialog";
-import app = require("durandal/app");
+import app from "durandal/app";
 
 type trafficChangeType = Raven.Client.Documents.Changes.TrafficWatchChangeType | Raven.Client.ServerWide.Tcp.TcpConnectionHeaderMessage.OperationTypes;
 

@@ -1,13 +1,13 @@
-import router = require("plugins/router");
-import appUrl = require("common/appUrl");
-import viewModelBase = require("viewmodels/viewModelBase");
-import accessManager = require("common/shell/accessManager");
-import getStorageReportCommand = require("commands/database/debug/getStorageReportCommand");
-import getEnvironmentStorageReportCommand = require("commands/database/debug/getEnvironmentStorageReportCommand");
-import protractedCommandsDetector = require("common/notifications/protractedCommandsDetector");
-import generalUtils = require("common/generalUtils");
-import storageReportItem = require("models/database/status/storageReportItem");
-import d3 = require("d3");
+import router from "plugins/router";
+import appUrl from "common/appUrl";
+import viewModelBase from "viewmodels/viewModelBase";
+import accessManager from "common/shell/accessManager";
+import getStorageReportCommand from "commands/database/debug/getStorageReportCommand";
+import getEnvironmentStorageReportCommand from "commands/database/debug/getEnvironmentStorageReportCommand";
+import protractedCommandsDetector from "common/notifications/protractedCommandsDetector";
+import generalUtils from "common/generalUtils";
+import storageReportItem from "models/database/status/storageReportItem";
+import d3 from "d3";
 
 type positionAndSizes = {
     dx: number,

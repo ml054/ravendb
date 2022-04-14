@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
 
-import diff = require("diff");
+import diff from "diff";
 
 type gapItem = {
     firstLine: number;

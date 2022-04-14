@@ -1,5 +1,5 @@
-import composition = require("durandal/composition");
-import viewModelBase = require("viewmodels/viewModelBase");
+import composition from "durandal/composition";
+import viewModelBase from "viewmodels/viewModelBase";
 
 class helpBindingHandler {
 

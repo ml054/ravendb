@@ -1,6 +1,6 @@
-import commandBase = require("commands/commandBase");
-import database = require("models/resources/database");
-import endpoints = require("endpoints");
+import commandBase from "commands/commandBase";
+import database from "models/resources/database";
+import endpoints from "endpoints";
 
 class executeBulkDocsCommand extends commandBase {
     constructor(public docs: Partial<Raven.Server.Documents.Handlers.BatchRequestParser.CommandData>[], private db: database, private transactionMode: Raven.Client.Documents.Session.TransactionMode = "SingleNode") {

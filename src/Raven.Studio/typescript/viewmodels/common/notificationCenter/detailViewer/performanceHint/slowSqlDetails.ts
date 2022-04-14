@@ -1,14 +1,14 @@
-import app = require("durandal/app");
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import notificationCenter = require("common/notifications/notificationCenter");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import generalUtils = require("common/generalUtils");
-import actionColumn = require("widgets/virtualGrid/columns/actionColumn");
-import moment = require("moment");
-import performanceHint = require("common/notifications/models/performanceHint");
-import abstractPerformanceHintDetails = require("viewmodels/common/notificationCenter/detailViewer/performanceHint/abstractPerformanceHintDetails");
+import app from "durandal/app";
+import abstractNotification from "common/notifications/models/abstractNotification";
+import notificationCenter from "common/notifications/notificationCenter";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import generalUtils from "common/generalUtils";
+import actionColumn from "widgets/virtualGrid/columns/actionColumn";
+import moment from "moment";
+import performanceHint from "common/notifications/models/performanceHint";
+import abstractPerformanceHintDetails from "viewmodels/common/notificationCenter/detailViewer/performanceHint/abstractPerformanceHintDetails";
 
 class slowSqlDetails extends abstractPerformanceHintDetails {
 

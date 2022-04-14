@@ -1,8 +1,8 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import ongoingTaskEditModel = require("models/database/tasks/ongoingTaskEditModel");
-import replicationCertificateModel = require("models/database/tasks/replicationCertificateModel");
-import replicationAccessSinkModel = require("models/database/tasks/replicationAccessSinkModel");
-import prefixPathModel = require("models/database/tasks/prefixPathModel");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import ongoingTaskEditModel from "models/database/tasks/ongoingTaskEditModel";
+import replicationCertificateModel from "models/database/tasks/replicationCertificateModel";
+import replicationAccessSinkModel from "models/database/tasks/replicationAccessSinkModel";
+import prefixPathModel from "models/database/tasks/prefixPathModel";
 
 class ongoingTaskReplicationSinkEditModel extends ongoingTaskEditModel {
 

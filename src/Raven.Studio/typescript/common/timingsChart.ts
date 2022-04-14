@@ -1,6 +1,6 @@
 /// <reference path="../../typings/tsd.d.ts"/>
 
-import d3 = require("d3");
+import d3 from "d3";
 
 interface graphNode extends d3.layout.partition.Node {
     name: string;

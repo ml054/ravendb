@@ -1,8 +1,8 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import clientConfigurationModel = require("models/database/settings/clientConfigurationModel");
-import saveGlobalClientConfigurationCommand = require("commands/resources/saveGlobalClientConfigurationCommand");
-import getGlobalClientConfigurationCommand = require("commands/resources/getGlobalClientConfigurationCommand");
-import eventsCollector = require("common/eventsCollector");
+import viewModelBase from "viewmodels/viewModelBase";
+import clientConfigurationModel from "models/database/settings/clientConfigurationModel";
+import saveGlobalClientConfigurationCommand from "commands/resources/saveGlobalClientConfigurationCommand";
+import getGlobalClientConfigurationCommand from "commands/resources/getGlobalClientConfigurationCommand";
+import eventsCollector from "common/eventsCollector";
 
 class clientConfiguration extends viewModelBase {
 

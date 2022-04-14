@@ -1,8 +1,8 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import serverTime = require("common/helpers/database/serverTime");
-import timeHelpers = require("common/timeHelpers");
-import generalUtils = require("common/generalUtils");
-import moment = require("moment");
+import serverTime from "common/helpers/database/serverTime";
+import timeHelpers from "common/timeHelpers";
+import generalUtils from "common/generalUtils";
+import moment from "moment";
 
 
 

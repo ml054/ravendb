@@ -1,9 +1,9 @@
-import database = require("models/resources/database");
-import collection = require("models/database/documents/collection");
-import document = require("models/database/documents/document");
-import indexDefinition = require("models/database/index/indexDefinition");
-import getCollectionsStatsCommand = require("commands/database/documents/getCollectionsStatsCommand");
-import collectionsStats = require("models/database/documents/collectionsStats");
+import database from "models/resources/database";
+import collection from "models/database/documents/collection";
+import document from "models/database/documents/document";
+import indexDefinition from "models/database/index/indexDefinition";
+import getCollectionsStatsCommand from "commands/database/documents/getCollectionsStatsCommand";
+import collectionsStats from "models/database/documents/collectionsStats";
 
 class indexAceAutoCompleteProvider {
     constructor(private activeDatabase: database, private editedIndex: KnockoutObservable<indexDefinition>) {

@@ -1,6 +1,6 @@
-import dialog = require("plugins/dialog");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import database = require("models/resources/database");
+import dialog from "plugins/dialog";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import database from "models/resources/database";
 
 class deleteDocumentsMatchingQueryConfirm extends dialogViewModelBase {
 

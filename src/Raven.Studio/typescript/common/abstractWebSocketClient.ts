@@ -1,6 +1,6 @@
 /// <reference path="../../typings/tsd.d.ts" />
-import database = require("models/resources/database");
-import appUrl = require("common/appUrl");
+import database from "models/resources/database";
+import appUrl from "common/appUrl";
 
 abstract class abstractWebSocketClient<T> {
 

@@ -1,10 +1,10 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import databasesManager = require("common/shell/databasesManager");
-import replayTransactionsCommand = require("commands/database/debug/replayTransactionsCommand");
-import database = require("models/resources/database");
-import messagePublisher = require("common/messagePublisher");
-import getNextOperationId = require("commands/database/studio/getNextOperationId");
-import notificationCenter = require("common/notifications/notificationCenter");
+import viewModelBase from "viewmodels/viewModelBase";
+import databasesManager from "common/shell/databasesManager";
+import replayTransactionsCommand from "commands/database/debug/replayTransactionsCommand";
+import database from "models/resources/database";
+import messagePublisher from "common/messagePublisher";
+import getNextOperationId from "commands/database/studio/getNextOperationId";
+import notificationCenter from "common/notifications/notificationCenter";
 
 class debugAdvancedReplayTransactionCommands extends viewModelBase {
 

@@ -1,6 +1,6 @@
 import CpuUsagePayload = Raven.Server.Dashboard.Cluster.Notifications.CpuUsagePayload;
 
-import historyAwareNodeStats = require("models/resources/widgets/historyAwareNodeStats");
+import historyAwareNodeStats from "models/resources/widgets/historyAwareNodeStats";
 
 class cpuUsage extends historyAwareNodeStats<CpuUsagePayload> {
     

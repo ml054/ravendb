@@ -1,4 +1,4 @@
-﻿import messagePublisher = require("common/messagePublisher");
+import messagePublisher from "common/messagePublisher";
 
 class copyToClipboard {
     static copy(toCopy: string, successMessage?: string, container: Element = document.body) {

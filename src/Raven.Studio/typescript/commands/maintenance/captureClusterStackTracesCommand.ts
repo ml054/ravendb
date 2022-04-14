@@ -1,8 +1,8 @@
-import commandBase = require("commands/commandBase");
-import endpoints = require("endpoints");
+import commandBase from "commands/commandBase";
+import endpoints from "endpoints";
 
 import { getBinaryContent } from "jszip-utils";
-import jszip = require("jszip");
+import jszip from "jszip";
 
 class captureClusterStackTracesCommand extends commandBase {
 

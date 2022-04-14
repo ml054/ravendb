@@ -1,5 +1,5 @@
-﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
-import ongoingTaskListModel = require("models/database/tasks/ongoingTaskListModel");
+/// <reference path="../../../../../typings/tsd.d.ts"/>
+import ongoingTaskListModel from "models/database/tasks/ongoingTaskListModel";
 
 abstract class serverWideTaskListModel extends ongoingTaskListModel {
 

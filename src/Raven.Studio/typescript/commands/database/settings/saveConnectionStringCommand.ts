@@ -1,10 +1,10 @@
-import commandBase = require("commands/commandBase");
-import database = require("models/resources/database");
-import endpoints = require("endpoints");
-import connectionStringRavenEtlModel = require("models/database/settings/connectionStringRavenEtlModel");
-import connectionStringSqlEtlModel = require("models/database/settings/connectionStringSqlEtlModel");
-import connectionStringOlapEtlModel = require("models/database/settings/connectionStringOlapEtlModel");
-import connectionStringElasticSearchEtlModel = require("models/database/settings/connectionStringElasticSearchEtlModel");
+import commandBase from "commands/commandBase";
+import database from "models/resources/database";
+import endpoints from "endpoints";
+import connectionStringRavenEtlModel from "models/database/settings/connectionStringRavenEtlModel";
+import connectionStringSqlEtlModel from "models/database/settings/connectionStringSqlEtlModel";
+import connectionStringOlapEtlModel from "models/database/settings/connectionStringOlapEtlModel";
+import connectionStringElasticSearchEtlModel from "models/database/settings/connectionStringElasticSearchEtlModel";
 
 class saveConnectionStringCommand extends commandBase {
 

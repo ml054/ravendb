@@ -1,8 +1,8 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import collectionsTracker = require("common/helpers/database/collectionsTracker");
-import jsonUtil = require("common/jsonUtil");
-import validateNameCommand = require("commands/resources/validateNameCommand");
-import generalUtils = require("common/generalUtils");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import collectionsTracker from "common/helpers/database/collectionsTracker";
+import jsonUtil from "common/jsonUtil";
+import validateNameCommand from "commands/resources/validateNameCommand";
+import generalUtils from "common/generalUtils";
 
 class ongoingTaskOlapEtlTransformationModel {
 

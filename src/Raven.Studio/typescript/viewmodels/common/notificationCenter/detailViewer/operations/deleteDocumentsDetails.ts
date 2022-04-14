@@ -1,11 +1,11 @@
-import app = require("durandal/app");
+import app from "durandal/app";
 
-import database = require("models/resources/database");
-import operation = require("common/notifications/models/operation");
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import notificationCenter = require("common/notifications/notificationCenter");
-import virtualDeleteByQuery = require("common/notifications/models/virtualDeleteByQuery");
-import abstractOperationDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/abstractOperationDetails");
+import database from "models/resources/database";
+import operation from "common/notifications/models/operation";
+import abstractNotification from "common/notifications/models/abstractNotification";
+import notificationCenter from "common/notifications/notificationCenter";
+import virtualDeleteByQuery from "common/notifications/models/virtualDeleteByQuery";
+import abstractOperationDetails from "viewmodels/common/notificationCenter/detailViewer/operations/abstractOperationDetails";
 
 class deleteDocumentsDetails extends abstractOperationDetails {
 

@@ -1,11 +1,11 @@
-import appUrl = require("common/appUrl");
-import viewModelBase = require("viewmodels/viewModelBase");
-import sorterListItemModel = require("models/database/settings/sorterListItemModel");
-import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
-import generalUtils = require("common/generalUtils");
-import router = require("plugins/router");
-import getServerWideCustomSortersCommand = require("commands/serverWide/sorters/getServerWideCustomSortersCommand");
-import deleteServerWideCustomSorterCommand = require("commands/serverWide/sorters/deleteServerWideCustomSorterCommand");
+import appUrl from "common/appUrl";
+import viewModelBase from "viewmodels/viewModelBase";
+import sorterListItemModel from "models/database/settings/sorterListItemModel";
+import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
+import generalUtils from "common/generalUtils";
+import router from "plugins/router";
+import getServerWideCustomSortersCommand from "commands/serverWide/sorters/getServerWideCustomSortersCommand";
+import deleteServerWideCustomSorterCommand from "commands/serverWide/sorters/deleteServerWideCustomSorterCommand";
 
 class serverWideCustomSorters extends viewModelBase {
 

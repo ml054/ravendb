@@ -1,4 +1,4 @@
-import documentMetadata = require("models/database/documents/documentMetadata");
+import documentMetadata from "models/database/documents/documentMetadata";
 
 class document implements documentBase {
     

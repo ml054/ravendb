@@ -1,11 +1,11 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import database = require("models/resources/database");
-import messagePublisher = require("common/messagePublisher");
-import notificationCenter = require("common/notifications/notificationCenter");
-import eventsCollector = require("common/eventsCollector");
-import getNextOperationId = require("commands/database/studio/getNextOperationId");
-import importFromCsvCommand = require("commands/database/studio/importFromCsvCommand");
-import EVENTS = require("common/constants/events");
+import viewModelBase from "viewmodels/viewModelBase";
+import database from "models/resources/database";
+import messagePublisher from "common/messagePublisher";
+import notificationCenter from "common/notifications/notificationCenter";
+import eventsCollector from "common/eventsCollector";
+import getNextOperationId from "commands/database/studio/getNextOperationId";
+import importFromCsvCommand from "commands/database/studio/importFromCsvCommand";
+import EVENTS from "common/constants/events";
 
 type delimiters = "Comma" | "Semicolon" | "Tab" | "Space";
 type quoteChars = "Double quote" | "Single quote";

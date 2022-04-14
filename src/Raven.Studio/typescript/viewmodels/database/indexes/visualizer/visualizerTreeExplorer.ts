@@ -1,9 +1,9 @@
-import generalUtils = require("common/generalUtils");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
+import generalUtils from "common/generalUtils";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
 import { highlight, languages } from "prismjs";
 
 class visualizerTreeExplorer extends dialogViewModelBase {

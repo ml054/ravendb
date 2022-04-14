@@ -1,5 +1,5 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import jsonUtil = require("common/jsonUtil");
+import jsonUtil from "common/jsonUtil";
 
 class clientConfigurationModel {
 

@@ -1,10 +1,10 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
-import storageKeyProvider = require("common/storage/storageKeyProvider");
-import abstractSettings = require("common/settings/abstractSettings");
-import simpleStudioSetting = require("common/settings/simpleStudioSetting");
-import dontShowAgainSettings = require("common/settings/dontShowAgainSettings");
-import studioSetting = require("common/settings/studioSetting");
+import storageKeyProvider from "common/storage/storageKeyProvider";
+import abstractSettings from "common/settings/abstractSettings";
+import simpleStudioSetting from "common/settings/simpleStudioSetting";
+import dontShowAgainSettings from "common/settings/dontShowAgainSettings";
+import studioSetting from "common/settings/studioSetting";
 
 class globalSettings extends abstractSettings {
     private readonly remoteSettingsLoader: () => JQueryPromise<Raven.Client.ServerWide.Operations.Configuration.ServerWideStudioConfiguration>;

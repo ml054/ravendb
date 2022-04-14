@@ -1,7 +1,7 @@
 /// <reference path="../../typings/tsd.d.ts"/>
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import pluralizeHelpers = require("common/helpers/text/pluralizeHelpers");
-import dialog = require("plugins/dialog");
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
+import pluralizeHelpers from "common/helpers/text/pluralizeHelpers";
+import dialog from "plugins/dialog";
 import { jwerty } from "jwerty";
 
 type dialogViewModelBaseOptions = {

@@ -1,9 +1,9 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts" />
+/// <reference path="../../../../typings/tsd.d.ts" />
 
-import intermediateMenuItem = require("common/shell/menu/intermediateMenuItem");
-import collection = require("models/database/documents/collection");
-import leafMenuItem = require("common/shell/menu/leafMenuItem");
-import router = require("plugins/router");
+import intermediateMenuItem from "common/shell/menu/intermediateMenuItem";
+import collection from "models/database/documents/collection";
+import leafMenuItem from "common/shell/menu/leafMenuItem";
+import router from "plugins/router";
 
 class collectionMenuItem implements menuItem {
     type: menuItemType = "collections";

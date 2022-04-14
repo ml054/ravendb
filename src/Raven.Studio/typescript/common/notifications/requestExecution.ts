@@ -1,4 +1,4 @@
-﻿
+
 class requestExecution {
 
     spinnerVisible = false;

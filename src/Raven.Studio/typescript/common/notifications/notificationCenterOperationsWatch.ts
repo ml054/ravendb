@@ -1,4 +1,4 @@
-﻿import database = require("models/resources/database");
+import database from "models/resources/database";
 
 class notificationCenterOperationsWatch {
 

@@ -1,5 +1,5 @@
-import database = require("models/resources/database");
-import appUrl = require("common/appUrl");
+import database from "models/resources/database";
+import appUrl from "common/appUrl";
 
 class recentDocuments {
     private static recentDocumentsInDatabases = ko.observableArray<{ databaseName: string; recentDocuments: KnockoutObservableArray<string> }>();

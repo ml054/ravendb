@@ -1,7 +1,7 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
-import viewModelBase = require("viewmodels/viewModelBase");
-import serverSetup = require("models/wizard/serverSetup");
+import viewModelBase from "viewmodels/viewModelBase";
+import serverSetup from "models/wizard/serverSetup";
 
 abstract class setupStep extends viewModelBase {
    protected model = serverSetup.default;

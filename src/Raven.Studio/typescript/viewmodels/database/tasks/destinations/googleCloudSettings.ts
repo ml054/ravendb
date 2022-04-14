@@ -1,8 +1,8 @@
-import backupSettings = require("models/database/tasks/periodicBackup/backupSettings");
-import jsonUtil = require("common/jsonUtil");
-import genUtils = require("common/generalUtils");
-import popoverUtils = require("common/popoverUtils");
-import tasksCommonContent = require("models/database/tasks/tasksCommonContent");
+import backupSettings from "models/database/tasks/periodicBackup/backupSettings";
+import jsonUtil from "common/jsonUtil";
+import genUtils from "common/generalUtils";
+import popoverUtils from "common/popoverUtils";
+import tasksCommonContent from "models/database/tasks/tasksCommonContent";
 
 class googleCloudSettings extends backupSettings {
 

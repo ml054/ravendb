@@ -1,10 +1,10 @@
-import visualizerGraphGlobal = require("viewmodels/database/indexes/visualizer/visualizerGraphGlobal");
-import visualizerGraphDetails = require("viewmodels/database/indexes/visualizer/visualizerGraphDetails");
+import visualizerGraphGlobal from "viewmodels/database/indexes/visualizer/visualizerGraphGlobal";
+import visualizerGraphDetails from "viewmodels/database/indexes/visualizer/visualizerGraphDetails";
 
-import getIndexesStatsCommand = require("commands/database/index/getIndexesStatsCommand");
-import getIndexMapReduceTreeCommand = require("commands/database/index/getIndexMapReduceTreeCommand");
-import getIndexDebugSourceDocumentsCommand = require("commands/database/index/getIndexDebugSourceDocumentsCommand");
-import eventsCollector = require("common/eventsCollector");
+import getIndexesStatsCommand from "commands/database/index/getIndexesStatsCommand";
+import getIndexMapReduceTreeCommand from "commands/database/index/getIndexMapReduceTreeCommand";
+import getIndexDebugSourceDocumentsCommand from "commands/database/index/getIndexDebugSourceDocumentsCommand";
+import eventsCollector from "common/eventsCollector";
 import shardViewModelBase from "viewmodels/shardViewModelBase";
 import database from "models/resources/database";
 

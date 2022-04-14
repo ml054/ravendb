@@ -1,10 +1,10 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
-import getCronExpressionOccurrenceCommand = require("commands/database/tasks/getCronExpressionOccurrenceCommand");
-import generalUtils = require("common/generalUtils");
-import popoverUtils = require("common/popoverUtils");
-import moment = require("moment");
-import cronstrue = require("cronstrue");
+import getCronExpressionOccurrenceCommand from "commands/database/tasks/getCronExpressionOccurrenceCommand";
+import generalUtils from "common/generalUtils";
+import popoverUtils from "common/popoverUtils";
+import moment from "moment";
+import cronstrue from "cronstrue";
 
 type cronPeriod = "minute" | "hour" | "day" | "week" | "month" | "year" | "custom";
 

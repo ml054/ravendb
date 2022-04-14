@@ -1,5 +1,5 @@
-﻿import intermediateMenuItem = require("common/shell/menu/intermediateMenuItem");
-import leafMenuItem = require("common/shell/menu/leafMenuItem");
+import intermediateMenuItem from "common/shell/menu/intermediateMenuItem";
+import leafMenuItem from "common/shell/menu/leafMenuItem";
 
 export = getStatsMenuItem;
 

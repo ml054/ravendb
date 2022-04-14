@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/tsd.d.ts"/>
-import ipEntry = require("models/wizard/ipEntry");
-import nodeInfo = require("models/wizard/nodeInfo");
+import ipEntry from "models/wizard/ipEntry";
+import nodeInfo from "models/wizard/nodeInfo";
 
 class unsecureSetup {
 

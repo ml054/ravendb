@@ -1,5 +1,5 @@
-import commandBase = require("commands/commandBase");
-import endpoints = require("endpoints");
+import commandBase from "commands/commandBase";
+import endpoints from "endpoints";
 
 class getServerWideTaskInfoCommand<T extends Raven.Client.ServerWide.Operations.OngoingTasks.ServerWideExternalReplication |
                                              Raven.Client.ServerWide.Operations.Configuration.ServerWideBackupConfiguration> extends commandBase {

@@ -1,14 +1,14 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import spatialMarkersLayerModel = require("models/database/query/spatialMarkersLayerModel");
-import document = require("models/database/documents/document");
-import documentMetadata = require("models/database/documents/documentMetadata");
+import viewModelBase from "viewmodels/viewModelBase";
+import spatialMarkersLayerModel from "models/database/query/spatialMarkersLayerModel";
+import document from "models/database/documents/document";
+import documentMetadata from "models/database/documents/documentMetadata";
 import { Control, IconOptions, MarkerClusterGroup, Map, TileLayer } from "leaflet";
-import genUtils = require("common/generalUtils");
-import spatialCircleModel = require("models/database/query/spatialCircleModel");
-import spatialPolygonModel = require("models/database/query/spatialPolygonModel");
+import genUtils from "common/generalUtils";
+import spatialCircleModel from "models/database/query/spatialCircleModel";
+import spatialPolygonModel from "models/database/query/spatialPolygonModel";
 import { highlight, languages } from "prismjs";
 
-import L = require("leaflet");
+import L from "leaflet";
 import "leaflet.markercluster";
 
 const markerIcon = require("Content/img/leaflet/marker-icon.svg");

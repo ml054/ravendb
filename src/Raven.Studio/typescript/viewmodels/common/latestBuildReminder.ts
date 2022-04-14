@@ -1,6 +1,6 @@
-import dialog = require("plugins/dialog");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import serverBuildReminder = require("common/storage/serverBuildReminder");
+import dialog from "plugins/dialog";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import serverBuildReminder from "common/storage/serverBuildReminder";
 
 class latestBuildReminder extends dialogViewModelBase {
 

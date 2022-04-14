@@ -1,6 +1,6 @@
-import queryCriteria = require("models/database/query/queryCriteria");
-import database = require("models/resources/database");
-import queryCommand = require("commands/database/query/queryCommand");
+import queryCriteria from "models/database/query/queryCriteria";
+import database from "models/resources/database";
+import queryCommand from "commands/database/query/queryCommand";
 
 class docsIdsBasedOnQueryFetcher {
 

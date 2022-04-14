@@ -1,5 +1,5 @@
-import executeBulkDocsCommand = require("commands/database/documents/executeBulkDocsCommand");
-import database = require("models/resources/database");
+import executeBulkDocsCommand from "commands/database/documents/executeBulkDocsCommand";
+import database from "models/resources/database";
 
 class deleteDocumentsCommand extends executeBulkDocsCommand {
 

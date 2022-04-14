@@ -1,8 +1,8 @@
 ﻿/// <reference path="../../../../typings/tsd.d.ts"/>
 
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import genUtils = require("common/generalUtils");
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import genUtils from "common/generalUtils";
 
 class iconsPlusTextColumn<T> implements virtualColumn {
     width: string;

@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
 
-import indexDefinition = require("models/database/index/indexDefinition");
+import indexDefinition from "models/database/index/indexDefinition";
 
 class autoIndexField {
     fieldName = ko.observable<string>();

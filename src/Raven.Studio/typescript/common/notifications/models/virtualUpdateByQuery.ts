@@ -1,8 +1,8 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
-import virtualNotification = require("common/notifications/models/virtualNotification");
-import database = require("models/resources/database");
-import moment = require("moment");
-import pluralizeHelpers = require("common/helpers/text/pluralizeHelpers");
+import virtualNotification from "common/notifications/models/virtualNotification";
+import database from "models/resources/database";
+import moment from "moment";
+import pluralizeHelpers from "common/helpers/text/pluralizeHelpers";
 
 class virtualUpdateByQuery extends virtualNotification {
 

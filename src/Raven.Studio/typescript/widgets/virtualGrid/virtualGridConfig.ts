@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../../typings/tsd.d.ts"/>
 
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
 
 class virtualGridConfig<T> {
     /**

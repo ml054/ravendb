@@ -1,9 +1,9 @@
 /// <reference path="../../../typings/tsd.d.ts" />
-import database = require("models/resources/database");
-import storageKeyProvider = require("common/storage/storageKeyProvider");
-import abstractSettings = require("common/settings/abstractSettings");
-import studioSetting = require("common/settings/studioSetting");
-import simpleStudioSetting = require("common/settings/simpleStudioSetting");
+import database from "models/resources/database";
+import storageKeyProvider from "common/storage/storageKeyProvider";
+import abstractSettings from "common/settings/abstractSettings";
+import studioSetting from "common/settings/studioSetting";
+import simpleStudioSetting from "common/settings/simpleStudioSetting";
 
 class databaseSettings extends abstractSettings {
     private readonly db: database;

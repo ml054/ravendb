@@ -1,12 +1,12 @@
 /// <reference path="../../../typings/tsd.d.ts"/>
 
-import app = require("durandal/app");
-import EVENTS = require("common/constants/events");
-import router = require("plugins/router");
-import intermediateMenuItem = require("common/shell/menu/intermediateMenuItem");
-import leafMenuItem = require("common/shell/menu/leafMenuItem");
-import studioSettings = require("common/settings/studioSettings");
-import globalSettings = require("common/settings/globalSettings");
+import app from "durandal/app";
+import EVENTS from "common/constants/events";
+import router from "plugins/router";
+import intermediateMenuItem from "common/shell/menu/intermediateMenuItem";
+import leafMenuItem from "common/shell/menu/leafMenuItem";
+import studioSettings from "common/settings/studioSettings";
+import globalSettings from "common/settings/globalSettings";
 
 class menu {
 

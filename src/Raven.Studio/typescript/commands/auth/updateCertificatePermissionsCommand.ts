@@ -1,6 +1,6 @@
-import commandBase = require("commands/commandBase");
-import endpoints = require("endpoints");
-import certificateModel = require("models/auth/certificateModel");
+import commandBase from "commands/commandBase";
+import endpoints from "endpoints";
+import certificateModel from "models/auth/certificateModel";
 
 class updateCertificatePermissionsCommand extends commandBase {
 

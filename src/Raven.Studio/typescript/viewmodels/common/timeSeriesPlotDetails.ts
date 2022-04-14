@@ -1,10 +1,10 @@
-import timeSeriesQueryResult = require("models/database/timeSeries/timeSeriesQueryResult");
-import viewModelBase = require("viewmodels/viewModelBase");
-import d3 = require("d3");
-import viewHelpers = require("common/helpers/view/viewHelpers");
-import colorsManager = require("common/colorsManager");
-import genUtils = require("common/generalUtils");
-import moment = require("moment");
+import timeSeriesQueryResult from "models/database/timeSeries/timeSeriesQueryResult";
+import viewModelBase from "viewmodels/viewModelBase";
+import d3 from "d3";
+import viewHelpers from "common/helpers/view/viewHelpers";
+import colorsManager from "common/colorsManager";
+import genUtils from "common/generalUtils";
+import moment from "moment";
 
 interface graphData {
     pointSeries: graphSeries<dataPoint>[];

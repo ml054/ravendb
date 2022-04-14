@@ -1,7 +1,7 @@
-import eventsCollector = require("common/eventsCollector");
-import appUrl = require("common/appUrl");
-import router = require("plugins/router");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase"); 
+import eventsCollector from "common/eventsCollector";
+import appUrl from "common/appUrl";
+import router from "plugins/router";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase"; 
 
 class createOngoingTask extends dialogViewModelBase {
 

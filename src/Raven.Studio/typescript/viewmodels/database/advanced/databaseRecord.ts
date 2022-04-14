@@ -1,13 +1,13 @@
-import appUrl = require("common/appUrl");
-import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
-import getDatabaseRecordCommand = require("commands/resources/getDatabaseRecordCommand");
-import document = require("models/database/documents/document");
-import database = require("models/resources/database");
-import messagePublisher = require("common/messagePublisher");
-import accessManager = require("common/shell/accessManager");
-import eventsCollector = require("common/eventsCollector");
-import saveDatabaseRecordCommand = require("commands/resources/saveDatabaseRecordCommand");
-import genUtils = require("common/generalUtils");
+import appUrl from "common/appUrl";
+import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
+import getDatabaseRecordCommand from "commands/resources/getDatabaseRecordCommand";
+import document from "models/database/documents/document";
+import database from "models/resources/database";
+import messagePublisher from "common/messagePublisher";
+import accessManager from "common/shell/accessManager";
+import eventsCollector from "common/eventsCollector";
+import saveDatabaseRecordCommand from "commands/resources/saveDatabaseRecordCommand";
+import genUtils from "common/generalUtils";
 import shardViewModelBase from "viewmodels/shardViewModelBase";
 
 class databaseRecord extends shardViewModelBase {

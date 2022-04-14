@@ -1,9 +1,9 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import studioConfigurationGlobalModel = require("models/database/settings/studioConfigurationGlobalModel");
-import studioSettings = require("common/settings/studioSettings");
-import globalSettings = require("common/settings/globalSettings");
-import jsonUtil = require("common/jsonUtil");
-import eventsCollector = require("common/eventsCollector");
+import viewModelBase from "viewmodels/viewModelBase";
+import studioConfigurationGlobalModel from "models/database/settings/studioConfigurationGlobalModel";
+import studioSettings from "common/settings/studioSettings";
+import globalSettings from "common/settings/globalSettings";
+import jsonUtil from "common/jsonUtil";
+import eventsCollector from "common/eventsCollector";
 
 class studioConfiguration extends viewModelBase {
 

@@ -1,18 +1,18 @@
-﻿import appUrl = require("common/appUrl");
-import viewModelBase = require("viewmodels/viewModelBase");
-import router = require("plugins/router");
-import getPeriodicBackupConfigurationCommand = require("commands/database/tasks/getPeriodicBackupConfigurationCommand");
-import getPeriodicBackupConfigCommand = require("commands/database/tasks/getPeriodicBackupConfigCommand");
-import testPeriodicBackupCredentialsCommand = require("commands/serverWide/testPeriodicBackupCredentialsCommand");
-import popoverUtils = require("common/popoverUtils");
-import eventsCollector = require("common/eventsCollector");
-import backupSettings = require("models/database/tasks/periodicBackup/backupSettings");
-import getPossibleMentorsCommand = require("commands/database/tasks/getPossibleMentorsCommand");
-import cronEditor = require("viewmodels/common/cronEditor");
-import tasksCommonContent = require("models/database/tasks/tasksCommonContent");
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import manualBackupConfiguration = require("models/database/tasks/periodicBackup/manualBackupConfiguration");
-import periodicBackupConfiguration = require("models/database/tasks/periodicBackup/periodicBackupConfiguration");
+import appUrl from "common/appUrl";
+import viewModelBase from "viewmodels/viewModelBase";
+import router from "plugins/router";
+import getPeriodicBackupConfigurationCommand from "commands/database/tasks/getPeriodicBackupConfigurationCommand";
+import getPeriodicBackupConfigCommand from "commands/database/tasks/getPeriodicBackupConfigCommand";
+import testPeriodicBackupCredentialsCommand from "commands/serverWide/testPeriodicBackupCredentialsCommand";
+import popoverUtils from "common/popoverUtils";
+import eventsCollector from "common/eventsCollector";
+import backupSettings from "models/database/tasks/periodicBackup/backupSettings";
+import getPossibleMentorsCommand from "commands/database/tasks/getPossibleMentorsCommand";
+import cronEditor from "viewmodels/common/cronEditor";
+import tasksCommonContent from "models/database/tasks/tasksCommonContent";
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
+import manualBackupConfiguration from "models/database/tasks/periodicBackup/manualBackupConfiguration";
+import periodicBackupConfiguration from "models/database/tasks/periodicBackup/periodicBackupConfiguration";
 
 type backupConfigurationClass = manualBackupConfiguration | periodicBackupConfiguration;
 

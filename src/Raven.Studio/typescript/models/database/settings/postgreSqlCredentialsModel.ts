@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import generateSecretCommand = require("commands/database/secrets/generateSecretCommand");
-import copyToClipboard = require("common/copyToClipboard");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import generateSecretCommand from "commands/database/secrets/generateSecretCommand";
+import copyToClipboard from "common/copyToClipboard";
 
 class postgreSqlCredentialsModel {
 

@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
 
-import moment = require("moment");
+import moment from "moment";
 
 type timeMagnitude = "minutes" | "hours" | "days";
 

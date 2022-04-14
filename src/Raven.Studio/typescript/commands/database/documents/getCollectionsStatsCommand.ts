@@ -1,7 +1,7 @@
-import commandBase = require("commands/commandBase");
-import database = require("models/resources/database");
-import collectionsStats = require("models/database/documents/collectionsStats");
-import endpoints = require("endpoints");
+import commandBase from "commands/commandBase";
+import database from "models/resources/database";
+import collectionsStats from "models/database/documents/collectionsStats";
+import endpoints from "endpoints";
 
 class getCollectionsStatsCommand extends commandBase {
 

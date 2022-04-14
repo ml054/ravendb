@@ -1,4 +1,4 @@
-import confirmViewModelBase = require("viewmodels/confirmViewModelBase");
+import confirmViewModelBase from "viewmodels/confirmViewModelBase";
 
 class backupNowConfirm extends confirmViewModelBase<backupNowConfirmResult> {
 

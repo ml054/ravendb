@@ -1,6 +1,6 @@
 /// <reference path="../../typings/tsd.d.ts"/>
 
-import inputCursor = require('common/inputCursor');
+import inputCursor from 'common/inputCursor';
 
 class autoCompleterSupport {
   constructor(private autoCompleteBase: KnockoutObservableArray<KnockoutObservable<string>>, private autoCompleteResults: KnockoutObservableArray<KnockoutObservable<string>>,private showAllOptionOnEmptyInput: boolean = false) {

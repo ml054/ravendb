@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/tsd.d.ts"/>
-import ipEntry = require("models/wizard/ipEntry");
-import genUtils = require("common/generalUtils");
+import ipEntry from "models/wizard/ipEntry";
+import genUtils from "common/generalUtils";
 
 class nodeInfo {
     

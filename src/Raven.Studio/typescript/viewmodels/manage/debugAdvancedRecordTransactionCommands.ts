@@ -1,10 +1,10 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import databasesManager = require("common/shell/databasesManager");
-import recordTransactionsCommand = require("commands/database/debug/recordTransactionsCommand");
-import notificationCenter = require("common/notifications/notificationCenter");
-import operation = require("common/notifications/models/operation");
-import stopRecordingTransactionsCommand = require("commands/database/debug/stopRecordingTransactionsCommand");
-import getFolderPathOptionsCommand = require("commands/resources/getFolderPathOptionsCommand");
+import viewModelBase from "viewmodels/viewModelBase";
+import databasesManager from "common/shell/databasesManager";
+import recordTransactionsCommand from "commands/database/debug/recordTransactionsCommand";
+import notificationCenter from "common/notifications/notificationCenter";
+import operation from "common/notifications/models/operation";
+import stopRecordingTransactionsCommand from "commands/database/debug/stopRecordingTransactionsCommand";
+import getFolderPathOptionsCommand from "commands/resources/getFolderPathOptionsCommand";
 
 class runningRecording {
     databaseName: string;

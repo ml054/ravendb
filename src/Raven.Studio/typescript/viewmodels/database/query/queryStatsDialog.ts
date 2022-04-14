@@ -1,7 +1,7 @@
-import appUrl = require("common/appUrl");
-import dialog = require("plugins/dialog");
-import database = require("models/resources/database");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
+import appUrl from "common/appUrl";
+import dialog from "plugins/dialog";
+import database from "models/resources/database";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
 
 class queryStatsDialog extends dialogViewModelBase {
 

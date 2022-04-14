@@ -1,11 +1,11 @@
-import setupStep = require("viewmodels/wizard/setupStep");
-import router = require("plugins/router");
-import claimDomainCommand = require("commands/wizard/claimDomainCommand");
-import nodeInfo = require("models/wizard/nodeInfo");
-import ipEntry = require("models/wizard/ipEntry");
-import loadAgreementCommand = require("commands/wizard/loadAgreementCommand");
-import getIpsInfoCommand = require("commands/wizard/getIpsInfoCommand");
-import viewHelpers = require("common/helpers/view/viewHelpers");
+import setupStep from "viewmodels/wizard/setupStep";
+import router from "plugins/router";
+import claimDomainCommand from "commands/wizard/claimDomainCommand";
+import nodeInfo from "models/wizard/nodeInfo";
+import ipEntry from "models/wizard/ipEntry";
+import loadAgreementCommand from "commands/wizard/loadAgreementCommand";
+import getIpsInfoCommand from "commands/wizard/getIpsInfoCommand";
+import viewHelpers from "common/helpers/view/viewHelpers";
 
 class domain extends setupStep {
 

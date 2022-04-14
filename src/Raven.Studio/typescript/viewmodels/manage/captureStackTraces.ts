@@ -1,12 +1,12 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import d3 = require("d3");
-import captureLocalStackTracesCommand = require("commands/maintenance/captureLocalStackTracesCommand");
-import captureClusterStackTracesCommand = require("commands/maintenance/captureClusterStackTracesCommand");
-import clusterTopologyManager = require("common/shell/clusterTopologyManager");
-import copyToClipboard = require("common/copyToClipboard");
-import fileDownloader = require("common/fileDownloader");
-import fileImporter = require("common/fileImporter");
-import genUtils = require("common/generalUtils");
+import viewModelBase from "viewmodels/viewModelBase";
+import d3 from "d3";
+import captureLocalStackTracesCommand from "commands/maintenance/captureLocalStackTracesCommand";
+import captureClusterStackTracesCommand from "commands/maintenance/captureClusterStackTracesCommand";
+import clusterTopologyManager from "common/shell/clusterTopologyManager";
+import copyToClipboard from "common/copyToClipboard";
+import fileDownloader from "common/fileDownloader";
+import fileImporter from "common/fileImporter";
+import genUtils from "common/generalUtils";
 
 type stackFrame = {
     short: string;

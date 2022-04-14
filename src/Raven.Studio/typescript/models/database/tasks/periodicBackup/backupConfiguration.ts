@@ -1,18 +1,18 @@
-﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
-import localSettings = require("models/database/tasks/periodicBackup/localSettings");
-import s3Settings = require("viewmodels/database/tasks/destinations/s3Settings");
-import glacierSettings = require("viewmodels/database/tasks/destinations/glacierSettings");
-import azureSettings = require("viewmodels/database/tasks/destinations/azureSettings");
-import googleCloudSettings = require("viewmodels/database/tasks/destinations/googleCloudSettings");
-import ftpSettings = require("viewmodels/database/tasks/destinations/ftpSettings");
-import getBackupLocationCommand = require("commands/database/tasks/getBackupLocationCommand");
-import getServerWideBackupLocationCommand = require("commands/serverWide/tasks/getServerWideBackupLocationCommand");
-import getFolderPathOptionsCommand = require("commands/resources/getFolderPathOptionsCommand");
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import snapshot = require("models/database/tasks/periodicBackup/snapshot");
-import encryptionSettings = require("models/database/tasks/periodicBackup/encryptionSettings");
-import generalUtils = require("common/generalUtils");
-import backupSettings = require("models/database/tasks/periodicBackup/backupSettings");
+/// <reference path="../../../../../typings/tsd.d.ts"/>
+import localSettings from "models/database/tasks/periodicBackup/localSettings";
+import s3Settings from "viewmodels/database/tasks/destinations/s3Settings";
+import glacierSettings from "viewmodels/database/tasks/destinations/glacierSettings";
+import azureSettings from "viewmodels/database/tasks/destinations/azureSettings";
+import googleCloudSettings from "viewmodels/database/tasks/destinations/googleCloudSettings";
+import ftpSettings from "viewmodels/database/tasks/destinations/ftpSettings";
+import getBackupLocationCommand from "commands/database/tasks/getBackupLocationCommand";
+import getServerWideBackupLocationCommand from "commands/serverWide/tasks/getServerWideBackupLocationCommand";
+import getFolderPathOptionsCommand from "commands/resources/getFolderPathOptionsCommand";
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
+import snapshot from "models/database/tasks/periodicBackup/snapshot";
+import encryptionSettings from "models/database/tasks/periodicBackup/encryptionSettings";
+import generalUtils from "common/generalUtils";
+import backupSettings from "models/database/tasks/periodicBackup/backupSettings";
 
 abstract class backupConfiguration {
 

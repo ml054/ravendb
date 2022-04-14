@@ -1,10 +1,10 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import database = require("models/resources/database");
-import adminJsScriptCommand = require("commands/maintenance/adminJsScriptCommand");
-import eventsCollector = require("common/eventsCollector");
-import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
-import databasesManager = require("common/shell/databasesManager");
-import defaultAceCompleter = require("common/defaultAceCompleter");
+import viewModelBase from "viewmodels/viewModelBase";
+import database from "models/resources/database";
+import adminJsScriptCommand from "commands/maintenance/adminJsScriptCommand";
+import eventsCollector from "common/eventsCollector";
+import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
+import databasesManager from "common/shell/databasesManager";
+import defaultAceCompleter from "common/defaultAceCompleter";
 import { highlight, languages } from "prismjs";
 
 type jsConsolePatchOption = "Server" | "Database";

@@ -1,9 +1,9 @@
-import setupStep = require("viewmodels/wizard/setupStep");
-import router = require("plugins/router");
-import getSetupLocalNodeIpsCommand = require("commands/wizard/getSetupLocalNodeIpsCommand");
-import getSetupParametersCommand = require("commands/wizard/getSetupParametersCommand");
-import genUtils = require("common/generalUtils");
-import detectBrowser = require("viewmodels/common/detectBrowser");
+import setupStep from "viewmodels/wizard/setupStep";
+import router from "plugins/router";
+import getSetupLocalNodeIpsCommand from "commands/wizard/getSetupLocalNodeIpsCommand";
+import getSetupParametersCommand from "commands/wizard/getSetupParametersCommand";
+import genUtils from "common/generalUtils";
+import detectBrowser from "viewmodels/common/detectBrowser";
 
 class welcome extends setupStep {
 

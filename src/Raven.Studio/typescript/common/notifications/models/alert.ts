@@ -1,8 +1,8 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
 
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import database = require("models/resources/database");
-import licenseAgpl = require("viewmodels/common/notificationCenter/customControlls/licenseAgpl");
+import abstractNotification from "common/notifications/models/abstractNotification";
+import database from "models/resources/database";
+import licenseAgpl from "viewmodels/common/notificationCenter/customControlls/licenseAgpl";
 
 class alert extends abstractNotification {
 

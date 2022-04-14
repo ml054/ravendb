@@ -1,10 +1,10 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import datePickerBindingHandler = require("common/bindingHelpers/datePickerBindingHandler");
-import revertRevisionsCommand = require("commands/database/documents/revertRevisionsCommand");
-import revertRevisionsRequest = require("models/database/documents/revertRevisionsRequest");
-import notificationCenter = require("common/notifications/notificationCenter");
-import appUrl = require("common/appUrl");
-import moment = require("moment");
+import viewModelBase from "viewmodels/viewModelBase";
+import datePickerBindingHandler from "common/bindingHelpers/datePickerBindingHandler";
+import revertRevisionsCommand from "commands/database/documents/revertRevisionsCommand";
+import revertRevisionsRequest from "models/database/documents/revertRevisionsRequest";
+import notificationCenter from "common/notifications/notificationCenter";
+import appUrl from "common/appUrl";
+import moment from "moment";
 
 class revertRevisions extends viewModelBase {
     

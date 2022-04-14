@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
-import getClientCertificateCommand = require("commands/auth/getClientCertificateCommand");
+import getClientCertificateCommand from "commands/auth/getClientCertificateCommand";
 
 class clientCertificateModel {
     static certificateInfo = ko.observable<Raven.Client.ServerWide.Operations.Certificates.CertificateDefinition>();

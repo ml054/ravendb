@@ -1,10 +1,10 @@
-import graphHelper = require("common/helpers/graph/graphHelper");
-import viewHelpers = require("common/helpers/view/viewHelpers");
-import canvasIcons = require("common/helpers/graph/canvasIcons");
+import graphHelper from "common/helpers/graph/graphHelper";
+import viewHelpers from "common/helpers/view/viewHelpers";
+import canvasIcons from "common/helpers/graph/canvasIcons";
 
-import d3 = require('d3');
-import rbush = require("rbush");
-import colorsManager = require("common/colorsManager");
+import d3 from 'd3';
+import rbush from "rbush";
+import colorsManager from "common/colorsManager";
 
 abstract class abstractPageItem {
     static readonly pageWidth = 20;

@@ -1,8 +1,8 @@
-import clusterDashboard = require("viewmodels/resources/clusterDashboard");
-import abstractChartsWebsocketWidget = require("viewmodels/resources/widgets/abstractChartsWebsocketWidget");
+import clusterDashboard from "viewmodels/resources/clusterDashboard";
+import abstractChartsWebsocketWidget from "viewmodels/resources/widgets/abstractChartsWebsocketWidget";
 
-import lineChart = require("models/resources/clusterDashboard/lineChart");
-import memoryUsage = require("models/resources/widgets/memoryUsage");
+import lineChart from "models/resources/clusterDashboard/lineChart";
+import memoryUsage from "models/resources/widgets/memoryUsage";
 
 
 interface memoryUsageState {

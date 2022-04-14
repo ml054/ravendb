@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import collectionsTracker = require("common/helpers/database/collectionsTracker");
-import jsonUtil = require("common/jsonUtil");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import collectionsTracker from "common/helpers/database/collectionsTracker";
+import jsonUtil from "common/jsonUtil";
 
 class ongoingTaskElasticSearchTransformationModel {
     name = ko.observable<string>();

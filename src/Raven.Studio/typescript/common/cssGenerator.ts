@@ -1,6 +1,6 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import database = require("models/resources/database");
+import database from "models/resources/database";
 
 class cssGenerator {
     static getCssClass(entityName: string, colorMaps: resourceStyleMap[], db: database): string {

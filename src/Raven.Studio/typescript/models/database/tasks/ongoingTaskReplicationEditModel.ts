@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import generalUtils = require("common/generalUtils");
-import ongoingTaskEditModel = require("models/database/tasks/ongoingTaskEditModel"); 
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import generalUtils from "common/generalUtils";
+import ongoingTaskEditModel from "models/database/tasks/ongoingTaskEditModel"; 
 
 class ongoingTaskReplicationEditModel extends ongoingTaskEditModel {
        

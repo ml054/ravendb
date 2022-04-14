@@ -1,17 +1,17 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import adminLogsWebSocketClient = require("common/adminLogsWebSocketClient");
-import adminLogsConfig = require("models/database/debug/adminLogsConfig");
-import adminLogsConfigEntry = require("models/database/debug/adminLogsConfigEntry");
-import eventsCollector = require("common/eventsCollector");
-import listViewController = require("widgets/listView/listViewController");
-import fileDownloader = require("common/fileDownloader");
-import virtualListRow = require("widgets/listView/virtualListRow");
-import copyToClipboard = require("common/copyToClipboard");
-import generalUtils = require("common/generalUtils");
-import getAdminLogsConfigurationCommand = require("commands/maintenance/getAdminLogsConfigurationCommand");
-import saveAdminLogsConfigurationCommand = require("commands/maintenance/saveAdminLogsConfigurationCommand");
-import adminLogsOnDiskConfig = require("models/database/debug/adminLogsOnDiskConfig");
-import moment = require("moment");
+import viewModelBase from "viewmodels/viewModelBase";
+import adminLogsWebSocketClient from "common/adminLogsWebSocketClient";
+import adminLogsConfig from "models/database/debug/adminLogsConfig";
+import adminLogsConfigEntry from "models/database/debug/adminLogsConfigEntry";
+import eventsCollector from "common/eventsCollector";
+import listViewController from "widgets/listView/listViewController";
+import fileDownloader from "common/fileDownloader";
+import virtualListRow from "widgets/listView/virtualListRow";
+import copyToClipboard from "common/copyToClipboard";
+import generalUtils from "common/generalUtils";
+import getAdminLogsConfigurationCommand from "commands/maintenance/getAdminLogsConfigurationCommand";
+import saveAdminLogsConfigurationCommand from "commands/maintenance/saveAdminLogsConfigurationCommand";
+import adminLogsOnDiskConfig from "models/database/debug/adminLogsOnDiskConfig";
+import moment from "moment";
 
 class heightCalculator {
     

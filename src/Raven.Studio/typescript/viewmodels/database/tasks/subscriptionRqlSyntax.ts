@@ -1,5 +1,5 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import copyToClipboard = require("common/copyToClipboard");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import copyToClipboard from "common/copyToClipboard";
 
 class subscriptionRqlSyntax extends dialogViewModelBase {
 

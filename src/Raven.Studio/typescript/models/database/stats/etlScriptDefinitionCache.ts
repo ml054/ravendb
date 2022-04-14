@@ -1,8 +1,8 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import database = require("models/resources/database");
-import getOngoingTaskInfoCommand = require("commands/database/tasks/getOngoingTaskInfoCommand");
-import app = require("durandal/app");
-import etlScriptDefinitionPreview = require("viewmodels/database/status/etlScriptDefinitionPreview");
+import database from "models/resources/database";
+import getOngoingTaskInfoCommand from "commands/database/tasks/getOngoingTaskInfoCommand";
+import app from "durandal/app";
+import etlScriptDefinitionPreview from "viewmodels/database/status/etlScriptDefinitionPreview";
 
 class etlScriptDefinitionCache {
     private readonly taskInfoCache = new Map<number, etlScriptDefinitionCacheItem>();

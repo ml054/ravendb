@@ -1,18 +1,18 @@
-import appUrl = require("common/appUrl");
-import viewModelBase = require("viewmodels/viewModelBase");
-import router = require("plugins/router");
-import saveExternalReplicationTaskCommand = require("commands/database/tasks/saveExternalReplicationTaskCommand");
-import ongoingTaskReplicationEditModel = require("models/database/tasks/ongoingTaskReplicationEditModel");
-import ongoingTaskInfoCommand = require("commands/database/tasks/getOngoingTaskInfoCommand");
-import eventsCollector = require("common/eventsCollector");
-import generalUtils = require("common/generalUtils");
-import getConnectionStringsCommand = require("commands/database/settings/getConnectionStringsCommand");
-import getPossibleMentorsCommand = require("commands/database/tasks/getPossibleMentorsCommand");
-import connectionStringRavenEtlModel = require("models/database/settings/connectionStringRavenEtlModel");
-import jsonUtil = require("common/jsonUtil");
-import popoverUtils = require("common/popoverUtils");
-import tasksCommonContent = require("models/database/tasks/tasksCommonContent");
-import discoveryUrl = require("models/database/settings/discoveryUrl");
+import appUrl from "common/appUrl";
+import viewModelBase from "viewmodels/viewModelBase";
+import router from "plugins/router";
+import saveExternalReplicationTaskCommand from "commands/database/tasks/saveExternalReplicationTaskCommand";
+import ongoingTaskReplicationEditModel from "models/database/tasks/ongoingTaskReplicationEditModel";
+import ongoingTaskInfoCommand from "commands/database/tasks/getOngoingTaskInfoCommand";
+import eventsCollector from "common/eventsCollector";
+import generalUtils from "common/generalUtils";
+import getConnectionStringsCommand from "commands/database/settings/getConnectionStringsCommand";
+import getPossibleMentorsCommand from "commands/database/tasks/getPossibleMentorsCommand";
+import connectionStringRavenEtlModel from "models/database/settings/connectionStringRavenEtlModel";
+import jsonUtil from "common/jsonUtil";
+import popoverUtils from "common/popoverUtils";
+import tasksCommonContent from "models/database/tasks/tasksCommonContent";
+import discoveryUrl from "models/database/settings/discoveryUrl";
 
 class editExternalReplicationTask extends viewModelBase {
 

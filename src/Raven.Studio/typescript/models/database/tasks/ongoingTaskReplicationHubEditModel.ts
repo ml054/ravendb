@@ -1,5 +1,5 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import generalUtils = require("common/generalUtils");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import generalUtils from "common/generalUtils";
 
 class ongoingTaskReplicationHubEditModel {
 

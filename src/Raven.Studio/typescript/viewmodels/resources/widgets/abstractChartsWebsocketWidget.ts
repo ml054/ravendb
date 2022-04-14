@@ -1,9 +1,9 @@
-import websocketBasedWidget = require("viewmodels/resources/widgets/websocketBasedWidget");
-import historyAwareNodeStats = require("models/resources/widgets/historyAwareNodeStats");
-import clusterDashboard = require("viewmodels/resources/clusterDashboard");
-import clusterDashboardWebSocketClient = require("common/clusterDashboardWebSocketClient");
-import lineChart = require("models/resources/clusterDashboard/lineChart");
-import moment = require("moment");
+import websocketBasedWidget from "viewmodels/resources/widgets/websocketBasedWidget";
+import historyAwareNodeStats from "models/resources/widgets/historyAwareNodeStats";
+import clusterDashboard from "viewmodels/resources/clusterDashboard";
+import clusterDashboardWebSocketClient from "common/clusterDashboardWebSocketClient";
+import lineChart from "models/resources/clusterDashboard/lineChart";
+import moment from "moment";
 
 abstract class abstractChartsWebsocketWidget<
     TPayload extends Raven.Server.Dashboard.Cluster.AbstractClusterDashboardNotification, 

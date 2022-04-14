@@ -1,11 +1,11 @@
-import app = require("durandal/app");
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import notificationCenter = require("common/notifications/notificationCenter");
-import recentLicenseLimitError = require("common/notifications/models/recentLicenseLimitError");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import alert = require("common/notifications/models/alert");
-import license = require("models/auth/licenseModel");
-import registration = require("viewmodels/shell/registration");
+import app from "durandal/app";
+import abstractNotification from "common/notifications/models/abstractNotification";
+import notificationCenter from "common/notifications/notificationCenter";
+import recentLicenseLimitError from "common/notifications/models/recentLicenseLimitError";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import alert from "common/notifications/models/alert";
+import license from "models/auth/licenseModel";
+import registration from "viewmodels/shell/registration";
 
 class licenseLimitDetails extends dialogViewModelBase {
 

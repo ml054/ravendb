@@ -1,13 +1,13 @@
-import appUrl = require("common/appUrl");
-import database = require("models/resources/database");
-import saveTimeSeriesConfigurationCommand = require("commands/database/documents/timeSeries/saveTimeSeriesConfigurationCommand");
-import eventsCollector = require("common/eventsCollector");
-import generalUtils = require("common/generalUtils");
-import messagePublisher = require("common/messagePublisher");
-import collectionsTracker = require("common/helpers/database/collectionsTracker");
-import getTimeSeriesConfigurationCommand = require("commands/database/documents/timeSeries/getTimeSeriesConfigurationCommand");
-import timeSeriesConfigurationEntry = require("models/database/documents/timeSeriesConfigurationEntry");
-import popoverUtils = require("common/popoverUtils");
+import appUrl from "common/appUrl";
+import database from "models/resources/database";
+import saveTimeSeriesConfigurationCommand from "commands/database/documents/timeSeries/saveTimeSeriesConfigurationCommand";
+import eventsCollector from "common/eventsCollector";
+import generalUtils from "common/generalUtils";
+import messagePublisher from "common/messagePublisher";
+import collectionsTracker from "common/helpers/database/collectionsTracker";
+import getTimeSeriesConfigurationCommand from "commands/database/documents/timeSeries/getTimeSeriesConfigurationCommand";
+import timeSeriesConfigurationEntry from "models/database/documents/timeSeriesConfigurationEntry";
+import popoverUtils from "common/popoverUtils";
 import shardViewModelBase from "viewmodels/shardViewModelBase";
 
 class timeSeries extends shardViewModelBase {

@@ -1,9 +1,9 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
 
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import database = require("models/resources/database");
-import generalUtils = require("common/generalUtils");
-import moment = require("moment");
+import abstractNotification from "common/notifications/models/abstractNotification";
+import database from "models/resources/database";
+import generalUtils from "common/generalUtils";
+import moment from "moment";
 
 class attachmentUpload extends abstractNotification {
 

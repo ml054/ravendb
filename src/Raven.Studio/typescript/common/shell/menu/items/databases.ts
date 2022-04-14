@@ -1,4 +1,4 @@
-﻿import leafMenuItem = require("common/shell/menu/leafMenuItem");
+import leafMenuItem from "common/shell/menu/leafMenuItem";
 import appUrl from "common/appUrl";
 
 export = getDatabasesMenuItem;

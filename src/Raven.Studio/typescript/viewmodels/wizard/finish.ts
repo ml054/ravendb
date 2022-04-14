@@ -1,14 +1,14 @@
-import setupStep = require("viewmodels/wizard/setupStep");
-import finishSetupCommand = require("commands/wizard/finishSetupCommand");
-import getNextOperationId = require("commands/database/studio/getNextOperationId");
-import messagePublisher = require("common/messagePublisher");
-import endpoints = require("endpoints");
-import router = require("plugins/router");
-import app = require("durandal/app");
-import saveUnsecuredSetupCommand = require("commands/wizard/saveUnsecuredSetupCommand");
-import serverNotificationCenterClient = require("common/serverNotificationCenterClient");
-import continueClusterConfigurationCommand = require("commands/wizard/continueClusterConfigurationCommand");
-import letsEncryptInstructions = require("viewmodels/wizard/letsEncryptInstructions");
+import setupStep from "viewmodels/wizard/setupStep";
+import finishSetupCommand from "commands/wizard/finishSetupCommand";
+import getNextOperationId from "commands/database/studio/getNextOperationId";
+import messagePublisher from "common/messagePublisher";
+import endpoints from "endpoints";
+import router from "plugins/router";
+import app from "durandal/app";
+import saveUnsecuredSetupCommand from "commands/wizard/saveUnsecuredSetupCommand";
+import serverNotificationCenterClient from "common/serverNotificationCenterClient";
+import continueClusterConfigurationCommand from "commands/wizard/continueClusterConfigurationCommand";
+import letsEncryptInstructions from "viewmodels/wizard/letsEncryptInstructions";
 
 type messageItem = {
     message: string;

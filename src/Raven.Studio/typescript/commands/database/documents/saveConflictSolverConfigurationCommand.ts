@@ -1,6 +1,6 @@
-import database = require("models/resources/database");
-import commandBase = require("commands/commandBase");
-import endpoints = require("endpoints");
+import database from "models/resources/database";
+import commandBase from "commands/commandBase";
+import endpoints from "endpoints";
 
 class saveConflictSolverConfigurationCommand extends commandBase {
     constructor(private db: database, private configuration: Raven.Client.ServerWide.ConflictSolver) {

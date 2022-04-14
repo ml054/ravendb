@@ -1,12 +1,12 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import databasesManager = require("common/shell/databasesManager");
-import notificationCenter = require("common/notifications/notificationCenter");
-import databaseInfo = require("models/resources/info/databaseInfo");
-import getIndexNamesCommand = require("commands/database/index/getIndexNamesCommand");
-import compactDatabaseCommand = require("commands/resources/compactDatabaseCommand");
-import genUtils = require("common/generalUtils");
-import dialog = require("plugins/dialog");
-import clusterTopologyManager = require("common/shell/clusterTopologyManager");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import databasesManager from "common/shell/databasesManager";
+import notificationCenter from "common/notifications/notificationCenter";
+import databaseInfo from "models/resources/info/databaseInfo";
+import getIndexNamesCommand from "commands/database/index/getIndexNamesCommand";
+import compactDatabaseCommand from "commands/resources/compactDatabaseCommand";
+import genUtils from "common/generalUtils";
+import dialog from "plugins/dialog";
+import clusterTopologyManager from "common/shell/clusterTopologyManager";
 
 class compactDatabaseDialog extends dialogViewModelBase {
 

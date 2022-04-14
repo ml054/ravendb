@@ -1,12 +1,12 @@
-import appUrl = require("common/appUrl");
-import viewModelBase = require("viewmodels/viewModelBase");
-import router = require("plugins/router");
-import fileImporter = require("common/fileImporter");
-import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
-import customSorter = require("models/database/settings/customSorter");
-import messagePublisher = require("common/messagePublisher");
-import getServerWideCustomSortersCommand = require("commands/serverWide/sorters/getServerWideCustomSortersCommand");
-import saveServerWideCustomSorterCommand = require("commands/serverWide/sorters/saveServerWideCustomSorterCommand");
+import appUrl from "common/appUrl";
+import viewModelBase from "viewmodels/viewModelBase";
+import router from "plugins/router";
+import fileImporter from "common/fileImporter";
+import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
+import customSorter from "models/database/settings/customSorter";
+import messagePublisher from "common/messagePublisher";
+import getServerWideCustomSortersCommand from "commands/serverWide/sorters/getServerWideCustomSortersCommand";
+import saveServerWideCustomSorterCommand from "commands/serverWide/sorters/saveServerWideCustomSorterCommand";
 
 class editServerWideCustomSorter extends viewModelBase {
 

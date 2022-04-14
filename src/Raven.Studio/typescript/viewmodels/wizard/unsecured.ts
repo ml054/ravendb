@@ -1,8 +1,8 @@
-import setupStep = require("viewmodels/wizard/setupStep");
-import router = require("plugins/router");
-import popoverUtils = require("common/popoverUtils");
-import ipEntry = require("models/wizard/ipEntry");
-import studioConfigurationDatabaseModel = require("models/database/settings/studioConfigurationDatabaseModel");
+import setupStep from "viewmodels/wizard/setupStep";
+import router from "plugins/router";
+import popoverUtils from "common/popoverUtils";
+import ipEntry from "models/wizard/ipEntry";
+import studioConfigurationDatabaseModel from "models/database/settings/studioConfigurationDatabaseModel";
 
 class unsecured extends setupStep {
 

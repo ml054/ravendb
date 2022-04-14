@@ -1,8 +1,8 @@
-import deleteIndexCommand = require("commands/database/index/deleteIndexCommand");
-import dialog = require("plugins/dialog");
-import database = require("models/resources/database");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import messagePublisher = require("common/messagePublisher");
+import deleteIndexCommand from "commands/database/index/deleteIndexCommand";
+import dialog from "plugins/dialog";
+import database from "models/resources/database";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import messagePublisher from "common/messagePublisher";
 
 class indexInfoForDelete {
     indexName: string;

@@ -1,7 +1,5 @@
-﻿import commandBase = require("commands/commandBase");
-import databaseInfo = require("models/resources/info/databaseInfo");
-import endpoints = require("endpoints");
-import configuration = require("configuration");
+import commandBase from "commands/commandBase";
+import endpoints from "endpoints";
 
 class toggleClusterObserverCommand extends commandBase {
 

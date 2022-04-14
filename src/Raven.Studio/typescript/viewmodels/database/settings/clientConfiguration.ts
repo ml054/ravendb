@@ -1,12 +1,12 @@
-import clientConfigurationModel = require("models/database/settings/clientConfigurationModel");
-import getGlobalClientConfigurationCommand = require("commands/resources/getGlobalClientConfigurationCommand");
-import saveClientConfigurationCommand = require("commands/resources/saveClientConfigurationCommand");
-import getClientConfigurationCommand = require("commands/resources/getClientConfigurationCommand");
-import appUrl = require("common/appUrl");
-import eventsCollector = require("common/eventsCollector");
-import accessManager = require("common/shell/accessManager");
+import clientConfigurationModel from "models/database/settings/clientConfigurationModel";
+import getGlobalClientConfigurationCommand from "commands/resources/getGlobalClientConfigurationCommand";
+import saveClientConfigurationCommand from "commands/resources/saveClientConfigurationCommand";
+import getClientConfigurationCommand from "commands/resources/getClientConfigurationCommand";
+import appUrl from "common/appUrl";
+import eventsCollector from "common/eventsCollector";
+import accessManager from "common/shell/accessManager";
 import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database = require("models/resources/database");
+import database from "models/resources/database";
 
 class clientConfiguration extends shardViewModelBase {
 

@@ -1,5 +1,5 @@
-import database = require("models/resources/database");
-import collection = require("models/database/documents/collection");
+import database from "models/resources/database";
+import collection from "models/database/documents/collection";
 
 class collectionsStats  {
 

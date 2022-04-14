@@ -1,7 +1,7 @@
 ﻿/// <reference path="../../../../typings/tsd.d.ts"/>
 
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import hyperlinkColumn = require("widgets/virtualGrid/columns/hyperlinkColumn");
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import hyperlinkColumn from "widgets/virtualGrid/columns/hyperlinkColumn";
 
 class nodeTagColumn<T extends { nodeTag: string, database: string, noData: boolean }> extends hyperlinkColumn<T> {
 

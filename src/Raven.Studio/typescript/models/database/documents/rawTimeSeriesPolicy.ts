@@ -1,4 +1,4 @@
-import timeSeriesPolicy = require("models/database/documents/timeSeriesPolicy");
+import timeSeriesPolicy from "models/database/documents/timeSeriesPolicy";
 
 class rawTimeSeriesPolicy extends timeSeriesPolicy {
 

@@ -1,5 +1,5 @@
 
-import moment = require("moment");
+import moment from "moment";
 
 class databaseOverviewItem implements databaseAndNodeAwareStats {
     database: string;

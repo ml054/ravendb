@@ -1,8 +1,8 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import database = require("models/resources/database");
-import remoteMetadataProvider = require("./autoComplete/remoteMetadataProvider");
-import cachedMetadataProvider = require("./autoComplete/cachedMetadataProvider");
+import database from "models/resources/database";
+import remoteMetadataProvider from "./autoComplete/remoteMetadataProvider";
+import cachedMetadataProvider from "./autoComplete/cachedMetadataProvider";
 
 class rqlLanguageService {
     

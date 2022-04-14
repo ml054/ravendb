@@ -1,4 +1,4 @@
-import document = require("models/database/documents/document");
+import document from "models/database/documents/document";
 import documentHelpers from "common/helpers/database/documentHelpers";
 
 describe("documentHelpers", function () {

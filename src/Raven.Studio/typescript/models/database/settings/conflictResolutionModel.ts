@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import jsonUtil = require("common/jsonUtil");
-import perCollectionConflictResolutionModel = require("models/database/settings/perCollectionConflictResolutionModel");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import jsonUtil from "common/jsonUtil";
+import perCollectionConflictResolutionModel from "models/database/settings/perCollectionConflictResolutionModel";
 
 class conflictResolutionModel {
 

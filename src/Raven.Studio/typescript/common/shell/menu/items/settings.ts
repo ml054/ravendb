@@ -1,6 +1,6 @@
-﻿import intermediateMenuItem = require("common/shell/menu/intermediateMenuItem");
-import leafMenuItem = require("common/shell/menu/leafMenuItem");
-import separatorMenuItem = require("common/shell/menu/separatorMenuItem");
+import intermediateMenuItem from "common/shell/menu/intermediateMenuItem";
+import leafMenuItem from "common/shell/menu/leafMenuItem";
+import separatorMenuItem from "common/shell/menu/separatorMenuItem";
 
 export = getSettingsMenuItem;
 

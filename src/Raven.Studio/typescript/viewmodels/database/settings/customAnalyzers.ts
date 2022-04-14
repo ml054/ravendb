@@ -1,14 +1,14 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import appUrl = require("common/appUrl");
-import getCustomAnalyzersCommand = require("commands/database/settings/getCustomAnalyzersCommand");
-import deleteCustomAnalyzerCommand = require("commands/database/settings/deleteCustomAnalyzerCommand");
-import getServerWideCustomAnalyzersCommand = require("commands/serverWide/analyzers/getServerWideCustomAnalyzersCommand");
-import database = require("models/resources/database");
-import router = require("plugins/router");
-import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
-import generalUtils = require("common/generalUtils");
-import analyzerListItemModel = require("models/database/settings/analyzerListItemModel");
-import accessManager = require("common/shell/accessManager");
+import viewModelBase from "viewmodels/viewModelBase";
+import appUrl from "common/appUrl";
+import getCustomAnalyzersCommand from "commands/database/settings/getCustomAnalyzersCommand";
+import deleteCustomAnalyzerCommand from "commands/database/settings/deleteCustomAnalyzerCommand";
+import getServerWideCustomAnalyzersCommand from "commands/serverWide/analyzers/getServerWideCustomAnalyzersCommand";
+import database from "models/resources/database";
+import router from "plugins/router";
+import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
+import generalUtils from "common/generalUtils";
+import analyzerListItemModel from "models/database/settings/analyzerListItemModel";
+import accessManager from "common/shell/accessManager";
 import shardViewModelBase from "viewmodels/shardViewModelBase";
 
 class customAnalyzers extends shardViewModelBase {

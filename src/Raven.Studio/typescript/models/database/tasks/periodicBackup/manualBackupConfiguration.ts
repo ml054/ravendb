@@ -1,9 +1,9 @@
-﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
-import jsonUtil = require("common/jsonUtil");
-import database = require("models/resources/database");
-import backupConfiguration = require("models/database/tasks/periodicBackup/backupConfiguration");
-import backupNowManualCommand = require("commands/database/tasks/backupNowManualCommand");
-import notificationCenter = require("common/notifications/notificationCenter");
+/// <reference path="../../../../../typings/tsd.d.ts"/>
+import jsonUtil from "common/jsonUtil";
+import database from "models/resources/database";
+import backupConfiguration from "models/database/tasks/periodicBackup/backupConfiguration";
+import backupNowManualCommand from "commands/database/tasks/backupNowManualCommand";
+import notificationCenter from "common/notifications/notificationCenter";
 
 class manualBackupConfiguration extends backupConfiguration {
 

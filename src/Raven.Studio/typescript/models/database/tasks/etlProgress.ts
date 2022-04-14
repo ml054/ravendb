@@ -1,5 +1,5 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import genericProgress = require("common/helpers/database/genericProgress");
+import genericProgress from "common/helpers/database/genericProgress";
 
 class etlProgress extends genericProgress {
     

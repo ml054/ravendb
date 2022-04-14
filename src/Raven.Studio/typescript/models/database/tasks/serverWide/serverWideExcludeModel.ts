@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
-import databasesManager = require("common/shell/databasesManager");
-import jsonUtil = require("common/jsonUtil");
+/// <reference path="../../../../../typings/tsd.d.ts"/>
+import databasesManager from "common/shell/databasesManager";
+import jsonUtil from "common/jsonUtil";
 
 class serverWideExcludeModel {
     exclude = ko.observable<boolean>();

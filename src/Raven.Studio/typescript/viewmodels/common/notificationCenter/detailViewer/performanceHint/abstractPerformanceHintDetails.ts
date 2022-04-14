@@ -1,6 +1,6 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import notificationCenter = require("common/notifications/notificationCenter");
-import performanceHint = require("common/notifications/models/performanceHint");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import notificationCenter from "common/notifications/notificationCenter";
+import performanceHint from "common/notifications/models/performanceHint";
 
 abstract class abstractPerformanceHintDetails extends dialogViewModelBase {
 

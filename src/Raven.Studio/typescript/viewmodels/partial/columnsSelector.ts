@@ -1,13 +1,13 @@
 /// <reference path="../../../typings/tsd.d.ts" />
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import checkedColumn = require("widgets/virtualGrid/columns/checkedColumn");
-import actionColumn = require("widgets/virtualGrid/columns/actionColumn");
-import customColumn = require("widgets/virtualGrid/columns/customColumn");
-import hyperlinkColumn = require("widgets/virtualGrid/columns/hyperlinkColumn");
-import storageKeyProvider = require("common/storage/storageKeyProvider");
-import generalUtils = require("common/generalUtils");
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import checkedColumn from "widgets/virtualGrid/columns/checkedColumn";
+import actionColumn from "widgets/virtualGrid/columns/actionColumn";
+import customColumn from "widgets/virtualGrid/columns/customColumn";
+import hyperlinkColumn from "widgets/virtualGrid/columns/hyperlinkColumn";
+import storageKeyProvider from "common/storage/storageKeyProvider";
+import generalUtils from "common/generalUtils";
 import Sortable from "sortablejs";
 
 class columnItem {

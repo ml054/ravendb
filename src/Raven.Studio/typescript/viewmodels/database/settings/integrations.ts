@@ -1,13 +1,13 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import eventsCollector = require("common/eventsCollector");
-import generalUtils = require("common/generalUtils");
-import postgreSqlCredentialsModel = require("models/database/settings/postgreSqlCredentialsModel");
-import getIntegrationsPostgreSqlCredentialsCommand = require("commands/database/settings/getIntegrationsPostgreSqlCredentialsCommand");
-import getIntegrationsPostgreSqlSupportCommand = require("commands/database/settings/getIntegrationsPostgreSqlSupportCommand");
-import saveIntegrationsPostgreSqlCredentialsCommand = require("commands/database/settings/saveIntegrationsPostgreSqlCredentialsCommand");
-import deleteIntegrationsPostgreSqlCredentialsCommand = require("commands/database/settings/deleteIntegrationsPostgreSqlCredentialsCommand");
+import viewModelBase from "viewmodels/viewModelBase";
+import eventsCollector from "common/eventsCollector";
+import generalUtils from "common/generalUtils";
+import postgreSqlCredentialsModel from "models/database/settings/postgreSqlCredentialsModel";
+import getIntegrationsPostgreSqlCredentialsCommand from "commands/database/settings/getIntegrationsPostgreSqlCredentialsCommand";
+import getIntegrationsPostgreSqlSupportCommand from "commands/database/settings/getIntegrationsPostgreSqlSupportCommand";
+import saveIntegrationsPostgreSqlCredentialsCommand from "commands/database/settings/saveIntegrationsPostgreSqlCredentialsCommand";
+import deleteIntegrationsPostgreSqlCredentialsCommand from "commands/database/settings/deleteIntegrationsPostgreSqlCredentialsCommand";
 import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database = require("models/resources/database");
+import database from "models/resources/database";
 
 class integrations extends shardViewModelBase {
 

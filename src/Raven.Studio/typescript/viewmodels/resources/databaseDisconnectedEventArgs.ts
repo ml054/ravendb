@@ -1,4 +1,4 @@
-﻿interface databaseDisconnectedEventArgs {
+interface databaseDisconnectedEventArgs {
     databaseName: string;
     cause: databaseDisconnectionCause;
 }

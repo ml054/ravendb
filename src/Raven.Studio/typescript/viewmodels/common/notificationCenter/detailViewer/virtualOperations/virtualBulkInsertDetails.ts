@@ -1,15 +1,15 @@
-import app = require("durandal/app");
+import app from "durandal/app";
 
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import actionColumn = require("widgets/virtualGrid/columns/actionColumn");
-import notificationCenter = require("common/notifications/notificationCenter");
-import virtualBulkInsert = require("common/notifications/models/virtualBulkInsert");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import generalUtils = require("common/generalUtils");
-import moment = require("moment");
+import abstractNotification from "common/notifications/models/abstractNotification";
+import actionColumn from "widgets/virtualGrid/columns/actionColumn";
+import notificationCenter from "common/notifications/notificationCenter";
+import virtualBulkInsert from "common/notifications/models/virtualBulkInsert";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import generalUtils from "common/generalUtils";
+import moment from "moment";
 
 class virtualBulkInsertDetails extends dialogViewModelBase {
 

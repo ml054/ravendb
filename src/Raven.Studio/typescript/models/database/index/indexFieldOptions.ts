@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import spatialOptions = require("models/database/index/spatialOptions");
-import jsonUtil = require("common/jsonUtil");
+import spatialOptions from "models/database/index/spatialOptions";
+import jsonUtil from "common/jsonUtil";
 
 function labelMatcher<T>(labels: Array<valueAndLabelItem<T, string>>): (arg: T) => string {
     return(arg) => labels.find(x => x.value === arg).label;

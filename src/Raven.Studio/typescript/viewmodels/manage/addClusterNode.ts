@@ -1,12 +1,12 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import eventsCollector = require("common/eventsCollector");
-import addNodeToClusterCommand = require("commands/database/cluster/addNodeToClusterCommand");
-import router = require("plugins/router");
-import appUrl = require("common/appUrl");
-import generalUtils = require("common/generalUtils");
-import addClusterNodeModel = require("models/database/cluster/addClusterNodeModel");
-import testClusterNodeConnectionCommand = require("commands/database/cluster/testClusterNodeConnectionCommand");
-import popoverUtils = require("common/popoverUtils");
+import viewModelBase from "viewmodels/viewModelBase";
+import eventsCollector from "common/eventsCollector";
+import addNodeToClusterCommand from "commands/database/cluster/addNodeToClusterCommand";
+import router from "plugins/router";
+import appUrl from "common/appUrl";
+import generalUtils from "common/generalUtils";
+import addClusterNodeModel from "models/database/cluster/addClusterNodeModel";
+import testClusterNodeConnectionCommand from "commands/database/cluster/testClusterNodeConnectionCommand";
+import popoverUtils from "common/popoverUtils";
 
 class addClusterNode extends viewModelBase {
 

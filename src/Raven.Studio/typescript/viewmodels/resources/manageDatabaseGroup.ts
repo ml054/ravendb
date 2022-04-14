@@ -1,23 +1,23 @@
-import viewModelBase = require("viewmodels/viewModelBase");
+import viewModelBase from "viewmodels/viewModelBase";
 
-import app = require("durandal/app");
-import getDatabaseCommand = require("commands/resources/getDatabaseCommand");
-import databaseInfo = require("models/resources/info/databaseInfo");
-import clusterTopologyManager = require("common/shell/clusterTopologyManager");
+import app from "durandal/app";
+import getDatabaseCommand from "commands/resources/getDatabaseCommand";
+import databaseInfo from "models/resources/info/databaseInfo";
+import clusterTopologyManager from "common/shell/clusterTopologyManager";
 
-import databaseGroupNode = require("models/resources/info/databaseGroupNode");
-import deleteDatabaseFromNodeCommand = require("commands/resources/deleteDatabaseFromNodeCommand");
-import databaseGroupGraph = require("models/database/dbGroup/databaseGroupGraph");
-import ongoingTasksCommand = require("commands/database/tasks/getOngoingTasksCommand");
-import showDataDialog = require("viewmodels/common/showDataDialog");
-import addNewNodeToDatabaseGroup = require("viewmodels/resources/addNewNodeToDatabaseGroup");
-import reorderNodesInDatabaseGroupCommand = require("commands/database/dbGroup/reorderNodesInDatabaseGroupCommand");
-import license = require("models/auth/licenseModel");
-import eventsCollector = require("common/eventsCollector");
-import messagePublisher = require("common/messagePublisher");
-import generalUtils = require("common/generalUtils");
-import toggleDynamicNodeAssignmentCommand = require("commands/database/dbGroup/toggleDynamicNodeAssignmentCommand");
-import jsonUtil = require("common/jsonUtil");
+import databaseGroupNode from "models/resources/info/databaseGroupNode";
+import deleteDatabaseFromNodeCommand from "commands/resources/deleteDatabaseFromNodeCommand";
+import databaseGroupGraph from "models/database/dbGroup/databaseGroupGraph";
+import ongoingTasksCommand from "commands/database/tasks/getOngoingTasksCommand";
+import showDataDialog from "viewmodels/common/showDataDialog";
+import addNewNodeToDatabaseGroup from "viewmodels/resources/addNewNodeToDatabaseGroup";
+import reorderNodesInDatabaseGroupCommand from "commands/database/dbGroup/reorderNodesInDatabaseGroupCommand";
+import license from "models/auth/licenseModel";
+import eventsCollector from "common/eventsCollector";
+import messagePublisher from "common/messagePublisher";
+import generalUtils from "common/generalUtils";
+import toggleDynamicNodeAssignmentCommand from "commands/database/dbGroup/toggleDynamicNodeAssignmentCommand";
+import jsonUtil from "common/jsonUtil";
 import Sortable from "sortablejs";
 
 class manageDatabaseGroup extends viewModelBase {

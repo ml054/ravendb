@@ -1,8 +1,8 @@
 ﻿/// <reference path="../../../typings/tsd.d.ts"/>
 
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import virtualRow = require("widgets/virtualGrid/virtualRow");
-import virtualGridSelection = require("widgets/virtualGrid/virtualGridSelection");
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import virtualRow from "widgets/virtualGrid/virtualRow";
+import virtualGridSelection from "widgets/virtualGrid/virtualGridSelection";
 
 interface virtualGridController<T> { 
 

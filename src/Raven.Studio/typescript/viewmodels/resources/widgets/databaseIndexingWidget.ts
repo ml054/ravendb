@@ -1,12 +1,12 @@
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import indexingSpeedItem = require("models/resources/widgets/indexingSpeedItem");
-import clusterDashboard = require("viewmodels/resources/clusterDashboard");
-import nodeTagColumn = require("widgets/virtualGrid/columns/nodeTagColumn");
-import abstractDatabaseAndNodeAwareTableWidget = require("viewmodels/resources/widgets/abstractDatabaseAndNodeAwareTableWidget");
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import appUrl = require("common/appUrl");
-import perNodeStatItems = require("models/resources/widgets/perNodeStatItems");
-import widget = require("viewmodels/resources/widgets/widget");
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import indexingSpeedItem from "models/resources/widgets/indexingSpeedItem";
+import clusterDashboard from "viewmodels/resources/clusterDashboard";
+import nodeTagColumn from "widgets/virtualGrid/columns/nodeTagColumn";
+import abstractDatabaseAndNodeAwareTableWidget from "viewmodels/resources/widgets/abstractDatabaseAndNodeAwareTableWidget";
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import appUrl from "common/appUrl";
+import perNodeStatItems from "models/resources/widgets/perNodeStatItems";
+import widget from "viewmodels/resources/widgets/widget";
 
 class databaseIndexingWidget extends abstractDatabaseAndNodeAwareTableWidget<Raven.Server.Dashboard.Cluster.Notifications.DatabaseIndexingSpeedPayload, perNodeStatItems<indexingSpeedItem>, indexingSpeedItem> {
 

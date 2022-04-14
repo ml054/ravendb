@@ -1,8 +1,8 @@
-﻿import appUrl = require("common/appUrl");
-import intermediateMenuItem = require("common/shell/menu/intermediateMenuItem");
-import leafMenuItem = require("common/shell/menu/leafMenuItem");
-import separatorMenuItem = require("common/shell/menu/separatorMenuItem");
-import accessManager = require("common/shell/accessManager");
+import appUrl from "common/appUrl";
+import intermediateMenuItem from "common/shell/menu/intermediateMenuItem";
+import leafMenuItem from "common/shell/menu/leafMenuItem";
+import separatorMenuItem from "common/shell/menu/separatorMenuItem";
+import accessManager from "common/shell/accessManager";
 
 export = getManageServerMenuItem;
 

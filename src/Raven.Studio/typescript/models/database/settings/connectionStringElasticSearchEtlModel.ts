@@ -1,15 +1,15 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import database = require("models/resources/database");
-import connectionStringModel = require("models/database/settings/connectionStringModel");
-import saveConnectionStringCommand = require("commands/database/settings/saveConnectionStringCommand");
-import jsonUtil = require("common/jsonUtil");
-import discoveryUrl = require("models/database/settings/discoveryUrl");
-import fileImporter = require("common/fileImporter");
-import replicationCertificateModel = require("models/database/tasks/replicationCertificateModel");
-import forge = require("node-forge");
-import certificateUtils = require("common/certificateUtils");
-import messagePublisher = require("common/messagePublisher");
-import testElasticSearchNodeConnectionCommand = require("commands/database/cluster/testElasticSearchNodeConnectionCommand");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import database from "models/resources/database";
+import connectionStringModel from "models/database/settings/connectionStringModel";
+import saveConnectionStringCommand from "commands/database/settings/saveConnectionStringCommand";
+import jsonUtil from "common/jsonUtil";
+import discoveryUrl from "models/database/settings/discoveryUrl";
+import fileImporter from "common/fileImporter";
+import replicationCertificateModel from "models/database/tasks/replicationCertificateModel";
+import forge from "node-forge";
+import certificateUtils from "common/certificateUtils";
+import messagePublisher from "common/messagePublisher";
+import testElasticSearchNodeConnectionCommand from "commands/database/cluster/testElasticSearchNodeConnectionCommand";
 
 type authenticationMethod = "none" | "basic" | "apiKey" | "certificate";
 

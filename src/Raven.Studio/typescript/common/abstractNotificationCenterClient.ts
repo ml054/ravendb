@@ -1,9 +1,9 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import database = require("models/resources/database");
-import changeSubscription = require("common/changeSubscription");
-import changesCallback = require("common/changesCallback");
-import eventsWebSocketClient = require("common/eventsWebSocketClient");
+import database from "models/resources/database";
+import changeSubscription from "common/changeSubscription";
+import changesCallback from "common/changesCallback";
+import eventsWebSocketClient from "common/eventsWebSocketClient";
 
 abstract class abstractNotificationCenterClient extends eventsWebSocketClient<Raven.Server.NotificationCenter.Notifications.Notification> {
 

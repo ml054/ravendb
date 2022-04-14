@@ -1,10 +1,10 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
-import getLicenseStatusCommand = require("commands/licensing/getLicenseStatusCommand");
-import buildInfo = require("models/resources/buildInfo");
-import generalUtils = require("common/generalUtils");
-import moment = require("moment");
-import licenseSupportInfoCommand = require("commands/licensing/licenseSupportInfoCommand");
+import getLicenseStatusCommand from "commands/licensing/getLicenseStatusCommand";
+import buildInfo from "models/resources/buildInfo";
+import generalUtils from "common/generalUtils";
+import moment from "moment";
+import licenseSupportInfoCommand from "commands/licensing/licenseSupportInfoCommand";
 
 class licenseModel {
     static licenseStatus = ko.observable<Raven.Server.Commercial.LicenseStatus>();

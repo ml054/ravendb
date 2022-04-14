@@ -1,8 +1,8 @@
-﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
-import appUrl = require("common/appUrl");
-import serverWideTaskListModel = require("models/database/tasks/serverWide/serverWideTaskListModel");
-import getAllServerWideTasksCommand = require("commands/serverWide/tasks/getAllServerWideTasksCommand");
-import generalUtils = require("common/generalUtils");
+/// <reference path="../../../../../typings/tsd.d.ts"/>
+import appUrl from "common/appUrl";
+import serverWideTaskListModel from "models/database/tasks/serverWide/serverWideTaskListModel";
+import getAllServerWideTasksCommand from "commands/serverWide/tasks/getAllServerWideTasksCommand";
+import generalUtils from "common/generalUtils";
 import connectionStatus from "models/resources/connectionStatus";
 
 class serverWideExternalReplicationListModel extends serverWideTaskListModel {

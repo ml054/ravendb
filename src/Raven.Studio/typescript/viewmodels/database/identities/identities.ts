@@ -1,17 +1,17 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import eventsCollector = require("common/eventsCollector");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import actionColumn = require("widgets/virtualGrid/columns/actionColumn");
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import getIdentitiesCommand = require("commands/database/identities/getIdentitiesCommand");
-import seedIdentityCommand = require("commands/database/identities/seedIdentityCommand");
-import getClientConfigurationCommand = require("commands/resources/getClientConfigurationCommand");
-import getGlobalClientConfigurationCommand = require("commands/resources/getGlobalClientConfigurationCommand");
-import genUtils = require("common/generalUtils");
+import viewModelBase from "viewmodels/viewModelBase";
+import eventsCollector from "common/eventsCollector";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import actionColumn from "widgets/virtualGrid/columns/actionColumn";
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import getIdentitiesCommand from "commands/database/identities/getIdentitiesCommand";
+import seedIdentityCommand from "commands/database/identities/seedIdentityCommand";
+import getClientConfigurationCommand from "commands/resources/getClientConfigurationCommand";
+import getGlobalClientConfigurationCommand from "commands/resources/getGlobalClientConfigurationCommand";
+import genUtils from "common/generalUtils";
 import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database = require("models/resources/database");
+import database from "models/resources/database";
 
 class identity {
     prefix = ko.observable<string>();

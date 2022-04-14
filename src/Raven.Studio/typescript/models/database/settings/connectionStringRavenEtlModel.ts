@@ -1,10 +1,10 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import database = require("models/resources/database");
-import connectionStringModel = require("models/database/settings/connectionStringModel");
-import saveConnectionStringCommand = require("commands/database/settings/saveConnectionStringCommand");
-import testClusterNodeConnectionCommand = require("commands/database/cluster/testClusterNodeConnectionCommand");
-import jsonUtil = require("common/jsonUtil");
-import discoveryUrl = require("models/database/settings/discoveryUrl");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import database from "models/resources/database";
+import connectionStringModel from "models/database/settings/connectionStringModel";
+import saveConnectionStringCommand from "commands/database/settings/saveConnectionStringCommand";
+import testClusterNodeConnectionCommand from "commands/database/cluster/testClusterNodeConnectionCommand";
+import jsonUtil from "common/jsonUtil";
+import discoveryUrl from "models/database/settings/discoveryUrl";
 
 class connectionStringRavenEtlModel extends connectionStringModel { 
 

@@ -1,4 +1,4 @@
-﻿import requestExecution = require("common/notifications/requestExecution");
+import requestExecution from "common/notifications/requestExecution";
 
 class protractedCommandsDetector {
     static instance = new protractedCommandsDetector();

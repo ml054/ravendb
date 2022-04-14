@@ -1,8 +1,8 @@
-import widget = require("viewmodels/resources/widgets/widget");
-import app = require("durandal/app");
-import appUrl = require("common/appUrl");
-import createDatabase = require("viewmodels/resources/createDatabase");
-import viewModelBase = require("viewmodels/viewModelBase");
+import widget from "viewmodels/resources/widgets/widget";
+import app from "durandal/app";
+import appUrl from "common/appUrl";
+import createDatabase from "viewmodels/resources/createDatabase";
+import viewModelBase from "viewmodels/viewModelBase";
 
 class welcomeWidget extends widget {
 

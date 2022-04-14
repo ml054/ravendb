@@ -1,11 +1,11 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
 
-import uploadAttachmentCommand = require("commands/database/documents/attachments/uploadAttachmentCommand");
-import document = require("models/database/documents/document");
-import database = require("models/resources/database");
-import viewHelpers = require("common/helpers/view/viewHelpers")
-import notificationCenter = require("common/notifications/notificationCenter");
-import attachmentUpload = require("common/notifications/models/attachmentUpload");
+import uploadAttachmentCommand from "commands/database/documents/attachments/uploadAttachmentCommand";
+import document from "models/database/documents/document";
+import database from "models/resources/database";
+import viewHelpers from "common/helpers/view/viewHelpers"
+import notificationCenter from "common/notifications/notificationCenter";
+import attachmentUpload from "common/notifications/models/attachmentUpload";
 
 class editDocumentUploader {
 

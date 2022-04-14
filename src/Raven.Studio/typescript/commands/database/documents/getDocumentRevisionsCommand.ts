@@ -1,7 +1,7 @@
-import commandBase = require("commands/commandBase");
-import database = require("models/resources/database");
-import document = require("models/database/documents/document");
-import endpoints = require("endpoints");
+import commandBase from "commands/commandBase";
+import database from "models/resources/database";
+import document from "models/database/documents/document";
+import endpoints from "endpoints";
 
 class getDocumentRevisionsCommand extends commandBase {
 

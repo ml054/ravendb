@@ -1,20 +1,20 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import connectionStringRavenEtlModel = require("models/database/settings/connectionStringRavenEtlModel");
-import connectionStringSqlEtlModel = require("models/database/settings/connectionStringSqlEtlModel");
-import connectionStringOlapEtlModel = require("models/database/settings/connectionStringOlapEtlModel");
-import connectionStringElasticSearchEtlModel = require("models/database/settings/connectionStringElasticSearchEtlModel");
-import saveConnectionStringCommand = require("commands/database/settings/saveConnectionStringCommand");
-import getConnectionStringsCommand = require("commands/database/settings/getConnectionStringsCommand");
-import getConnectionStringInfoCommand = require("commands/database/settings/getConnectionStringInfoCommand");
-import deleteConnectionStringCommand = require("commands/database/settings/deleteConnectionStringCommand");
-import ongoingTasksCommand = require("commands/database/tasks/getOngoingTasksCommand");
-import discoveryUrl = require("models/database/settings/discoveryUrl");
-import eventsCollector = require("common/eventsCollector");
-import generalUtils = require("common/generalUtils");
-import appUrl = require("common/appUrl");
-import getPeriodicBackupConfigCommand = require("commands/database/tasks/getPeriodicBackupConfigCommand");
-import backupSettings = require("models/database/tasks/periodicBackup/backupSettings");
-import testPeriodicBackupCredentialsCommand = require("commands/serverWide/testPeriodicBackupCredentialsCommand");
+import viewModelBase from "viewmodels/viewModelBase";
+import connectionStringRavenEtlModel from "models/database/settings/connectionStringRavenEtlModel";
+import connectionStringSqlEtlModel from "models/database/settings/connectionStringSqlEtlModel";
+import connectionStringOlapEtlModel from "models/database/settings/connectionStringOlapEtlModel";
+import connectionStringElasticSearchEtlModel from "models/database/settings/connectionStringElasticSearchEtlModel";
+import saveConnectionStringCommand from "commands/database/settings/saveConnectionStringCommand";
+import getConnectionStringsCommand from "commands/database/settings/getConnectionStringsCommand";
+import getConnectionStringInfoCommand from "commands/database/settings/getConnectionStringInfoCommand";
+import deleteConnectionStringCommand from "commands/database/settings/deleteConnectionStringCommand";
+import ongoingTasksCommand from "commands/database/tasks/getOngoingTasksCommand";
+import discoveryUrl from "models/database/settings/discoveryUrl";
+import eventsCollector from "common/eventsCollector";
+import generalUtils from "common/generalUtils";
+import appUrl from "common/appUrl";
+import getPeriodicBackupConfigCommand from "commands/database/tasks/getPeriodicBackupConfigCommand";
+import backupSettings from "models/database/tasks/periodicBackup/backupSettings";
+import testPeriodicBackupCredentialsCommand from "commands/serverWide/testPeriodicBackupCredentialsCommand";
 
 class connectionStrings extends viewModelBase {
 

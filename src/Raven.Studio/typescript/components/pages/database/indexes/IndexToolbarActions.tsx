@@ -2,7 +2,7 @@
 import { useAppUrls } from "../../../hooks/useAppUrls";
 import classNames from "classnames";
 import { withPreventDefault } from "../../../utils/common";
-import IndexLockMode = Raven.Client.Documents.Indexes.IndexLockMode;
+type IndexLockMode = Raven.Client.Documents.Indexes.IndexLockMode;
 
 interface IndexToolbarActionProps {
     selectedIndexes: string[];

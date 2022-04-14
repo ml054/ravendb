@@ -1,10 +1,10 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import database = require("models/resources/database");
-import d3 = require("d3");
-import abstractWebSocketClient = require("common/abstractWebSocketClient");
-import endpoints = require("endpoints");
-import moment = require("moment");
+import database from "models/resources/database";
+import d3 from "d3";
+import abstractWebSocketClient from "common/abstractWebSocketClient";
+import endpoints from "endpoints";
+import moment from "moment";
 
 class liveIndexPerformanceWebSocketClient extends abstractWebSocketClient<resultsDto<Raven.Client.Documents.Indexes.IndexPerformanceStats>> {
 

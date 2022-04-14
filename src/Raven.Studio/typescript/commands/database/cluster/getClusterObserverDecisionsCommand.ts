@@ -1,6 +1,6 @@
-import commandBase = require("commands/commandBase");
-import endpoints = require("endpoints");
-import clusterTopology = require("models/database/cluster/clusterTopology");
+import commandBase from "commands/commandBase";
+import endpoints from "endpoints";
+import clusterTopology from "models/database/cluster/clusterTopology";
 
 class getClusterObserverDecisionsCommand extends commandBase {
 

@@ -1,5 +1,5 @@
 /// <reference path="../../../typings/tsd.d.ts"/>
-import genUtils = require("common/generalUtils");
+import genUtils from "common/generalUtils";
 
 class ipEntry {
     

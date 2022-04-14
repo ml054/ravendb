@@ -1,8 +1,8 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import endpoints = require("endpoints");
+import endpoints from "endpoints";
 
-import abstractWebSocketClient = require("common/abstractWebSocketClient");
+import abstractWebSocketClient from "common/abstractWebSocketClient";
 
 class runningQueriesWebSocketClient extends abstractWebSocketClient<Array<Raven.Server.Documents.Queries.LiveRunningQueriesCollector.ExecutingQueryCollection>> {
 

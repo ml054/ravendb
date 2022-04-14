@@ -1,15 +1,15 @@
-﻿import appUrl = require("common/appUrl");
-import intermediateMenuItem = require("common/shell/menu/intermediateMenuItem");
-import leafMenuItem = require("common/shell/menu/leafMenuItem");
+import appUrl from "common/appUrl";
+import intermediateMenuItem from "common/shell/menu/intermediateMenuItem";
+import leafMenuItem from "common/shell/menu/leafMenuItem";
 
-import getManageServerMenuItem = require("common/shell/menu/items/manageServer");
-import getDatabasesMenuItem = require("common/shell/menu/items/databases");
-import getSettingsMenuItem = require("common/shell/menu/items/settings");
-import getStatsMenuItem = require("common/shell/menu/items/stats");
-import getTasksMenuItem = require("common/shell/menu/items/tasks");
-import getIndexesMenuItem = require("common/shell/menu/items/indexes");
-import getDocumentsMenuItem = require("common/shell/menu/items/documents");
-import rootItems = require("common/shell/menu/items/rootItems");
+import getManageServerMenuItem from "common/shell/menu/items/manageServer";
+import getDatabasesMenuItem from "common/shell/menu/items/databases";
+import getSettingsMenuItem from "common/shell/menu/items/settings";
+import getStatsMenuItem from "common/shell/menu/items/stats";
+import getTasksMenuItem from "common/shell/menu/items/tasks";
+import getIndexesMenuItem from "common/shell/menu/items/indexes";
+import getDocumentsMenuItem from "common/shell/menu/items/documents";
+import rootItems from "common/shell/menu/items/rootItems";
 
 export = getRouterConfiguration();
 

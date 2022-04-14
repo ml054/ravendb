@@ -1,6 +1,6 @@
-﻿import commandBase = require("commands/commandBase");
-import databaseInfo = require("models/resources/info/databaseInfo");
-import endpoints = require("endpoints");
+import commandBase from "commands/commandBase";
+import databaseInfo from "models/resources/info/databaseInfo";
+import endpoints from "endpoints";
 
 class toggleDisableIndexingCommand extends commandBase {
 

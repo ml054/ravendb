@@ -1,5 +1,5 @@
 ﻿/// <reference path="../../../typings/tsd.d.ts"/>
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
 
 /**
  * A virtual row. Contains an element displayed as a row in the list view. Gets recycled as the list view scrolls in order to create and manage fewer elements.

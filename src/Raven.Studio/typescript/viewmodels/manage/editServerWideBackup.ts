@@ -1,18 +1,18 @@
-import appUrl = require("common/appUrl");
-import viewModelBase = require("viewmodels/viewModelBase");
-import router = require("plugins/router");
-import serverWideBackupEditModel = require("models/database/tasks/serverWide/serverWideBackupEditModel");
-import testPeriodicBackupCredentialsCommand = require("commands/serverWide/testPeriodicBackupCredentialsCommand");
-import getServerWideBackupConfigCommand = require("commands/serverWide/tasks/getServerWideBackupConfigCommand");
-import getServerWideTaskInfoCommand = require("commands/serverWide/tasks/getServerWideTaskInfoCommand");
-import popoverUtils = require("common/popoverUtils");
-import eventsCollector = require("common/eventsCollector");
-import backupSettings = require("models/database/tasks/periodicBackup/backupSettings");
-import cronEditor = require("viewmodels/common/cronEditor");
-import saveServerWideBackupCommand = require("commands/serverWide/tasks/saveServerWideBackupCommand");
-import tasksCommonContent = require("models/database/tasks/tasksCommonContent");
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import clusterTopologyManager = require("common/shell/clusterTopologyManager");
+import appUrl from "common/appUrl";
+import viewModelBase from "viewmodels/viewModelBase";
+import router from "plugins/router";
+import serverWideBackupEditModel from "models/database/tasks/serverWide/serverWideBackupEditModel";
+import testPeriodicBackupCredentialsCommand from "commands/serverWide/testPeriodicBackupCredentialsCommand";
+import getServerWideBackupConfigCommand from "commands/serverWide/tasks/getServerWideBackupConfigCommand";
+import getServerWideTaskInfoCommand from "commands/serverWide/tasks/getServerWideTaskInfoCommand";
+import popoverUtils from "common/popoverUtils";
+import eventsCollector from "common/eventsCollector";
+import backupSettings from "models/database/tasks/periodicBackup/backupSettings";
+import cronEditor from "viewmodels/common/cronEditor";
+import saveServerWideBackupCommand from "commands/serverWide/tasks/saveServerWideBackupCommand";
+import tasksCommonContent from "models/database/tasks/tasksCommonContent";
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
+import clusterTopologyManager from "common/shell/clusterTopologyManager";
 
 class editServerWideBackup extends viewModelBase {
 

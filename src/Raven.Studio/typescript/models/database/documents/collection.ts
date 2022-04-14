@@ -1,8 +1,8 @@
-import database = require("models/resources/database");
-import document = require("models/database/documents/document");
-import getCollectionFieldsCommand = require("commands/database/documents/getCollectionFieldsCommand");
-import getDocumentsPreviewCommand = require("commands/database/documents/getDocumentsPreviewCommand");
-import generalUtils = require("common/generalUtils");
+import database from "models/resources/database";
+import document from "models/database/documents/document";
+import getCollectionFieldsCommand from "commands/database/documents/getCollectionFieldsCommand";
+import getDocumentsPreviewCommand from "commands/database/documents/getDocumentsPreviewCommand";
+import generalUtils from "common/generalUtils";
 
 class collection {
     static readonly allDocumentsCollectionName = "All Documents";

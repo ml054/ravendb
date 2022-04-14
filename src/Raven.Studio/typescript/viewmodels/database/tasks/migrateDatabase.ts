@@ -1,16 +1,16 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import migrateDatabaseCommand = require("commands/database/studio/migrateDatabaseCommand");
-import migrateDatabaseModel = require("models/database/tasks/migrateDatabaseModel");
-import notificationCenter = require("common/notifications/notificationCenter");
-import eventsCollector = require("common/eventsCollector");
-import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
-import defaultAceCompleter = require("common/defaultAceCompleter");
-import popoverUtils = require("common/popoverUtils");
-import generalUtils = require("common/generalUtils");
-import recentError = require("common/notifications/models/recentError");
-import viewHelpers = require("common/helpers/view/viewHelpers");
-import lastUsedAutocomplete = require("common/storage/lastUsedAutocomplete");
-import getMigratorPathConfigurationCommand = require("commands/database/tasks/getMigratorPathConfigurationCommand");
+import viewModelBase from "viewmodels/viewModelBase";
+import migrateDatabaseCommand from "commands/database/studio/migrateDatabaseCommand";
+import migrateDatabaseModel from "models/database/tasks/migrateDatabaseModel";
+import notificationCenter from "common/notifications/notificationCenter";
+import eventsCollector from "common/eventsCollector";
+import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
+import defaultAceCompleter from "common/defaultAceCompleter";
+import popoverUtils from "common/popoverUtils";
+import generalUtils from "common/generalUtils";
+import recentError from "common/notifications/models/recentError";
+import viewHelpers from "common/helpers/view/viewHelpers";
+import lastUsedAutocomplete from "common/storage/lastUsedAutocomplete";
+import getMigratorPathConfigurationCommand from "commands/database/tasks/getMigratorPathConfigurationCommand";
 
 class migrateDatabase extends viewModelBase {
 

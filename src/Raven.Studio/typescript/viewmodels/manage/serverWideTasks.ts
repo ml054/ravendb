@@ -1,14 +1,14 @@
-import app = require("durandal/app");
-import appUrl = require("common/appUrl");
-import viewModelBase = require("viewmodels/viewModelBase");
-import getAllServerWideTasksCommand = require("commands/serverWide/tasks/getAllServerWideTasksCommand");
-import serverWideBackupListModel = require("models/database/tasks/serverWide/serverWideBackupListModel");
-import serverWideExternalReplicationListModel = require("models/database/tasks/serverWide/serverWideExternalReplicationListModel");
-import ongoingTaskModel = require("models/database/tasks/ongoingTaskModel");
-import ongoingTaskListModel = require("models/database/tasks/ongoingTaskListModel");
-import deleteServerWideTaskCommand = require("commands/serverWide/tasks/deleteServerWideTaskCommand");
-import toggleServerWideTaskCommand = require("commands/serverWide/tasks/toggleServerWideTaskCommand");
-import createServerWideTask = require("viewmodels/manage/createServerWideTask");
+import app from "durandal/app";
+import appUrl from "common/appUrl";
+import viewModelBase from "viewmodels/viewModelBase";
+import getAllServerWideTasksCommand from "commands/serverWide/tasks/getAllServerWideTasksCommand";
+import serverWideBackupListModel from "models/database/tasks/serverWide/serverWideBackupListModel";
+import serverWideExternalReplicationListModel from "models/database/tasks/serverWide/serverWideExternalReplicationListModel";
+import ongoingTaskModel from "models/database/tasks/ongoingTaskModel";
+import ongoingTaskListModel from "models/database/tasks/ongoingTaskListModel";
+import deleteServerWideTaskCommand from "commands/serverWide/tasks/deleteServerWideTaskCommand";
+import toggleServerWideTaskCommand from "commands/serverWide/tasks/toggleServerWideTaskCommand";
+import createServerWideTask from "viewmodels/manage/createServerWideTask";
 
 class serverWideTasks extends viewModelBase {
 

@@ -1,9 +1,9 @@
-﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
-import jsonUtil = require("common/jsonUtil");
-import database = require("models/resources/database");
-import retentionPolicy = require("models/database/tasks/periodicBackup/retentionPolicy");
-import backupConfiguration = require("models/database/tasks/periodicBackup/backupConfiguration");
-import savePeriodicBackupConfigurationCommand = require("commands/database/tasks/savePeriodicBackupConfigurationCommand");
+/// <reference path="../../../../../typings/tsd.d.ts"/>
+import jsonUtil from "common/jsonUtil";
+import database from "models/resources/database";
+import retentionPolicy from "models/database/tasks/periodicBackup/retentionPolicy";
+import backupConfiguration from "models/database/tasks/periodicBackup/backupConfiguration";
+import savePeriodicBackupConfigurationCommand from "commands/database/tasks/savePeriodicBackupConfigurationCommand";
 
 class periodicBackupConfiguration extends backupConfiguration {
 

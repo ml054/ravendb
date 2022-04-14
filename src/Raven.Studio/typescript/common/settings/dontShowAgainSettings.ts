@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
-import studioSetting = require("common/settings/studioSetting");
+import studioSetting from "common/settings/studioSetting";
 
 class dontShowAgainSettings extends studioSetting<Array<studio.settings.dontShowAgain>> {
 

@@ -1,6 +1,6 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import database = require("models/resources/database");
-import getIndexStalenessReasonsCommand = require("commands/database/index/getIndexStalenessReasonsCommand");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import database from "models/resources/database";
+import getIndexStalenessReasonsCommand from "commands/database/index/getIndexStalenessReasonsCommand";
 
 class indexStalenessReasons extends dialogViewModelBase {
 

@@ -1,11 +1,11 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
-import app = require("durandal/app");
-import document = require("models/database/documents/document");
-import showDataDialog = require("viewmodels/common/showDataDialog");
-import graphHelper = require("common/helpers/graph/graphHelper");
+import app from "durandal/app";
+import document from "models/database/documents/document";
+import showDataDialog from "viewmodels/common/showDataDialog";
+import graphHelper from "common/helpers/graph/graphHelper";
 import { d3adaptor, Link, Node, ID3StyleLayoutAdaptor, Layout } from "webcola";
-import d3 = require("d3");
+import d3 from "d3";
 
 interface debugGraphOutputNodeWithLayout extends debugGraphOutputNode, Node {
     fixed: number;

@@ -1,15 +1,15 @@
-import rbush = require("rbush");
-import graphHelper = require("common/helpers/graph/graphHelper");
-import gapFinder = require("common/helpers/graph/gapFinder");
-import colorsManager = require("common/colorsManager");
-import generalUtils = require("common/generalUtils");
-import fileDownloader = require("common/fileDownloader");
-import messagePublisher = require("common/messagePublisher");
-import liveIOStatsWebSocketClient = require("common/liveIOStatsWebSocketClient");
-import fileImporter = require("common/fileImporter");
-import viewHelpers = require("common/helpers/view/viewHelpers");
-import moment = require("moment");
-import d3 = require("d3");
+import rbush from "rbush";
+import graphHelper from "common/helpers/graph/graphHelper";
+import gapFinder from "common/helpers/graph/gapFinder";
+import colorsManager from "common/colorsManager";
+import generalUtils from "common/generalUtils";
+import fileDownloader from "common/fileDownloader";
+import messagePublisher from "common/messagePublisher";
+import liveIOStatsWebSocketClient from "common/liveIOStatsWebSocketClient";
+import fileImporter from "common/fileImporter";
+import viewHelpers from "common/helpers/view/viewHelpers";
+import moment from "moment";
+import d3 from "d3";
 
 type rTreeLeaf = {
     minX: number;

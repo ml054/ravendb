@@ -1,16 +1,16 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import configuration = require("configuration");
-import restorePoint = require("models/resources/creation/restorePoint");
-import clusterNode = require("models/database/cluster/clusterNode");
-import generalUtils = require("common/generalUtils");
-import recentError = require("common/notifications/models/recentError");
-import validateNameCommand = require("commands/resources/validateNameCommand");
-import validateOfflineMigration = require("commands/resources/validateOfflineMigration");
-import storageKeyProvider = require("common/storage/storageKeyProvider");
-import setupEncryptionKey = require("viewmodels/resources/setupEncryptionKey");
-import licenseModel = require("models/auth/licenseModel");
-import getCloudBackupCredentialsFromLinkCommand = require("commands/resources/getCloudBackupCredentialsFromLinkCommand");
-import backupCredentials = require("models/resources/creation/backupCredentials");
+import configuration from "configuration";
+import restorePoint from "models/resources/creation/restorePoint";
+import clusterNode from "models/database/cluster/clusterNode";
+import generalUtils from "common/generalUtils";
+import recentError from "common/notifications/models/recentError";
+import validateNameCommand from "commands/resources/validateNameCommand";
+import validateOfflineMigration from "commands/resources/validateOfflineMigration";
+import storageKeyProvider from "common/storage/storageKeyProvider";
+import setupEncryptionKey from "viewmodels/resources/setupEncryptionKey";
+import licenseModel from "models/auth/licenseModel";
+import getCloudBackupCredentialsFromLinkCommand from "commands/resources/getCloudBackupCredentialsFromLinkCommand";
+import * as backupCredentials from "models/resources/creation/backupCredentials";
 
 class databaseCreationModel {
     static unknownDatabaseName = "Unknown Database";

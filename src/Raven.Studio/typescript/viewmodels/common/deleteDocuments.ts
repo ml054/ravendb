@@ -1,8 +1,8 @@
-import dialog = require("plugins/dialog");
-import deleteDocumentsCommand = require("commands/database/documents/deleteDocumentsCommand");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import database = require("models/resources/database");
-import messagePublisher = require("common/messagePublisher");
+import dialog from "plugins/dialog";
+import deleteDocumentsCommand from "commands/database/documents/deleteDocumentsCommand";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import database from "models/resources/database";
+import messagePublisher from "common/messagePublisher";
 
 class deleteDocuments extends dialogViewModelBase {
 

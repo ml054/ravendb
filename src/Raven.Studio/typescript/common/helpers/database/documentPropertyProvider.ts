@@ -1,12 +1,12 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
 
-import document = require("models/database/documents/document");
-import database = require("models/resources/database");
-import getDocumentsPreviewCommand = require("commands/database/documents/getDocumentsPreviewCommand");
-import getDocumentWithMetadataCommand = require("commands/database/documents/getDocumentWithMetadataCommand");
-import messagePublisher = require("common/messagePublisher");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import customColumn = require("widgets/virtualGrid/columns/customColumn");
+import document from "models/database/documents/document";
+import database from "models/resources/database";
+import getDocumentsPreviewCommand from "commands/database/documents/getDocumentsPreviewCommand";
+import getDocumentWithMetadataCommand from "commands/database/documents/getDocumentWithMetadataCommand";
+import messagePublisher from "common/messagePublisher";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import customColumn from "widgets/virtualGrid/columns/customColumn";
 
 class documentPropertyProvider {
     private fullDocumentsCache = new Map<string, document>();

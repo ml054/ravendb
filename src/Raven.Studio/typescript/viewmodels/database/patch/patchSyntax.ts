@@ -1,6 +1,6 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import copyToClipboard = require("common/copyToClipboard");
-import viewModelBase = require("viewmodels/viewModelBase");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import copyToClipboard from "common/copyToClipboard";
+import viewModelBase from "viewmodels/viewModelBase";
 
 class patchSyntax extends dialogViewModelBase {
     

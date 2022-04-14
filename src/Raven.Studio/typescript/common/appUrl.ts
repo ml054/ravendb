@@ -1,9 +1,9 @@
 /// <reference path="../../typings/tsd.d.ts"/>
-import database = require("models/resources/database");
-import activeDatabase = require("common/shell/activeDatabaseTracker");
-import router = require("plugins/router");
-import messagePublisher = require("common/messagePublisher");
-import databaseInfo = require("models/resources/info/databaseInfo");
+import database from "models/resources/database";
+import activeDatabase from "common/shell/activeDatabaseTracker";
+import router from "plugins/router";
+import messagePublisher from "common/messagePublisher";
+import databaseInfo from "models/resources/info/databaseInfo";
 
 class appUrl {
 

@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import smugglerDatabaseRecord = require("models/database/tasks/smugglerDatabaseRecord");
-import genUtils = require("common/generalUtils");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import smugglerDatabaseRecord from "models/database/tasks/smugglerDatabaseRecord";
+import genUtils from "common/generalUtils";
 
 class importDatabaseModel {
     includeDatabaseRecord = ko.observable(true);

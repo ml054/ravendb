@@ -1,8 +1,8 @@
-﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
+/// <reference path="../../../../../typings/tsd.d.ts"/>
 
-import abstractSqlTable = require("models/database/tasks/sql/abstractSqlTable");
-import innerSqlTable = require("models/database/tasks/sql/innerSqlTable");
-import sqlReference = require("models/database/tasks/sql/sqlReference");
+import abstractSqlTable from "models/database/tasks/sql/abstractSqlTable";
+import innerSqlTable from "models/database/tasks/sql/innerSqlTable";
+import sqlReference from "models/database/tasks/sql/sqlReference";
 
 class valueHolder<T> {
     value = ko.observable<T>();

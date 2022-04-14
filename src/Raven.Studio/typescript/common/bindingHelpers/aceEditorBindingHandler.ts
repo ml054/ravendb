@@ -1,5 +1,5 @@
 /// <reference path="../../../typings/tsd.d.ts" />
-import composition = require("durandal/composition");
+import composition from "durandal/composition";
 
 /*
  * A custom Knockout binding handler transforms the target element (usually a <pre>) into a code editor, powered by Ace. http://ace.c9.io

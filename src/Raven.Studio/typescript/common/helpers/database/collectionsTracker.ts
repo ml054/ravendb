@@ -1,9 +1,9 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
-import collection = require("models/database/documents/collection");
-import database = require("models/resources/database");
-import getCollectionsStatsCommand = require("commands/database/documents/getCollectionsStatsCommand");
-import collectionsStats = require("models/database/documents/collectionsStats");
-import generalUtils = require("common/generalUtils");
+import collection from "models/database/documents/collection";
+import database from "models/resources/database";
+import getCollectionsStatsCommand from "commands/database/documents/getCollectionsStatsCommand";
+import collectionsStats from "models/database/documents/collectionsStats";
+import generalUtils from "common/generalUtils";
 
 class collectionsTracker {
 

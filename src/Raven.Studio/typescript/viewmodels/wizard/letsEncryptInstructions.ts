@@ -1,5 +1,5 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import dialog = require("plugins/dialog");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import dialog from "plugins/dialog";
 
 class letsEncryptInstructions extends dialogViewModelBase {
 

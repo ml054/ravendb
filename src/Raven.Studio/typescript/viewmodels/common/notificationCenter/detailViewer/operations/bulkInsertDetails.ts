@@ -1,11 +1,11 @@
-import app = require("durandal/app");
+import app from "durandal/app";
 
-import database = require("models/resources/database");
-import operation = require("common/notifications/models/operation");
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import notificationCenter = require("common/notifications/notificationCenter");
-import abstractOperationDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/abstractOperationDetails");
-import virtualBulkInsert = require("common/notifications/models/virtualBulkInsert");
+import database from "models/resources/database";
+import operation from "common/notifications/models/operation";
+import abstractNotification from "common/notifications/models/abstractNotification";
+import notificationCenter from "common/notifications/notificationCenter";
+import abstractOperationDetails from "viewmodels/common/notificationCenter/detailViewer/operations/abstractOperationDetails";
+import virtualBulkInsert from "common/notifications/models/virtualBulkInsert";
 
 class bulkInsertDetails extends abstractOperationDetails {
 

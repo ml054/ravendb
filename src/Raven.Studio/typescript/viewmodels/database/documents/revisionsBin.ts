@@ -1,20 +1,20 @@
-import appUrl = require("common/appUrl");
-import router = require("plugins/router");
-import viewModelBase = require("viewmodels/viewModelBase");
-import deleteRevisionsForDocumentsCommand = require("commands/database/documents/deleteRevisionsForDocumentsCommand");
-import getRevisionsBinEntryCommand = require("commands/database/documents/getRevisionsBinEntryCommand");
-import generalUtils = require("common/generalUtils");
-import moment = require("moment");
+import appUrl from "common/appUrl";
+import router from "plugins/router";
+import viewModelBase from "viewmodels/viewModelBase";
+import deleteRevisionsForDocumentsCommand from "commands/database/documents/deleteRevisionsForDocumentsCommand";
+import getRevisionsBinEntryCommand from "commands/database/documents/getRevisionsBinEntryCommand";
+import generalUtils from "common/generalUtils";
+import moment from "moment";
 
-import document = require("models/database/documents/document");
+import document from "models/database/documents/document";
 
-import eventsCollector = require("common/eventsCollector");
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import hyperlinkColumn = require("widgets/virtualGrid/columns/hyperlinkColumn");
-import checkedColumn = require("widgets/virtualGrid/columns/checkedColumn");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
+import eventsCollector from "common/eventsCollector";
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import hyperlinkColumn from "widgets/virtualGrid/columns/hyperlinkColumn";
+import checkedColumn from "widgets/virtualGrid/columns/checkedColumn";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
 import { highlight, languages } from "prismjs";
 
 class revisionsBin extends viewModelBase {

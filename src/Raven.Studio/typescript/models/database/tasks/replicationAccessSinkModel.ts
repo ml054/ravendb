@@ -1,8 +1,8 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import replicationCertificateModel = require("models/database/tasks/replicationCertificateModel");
-import prefixPathModel = require("models/database/tasks/prefixPathModel");
-import replicationAccessBaseModel = require("models/database/tasks/replicationAccessBaseModel");
-import messagePublisher = require("common/messagePublisher");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import replicationCertificateModel from "models/database/tasks/replicationCertificateModel";
+import prefixPathModel from "models/database/tasks/prefixPathModel";
+import replicationAccessBaseModel from "models/database/tasks/replicationAccessBaseModel";
+import messagePublisher from "common/messagePublisher";
 
 class replicationAccessSinkModel extends replicationAccessBaseModel {
 

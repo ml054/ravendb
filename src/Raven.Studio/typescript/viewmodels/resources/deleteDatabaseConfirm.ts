@@ -1,7 +1,7 @@
-import confirmViewModelBase = require("viewmodels/confirmViewModelBase");
-import databaseInfo = require("models/resources/info/databaseInfo");
-import router = require("plugins/router");
-import appUrl = require("common/appUrl");
+import confirmViewModelBase from "viewmodels/confirmViewModelBase";
+import databaseInfo from "models/resources/info/databaseInfo";
+import router from "plugins/router";
+import appUrl from "common/appUrl";
 
 class deleteDatabaseConfirm extends confirmViewModelBase<deleteDatabaseConfirmResult> {
 

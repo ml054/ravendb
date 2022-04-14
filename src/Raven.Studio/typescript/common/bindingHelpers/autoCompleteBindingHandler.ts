@@ -1,4 +1,4 @@
-import composition = require("durandal/composition");
+import composition from "durandal/composition";
 
 /*
  * A KnockoutJS binding handler that transforms a div into the auto-complete items container for a text box.

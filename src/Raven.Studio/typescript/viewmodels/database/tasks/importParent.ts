@@ -1,6 +1,6 @@
-import appUrl = require("common/appUrl");
+import appUrl from "common/appUrl";
 
-import durandalRouter = require("plugins/router");
+import durandalRouter from "plugins/router";
 import shardingContext from "viewmodels/common/sharding/shardingContext";
 import viewModelBase from "viewmodels/viewModelBase";
 

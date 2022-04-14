@@ -1,7 +1,7 @@
-import commandBase = require("commands/commandBase");
-import document = require("models/database/documents/document");
-import database = require("models/resources/database");
-import endpoints = require("endpoints");
+import commandBase from "commands/commandBase";
+import document from "models/database/documents/document";
+import database from "models/resources/database";
+import endpoints from "endpoints";
 
 class saveDocumentCommand extends commandBase {
 

@@ -1,12 +1,12 @@
-import clusterDashboard = require("viewmodels/resources/clusterDashboard");
-import nodeTagColumn = require("widgets/virtualGrid/columns/nodeTagColumn");
-import abstractDatabaseAndNodeAwareTableWidget = require("viewmodels/resources/widgets/abstractDatabaseAndNodeAwareTableWidget");
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import iconsPlusTextColumn = require("widgets/virtualGrid/columns/iconsPlusTextColumn");
-import appUrl = require("common/appUrl");
-import perNodeStatItems = require("models/resources/widgets/perNodeStatItems");
-import databaseOverviewItem = require("models/resources/widgets/databaseOverviewItem");
+import clusterDashboard from "viewmodels/resources/clusterDashboard";
+import nodeTagColumn from "widgets/virtualGrid/columns/nodeTagColumn";
+import abstractDatabaseAndNodeAwareTableWidget from "viewmodels/resources/widgets/abstractDatabaseAndNodeAwareTableWidget";
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import iconsPlusTextColumn from "widgets/virtualGrid/columns/iconsPlusTextColumn";
+import appUrl from "common/appUrl";
+import perNodeStatItems from "models/resources/widgets/perNodeStatItems";
+import databaseOverviewItem from "models/resources/widgets/databaseOverviewItem";
 
 class databaseOverviewWidget extends abstractDatabaseAndNodeAwareTableWidget<Raven.Server.Dashboard.Cluster.Notifications.DatabaseOverviewPayload,
     perNodeStatItems<databaseOverviewItem>, databaseOverviewItem> {

@@ -1,16 +1,16 @@
-import appUrl = require("common/appUrl");
-import viewModelBase = require("viewmodels/viewModelBase");
-import router = require("plugins/router");
-import serverWideExternalReplicationEditModel = require("models/database/tasks/serverWide/serverWideExternalReplicationEditModel");
-import getServerWideTaskInfoCommand = require("commands/serverWide/tasks/getServerWideTaskInfoCommand");
-import eventsCollector = require("common/eventsCollector");
-import saveServerWideExternalReplicationCommand = require("commands/serverWide/tasks/saveServerWideExternalReplicationCommand");
-import connectionStringRavenEtlModel = require("models/database/settings/connectionStringRavenEtlModel");
-import generalUtils = require("common/generalUtils");
-import clusterTopologyManager = require("common/shell/clusterTopologyManager");
-import popoverUtils = require("common/popoverUtils");
-import tasksCommonContent = require("models/database/tasks/tasksCommonContent");
-import discoveryUrl = require("models/database/settings/discoveryUrl");
+import appUrl from "common/appUrl";
+import viewModelBase from "viewmodels/viewModelBase";
+import router from "plugins/router";
+import serverWideExternalReplicationEditModel from "models/database/tasks/serverWide/serverWideExternalReplicationEditModel";
+import getServerWideTaskInfoCommand from "commands/serverWide/tasks/getServerWideTaskInfoCommand";
+import eventsCollector from "common/eventsCollector";
+import saveServerWideExternalReplicationCommand from "commands/serverWide/tasks/saveServerWideExternalReplicationCommand";
+import connectionStringRavenEtlModel from "models/database/settings/connectionStringRavenEtlModel";
+import generalUtils from "common/generalUtils";
+import clusterTopologyManager from "common/shell/clusterTopologyManager";
+import popoverUtils from "common/popoverUtils";
+import tasksCommonContent from "models/database/tasks/tasksCommonContent";
+import discoveryUrl from "models/database/settings/discoveryUrl";
 
 class editServerWideExternalReplication extends viewModelBase {
     

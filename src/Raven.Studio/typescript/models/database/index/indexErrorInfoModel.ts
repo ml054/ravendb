@@ -1,14 +1,14 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import app = require("durandal/app");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import actionColumn = require("widgets/virtualGrid/columns/actionColumn");
-import hyperlinkColumn = require("widgets/virtualGrid/columns/hyperlinkColumn");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import generalUtils = require("common/generalUtils");
-import appUrl = require("common/appUrl");
-import moment = require("moment");
-import indexErrorDetails = require("viewmodels/database/indexes/indexErrorDetails");
+import app from "durandal/app";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import actionColumn from "widgets/virtualGrid/columns/actionColumn";
+import hyperlinkColumn from "widgets/virtualGrid/columns/hyperlinkColumn";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import generalUtils from "common/generalUtils";
+import appUrl from "common/appUrl";
+import moment from "moment";
+import indexErrorDetails from "viewmodels/database/indexes/indexErrorDetails";
 
 type indexErrorInfoModelState = "loading" | "loaded" | "error";
 

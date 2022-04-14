@@ -1,6 +1,6 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import serverWideLiveIOStatsWebSocketClient = require("common/serverWideLiveIOStatsWebSocketClient");
-import ioStatsGraph = require("models/database/status/ioStatsGraph");
+import viewModelBase from "viewmodels/viewModelBase";
+import serverWideLiveIOStatsWebSocketClient from "common/serverWideLiveIOStatsWebSocketClient";
+import ioStatsGraph from "models/database/status/ioStatsGraph";
 
 class serverWideIoStats extends viewModelBase {
 

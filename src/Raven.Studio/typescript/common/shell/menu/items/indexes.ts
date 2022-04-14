@@ -1,6 +1,6 @@
-﻿import intermediateMenuItem = require("common/shell/menu/intermediateMenuItem");
-import leafMenuItem = require("common/shell/menu/leafMenuItem");
-import footer = require("common/shell/footer");
+import intermediateMenuItem from "common/shell/menu/intermediateMenuItem";
+import leafMenuItem from "common/shell/menu/leafMenuItem";
+import footer from "common/shell/footer";
 export = getIndexesMenuItem;
 
 function getIndexesMenuItem(appUrls: computedAppUrls) {

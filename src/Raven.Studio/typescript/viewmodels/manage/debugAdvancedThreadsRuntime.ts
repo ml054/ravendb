@@ -1,15 +1,15 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import moment = require("moment");
+import viewModelBase from "viewmodels/viewModelBase";
+import moment from "moment";
 
-import app = require("durandal/app")
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import generalUtils = require("common/generalUtils");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import actionColumn = require("widgets/virtualGrid/columns/actionColumn");
-import getDebugThreadsRunawayCommand = require("commands/database/debug/getDebugThreadsRunawayCommand");
+import app from "durandal/app"
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import generalUtils from "common/generalUtils";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import actionColumn from "widgets/virtualGrid/columns/actionColumn";
+import getDebugThreadsRunawayCommand from "commands/database/debug/getDebugThreadsRunawayCommand";
 import { highlight, languages } from "prismjs";
-import threadStackTrace = require("viewmodels/manage/threadStackTrace");
+import threadStackTrace from "viewmodels/manage/threadStackTrace";
 
 class debugAdvancedThreadsRuntime extends viewModelBase {
 

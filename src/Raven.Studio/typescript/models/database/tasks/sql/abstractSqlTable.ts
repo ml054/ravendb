@@ -1,7 +1,7 @@
-﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
+/// <reference path="../../../../../typings/tsd.d.ts"/>
 
-import sqlColumn = require("models/database/tasks/sql/sqlColumn");
-import sqlReference = require("models/database/tasks/sql/sqlReference");
+import sqlColumn from "models/database/tasks/sql/sqlColumn";
+import sqlReference from "models/database/tasks/sql/sqlReference";
 
 abstract class abstractSqlTable {
     tableSchema: string;

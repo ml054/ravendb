@@ -1,13 +1,13 @@
-import app = require("durandal/app");
+import app from "durandal/app";
 
-import operation = require("common/notifications/models/operation");
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import notificationCenter = require("common/notifications/notificationCenter");
-import abstractOperationDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/abstractOperationDetails");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import generalUtils = require("common/generalUtils");
+import operation from "common/notifications/models/operation";
+import abstractNotification from "common/notifications/models/abstractNotification";
+import notificationCenter from "common/notifications/notificationCenter";
+import abstractOperationDetails from "viewmodels/common/notificationCenter/detailViewer/operations/abstractOperationDetails";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import generalUtils from "common/generalUtils";
 
 type gridItem = {
     Id: string;

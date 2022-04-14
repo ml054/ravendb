@@ -1,7 +1,7 @@
-﻿/// <reference path="../../../typings/tsd.d.ts" />
+/// <reference path="../../../typings/tsd.d.ts" />
 
-import database = require("models/resources/database");
-import storageKeyProvider = require("common/storage/storageKeyProvider");
+import database from "models/resources/database";
+import storageKeyProvider from "common/storage/storageKeyProvider";
 
 class savedPatchesStorage {
 

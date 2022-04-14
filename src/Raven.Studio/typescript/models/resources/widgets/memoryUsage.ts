@@ -1,6 +1,6 @@
-import generalUtils = require("common/generalUtils");
+import generalUtils from "common/generalUtils";
 
-import historyAwareNodeStats = require("models/resources/widgets/historyAwareNodeStats");
+import historyAwareNodeStats from "models/resources/widgets/historyAwareNodeStats";
 
 class memoryUsage extends historyAwareNodeStats<Raven.Server.Dashboard.Cluster.Notifications.MemoryUsagePayload> {
 

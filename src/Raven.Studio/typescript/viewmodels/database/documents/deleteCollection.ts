@@ -1,7 +1,7 @@
-import dialog = require("plugins/dialog");
-import collection = require("models/database/documents/collection");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import collectionsTracker = require("common/helpers/database/collectionsTracker");
+import dialog from "plugins/dialog";
+import collection from "models/database/documents/collection";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import collectionsTracker from "common/helpers/database/collectionsTracker";
 
 class deleteCollection extends dialogViewModelBase {
     

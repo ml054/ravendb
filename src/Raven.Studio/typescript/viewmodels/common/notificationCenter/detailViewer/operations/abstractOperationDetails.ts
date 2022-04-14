@@ -1,8 +1,8 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import operation = require("common/notifications/models/operation");
-import notificationCenter = require("common/notifications/notificationCenter");
-import generalUtils = require("common/generalUtils");
-import moment = require("moment");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import operation from "common/notifications/models/operation";
+import notificationCenter from "common/notifications/notificationCenter";
+import generalUtils from "common/generalUtils";
+import moment from "moment";
 
 abstract class abstractOperationDetails extends dialogViewModelBase {
     

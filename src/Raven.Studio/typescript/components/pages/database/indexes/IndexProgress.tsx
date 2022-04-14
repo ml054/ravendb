@@ -1,9 +1,9 @@
 ﻿import React from "react";
 import { IndexCollectionProgress, IndexNodeInfoDetails, IndexProgressInfo, Progress } from "../../../models/indexes";
 import classNames from "classnames";
-import IndexRunningStatus = Raven.Client.Documents.Indexes.IndexRunningStatus;
 import genUtils from "common/generalUtils";
-import moment = require("moment");
+import * as moment from "moment";
+type IndexRunningStatus = Raven.Client.Documents.Indexes.IndexRunningStatus;
 
 interface IndexProgressProps {
     progress: IndexProgressInfo;

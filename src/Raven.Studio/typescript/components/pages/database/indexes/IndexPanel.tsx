@@ -1,19 +1,19 @@
-﻿import React, { ForwardedRef, forwardRef, memo, MouseEvent, useCallback, useMemo, useRef, useState } from "react";
+﻿import React, { ForwardedRef, forwardRef, MouseEvent, useState } from "react";
 import classNames from "classnames";
-import IndexPriority = Raven.Client.Documents.Indexes.IndexPriority;
 import { IndexNodeInfo, IndexNodeInfoDetails, IndexSharedInfo } from "../../../models/indexes";
-import IndexLockMode = Raven.Client.Documents.Indexes.IndexLockMode;
 import { useAppUrls } from "../../../hooks/useAppUrls";
 import IndexUtils from "../../../utils/IndexUtils";
 import { useEventsCollector } from "../../../hooks/useEventsCollector";
 import { withPreventDefault } from "../../../utils/common";
 import indexStalenessReasons from "viewmodels/database/indexes/indexStalenessReasons";
-import database = require("models/resources/database");
+import database from "models/resources/database";
 import app from "durandal/app";
 import { IndexProgress } from "./IndexProgress";
 import { useAccessManager } from "../../../hooks/useAccessManager";
-import IndexRunningStatus = Raven.Client.Documents.Indexes.IndexRunningStatus;
 import { UncontrolledTooltip } from "../../../common/UncontrolledTooltip";
+type IndexPriority = Raven.Client.Documents.Indexes.IndexPriority;
+type IndexLockMode = Raven.Client.Documents.Indexes.IndexLockMode;
+type IndexRunningStatus = Raven.Client.Documents.Indexes.IndexRunningStatus;
 
 interface IndexPanelProps {
     database: database;

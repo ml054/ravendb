@@ -1,8 +1,8 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import clusterTopology = require("models/database/cluster/clusterTopology");
-import generalUtils = require("common/generalUtils");
-import license = require("models/auth/licenseModel");
-import accessManager = require("common/shell/accessManager");
+import clusterTopology from "models/database/cluster/clusterTopology";
+import generalUtils from "common/generalUtils";
+import license from "models/auth/licenseModel";
+import accessManager from "common/shell/accessManager";
 
 class clusterNode {
     tag = ko.observable<string>();

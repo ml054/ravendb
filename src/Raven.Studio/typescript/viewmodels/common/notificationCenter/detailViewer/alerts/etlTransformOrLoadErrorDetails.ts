@@ -1,15 +1,15 @@
-import app = require("durandal/app");
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import notificationCenter = require("common/notifications/notificationCenter");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import alert = require("common/notifications/models/alert");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import actionColumn = require("widgets/virtualGrid/columns/actionColumn");
-import abstractAlertDetails = require("viewmodels/common/notificationCenter/detailViewer/alerts/abstractAlertDetails");
-import copyToClipboard = require("common/copyToClipboard");
-import generalUtils = require("common/generalUtils");
-import moment = require("moment");
+import app from "durandal/app";
+import abstractNotification from "common/notifications/models/abstractNotification";
+import notificationCenter from "common/notifications/notificationCenter";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import alert from "common/notifications/models/alert";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import actionColumn from "widgets/virtualGrid/columns/actionColumn";
+import abstractAlertDetails from "viewmodels/common/notificationCenter/detailViewer/alerts/abstractAlertDetails";
+import copyToClipboard from "common/copyToClipboard";
+import generalUtils from "common/generalUtils";
+import moment from "moment";
 
 class etlTransformOrLoadErrorDetails extends abstractAlertDetails {
     

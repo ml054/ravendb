@@ -1,4 +1,4 @@
-import confirmViewModelBase = require("viewmodels/confirmViewModelBase");
+import confirmViewModelBase from "viewmodels/confirmViewModelBase";
 import { IndexSharedInfo } from "../../../components/models/indexes";
 import { DatabaseLocationSelector } from "../../../components/common/DatabaseLocationSelector";
 

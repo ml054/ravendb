@@ -1,10 +1,10 @@
 
-import operation = require("common/notifications/models/operation");
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import notificationCenter = require("common/notifications/notificationCenter");
-import abstractOperationDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/abstractOperationDetails");
-import appUrl = require("common/appUrl");
-import router = require("plugins/router");
+import operation from "common/notifications/models/operation";
+import abstractNotification from "common/notifications/models/abstractNotification";
+import notificationCenter from "common/notifications/notificationCenter";
+import abstractOperationDetails from "viewmodels/common/notificationCenter/detailViewer/operations/abstractOperationDetails";
+import appUrl from "common/appUrl";
+import router from "plugins/router";
 
 class transactionCommandsDetails extends abstractOperationDetails {
 

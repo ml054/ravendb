@@ -1,6 +1,6 @@
-import verifyDocumentsIDsCommand = require("commands/database/documents/verifyDocumentsIDsCommand");
-import database = require("models/resources/database");
-import generalUtils = require("common/generalUtils");
+import verifyDocumentsIDsCommand from "commands/database/documents/verifyDocumentsIDsCommand";
+import database from "models/resources/database";
+import generalUtils from "common/generalUtils";
 
 class validationHelpers {
 

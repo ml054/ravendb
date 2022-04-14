@@ -1,17 +1,17 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import app = require("durandal/app");
-import appUrl = require("common/appUrl");
-import ongoingTaskListModel = require("models/database/tasks/ongoingTaskListModel"); 
-import ongoingTaskInfoCommand = require("commands/database/tasks/getOngoingTaskInfoCommand");
-import backupNowPeriodicCommand = require("commands/database/tasks/backupNowPeriodicCommand");
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import backupNow = require("viewmodels/database/tasks/backupNow");
-import generalUtils = require("common/generalUtils");
-import timeHelpers = require("common/timeHelpers");
-import notificationCenter = require("common/notifications/notificationCenter");
-import clusterTopologyManager = require("common/shell/clusterTopologyManager");
-import accessManager = require("common/shell/accessManager");
-import moment = require("moment");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import app from "durandal/app";
+import appUrl from "common/appUrl";
+import ongoingTaskListModel from "models/database/tasks/ongoingTaskListModel"; 
+import ongoingTaskInfoCommand from "commands/database/tasks/getOngoingTaskInfoCommand";
+import backupNowPeriodicCommand from "commands/database/tasks/backupNowPeriodicCommand";
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
+import backupNow from "viewmodels/database/tasks/backupNow";
+import generalUtils from "common/generalUtils";
+import timeHelpers from "common/timeHelpers";
+import notificationCenter from "common/notifications/notificationCenter";
+import clusterTopologyManager from "common/shell/clusterTopologyManager";
+import accessManager from "common/shell/accessManager";
+import moment from "moment";
 import connectionStatus from "models/resources/connectionStatus";
 
 class ongoingTaskBackupListModel extends ongoingTaskListModel {

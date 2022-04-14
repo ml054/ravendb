@@ -1,9 +1,9 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
-import database = require("models/resources/database");
-import storageKeyProvider = require("common/storage/storageKeyProvider");
-import appUrl = require("common/appUrl");
-import router = require("plugins/router");
+import database from "models/resources/database";
+import storageKeyProvider from "common/storage/storageKeyProvider";
+import appUrl from "common/appUrl";
+import router from "plugins/router";
 
 class savedQueriesStorage {
 

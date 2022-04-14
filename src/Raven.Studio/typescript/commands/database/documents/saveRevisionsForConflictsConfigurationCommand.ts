@@ -1,6 +1,6 @@
-import database = require("models/resources/database");
-import commandBase = require("commands/commandBase");
-import endpoint = require("endpoints");
+import database from "models/resources/database";
+import commandBase from "commands/commandBase";
+import endpoint from "endpoints";
 
 class saveRevisionsForConflictsConfigurationCommand extends commandBase {
     constructor(private db: database, private revisionsConfiguration: Raven.Client.Documents.Operations.Revisions.RevisionsCollectionConfiguration) {

@@ -1,6 +1,6 @@
-import commandBase = require("commands/commandBase");
-import endpoints = require("endpoints");
-import adminLogsOnDiskConfig = require("models/database/debug/adminLogsOnDiskConfig");
+import commandBase from "commands/commandBase";
+import endpoints from "endpoints";
+import adminLogsOnDiskConfig from "models/database/debug/adminLogsOnDiskConfig";
 
 class saveAdminLogsConfigurationCommand extends commandBase {
     

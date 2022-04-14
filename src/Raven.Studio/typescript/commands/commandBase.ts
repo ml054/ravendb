@@ -1,8 +1,8 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import messagePublisher = require("common/messagePublisher");
-import appUrl = require("common/appUrl");
-import protractedCommandsDetector = require("common/notifications/protractedCommandsDetector");
+import messagePublisher from "common/messagePublisher";
+import appUrl from "common/appUrl";
+import protractedCommandsDetector from "common/notifications/protractedCommandsDetector";
 import database from "models/resources/database";
 
 /// Commands encapsulate a read or write operation to the database and support progress notifications and common AJAX related functionality.

@@ -1,16 +1,16 @@
 /// <reference path="../../typings/tsd.d.ts"/>
-import appUrl = require("common/appUrl");
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import router = require("plugins/router");
-import changeSubscription = require("common/changeSubscription");
-import changesContext = require("common/changesContext");
-import downloader = require("common/downloader");
-import databasesManager = require("common/shell/databasesManager");
-import pluralizeHelpers = require("common/helpers/text/pluralizeHelpers");
-import eventsCollector = require("common/eventsCollector");
-import viewHelpers = require("common/helpers/view/viewHelpers");
-import accessManager = require("common/shell/accessManager");
-import messagePublisher = require("common/messagePublisher");
+import appUrl from "common/appUrl";
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
+import router from "plugins/router";
+import changeSubscription from "common/changeSubscription";
+import changesContext from "common/changesContext";
+import downloader from "common/downloader";
+import databasesManager from "common/shell/databasesManager";
+import pluralizeHelpers from "common/helpers/text/pluralizeHelpers";
+import eventsCollector from "common/eventsCollector";
+import viewHelpers from "common/helpers/view/viewHelpers";
+import accessManager from "common/shell/accessManager";
+import messagePublisher from "common/messagePublisher";
 import { jwerty } from "jwerty";
 
 /*

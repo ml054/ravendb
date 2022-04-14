@@ -1,8 +1,8 @@
 ﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import virtualRow = require("widgets/virtualGrid/virtualRow");
-import generalUtils = require("common/generalUtils");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import virtualRow from "widgets/virtualGrid/virtualRow";
+import generalUtils from "common/generalUtils";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
 
 /**
  * Virtual grid column that renders hyperlinks.

@@ -1,9 +1,9 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import database = require("models/resources/database");
-import d3 = require("d3");
-import abstractWebSocketClient = require("common/abstractWebSocketClient");
-import endpoints = require("endpoints");
+import database from "models/resources/database";
+import d3 from "d3";
+import abstractWebSocketClient from "common/abstractWebSocketClient";
+import endpoints from "endpoints";
 
 class liveEtlStatsWebSocketClient extends abstractWebSocketClient<resultsDto<Raven.Server.Documents.ETL.Stats.EtlTaskPerformanceStats>> {
 

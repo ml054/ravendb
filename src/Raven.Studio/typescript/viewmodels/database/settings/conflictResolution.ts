@@ -1,15 +1,15 @@
-import app = require("durandal/app");
-import collectionsTracker = require("common/helpers/database/collectionsTracker");
-import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
-import conflictResolutionModel = require("models/database/settings/conflictResolutionModel");
-import perCollectionConflictResolutionModel = require("models/database/settings/perCollectionConflictResolutionModel");
-import collection = require("models/database/documents/collection");
-import conflictResolutionScriptSyntax = require("viewmodels/database/settings/conflictResolutionScriptSyntax");
-import getConflictSolverConfigurationCommand = require("commands/database/documents/getConflictSolverConfigurationCommand");
-import saveConflictSolverConfigurationCommand = require("commands/database/documents/saveConflictSolverConfigurationCommand");
-import eventsCollector = require("common/eventsCollector");
+import app from "durandal/app";
+import collectionsTracker from "common/helpers/database/collectionsTracker";
+import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
+import conflictResolutionModel from "models/database/settings/conflictResolutionModel";
+import perCollectionConflictResolutionModel from "models/database/settings/perCollectionConflictResolutionModel";
+import collection from "models/database/documents/collection";
+import conflictResolutionScriptSyntax from "viewmodels/database/settings/conflictResolutionScriptSyntax";
+import getConflictSolverConfigurationCommand from "commands/database/documents/getConflictSolverConfigurationCommand";
+import saveConflictSolverConfigurationCommand from "commands/database/documents/saveConflictSolverConfigurationCommand";
+import eventsCollector from "common/eventsCollector";
 import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database = require("models/resources/database");
+import database from "models/resources/database";
 
 class conflictResolution extends shardViewModelBase {
 

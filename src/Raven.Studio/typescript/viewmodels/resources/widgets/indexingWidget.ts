@@ -1,7 +1,7 @@
-import lineChart = require("models/resources/clusterDashboard/lineChart");
-import clusterDashboard = require("viewmodels/resources/clusterDashboard");
-import indexingSpeed = require("models/resources/widgets/indexingSpeed");
-import abstractChartsWebsocketWidget = require("viewmodels/resources/widgets/abstractChartsWebsocketWidget");
+import lineChart from "models/resources/clusterDashboard/lineChart";
+import clusterDashboard from "viewmodels/resources/clusterDashboard";
+import indexingSpeed from "models/resources/widgets/indexingSpeed";
+import abstractChartsWebsocketWidget from "viewmodels/resources/widgets/abstractChartsWebsocketWidget";
 
 class indexingWidget extends abstractChartsWebsocketWidget<Raven.Server.Dashboard.Cluster.Notifications.IndexingSpeedPayload, indexingSpeed> {
 

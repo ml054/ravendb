@@ -1,7 +1,7 @@
-import dialog = require("plugins/dialog");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import copyToClipboard = require("common/copyToClipboard");
-import generalUtils = require("common/generalUtils");
+import dialog from "plugins/dialog";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import copyToClipboard from "common/copyToClipboard";
+import generalUtils from "common/generalUtils";
 import { highlight, languages } from "prismjs";
 
 type supportedLangs = "javascript" | "csharp" | "plain";

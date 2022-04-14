@@ -1,11 +1,11 @@
-import getDatabaseStudioConfigurationCommand = require("commands/resources/getDatabaseStudioConfigurationCommand");
-import studioConfigurationDatabaseModel = require("models/database/settings/studioConfigurationDatabaseModel");
-import eventsCollector = require("common/eventsCollector");
-import saveDatabaseStudioConfigurationCommand = require("commands/resources/saveDatabaseStudioConfigurationCommand");
-import appUrl = require("common/appUrl");
-import jsonUtil = require("common/jsonUtil");
-import accessManager = require("common/shell/accessManager");
-import popoverUtils = require("common/popoverUtils");
+import getDatabaseStudioConfigurationCommand from "commands/resources/getDatabaseStudioConfigurationCommand";
+import studioConfigurationDatabaseModel from "models/database/settings/studioConfigurationDatabaseModel";
+import eventsCollector from "common/eventsCollector";
+import saveDatabaseStudioConfigurationCommand from "commands/resources/saveDatabaseStudioConfigurationCommand";
+import appUrl from "common/appUrl";
+import jsonUtil from "common/jsonUtil";
+import accessManager from "common/shell/accessManager";
+import popoverUtils from "common/popoverUtils";
 import shardViewModelBase from "viewmodels/shardViewModelBase";
 
 class studioConfiguration extends shardViewModelBase {

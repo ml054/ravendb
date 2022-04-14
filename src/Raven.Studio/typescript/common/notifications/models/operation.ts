@@ -1,10 +1,10 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
-import serverTime = require("common/helpers/database/serverTime");
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import database = require("models/resources/database");
-import generalUtils = require("common/generalUtils");
-import timeHelpers = require("common/timeHelpers");
-import moment = require("moment");
+import serverTime from "common/helpers/database/serverTime";
+import abstractNotification from "common/notifications/models/abstractNotification";
+import database from "models/resources/database";
+import generalUtils from "common/generalUtils";
+import timeHelpers from "common/timeHelpers";
+import moment from "moment";
 
 class operation extends abstractNotification {
 

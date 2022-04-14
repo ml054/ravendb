@@ -1,8 +1,8 @@
 /// <reference path="../../typings/tsd.d.ts" />
-import database = require("models/resources/database");
-import abstractWebSocketClient = require("common/abstractWebSocketClient");
-import d3 = require("d3");
-import endpoints = require("endpoints");
+import database from "models/resources/database";
+import abstractWebSocketClient from "common/abstractWebSocketClient";
+import d3 from "d3";
+import endpoints from "endpoints";
 
 abstract class liveIOStatsWebSocketClient extends abstractWebSocketClient<Raven.Server.Utils.IoMetrics.IOMetricsResponse> {
 

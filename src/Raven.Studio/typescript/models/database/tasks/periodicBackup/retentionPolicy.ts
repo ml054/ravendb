@@ -1,5 +1,5 @@
-﻿import jsonUtil = require("common/jsonUtil");
-import generalUtils = require("common/generalUtils");
+import jsonUtil from "common/jsonUtil";
+import generalUtils from "common/generalUtils";
 
 class retentionPolicy {
     disabled = ko.observable<boolean>(false);

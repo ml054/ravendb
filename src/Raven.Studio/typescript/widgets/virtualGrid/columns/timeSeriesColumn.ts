@@ -1,10 +1,10 @@
 ﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import virtualRow = require("widgets/virtualGrid/virtualRow");
-import generalUtils = require("common/generalUtils");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import timeSeriesQueryResult = require("models/database/timeSeries/timeSeriesQueryResult");
-import document = require("models/database/documents/document");
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import virtualRow from "widgets/virtualGrid/virtualRow";
+import generalUtils from "common/generalUtils";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import timeSeriesQueryResult from "models/database/timeSeries/timeSeriesQueryResult";
+import document from "models/database/documents/document";
 
 /**
  * Virtual grid column that renders time series.

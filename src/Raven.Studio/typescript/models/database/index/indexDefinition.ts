@@ -1,10 +1,10 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import indexFieldOptions = require("models/database/index/indexFieldOptions");
-import additionalSource = require("models/database/index/additionalSource");
-import additionalAssembly = require("models/database/index/additionalAssemblyModel");
-import configurationItem = require("models/database/index/configurationItem");
-import validateNameCommand = require("commands/resources/validateNameCommand");
-import generalUtils = require("common/generalUtils");
+import indexFieldOptions from "models/database/index/indexFieldOptions";
+import additionalSource from "models/database/index/additionalSource";
+import additionalAssembly from "models/database/index/additionalAssemblyModel";
+import configurationItem from "models/database/index/configurationItem";
+import validateNameCommand from "commands/resources/validateNameCommand";
+import generalUtils from "common/generalUtils";
 
 class mapItem {
     map = ko.observable<string>();

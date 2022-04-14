@@ -1,4 +1,4 @@
-﻿import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
 
 class allShardsDialog extends dialogViewModelBase {
     view = require("views/common/sharding/allShardsDialog.html");

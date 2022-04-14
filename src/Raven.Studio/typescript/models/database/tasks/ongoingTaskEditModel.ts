@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
+/// <reference path="../../../../typings/tsd.d.ts"/>
 
-import ongoingTaskModel = require("models/database/tasks/ongoingTaskModel");
+import ongoingTaskModel from "models/database/tasks/ongoingTaskModel";
 
 abstract class ongoingTaskEditModel extends ongoingTaskModel {
     manualChooseMentor = ko.observable<boolean>(false);

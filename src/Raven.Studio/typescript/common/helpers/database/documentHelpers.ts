@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
 
-import document = require("models/database/documents/document");
+import document from "models/database/documents/document";
 
 class documentHelpers {
     static findRelatedDocumentsCandidates(doc: documentBase): string[] {

@@ -1,9 +1,9 @@
 
-import app = require("durandal/app");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import database = require("models/resources/database");
-import messagePublisher = require("common/messagePublisher");
-import executeBulkDocsCommand = require("commands/database/documents/executeBulkDocsCommand");
+import app from "durandal/app";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import database from "models/resources/database";
+import messagePublisher from "common/messagePublisher";
+import executeBulkDocsCommand from "commands/database/documents/executeBulkDocsCommand";
 
 type itemTypeDto = { 
     Key: string, Index: number

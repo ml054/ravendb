@@ -1,6 +1,6 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import appUrl = require("common/appUrl");
-import durandalRouter = require("plugins/router");
+import viewModelBase from "viewmodels/viewModelBase";
+import appUrl from "common/appUrl";
+import durandalRouter from "plugins/router";
 
 class debugAdvanced {
     

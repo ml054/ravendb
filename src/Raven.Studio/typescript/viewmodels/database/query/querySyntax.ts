@@ -1,6 +1,6 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import viewModelBase = require("viewmodels/viewModelBase");
-import copyToClipboard = require("common/copyToClipboard");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import viewModelBase from "viewmodels/viewModelBase";
+import copyToClipboard from "common/copyToClipboard";
 
 class querySyntax extends dialogViewModelBase {
 

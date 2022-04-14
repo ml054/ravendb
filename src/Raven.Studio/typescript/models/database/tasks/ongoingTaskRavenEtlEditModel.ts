@@ -1,7 +1,7 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import ongoingTaskEditModel = require("models/database/tasks/ongoingTaskEditModel");
-import ongoingTaskRavenEtlTransformationModel = require("models/database/tasks/ongoingTaskRavenEtlTransformationModel");
-import jsonUtil = require("common/jsonUtil");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import ongoingTaskEditModel from "models/database/tasks/ongoingTaskEditModel";
+import ongoingTaskRavenEtlTransformationModel from "models/database/tasks/ongoingTaskRavenEtlTransformationModel";
+import jsonUtil from "common/jsonUtil";
 
 class ongoingTaskRavenEtlEditModel extends ongoingTaskEditModel {
     

@@ -1,12 +1,12 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import getDatabaseDetailedStatsCommand = require("commands/resources/getDatabaseDetailedStatsCommand");
-import getIndexesStatsCommand = require("commands/database/index/getIndexesStatsCommand");
-import appUrl = require("common/appUrl");
-import app = require("durandal/app");
-import indexStalenessReasons = require("viewmodels/database/indexes/indexStalenessReasons");
-import getStorageReportCommand = require("commands/database/debug/getStorageReportCommand");
-import statsModel = require("models/database/stats/statistics");
-import popoverUtils = require("common/popoverUtils");
+import viewModelBase from "viewmodels/viewModelBase";
+import getDatabaseDetailedStatsCommand from "commands/resources/getDatabaseDetailedStatsCommand";
+import getIndexesStatsCommand from "commands/database/index/getIndexesStatsCommand";
+import appUrl from "common/appUrl";
+import app from "durandal/app";
+import indexStalenessReasons from "viewmodels/database/indexes/indexStalenessReasons";
+import getStorageReportCommand from "commands/database/debug/getStorageReportCommand";
+import statsModel from "models/database/stats/statistics";
+import popoverUtils from "common/popoverUtils";
 
 class statistics extends viewModelBase {
 

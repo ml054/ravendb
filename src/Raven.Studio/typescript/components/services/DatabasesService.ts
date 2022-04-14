@@ -2,7 +2,7 @@
 
 import getDatabasesCommand from "commands/resources/getDatabasesCommand";
 import saveDatabaseLockModeCommand from "commands/resources/saveDatabaseLockModeCommand";
-import DatabaseLockMode = Raven.Client.ServerWide.DatabaseLockMode;
+type DatabaseLockMode = Raven.Client.ServerWide.DatabaseLockMode;
 import { DatabaseSharedInfo } from "../models/databases";
 
 export default class DatabasesService {

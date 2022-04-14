@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
 
-import recentError = require("common/notifications/models/recentError");
+import recentError from "common/notifications/models/recentError";
 
 class recentLicenseLimitError extends recentError {
 

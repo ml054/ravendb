@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
 
 class customColumn<T> extends textColumn<T> {
 

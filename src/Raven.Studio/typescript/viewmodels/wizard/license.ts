@@ -1,6 +1,6 @@
-import setupStep = require("viewmodels/wizard/setupStep");
-import router = require("plugins/router");
-import registrationInfoCommand = require("commands/wizard/registrationInfoCommand");
+import setupStep from "viewmodels/wizard/setupStep";
+import router from "plugins/router";
+import registrationInfoCommand from "commands/wizard/registrationInfoCommand";
 
 class license extends setupStep {
 

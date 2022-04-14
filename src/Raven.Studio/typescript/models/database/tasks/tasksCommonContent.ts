@@ -1,4 +1,4 @@
-﻿class tasksCommonContent {
+class tasksCommonContent {
     
     static readonly responsibleNodeInfo =
         `<ul class="margin-top margin-top-xs no-padding-left margin-left">

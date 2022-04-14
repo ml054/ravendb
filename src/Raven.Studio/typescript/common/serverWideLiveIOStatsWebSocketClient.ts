@@ -1,6 +1,6 @@
 /// <reference path="../../typings/tsd.d.ts" />
-import endpoints = require("endpoints");
-import liveIOStatsWebSocketClient = require("common/liveIOStatsWebSocketClient");
+import endpoints from "endpoints";
+import liveIOStatsWebSocketClient from "common/liveIOStatsWebSocketClient";
 
 class serverWideLiveIOStatsWebSocketClient extends liveIOStatsWebSocketClient {
 

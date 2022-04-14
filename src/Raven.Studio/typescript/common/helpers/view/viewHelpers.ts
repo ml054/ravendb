@@ -1,8 +1,8 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
 
-import app = require("durandal/app");
-import confirmationDialog = require("viewmodels/common/confirmationDialog");
-import generalUtils = require("common/generalUtils");
+import app from "durandal/app";
+import confirmationDialog from "viewmodels/common/confirmationDialog";
+import generalUtils from "common/generalUtils";
 
 class viewHelpers {
 

@@ -1,8 +1,8 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import dialog = require("plugins/dialog");
-import datePickerBindingHandler = require("common/bindingHelpers/datePickerBindingHandler");
-import editTimeSeriesEntry = require("viewmodels/database/timeSeries/editTimeSeriesEntry");
-import moment = require("moment");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import dialog from "plugins/dialog";
+import datePickerBindingHandler from "common/bindingHelpers/datePickerBindingHandler";
+import editTimeSeriesEntry from "viewmodels/database/timeSeries/editTimeSeriesEntry";
+import moment from "moment";
 
 class filterTimeSeries extends dialogViewModelBase {
     

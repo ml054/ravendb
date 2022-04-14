@@ -1,6 +1,6 @@
 /// <reference path="../../typings/tsd.d.ts" />
-import database = require("models/resources/database");
-import abstractWebSocketClient = require("common/abstractWebSocketClient");
+import database from "models/resources/database";
+import abstractWebSocketClient from "common/abstractWebSocketClient";
 
 abstract class eventsWebSocketClient<T> extends abstractWebSocketClient<T> {
 

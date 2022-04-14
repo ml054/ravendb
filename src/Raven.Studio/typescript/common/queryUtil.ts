@@ -1,7 +1,7 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import genUtils = require("common/generalUtils");
-import moment = require("moment");
+import genUtils from "common/generalUtils";
+import moment from "moment";
 import { parseRql } from "../../languageService/src/parser";
 import { TokenStreamRewriter } from "antlr4ts";
 import { CollectionByIndexContext, CollectionByNameContext } from "../../languageService/src/generated/BaseRqlParser";

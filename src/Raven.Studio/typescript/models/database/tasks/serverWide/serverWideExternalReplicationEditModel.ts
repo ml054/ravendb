@@ -1,8 +1,8 @@
-﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
-import serverWideConfigurationModel = require("models/database/tasks/serverWide/serverWideConfigurationModel");
-import connectionStringRavenEtlModel = require("models/database/settings/connectionStringRavenEtlModel");
-import generalUtils = require("common/generalUtils");
-import jsonUtil = require("common/jsonUtil");
+/// <reference path="../../../../../typings/tsd.d.ts"/>
+import serverWideConfigurationModel from "models/database/tasks/serverWide/serverWideConfigurationModel";
+import connectionStringRavenEtlModel from "models/database/settings/connectionStringRavenEtlModel";
+import generalUtils from "common/generalUtils";
+import jsonUtil from "common/jsonUtil";
 
 class serverWideExternalReplicationEditModel extends serverWideConfigurationModel {
     delayTime = ko.observable<number>();

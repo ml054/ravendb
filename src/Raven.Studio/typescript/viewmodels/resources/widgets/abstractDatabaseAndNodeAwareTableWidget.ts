@@ -1,13 +1,13 @@
-import app = require("durandal/app");
-import websocketBasedWidget = require("viewmodels/resources/widgets/websocketBasedWidget");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import clusterDashboardWebSocketClient = require("common/clusterDashboardWebSocketClient");
-import clusterTopologyManager = require("common/shell/clusterTopologyManager");
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import appUrl = require("common/appUrl");
-import generalUtils = require("common/generalUtils");
-import createDatabase = require("viewmodels/resources/createDatabase");
-import databasesManager = require("common/shell/databasesManager");
+import app from "durandal/app";
+import websocketBasedWidget from "viewmodels/resources/widgets/websocketBasedWidget";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import clusterDashboardWebSocketClient from "common/clusterDashboardWebSocketClient";
+import clusterTopologyManager from "common/shell/clusterTopologyManager";
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import appUrl from "common/appUrl";
+import generalUtils from "common/generalUtils";
+import createDatabase from "viewmodels/resources/createDatabase";
+import databasesManager from "common/shell/databasesManager";
 
 interface statsBase<TItem> {
     disconnected: KnockoutObservable<boolean>;

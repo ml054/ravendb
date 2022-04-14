@@ -1,7 +1,7 @@
-import commandBase = require("commands/commandBase");
-import database = require("models/resources/database");
-import endpoints = require("endpoints");
-import document = require("models/database/documents/document");
+import commandBase from "commands/commandBase";
+import database from "models/resources/database";
+import endpoints from "endpoints";
+import document from "models/database/documents/document";
 
 class testSubscriptionTaskCommand extends commandBase {
 

@@ -1,11 +1,11 @@
 /// <reference path="../../../typings/tsd.d.ts"/>
-import unsecureSetup = require("models/wizard/unsecureSetup");
-import licenseInfo = require("models/wizard/licenseInfo");
-import domainInfo = require("models/wizard/domainInfo");
-import nodeInfo = require("models/wizard/nodeInfo");
-import continueSetup = require("models/wizard/continueSetup");
-import certificateInfo = require("models/wizard/certificateInfo");
-import ipEntry = require("models/wizard/ipEntry");
+import unsecureSetup from "models/wizard/unsecureSetup";
+import licenseInfo from "models/wizard/licenseInfo";
+import domainInfo from "models/wizard/domainInfo";
+import nodeInfo from "models/wizard/nodeInfo";
+import continueSetup from "models/wizard/continueSetup";
+import certificateInfo from "models/wizard/certificateInfo";
+import ipEntry from "models/wizard/ipEntry";
 type deploymentEnvironment = "AwsLinux" | "AwsWindows" | "Azure" | "Custom";
 
 class serverSetup {

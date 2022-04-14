@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import certificateUtils = require("common/certificateUtils");
-import moment = require("moment");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import certificateUtils from "common/certificateUtils";
+import moment from "moment";
 
 class replicationCertificateModel {
 

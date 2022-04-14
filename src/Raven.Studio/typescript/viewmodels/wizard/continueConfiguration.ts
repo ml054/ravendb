@@ -1,5 +1,5 @@
-import setupStep = require("viewmodels/wizard/setupStep");
-import router = require("plugins/router");
+import setupStep from "viewmodels/wizard/setupStep";
+import router from "plugins/router";
 
 class continueConfiguration extends setupStep {
 

@@ -1,7 +1,7 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
 
-import generalUtils = require("common/generalUtils");
-import moment = require("moment");
+import generalUtils from "common/generalUtils";
+import moment from "moment";
 
 type knownDocumentFlags = "HasRevisions" | "Revision" | "HasAttachments" | "DeleteRevision" | "HasCounters" | "Artificial" | "HasTimeSeries";
 

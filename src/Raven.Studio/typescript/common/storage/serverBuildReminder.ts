@@ -1,7 +1,7 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
-import storageKeyProvider = require("common/storage/storageKeyProvider");
-import moment = require("moment");
+import storageKeyProvider from "common/storage/storageKeyProvider";
+import moment from "moment";
 
 class serverBuildReminder {
 

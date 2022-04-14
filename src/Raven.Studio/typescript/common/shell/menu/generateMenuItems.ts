@@ -1,17 +1,17 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts" />
+/// <reference path="../../../../typings/tsd.d.ts" />
 
-import appUrl = require("common/appUrl");
-import separatorMenuItem = require("common/shell/menu/separatorMenuItem");
-import database = require("models/resources/database");
+import appUrl from "common/appUrl";
+import separatorMenuItem from "common/shell/menu/separatorMenuItem";
+import database from "models/resources/database";
 
-import getManageServerMenuItem = require("common/shell/menu/items/manageServer");
-import getDatabasesMenuItem = require("common/shell/menu/items/databases");
-import getSettingsMenuItem = require("common/shell/menu/items/settings");
-import getStatsMenuItem = require("common/shell/menu/items/stats");
-import getTasksMenuItem = require("common/shell/menu/items/tasks");
-import getIndexesMenuItem = require("common/shell/menu/items/indexes");
-import getDocumentsMenuItem = require("common/shell/menu/items/documents");
-import rootItems = require("common/shell/menu/items/rootItems");
+import getManageServerMenuItem from "common/shell/menu/items/manageServer";
+import getDatabasesMenuItem from "common/shell/menu/items/databases";
+import getSettingsMenuItem from "common/shell/menu/items/settings";
+import getStatsMenuItem from "common/shell/menu/items/stats";
+import getTasksMenuItem from "common/shell/menu/items/tasks";
+import getIndexesMenuItem from "common/shell/menu/items/indexes";
+import getDocumentsMenuItem from "common/shell/menu/items/documents";
+import rootItems from "common/shell/menu/items/rootItems";
 
 export = generateMenuItems;
 

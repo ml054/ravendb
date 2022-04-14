@@ -1,12 +1,12 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import driveUsageDetails = require("models/resources/serverDashboard/driveUsageDetails");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import hyperlinkColumn = require("widgets/virtualGrid/columns/hyperlinkColumn");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import generalUtils = require("common/generalUtils");
-import appUrl = require("common/appUrl");
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import databasesManager = require("common/shell/databasesManager");
+import driveUsageDetails from "models/resources/serverDashboard/driveUsageDetails";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import hyperlinkColumn from "widgets/virtualGrid/columns/hyperlinkColumn";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import generalUtils from "common/generalUtils";
+import appUrl from "common/appUrl";
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import databasesManager from "common/shell/databasesManager";
 
 class legendColumn<T> implements virtualColumn {
     constructor(

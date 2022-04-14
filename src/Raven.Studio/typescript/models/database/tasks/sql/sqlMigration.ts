@@ -1,9 +1,9 @@
-﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
-import abstractSqlTable = require("models/database/tasks/sql/abstractSqlTable");
-import rootSqlTable = require("models/database/tasks/sql/rootSqlTable");
+/// <reference path="../../../../../typings/tsd.d.ts"/>
+import abstractSqlTable from "models/database/tasks/sql/abstractSqlTable";
+import rootSqlTable from "models/database/tasks/sql/rootSqlTable";
 
-import sqlColumn = require("models/database/tasks/sql/sqlColumn");
-import sqlReference = require("models/database/tasks/sql/sqlReference");
+import sqlColumn from "models/database/tasks/sql/sqlColumn";
+import sqlReference from "models/database/tasks/sql/sqlReference";
 
 class sqlMigration {
     

@@ -1,7 +1,7 @@
-import clusterDashboard = require("viewmodels/resources/clusterDashboard");
-import abstractChartsWebsocketWidget = require("viewmodels/resources/widgets/abstractChartsWebsocketWidget");
-import lineChart = require("models/resources/clusterDashboard/lineChart");
-import serverTraffic = require("models/resources/widgets/serverTraffic");
+import clusterDashboard from "viewmodels/resources/clusterDashboard";
+import abstractChartsWebsocketWidget from "viewmodels/resources/widgets/abstractChartsWebsocketWidget";
+import lineChart from "models/resources/clusterDashboard/lineChart";
+import serverTraffic from "models/resources/widgets/serverTraffic";
 
 interface trafficState {
     showWritesDetails: boolean;

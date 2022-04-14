@@ -1,6 +1,6 @@
-﻿import backupSettings = require("models/database/tasks/periodicBackup/backupSettings");
-import jsonUtil = require("common/jsonUtil");
-import genUtils = require("common/generalUtils");
+import backupSettings from "models/database/tasks/periodicBackup/backupSettings";
+import jsonUtil from "common/jsonUtil";
+import genUtils from "common/generalUtils";
 
 type container =  "backup" | "connectionString";
 

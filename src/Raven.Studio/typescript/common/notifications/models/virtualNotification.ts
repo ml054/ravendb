@@ -1,5 +1,5 @@
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import database = require("models/resources/database");
+import abstractNotification from "common/notifications/models/abstractNotification";
+import database from "models/resources/database";
 
 abstract class virtualNotification extends abstractNotification {
 

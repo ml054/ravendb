@@ -1,17 +1,17 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import changesApi = require("common/changesApi");
-import database = require("models/resources/database");
-import changeSubscription = require("common/changeSubscription");
-import appUrl = require("common/appUrl");
-import router = require("plugins/router");
-import serverNotificationCenterClient = require("common/serverNotificationCenterClient");
-import databaseNotificationCenterClient = require("common/databaseNotificationCenterClient");
-import EVENTS = require("common/constants/events");
+import changesApi from "common/changesApi";
+import database from "models/resources/database";
+import changeSubscription from "common/changeSubscription";
+import appUrl from "common/appUrl";
+import router from "plugins/router";
+import serverNotificationCenterClient from "common/serverNotificationCenterClient";
+import databaseNotificationCenterClient from "common/databaseNotificationCenterClient";
+import EVENTS from "common/constants/events";
 
-import databaseDisconnectedEventArgs = require("viewmodels/resources/databaseDisconnectedEventArgs");
-import notificationCenter = require("common/notifications/notificationCenter");
-import collectionsTracker = require("common/helpers/database/collectionsTracker");
+import databaseDisconnectedEventArgs from "viewmodels/resources/databaseDisconnectedEventArgs";
+import notificationCenter from "common/notifications/notificationCenter";
+import collectionsTracker from "common/helpers/database/collectionsTracker";
 
 class changesContext {
     static default = new changesContext();

@@ -1,8 +1,8 @@
-import generalUtils = require("common/generalUtils");
-import websocketBasedWidget = require("viewmodels/resources/widgets/websocketBasedWidget");
-import clusterDashboard = require("viewmodels/resources/clusterDashboard");
-import clusterDashboardWebSocketClient = require("common/clusterDashboardWebSocketClient");
-import mountPointUsage = require("models/resources/widgets/mountPointUsage");
+import generalUtils from "common/generalUtils";
+import websocketBasedWidget from "viewmodels/resources/widgets/websocketBasedWidget";
+import clusterDashboard from "viewmodels/resources/clusterDashboard";
+import clusterDashboardWebSocketClient from "common/clusterDashboardWebSocketClient";
+import mountPointUsage from "models/resources/widgets/mountPointUsage";
 
 
 class perNodeStorageStats {

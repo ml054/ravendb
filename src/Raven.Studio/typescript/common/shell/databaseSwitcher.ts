@@ -1,8 +1,8 @@
-﻿
-import EVENTS = require("common/constants/events");
-import database = require("models/resources/database");
-import databasesManager = require("common/shell/databasesManager");
-import appUrl = require("common/appUrl");
+
+import EVENTS from "common/constants/events";
+import database from "models/resources/database";
+import databasesManager from "common/shell/databasesManager";
+import appUrl from "common/appUrl";
 
 /*
     Events emitted through ko.postbox

@@ -1,8 +1,8 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
-import database = require("models/resources/database");
-import generalUtils = require("common/generalUtils");
-import accessManager = require("common/shell/accessManager");
-import moment = require("moment");
+import database from "models/resources/database";
+import generalUtils from "common/generalUtils";
+import accessManager from "common/shell/accessManager";
+import moment from "moment";
 
 abstract class abstractNotification {
 
@@ -92,7 +92,6 @@ abstract class abstractNotification {
         this.title(incomingChanges.Title);
         this.severity(incomingChanges.Severity);
     }
-
 }
 
 export = abstractNotification;

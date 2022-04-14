@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
+/// <reference path="../../../../typings/tsd.d.ts"/>
 
-import popoverUtils = require("common/popoverUtils");
+import popoverUtils from "common/popoverUtils";
 
 class smugglerDatabaseRecord {
     

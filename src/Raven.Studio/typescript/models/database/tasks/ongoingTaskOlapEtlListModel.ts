@@ -1,7 +1,7 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import abstractOngoingTaskEtlListModel = require("models/database/tasks/abstractOngoingTaskEtlListModel");
-import appUrl = require("common/appUrl");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
+import abstractOngoingTaskEtlListModel from "models/database/tasks/abstractOngoingTaskEtlListModel";
+import appUrl from "common/appUrl";
 
 class ongoingTaskOlapEtlListModel extends abstractOngoingTaskEtlListModel {
     

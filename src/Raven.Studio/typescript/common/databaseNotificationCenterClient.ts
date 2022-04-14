@@ -1,11 +1,11 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import database = require("models/resources/database");
-import changeSubscription = require("common/changeSubscription");
-import changesCallback = require("common/changesCallback");
-import endpoints = require("endpoints");
+import database from "models/resources/database";
+import changeSubscription from "common/changeSubscription";
+import changesCallback from "common/changesCallback";
+import endpoints from "endpoints";
 
-import abstractNotificationCenterClient = require("common/abstractNotificationCenterClient");
+import abstractNotificationCenterClient from "common/abstractNotificationCenterClient";
 
 class databaseNotificationCenterClient extends abstractNotificationCenterClient {
 

@@ -1,7 +1,7 @@
-import viewModelBase = require("viewmodels/viewModelBase");
+import viewModelBase from "viewmodels/viewModelBase";
 
-import getEulaCommand = require("commands/licensing/getEulaCommand");
-import acceptEulaCommand = require("commands/licensing/acceptEulaCommand");
+import getEulaCommand from "commands/licensing/getEulaCommand";
+import acceptEulaCommand from "commands/licensing/acceptEulaCommand";
 
 class license extends viewModelBase {
 

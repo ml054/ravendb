@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import ongoingTaskModel = require("models/database/tasks/ongoingTaskModel");
-import router = require("plugins/router");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import ongoingTaskModel from "models/database/tasks/ongoingTaskModel";
+import router from "plugins/router";
 
 abstract class ongoingTaskListModel extends ongoingTaskModel {
     

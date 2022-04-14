@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
-import storageKeyProvider = require("common/storage/storageKeyProvider");
+import storageKeyProvider from "common/storage/storageKeyProvider";
 
 class lastUsedAutocomplete {
 

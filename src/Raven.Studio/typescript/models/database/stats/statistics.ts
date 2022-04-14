@@ -1,7 +1,7 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import indexStatistics = require("models/database/stats/indexStatistics");
-import changeVectorUtils = require("common/changeVectorUtils");
-import generalUtils = require("common/generalUtils");
+import indexStatistics from "models/database/stats/indexStatistics";
+import changeVectorUtils from "common/changeVectorUtils";
+import generalUtils from "common/generalUtils";
 
 class statistics {
     databaseId: string;

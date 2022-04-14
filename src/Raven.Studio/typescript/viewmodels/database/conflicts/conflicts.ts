@@ -1,27 +1,27 @@
-import appUrl = require("common/appUrl");
-import eventsCollector = require("common/eventsCollector");
+import appUrl from "common/appUrl";
+import eventsCollector from "common/eventsCollector";
 
-import viewModelBase = require("viewmodels/viewModelBase");
-import app = require("durandal/app");
+import viewModelBase from "viewmodels/viewModelBase";
+import app from "durandal/app";
 
-import getConflictsCommand = require("commands/database/replication/getConflictsCommand");
-import getConflictsForDocumentCommand = require("commands/database/replication/getConflictsForDocumentCommand");
-import getSuggestedConflictResolutionCommand = require("commands/database/replication/getSuggestedConflictResolutionCommand");
+import getConflictsCommand from "commands/database/replication/getConflictsCommand";
+import getConflictsForDocumentCommand from "commands/database/replication/getConflictsForDocumentCommand";
+import getSuggestedConflictResolutionCommand from "commands/database/replication/getSuggestedConflictResolutionCommand";
 
-import deleteDocuments = require("viewmodels/common/deleteDocuments");
+import deleteDocuments from "viewmodels/common/deleteDocuments";
 
-import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
+import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
 
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import hyperlinkColumn = require("widgets/virtualGrid/columns/hyperlinkColumn");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import messagePublisher = require("common/messagePublisher");
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import hyperlinkColumn from "widgets/virtualGrid/columns/hyperlinkColumn";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import messagePublisher from "common/messagePublisher";
 
-import document = require("models/database/documents/document");
-import saveDocumentCommand = require("commands/database/documents/saveDocumentCommand");
-import changeVectorUtils = require("common/changeVectorUtils");
-import generalUtils = require("common/generalUtils");
-import moment = require("moment");
+import document from "models/database/documents/document";
+import saveDocumentCommand from "commands/database/documents/saveDocumentCommand";
+import changeVectorUtils from "common/changeVectorUtils";
+import generalUtils from "common/generalUtils";
+import moment from "moment";
 import { highlight, languages } from "prismjs";
 
 class conflictItem {

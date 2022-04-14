@@ -1,8 +1,8 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
-import virtualNotification = require("common/notifications/models/virtualNotification");
-import database = require("models/resources/database");
-import pluralizeHelpers = require("common/helpers/text/pluralizeHelpers");
-import moment = require("moment");
+import virtualNotification from "common/notifications/models/virtualNotification";
+import database from "models/resources/database";
+import pluralizeHelpers from "common/helpers/text/pluralizeHelpers";
+import moment from "moment";
 
 class virtualBulkInsert extends virtualNotification {
     

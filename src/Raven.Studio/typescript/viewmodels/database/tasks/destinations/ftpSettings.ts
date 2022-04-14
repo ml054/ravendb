@@ -1,9 +1,9 @@
-﻿import backupSettings = require("models/database/tasks/periodicBackup/backupSettings");
-import jsonUtil = require("common/jsonUtil");
-import fileImporter = require("common/fileImporter");
-import genUtils = require("common/generalUtils");
-import popoverUtils = require("common/popoverUtils");
-import tasksCommonContent = require("models/database/tasks/tasksCommonContent");
+import backupSettings from "models/database/tasks/periodicBackup/backupSettings";
+import jsonUtil from "common/jsonUtil";
+import fileImporter from "common/fileImporter";
+import genUtils from "common/generalUtils";
+import popoverUtils from "common/popoverUtils";
+import tasksCommonContent from "models/database/tasks/tasksCommonContent";
 
 class ftpSettings extends backupSettings {
     view = require("views/database/tasks/destinations/ftpSettings.html");

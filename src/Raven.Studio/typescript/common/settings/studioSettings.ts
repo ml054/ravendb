@@ -1,10 +1,10 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
-import database = require("models/resources/database");
-import globalSettings = require("common/settings/globalSettings");
-import databaseSettings = require("common/settings/databaseSettings");
-import abstractSettings = require("common/settings/abstractSettings");
-import studioSetting = require("common/settings/studioSetting");
+import database from "models/resources/database";
+import globalSettings from "common/settings/globalSettings";
+import databaseSettings from "common/settings/databaseSettings";
+import abstractSettings from "common/settings/abstractSettings";
+import studioSetting from "common/settings/studioSetting";
 
 type handlerItem = {
     nameCondition: (name: string) => boolean;

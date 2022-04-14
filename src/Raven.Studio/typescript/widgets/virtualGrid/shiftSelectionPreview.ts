@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../../typings/tsd.d.ts"/>
 
-import virtualRow = require("widgets/virtualGrid/virtualRow");
+import virtualRow from "widgets/virtualGrid/virtualRow";
 
 class shiftSelectionHandler implements disposable {
     private static readonly selectionPreviewClass = "selection-preview";

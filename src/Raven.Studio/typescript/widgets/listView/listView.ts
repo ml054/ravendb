@@ -1,8 +1,8 @@
 ﻿/// <reference path="../../../typings/tsd.d.ts"/>
 
-import itemFetch = require("widgets/virtualGrid/itemFetch");
-import listViewController = require("widgets/listView/listViewController");
-import virtualListRow = require("widgets/listView/virtualListRow");
+import itemFetch from "widgets/virtualGrid/itemFetch";
+import listViewController from "widgets/listView/listViewController";
+import virtualListRow from "widgets/listView/virtualListRow";
 
 /**
  * This list view is optimized to handle following lists:

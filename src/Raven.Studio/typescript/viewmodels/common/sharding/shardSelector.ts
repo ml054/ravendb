@@ -1,4 +1,4 @@
-﻿import shard from "models/resources/shard";
+import shard from "models/resources/shard";
 import dialogViewModelBase from "viewmodels/dialogViewModelBase";
 import clusterTopologyManager from "common/shell/clusterTopologyManager";
 import activeDatabaseTracker from "common/shell/activeDatabaseTracker";

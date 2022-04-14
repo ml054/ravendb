@@ -1,20 +1,20 @@
-import appUrl = require("common/appUrl");
-import router = require("plugins/router");
-import viewModelBase = require("viewmodels/viewModelBase");
-import database = require("models/resources/database");
-import ongoingTasksCommand = require("commands/database/tasks/getOngoingTasksCommand");
-import ongoingTaskReplicationHubDefinitionListModel = require("models/database/tasks/ongoingTaskReplicationHubDefinitionListModel");
-import ongoingTaskBackupListModel = require("models/database/tasks/ongoingTaskBackupListModel");
-import clusterTopologyManager = require("common/shell/clusterTopologyManager");
-import ongoingTaskModel = require("models/database/tasks/ongoingTaskModel");
-import deleteOngoingTaskCommand = require("commands/database/tasks/deleteOngoingTaskCommand");
-import toggleOngoingTaskCommand = require("commands/database/tasks/toggleOngoingTaskCommand");
-import databaseGroupGraph = require("models/database/dbGroup/databaseGroupGraph");
-import getDatabaseCommand = require("commands/resources/getDatabaseCommand");
-import ongoingTaskListModel = require("models/database/tasks/ongoingTaskListModel");
-import manualBackupListModel = require("models/database/tasks/manualBackupListModel");
-import accessManager = require("common/shell/accessManager");
-import getManualBackupCommand = require("commands/database/tasks/getManualBackupCommand");
+import appUrl from "common/appUrl";
+import router from "plugins/router";
+import viewModelBase from "viewmodels/viewModelBase";
+import database from "models/resources/database";
+import ongoingTasksCommand from "commands/database/tasks/getOngoingTasksCommand";
+import ongoingTaskReplicationHubDefinitionListModel from "models/database/tasks/ongoingTaskReplicationHubDefinitionListModel";
+import ongoingTaskBackupListModel from "models/database/tasks/ongoingTaskBackupListModel";
+import clusterTopologyManager from "common/shell/clusterTopologyManager";
+import ongoingTaskModel from "models/database/tasks/ongoingTaskModel";
+import deleteOngoingTaskCommand from "commands/database/tasks/deleteOngoingTaskCommand";
+import toggleOngoingTaskCommand from "commands/database/tasks/toggleOngoingTaskCommand";
+import databaseGroupGraph from "models/database/dbGroup/databaseGroupGraph";
+import getDatabaseCommand from "commands/resources/getDatabaseCommand";
+import ongoingTaskListModel from "models/database/tasks/ongoingTaskListModel";
+import manualBackupListModel from "models/database/tasks/manualBackupListModel";
+import accessManager from "common/shell/accessManager";
+import getManualBackupCommand from "commands/database/tasks/getManualBackupCommand";
 
 class backups extends viewModelBase {
 

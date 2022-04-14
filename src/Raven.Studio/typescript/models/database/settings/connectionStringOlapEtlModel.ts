@@ -1,18 +1,18 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import connectionStringModel = require("models/database/settings/connectionStringModel");
-import jsonUtil = require("common/jsonUtil");
-import s3Settings = require("viewmodels/database/tasks/destinations/s3Settings");
-import localSettings = require("models/database/tasks/periodicBackup/localSettings");
-import getBackupLocationCommand = require("commands/database/tasks/getBackupLocationCommand");
-import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import generalUtils = require("common/generalUtils");
-import getFolderPathOptionsCommand = require("commands/resources/getFolderPathOptionsCommand");
-import database = require("models/resources/database");
-import saveConnectionStringCommand = require("commands/database/settings/saveConnectionStringCommand");
-import azureSettings = require("viewmodels/database/tasks/destinations/azureSettings");
-import googleCloudSettings = require("viewmodels/database/tasks/destinations/googleCloudSettings");
-import glacierSettings = require("viewmodels/database/tasks/destinations/glacierSettings");
-import ftpSettings = require("viewmodels/database/tasks/destinations/ftpSettings");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import connectionStringModel from "models/database/settings/connectionStringModel";
+import jsonUtil from "common/jsonUtil";
+import s3Settings from "viewmodels/database/tasks/destinations/s3Settings";
+import localSettings from "models/database/tasks/periodicBackup/localSettings";
+import getBackupLocationCommand from "commands/database/tasks/getBackupLocationCommand";
+import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
+import generalUtils from "common/generalUtils";
+import getFolderPathOptionsCommand from "commands/resources/getFolderPathOptionsCommand";
+import database from "models/resources/database";
+import saveConnectionStringCommand from "commands/database/settings/saveConnectionStringCommand";
+import azureSettings from "viewmodels/database/tasks/destinations/azureSettings";
+import googleCloudSettings from "viewmodels/database/tasks/destinations/googleCloudSettings";
+import glacierSettings from "viewmodels/database/tasks/destinations/glacierSettings";
+import ftpSettings from "viewmodels/database/tasks/destinations/ftpSettings";
 
 class connectionStringOlapEtlModel extends connectionStringModel {
 

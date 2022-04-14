@@ -1,9 +1,9 @@
 ﻿/// <reference path="../../typings/tsd.d.ts" />
-import pluralizeHelpers = require("common/helpers/text/pluralizeHelpers");
-import moment = require("moment");
-import d3 = require("d3");
+import pluralizeHelpers from "common/helpers/text/pluralizeHelpers";
+import moment from "moment";
+import d3 from "d3";
 
-class genUtils {
+export default class genUtils {
     
     static integerMaxValue = 2147483647;
 
@@ -720,5 +720,3 @@ class genUtils {
         return "Node " + location.nodeTag;
     }
 } 
-
-export = genUtils;

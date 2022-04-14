@@ -1,8 +1,8 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import ongoingTaskEditModel = require("models/database/tasks/ongoingTaskEditModel");
-import ongoingTaskOlapEtlTransformationModel = require("models/database/tasks/ongoingTaskOlapEtlTransformationModel");
-import ongoingTaskOlapEtlTableModel = require("models/database/tasks/ongoingTaskOlapEtlTableModel");
-import cronEditor = require("viewmodels/common/cronEditor");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import ongoingTaskEditModel from "models/database/tasks/ongoingTaskEditModel";
+import ongoingTaskOlapEtlTransformationModel from "models/database/tasks/ongoingTaskOlapEtlTransformationModel";
+import ongoingTaskOlapEtlTableModel from "models/database/tasks/ongoingTaskOlapEtlTableModel";
+import cronEditor from "viewmodels/common/cronEditor";
 
 class ongoingTaskOlapEtlEditModel extends ongoingTaskEditModel {
     connectionStringName = ko.observable<string>();

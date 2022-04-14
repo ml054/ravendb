@@ -1,5 +1,5 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import generalUtils = require("common/generalUtils");
+import generalUtils from "common/generalUtils";
 
 class trafficItem {
     sizeFormatter = generalUtils.formatBytesToSize;

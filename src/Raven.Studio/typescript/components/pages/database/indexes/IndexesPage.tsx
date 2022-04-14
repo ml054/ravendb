@@ -5,12 +5,12 @@ import {
     IndexFilterCriteria, IndexGroup, IndexNodeInfoDetails,
     IndexSharedInfo, IndexStatus,
 } from "../../../models/indexes";
-import IndexPriority = Raven.Client.Documents.Indexes.IndexPriority;
+type IndexPriority = Raven.Client.Documents.Indexes.IndexPriority;
 import { IndexPanel } from "./IndexPanel";
 import deleteIndexesConfirm from "viewmodels/database/indexes/deleteIndexesConfirm";
 import app from "durandal/app";
 import IndexFilter, { IndexFilterDescription } from "./IndexFilter";
-import IndexLockMode = Raven.Client.Documents.Indexes.IndexLockMode;
+type IndexLockMode = Raven.Client.Documents.Indexes.IndexLockMode;
 import IndexToolbarActions from "./IndexToolbarActions";
 import { useServices } from "../../../hooks/useServices";
 import { indexesStatsReducer, indexesStatsReducerInitializer } from "./IndexesStatsReducer";
@@ -25,7 +25,7 @@ import clusterTopologyManager from "common/shell/clusterTopologyManager";
 import classNames from "classnames";
 import { useAppUrls } from "../../../hooks/useAppUrls";
 import { useAccessManager } from "../../../hooks/useAccessManager";
-import IndexRunningStatus = Raven.Client.Documents.Indexes.IndexRunningStatus;
+type IndexRunningStatus = Raven.Client.Documents.Indexes.IndexRunningStatus;
 import { shardingTodo } from "common/developmentHelper";
 import useTimeout from "../../../hooks/useTimeout";
 import useInterval from "../../../hooks/useInterval";
@@ -118,7 +118,7 @@ function indexMatchesFilter(index: IndexSharedInfo, filter: IndexFilterCriteria,
     const indexingErrorsMatch = !filter.showOnlyIndexesWithIndexingErrors 
         || (filter.showOnlyIndexesWithIndexingErrors && index.nodesInfo.some(x => x.details?.errorCount > 0));
 
-    return nameMatch && statusMatch && indexingErrorsMatch;
+    return true;
 }
 
 function groupAndFilterIndexStats(indexes: IndexSharedInfo[], collections: collection[], filter: IndexFilterCriteria, globalIndexingStatus: IndexRunningStatus): { groups: IndexGroup[], replacements: IndexSharedInfo[] } {

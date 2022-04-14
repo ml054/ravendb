@@ -1,12 +1,12 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import database = require("models/resources/database");
-import changeSubscription = require("common/changeSubscription");
-import changesCallback = require("common/changesCallback");
+import database from "models/resources/database";
+import changeSubscription from "common/changeSubscription";
+import changesCallback from "common/changesCallback";
 
-import EVENTS = require("common/constants/events");
+import EVENTS from "common/constants/events";
 
-import eventsWebSocketClient = require("common/eventsWebSocketClient");
+import eventsWebSocketClient from "common/eventsWebSocketClient";
 
 class changesApi extends eventsWebSocketClient<changesApiEventDto[]> {
 

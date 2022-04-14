@@ -1,9 +1,9 @@
-import commandBase = require("commands/commandBase");
-import database = require("models/resources/database");
-import document = require("models/database/documents/document");
-import endpoints = require("endpoints");
-import queryCriteria = require("models/database/query/queryCriteria");
-import queryUtil = require("common/queryUtil");
+import commandBase from "commands/commandBase";
+import database from "models/resources/database";
+import document from "models/database/documents/document";
+import endpoints from "endpoints";
+import queryCriteria from "models/database/query/queryCriteria";
+import queryUtil from "common/queryUtil";
 
 class queryCommand extends commandBase {
 

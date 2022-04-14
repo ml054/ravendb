@@ -1,8 +1,8 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
-import database = require("models/resources/database");
-import getOngoingTaskInfoCommand = require("commands/database/tasks/getOngoingTaskInfoCommand");
-import app = require("durandal/app");
-import subscriptionQueryDefinitionPreview = require("viewmodels/database/status/subscriptionQueryDefinitionPreview");
+import database from "models/resources/database";
+import getOngoingTaskInfoCommand from "commands/database/tasks/getOngoingTaskInfoCommand";
+import app from "durandal/app";
+import subscriptionQueryDefinitionPreview from "viewmodels/database/status/subscriptionQueryDefinitionPreview";
 
 class subscriptionQueryDefinitionCache {
     private readonly db: database;

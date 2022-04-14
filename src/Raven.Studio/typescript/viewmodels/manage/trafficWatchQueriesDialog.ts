@@ -1,5 +1,5 @@
-import dialog = require("plugins/dialog");
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
+import dialog from "plugins/dialog";
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
 
 class trafficWatchQueriesDialog extends dialogViewModelBase {
 

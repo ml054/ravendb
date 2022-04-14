@@ -1,7 +1,7 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
 
-import generalUtils = require("common/generalUtils");
-import pluralizeHelpers = require("common/helpers/text/pluralizeHelpers");
+import generalUtils from "common/generalUtils";
+import pluralizeHelpers from "common/helpers/text/pluralizeHelpers";
 
 class timeValueEntry {
     

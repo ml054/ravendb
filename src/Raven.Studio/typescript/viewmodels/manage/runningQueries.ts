@@ -1,14 +1,14 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import virtualGridController = require("widgets/virtualGrid/virtualGridController");
-import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import awesomeMultiselect = require("common/awesomeMultiselect");
-import runningQueriesWebSocketClient = require("common/runningQueriesWebSocketClient");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import databasesManager = require("common/shell/databasesManager");
-import actionColumn = require("widgets/virtualGrid/columns/actionColumn");
-import killQueryCommand = require("commands/database/query/killQueryCommand");
-import messagePublisher = require("common/messagePublisher");
-import generalUtils = require("common/generalUtils");
+import viewModelBase from "viewmodels/viewModelBase";
+import virtualGridController from "widgets/virtualGrid/virtualGridController";
+import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import awesomeMultiselect from "common/awesomeMultiselect";
+import runningQueriesWebSocketClient from "common/runningQueriesWebSocketClient";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import databasesManager from "common/shell/databasesManager";
+import actionColumn from "widgets/virtualGrid/columns/actionColumn";
+import killQueryCommand from "commands/database/query/killQueryCommand";
+import messagePublisher from "common/messagePublisher";
+import generalUtils from "common/generalUtils";
 import { highlight, languages } from "prismjs";
 
 type ExecutingQueryInfoWithCache = {

@@ -1,11 +1,11 @@
-import graphHelper = require("common/helpers/graph/graphHelper");
-import viewHelpers = require("common/helpers/view/viewHelpers");
-import visualizerTreeExplorer = require("viewmodels/database/indexes/visualizer/visualizerTreeExplorer")
+import graphHelper from "common/helpers/graph/graphHelper";
+import viewHelpers from "common/helpers/view/viewHelpers";
+import visualizerTreeExplorer from "viewmodels/database/indexes/visualizer/visualizerTreeExplorer"
 
-import app = require("durandal/app");
-import d3 = require('d3');
-import rbush = require("rbush");
-import colorsManager = require("common/colorsManager");
+import app from "durandal/app";
+import d3 from 'd3';
+import rbush from "rbush";
+import colorsManager from "common/colorsManager";
 
 abstract class reduceValuesFormatter {
     static formatData(data: any) {

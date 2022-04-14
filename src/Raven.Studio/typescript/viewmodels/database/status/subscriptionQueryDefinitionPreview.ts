@@ -1,5 +1,5 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
 
 class subscriptionQueryDefinitionPreview extends dialogViewModelBase {
 

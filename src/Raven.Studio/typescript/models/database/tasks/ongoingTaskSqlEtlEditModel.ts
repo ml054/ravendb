@@ -1,7 +1,7 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import ongoingTaskEditModel = require("models/database/tasks/ongoingTaskEditModel");
-import ongoingTaskSqlEtlTransformationModel = require("models/database/tasks/ongoingTaskSqlEtlTransformationModel");
-import ongoingTaskSqlEtlTableModel = require("models/database/tasks/ongoingTaskSqlEtlTableModel");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import ongoingTaskEditModel from "models/database/tasks/ongoingTaskEditModel";
+import ongoingTaskSqlEtlTransformationModel from "models/database/tasks/ongoingTaskSqlEtlTransformationModel";
+import ongoingTaskSqlEtlTableModel from "models/database/tasks/ongoingTaskSqlEtlTableModel";
 
 class ongoingTaskSqlEtlEditModel extends ongoingTaskEditModel {
     connectionStringName = ko.observable<string>();

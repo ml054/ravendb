@@ -1,5 +1,5 @@
-﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
-import serverWideExcludeModel = require("models/database/tasks/serverWide/serverWideExcludeModel");
+/// <reference path="../../../../../typings/tsd.d.ts"/>
+import serverWideExcludeModel from "models/database/tasks/serverWide/serverWideExcludeModel";
 
 abstract class serverWideConfigurationModel {
     taskId = ko.observable<number>();

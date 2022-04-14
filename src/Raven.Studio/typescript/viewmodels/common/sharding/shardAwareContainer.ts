@@ -1,10 +1,10 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import activator = require("durandal/activator");
-import database = require("models/resources/database");
-import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import viewModelBase from "viewmodels/viewModelBase";
+import activator from "durandal/activator";
+import database from "models/resources/database";
+import shardViewModelBase from "viewmodels/shardViewModelBase";
 import shardingContext from "viewmodels/common/sharding/shardingContext";
 import { shardingTodo } from "common/developmentHelper";
-import router = require("plugins/router");
+import router from "plugins/router";
 
 class shardAwareContainer extends viewModelBase {
     protected rootActivator: DurandalActivator<any>;

@@ -1,7 +1,7 @@
-﻿/// <reference path="../../../../../typings/tsd.d.ts"/>
-import periodicBackupConfiguration = require("models/database/tasks/periodicBackup/periodicBackupConfiguration");
-import serverWideExcludeModel = require("models/database/tasks/serverWide/serverWideExcludeModel");
-import jsonUtil = require("common/jsonUtil");
+/// <reference path="../../../../../typings/tsd.d.ts"/>
+import periodicBackupConfiguration from "models/database/tasks/periodicBackup/periodicBackupConfiguration";
+import serverWideExcludeModel from "models/database/tasks/serverWide/serverWideExcludeModel";
+import jsonUtil from "common/jsonUtil";
 
 class serverWideBackupEditModel extends periodicBackupConfiguration {
     excludeInfo = ko.observable<serverWideExcludeModel>();

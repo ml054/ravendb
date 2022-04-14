@@ -1,8 +1,8 @@
-import app = require("durandal/app");
-import operation = require("common/notifications/models/operation");
-import abstractNotification = require("common/notifications/models/abstractNotification");
-import notificationCenter = require("common/notifications/notificationCenter");
-import abstractOperationDetails = require("viewmodels/common/notificationCenter/detailViewer/operations/abstractOperationDetails");
+import app from "durandal/app";
+import operation from "common/notifications/models/operation";
+import abstractNotification from "common/notifications/models/abstractNotification";
+import notificationCenter from "common/notifications/notificationCenter";
+import abstractOperationDetails from "viewmodels/common/notificationCenter/detailViewer/operations/abstractOperationDetails";
 
 type migrationListItemStatus = "processed" | "processing" | "pending";
 

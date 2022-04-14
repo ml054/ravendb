@@ -1,11 +1,11 @@
-import widget = require("viewmodels/resources/widgets/widget");
-import license = require("models/auth/licenseModel");
-import appUrl = require("common/appUrl");
-import generalUtils = require("common/generalUtils");
-import getCertificatesCommand = require("commands/auth/getCertificatesCommand");
-import accessManager = require("common/shell/accessManager");
-import clusterDashboard = require("viewmodels/resources/clusterDashboard");
-import moment = require("moment");
+import widget from "viewmodels/resources/widgets/widget";
+import license from "models/auth/licenseModel";
+import appUrl from "common/appUrl";
+import generalUtils from "common/generalUtils";
+import getCertificatesCommand from "commands/auth/getCertificatesCommand";
+import accessManager from "common/shell/accessManager";
+import clusterDashboard from "viewmodels/resources/clusterDashboard";
+import moment from "moment";
 
 interface serverCertificateInfo {
     dateFormatted: string;

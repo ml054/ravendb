@@ -1,7 +1,7 @@
 /// <reference path="../../../typings/tsd.d.ts"/>
 
-import extractNodesInfoFromPackageCommand = require("commands/wizard/extractNodesInfoFromPackageCommand");
-import fileImporter = require("common/fileImporter");
+import extractNodesInfoFromPackageCommand from "commands/wizard/extractNodesInfoFromPackageCommand";
+import fileImporter from "common/fileImporter";
 
 class continueSetup {
 

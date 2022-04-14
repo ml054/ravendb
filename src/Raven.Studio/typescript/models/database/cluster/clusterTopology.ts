@@ -1,5 +1,5 @@
 
-import clusterNode = require("models/database/cluster/clusterNode");
+import clusterNode from "models/database/cluster/clusterNode";
 
 class clusterTopology {
     leader = ko.observable<string>();

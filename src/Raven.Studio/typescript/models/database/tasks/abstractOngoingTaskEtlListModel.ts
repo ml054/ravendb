@@ -1,7 +1,7 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import ongoingTaskListModel = require("models/database/tasks/ongoingTaskListModel");
-import genericProgress = require("common/helpers/database/genericProgress");
-import etlProgress = require("models/database/tasks/etlProgress");
+/// <reference path="../../../../typings/tsd.d.ts"/>
+import ongoingTaskListModel from "models/database/tasks/ongoingTaskListModel";
+import genericProgress from "common/helpers/database/genericProgress";
+import etlProgress from "models/database/tasks/etlProgress";
 
 class progressItem {
     name = ko.observable<string>();

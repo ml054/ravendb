@@ -1,4 +1,4 @@
-import document = require("models/database/documents/document");
+import document from "models/database/documents/document";
 
 class collectionInfo {
     results: Array<document>;

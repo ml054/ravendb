@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../../typings/tsd.d.ts"/>
+/// <reference path="../../../../typings/tsd.d.ts"/>
 
-import smugglerDatabaseRecord = require("models/database/tasks/smugglerDatabaseRecord");
+import smugglerDatabaseRecord from "models/database/tasks/smugglerDatabaseRecord";
 
 type authenticationMethod = "none" | "apiKey" | "windows";
 

@@ -1,16 +1,16 @@
-import viewModelBase = require("viewmodels/viewModelBase");
-import migrateRavenDbDatabaseCommand = require("commands/database/studio/migrateRavenDbDatabaseCommand");
-import migrateRavenDbDatabaseModel = require("models/database/tasks/migrateRavenDbDatabaseModel");
-import notificationCenter = require("common/notifications/notificationCenter");
-import eventsCollector = require("common/eventsCollector");
-import viewHelpers = require("common/helpers/view/viewHelpers");
-import getMigratedServerUrlsCommand = require("commands/database/studio/getMigratedServerUrlsCommand");
-import getRemoteServerVersionWithDatabasesCommand = require("commands/database/studio/getRemoteServerVersionWithDatabasesCommand");
-import recentError = require("common/notifications/models/recentError");
-import generalUtils = require("common/generalUtils");
-import popoverUtils = require("common/popoverUtils");
-import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
-import defaultAceCompleter = require("common/defaultAceCompleter");
+import viewModelBase from "viewmodels/viewModelBase";
+import migrateRavenDbDatabaseCommand from "commands/database/studio/migrateRavenDbDatabaseCommand";
+import migrateRavenDbDatabaseModel from "models/database/tasks/migrateRavenDbDatabaseModel";
+import notificationCenter from "common/notifications/notificationCenter";
+import eventsCollector from "common/eventsCollector";
+import viewHelpers from "common/helpers/view/viewHelpers";
+import getMigratedServerUrlsCommand from "commands/database/studio/getMigratedServerUrlsCommand";
+import getRemoteServerVersionWithDatabasesCommand from "commands/database/studio/getRemoteServerVersionWithDatabasesCommand";
+import recentError from "common/notifications/models/recentError";
+import generalUtils from "common/generalUtils";
+import popoverUtils from "common/popoverUtils";
+import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
+import defaultAceCompleter from "common/defaultAceCompleter";
 
 class migrateRavenDbDatabase extends viewModelBase {
 

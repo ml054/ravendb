@@ -1,9 +1,11 @@
+/// <reference path="../../../typings/tsd.d.ts"/>
+
 import assertUnreachable from "./assertUnreachable";
-import IndexLockMode = Raven.Client.Documents.Indexes.IndexLockMode;
+type IndexLockMode = Raven.Client.Documents.Indexes.IndexLockMode;
 import { IndexNodeInfoDetails, IndexSharedInfo, IndexStatus } from "../models/indexes";
-import IndexType = Raven.Client.Documents.Indexes.IndexType;
+type IndexType = Raven.Client.Documents.Indexes.IndexType;
 import collection from "models/database/documents/collection";
-import IndexRunningStatus = Raven.Client.Documents.Indexes.IndexRunningStatus;
+type IndexRunningStatus = Raven.Client.Documents.Indexes.IndexRunningStatus;
 
 export default class IndexUtils {
 

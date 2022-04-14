@@ -1,7 +1,7 @@
-import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import notificationCenter = require("common/notifications/notificationCenter");
-import alert = require("common/notifications/models/alert");
-import notificationCenterSettings = require("common/notifications/notificationCenterSettings");
+import dialogViewModelBase from "viewmodels/dialogViewModelBase";
+import notificationCenter from "common/notifications/notificationCenter";
+import alert from "common/notifications/models/alert";
+import notificationCenterSettings from "common/notifications/notificationCenterSettings";
 
 abstract class abstractAlertDetails extends dialogViewModelBase {
 

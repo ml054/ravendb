@@ -1,11 +1,11 @@
-import clusterDashboard = require("viewmodels/resources/clusterDashboard");
-import nodeTagColumn = require("widgets/virtualGrid/columns/nodeTagColumn");
-import abstractDatabaseAndNodeAwareTableWidget = require("viewmodels/resources/widgets/abstractDatabaseAndNodeAwareTableWidget");
-import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
-import databaseDiskUsage = require("models/resources/widgets/databaseDiskUsage");
-import textColumn = require("widgets/virtualGrid/columns/textColumn");
-import appUrl = require("common/appUrl");
-import perNodeStatItems = require("models/resources/widgets/perNodeStatItems");
+import clusterDashboard from "viewmodels/resources/clusterDashboard";
+import nodeTagColumn from "widgets/virtualGrid/columns/nodeTagColumn";
+import abstractDatabaseAndNodeAwareTableWidget from "viewmodels/resources/widgets/abstractDatabaseAndNodeAwareTableWidget";
+import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import databaseDiskUsage from "models/resources/widgets/databaseDiskUsage";
+import textColumn from "widgets/virtualGrid/columns/textColumn";
+import appUrl from "common/appUrl";
+import perNodeStatItems from "models/resources/widgets/perNodeStatItems";
 
 class databaseStorageWidget extends abstractDatabaseAndNodeAwareTableWidget<Raven.Server.Dashboard.Cluster.Notifications.DatabaseStorageUsagePayload, perNodeStatItems<databaseDiskUsage>, databaseDiskUsage> {
 
