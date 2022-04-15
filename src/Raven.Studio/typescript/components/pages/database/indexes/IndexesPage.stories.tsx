@@ -9,15 +9,16 @@ export default {
     component: IndexesPage
 } as ComponentMeta<typeof IndexesPage>;
 
-
 export const Story1: ComponentStory<typeof IndexesPage> = () => {
     const db = new nonShardedDatabase({
         Name: "db1"
     } as any, ko.observable("A"));
-    
+
     return (
-        <div className="indexes content-margin no-transition absolute-fill">
-            <IndexesPage database={db} />
+
+        <div className="indexes content-margin no-transition absolute-fill" style={{ margin: "50px" }}>
+            <IndexesPage database={db}/>
         </div>
+
     );
 }

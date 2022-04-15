@@ -24,4 +24,3 @@ module.exports = ({ template }) => {
         }
     };
 };
-//# sourceMappingURL=index.js.map
