@@ -166,5 +166,12 @@ namespace Raven.Server.Documents.Sharding.Handlers
             using (var processor = new ShardedOngoingTasksHandlerProcessorForUpdateExternalReplication(this))
                 await processor.ExecuteAsync();
         }
+
+        [RavenShardedAction("/databases/*/tasks/pull-replication/hub", "GET")]
+        public async Task GetHubTasksInfo()
+        {
+            using (var processor = new ShardedOngoingTasksHandlerProcessorForGetPullReplicationHubTasksInfo(this))
+                await processor.ExecuteAsync();
+        }
     }
 }
