@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -862,16 +861,6 @@ namespace Raven.Server.Web.System
             await using (var writer = new AsyncBlittableJsonTextWriter(context, ResponseBodyStream()))
             {
                 context.Write(writer, taskInfo.ToJson());
-            }
-        }
-
-        internal async Task WriteResult(JsonOperationContext context, DynamicJsonValue dynamicJsonValue)
-        {
-            HttpContext.Response.StatusCode = (int)HttpStatusCode.OK;
-
-            await using (var writer = new AsyncBlittableJsonTextWriter(context, ResponseBodyStream()))
-            {
-                context.Write(writer, dynamicJsonValue);
             }
         }
 
