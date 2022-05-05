@@ -21,13 +21,19 @@ namespace Raven.Client.Documents.Operations.OngoingTasks
             return new GetPullReplicationTasksInfoCommand(_taskId);
         }
 
-        private class GetPullReplicationTasksInfoCommand : RavenCommand<PullReplicationDefinitionAndCurrentConnections>
+        internal class GetPullReplicationTasksInfoCommand : RavenCommand<PullReplicationDefinitionAndCurrentConnections>
         {
             private readonly long _taskId;
 
             public GetPullReplicationTasksInfoCommand(long taskId)
             {
                 _taskId = taskId;
+            }
+
+            public GetPullReplicationTasksInfoCommand(long taskId, string nodeTag)
+            {
+                _taskId = taskId;
+                SelectedNodeTag = nodeTag;
             }
 
             public override HttpRequestMessage CreateRequest(JsonOperationContext ctx, ServerNode node, out string url)
