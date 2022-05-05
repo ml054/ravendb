@@ -7,7 +7,7 @@ import database from "models/resources/database";
 import getIndexesErrorCountCommand from "commands/database/index/getIndexesErrorCountCommand";
 import indexErrorInfoModel from "models/database/index/indexErrorInfoModel";
 import getIndexesErrorCommand from "commands/database/index/getIndexesErrorCommand";
-import IndexErrors = Raven.Client.Documents.Indexes.IndexErrors;
+import { IndexError } from "../../../components/pages/IndexError";
 
 type nameAndCount = {
     name: string;
@@ -15,7 +15,11 @@ type nameAndCount = {
 }
 
 class indexErrors extends shardViewModelBase {
-
+    
+    reactOptions = ko.pureComputed(() => ({
+        component: IndexError
+    }));
+    
     view = require("views/database/indexes/indexErrors.html");
 
     private errorInfoItems = ko.observableArray<indexErrorInfoModel>([]);
