@@ -2006,6 +2006,17 @@ namespace Raven.Server.ServerWide
                         command = new AddElasticSearchEtlCommand(elasticSearchEtl, databaseName, raftRequestId);
                         break;
 
+                    case EtlType.Queue:
+                        var queueEtl = JsonDeserializationCluster.QueueEtlConfiguration(etlConfiguration);
+                        queueEtl.Validate(out var queueEtlErr, validateName: false, validateConnection: false);
+                        if (ValidateConnectionString(rawRecord, queueEtl.ConnectionStringName, queueEtl.EtlType) == false)
+                            queueEtlErr.Add($"Could not find connection string named '{queueEtl.ConnectionStringName}'. Please supply an existing connection string.");
+
+                        ThrowInvalidConfigurationIfNecessary(etlConfiguration, queueEtlErr);
+
+                        command = new AddQueueEtlCommand(queueEtl, databaseName, raftRequestId);
+                        break;
+
                     default:
                         throw new NotSupportedException($"Unknown ETL configuration type. Configuration: {etlConfiguration}");
                 }
@@ -2053,6 +2064,9 @@ namespace Raven.Server.ServerWide
                 case EtlType.ElasticSearch:
                     var elasticSearchConnectionString = databaseRecord.ElasticSearchConnectionStrings;
                     return elasticSearchConnectionString != null && elasticSearchConnectionString.TryGetValue(connectionStringName, out _);
+                case EtlType.Queue:
+                    var queueConnectionString = databaseRecord.QueueConnectionStrings;
+                    return queueConnectionString != null && queueConnectionString.TryGetValue(connectionStringName, out _);
                 default:
                     throw new NotSupportedException($"Unknown ETL type. Type: {etlType}");
             }
@@ -2106,6 +2120,16 @@ namespace Raven.Server.ServerWide
                         ThrowInvalidConfigurationIfNecessary(etlConfiguration, elasticSearchEtlErr);
 
                         command = new UpdateElasticSearchEtlCommand(id, elasticSearchEtl, databaseName, raftRequestId);
+                        break;
+                    case EtlType.Queue:
+                        var queueEtl = JsonDeserializationCluster.QueueEtlConfiguration(etlConfiguration);
+                        queueEtl.Validate(out var queueEtlErr, validateName: false, validateConnection: false);
+                        if (ValidateConnectionString(rawRecord, queueEtl.ConnectionStringName, queueEtl.EtlType) == false)
+                            queueEtlErr.Add($"Could not find connection string named '{queueEtl.ConnectionStringName}'. Please supply an existing connection string.");
+
+                        ThrowInvalidConfigurationIfNecessary(etlConfiguration, queueEtlErr);
+
+                        command = new UpdateQueueEtlCommand(id, queueEtl, databaseName, raftRequestId);
                         break;
                     default:
                         throw new NotSupportedException($"Unknown ETL configuration type. Configuration: {etlConfiguration}");
@@ -2167,6 +2191,9 @@ namespace Raven.Server.ServerWide
                     break;
                 case ConnectionStringType.ElasticSearch:
                     command = new PutElasticSearchConnectionStringCommand(JsonDeserializationCluster.ElasticSearchConnectionString(connectionString), databaseName, raftRequestId);
+                    break;
+                case ConnectionStringType.Queue:
+                    command = new PutQueueConnectionStringCommand(JsonDeserializationCluster.QueueConnectionString(connectionString), databaseName, raftRequestId);
                     break;
 
                 default:
@@ -2277,6 +2304,26 @@ namespace Raven.Server.ServerWide
                         }
 
                         command = new RemoveElasticSearchConnectionStringCommand(connectionStringName, databaseName, raftRequestId);
+                        break;
+
+                    case ConnectionStringType.Queue:
+
+                        var queueEtls = rawRecord.QueueEtls;
+
+                        // Don't delete the connection string if used by tasks types: Queue Etl
+                        if (queueEtls != null)
+                        {
+                            foreach (var queueEtlTask in queueEtls)
+                            {
+                                if (queueEtlTask.ConnectionStringName == connectionStringName)
+                                {
+                                    throw new InvalidOperationException(
+                                        $"Can't delete connection string: {connectionStringName}. It is used by task: {queueEtlTask.Name}");
+                                }
+                            }
+                        }
+
+                        command = new RemoveQueueConnectionStringCommand(connectionStringName, databaseName, raftRequestId);
                         break;
 
                     default:
