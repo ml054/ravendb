@@ -482,7 +482,7 @@ namespace Raven.Server.Documents.Replication
             var taskId = pullReplicationDefinition.TaskId; // every connection to this pull replication on the hub will have the same task id.
             var externalReplication = pullReplicationDefinition.ToExternalReplication(initialRequest, taskId);
 
-            var outgoingReplication = new OutgoingPullReplicationHandlerAsHub( this, Database, externalReplication, initialRequest.Info)
+            var outgoingReplication = new OutgoingPullReplicationHandlerAsHub(this, Database, externalReplication, initialRequest.Info)
             {
                 OutgoingPullReplicationParams = new PullReplicationParams
                 {
@@ -644,13 +644,13 @@ namespace Raven.Server.Documents.Replication
                     getLatestEtagMessage.ReplicationsType);
             }
             else
-            { 
+            {
                 newIncoming = new IncomingPullReplicationHandler(
                 tcpConnectionOptions,
                 getLatestEtagMessage,
                 this,
                 buffer,
-                getLatestEtagMessage.ReplicationsType, 
+                getLatestEtagMessage.ReplicationsType,
                 incomingPullParams);
             }
 
@@ -715,9 +715,9 @@ namespace Raven.Server.Documents.Replication
                         changeVector = DocumentsStorage.GetFullDatabaseChangeVector(documentsContext);
 
                         lastEtagFromSrc = DocumentsStorage.GetLastReplicatedEtagFrom(
-                            documentsContext, getLatestEtagMessage.SourceDatabaseId);
-                        if (_log.IsInfoEnabled)
-                            _log.Info($"GetLastEtag response, last etag: {lastEtagFromSrc}");
+                        documentsContext, getLatestEtagMessage.SourceDatabaseId);
+                    if (_log.IsInfoEnabled)
+                        _log.Info($"GetLastEtag response, last etag: {lastEtagFromSrc}");
                     }
                     
                     var response = new DynamicJsonValue
@@ -992,7 +992,7 @@ namespace Raven.Server.Documents.Replication
                 if (handler is not OutgoingMigrationReplicationHandler migrationHandler)
                     continue;
 
-                if (newRecord.ShardBucketMigrations.TryGetValue(migrationHandler.BucketMigrationNode.Bucket, out var migration) == false)
+                if (newRecord.Sharding.ShardBucketMigrations.TryGetValue(migrationHandler.BucketMigrationNode.Bucket, out var migration) == false)
                 {
                     toRemove.Add(migrationHandler.BucketMigrationNode);
                     continue;
@@ -1005,7 +1005,7 @@ namespace Raven.Server.Documents.Replication
                 }
 
                 var source = newRecord.Topology.WhoseTaskIsIt(RachisState.Follower, migration, getLastResponsibleNode: null);
-                
+
                 var destTopology = GetTopologyForShard(migration.DestinationShard);
                 var destNode = destTopology.WhoseTaskIsIt(RachisState.Follower, migration, getLastResponsibleNode: null);
 
@@ -1021,7 +1021,7 @@ namespace Raven.Server.Documents.Replication
             DropOutgoingConnections(toRemove, instancesToDispose);
 
             // add
-            foreach (var migration in newRecord.ShardBucketMigrations)
+            foreach (var migration in newRecord.Sharding.ShardBucketMigrations)
             {
                 var process = migration.Value;
 
@@ -1604,15 +1604,15 @@ namespace Raven.Server.Documents.Replication
 
                     case BucketMigrationReplication _:
                     case InternalReplication _:
-                    {
-                        using (var cts = CancellationTokenSource.CreateLinkedTokenSource(_shutdownToken))
                         {
-                            cts.CancelAfter(_server.Engine.TcpConnectionTimeout);
-                            return ReplicationUtils.GetTcpInfo(node.Url, node.Database, Database.DbId.ToString(), Database.ReadLastEtag(),
-                                "Replication",
-                        certificate, cts.Token);
+                            using (var cts = CancellationTokenSource.CreateLinkedTokenSource(_shutdownToken))
+                            {
+                                cts.CancelAfter(_server.Engine.TcpConnectionTimeout);
+                                return ReplicationUtils.GetTcpInfo(node.Url, node.Database, Database.DbId.ToString(), Database.ReadLastEtag(),
+                                    "Replication",
+                            certificate, cts.Token);
+                            }
                         }
-                    }
                     default:
                         throw new InvalidOperationException(
                             $"Unexpected replication node type, Expected to be '{typeof(ExternalReplication)}' or '{typeof(InternalReplication)}', but got '{node.GetType()}'");

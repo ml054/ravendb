@@ -20,6 +20,7 @@ using Raven.Client.Documents.Session;
 using Raven.Client.Documents.Subscriptions;
 using Raven.Client.ServerWide;
 using Raven.Client.ServerWide.Operations;
+using Raven.Client.ServerWide.Sharding;
 using Raven.Server;
 using Raven.Server.Documents;
 using Raven.Server.Documents.PeriodicBackup;
@@ -56,9 +57,11 @@ public partial class RavenTestBase
             var shardedOptions = options ?? new Options();
             shardedOptions.ModifyDatabaseRecord += r =>
             {
+                r.Sharding ??= new ShardingConfiguration();
+
                 if (shards == null)
                 {
-                    r.Shards = new[]
+                    r.Sharding.Shards = new[]
                     {
                         new DatabaseTopology(),
                         new DatabaseTopology(),
@@ -67,9 +70,8 @@ public partial class RavenTestBase
                 }
                 else
                 {
-                    r.Shards = shards;
+                    r.Sharding.Shards = shards;
                 }
-
             };
             shardedOptions.ModifyDocumentStore = s => s.Conventions.OperationStatusFetchMode = OperationStatusFetchMode.Polling;
             DevelopmentHelper.ShardingToDo(DevelopmentHelper.TeamMember.Karmel, DevelopmentHelper.Severity.Normal, "remove above after changes api is working");
@@ -80,7 +82,7 @@ public partial class RavenTestBase
         {
             var record = await store.Maintenance.Server.SendAsync(new GetDatabaseRecordOperation(store.Database));
             var bucket = ShardHelper.GetBucket(id);
-            return ShardHelper.GetShardNumber(record.ShardBucketRanges, bucket);
+            return ShardHelper.GetShardNumber(record.Sharding.ShardBucketRanges, bucket);
         }
 
         public async Task<IEnumerable<DocumentDatabase>> GetShardsDocumentDatabaseInstancesFor(IDocumentStore store, string database = null)
@@ -113,7 +115,7 @@ public partial class RavenTestBase
             return true;
         }
 
-        public class ShardedBackupTestsBase 
+        public class ShardedBackupTestsBase
         {
             internal readonly RavenTestBase _parent;
 

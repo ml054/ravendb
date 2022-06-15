@@ -137,7 +137,7 @@ namespace Raven.Server.ServerWide
             // Database SEP SubscriptionId SEP type SEP key
             // type is Revision or Document
             // key is lowered docId for document or current change vector for revision
-            Key, 
+            Key,
             ChangeVector,
             BatchId,
         }
@@ -295,7 +295,7 @@ namespace Raven.Server.ServerWide
             SubscriptionStateSchema.DefineKey(new TableSchema.IndexDef
             {
                 StartIndex = (int)SubscriptionStateTable.Key,
-                Count =  1,
+                Count = 1,
                 IsGlobal = false,
                 Name = SubscriptionStateKeySlice
             });
@@ -457,7 +457,7 @@ namespace Raven.Server.ServerWide
                     case nameof(PutElasticSearchConnectionStringCommand):
                     case nameof(RemoveRavenConnectionStringCommand):
                     case nameof(RemoveSqlConnectionStringCommand):
-                    case nameof(RemoveOlapConnectionStringCommand): 
+                    case nameof(RemoveOlapConnectionStringCommand):
                     case nameof(RemoveElasticSearchConnectionStringCommand):
                     case nameof(UpdatePullReplicationAsHubCommand):
                     case nameof(UpdatePullReplicationAsSinkCommand):
@@ -935,8 +935,8 @@ namespace Raven.Server.ServerWide
                 using var rawRecord = ReadRawDatabaseRecord(context, clusterTransaction.DatabaseName);
                 if (rawRecord == null)
                     throw DatabaseDoesNotExistException.CreateWithMessage(clusterTransaction.DatabaseName, $"Could not execute update command of type '{nameof(ClusterTransactionCommand)}'.");
-                
-                if(rawRecord.IsSharded() == false)
+
+                if (rawRecord.IsSharded == false)
                     //This function is used to set cluster & database id for backward compatibility so no need if for shard
                     UpdateDatabaseRecordId(context, rawRecord, index, clusterTransaction);
 
@@ -960,7 +960,7 @@ namespace Raven.Server.ServerWide
                     {
                         notify = DatabasesLandlord.ClusterDatabaseChangeType.ClusterTransactionCompleted;
                     }
-                    
+
                     NotifyDatabaseAboutChanged(context, clusterTransaction.DatabaseName, index, nameof(ClusterTransactionCommand), notify, null);
 
                     return null;
@@ -1253,7 +1253,7 @@ namespace Raven.Server.ServerWide
                         else
                         {
                             bool emptyShardTypology = true;
-                            foreach (var shardTopology in record.Shards)
+                            foreach (var shardTopology in record.Sharding.Shards)
                             {
                                 if (shardTopology.RelevantFor(removed))
                                 {
@@ -1673,11 +1673,11 @@ namespace Raven.Server.ServerWide
                         if (addDatabaseCommand.Record.IsSharded == false)
                             return addDatabaseCommand.Record.Topology.Members;
 
-                        if (addDatabaseCommand.Record.ShardBucketRanges == null || addDatabaseCommand.Record.ShardBucketRanges.Count == 0)
-                            throw new RachisInvalidOperationException($"Can't create a sharded database {addDatabaseCommand.Name} with an empty {nameof(DatabaseRecord.ShardBucketRanges)}");
+                        if (addDatabaseCommand.Record.Sharding == null || addDatabaseCommand.Record.Sharding.ShardBucketRanges == null || addDatabaseCommand.Record.Sharding.ShardBucketRanges.Count == 0)
+                            throw new RachisInvalidOperationException($"Can't create a sharded database {addDatabaseCommand.Name} with an empty {nameof(DatabaseRecord.Sharding.ShardBucketRanges)}");
 
                         var set = new HashSet<string>();
-                        foreach (var shard in addDatabaseCommand.Record.Shards)
+                        foreach (var shard in addDatabaseCommand.Record.Sharding.Shards)
                         {
                             set.UnionWith(shard.Members);
                         }
@@ -1837,7 +1837,7 @@ namespace Raven.Server.ServerWide
 
                     if (remoteTopology.Name != localTopology.Name)
                     {
-                        Debug.Assert(false,$"Same number of topologies {remote.Length}, but has different name at i={i}, remote: {remoteTopology.Name}, local: {localTopology.Name}");
+                        Debug.Assert(false, $"Same number of topologies {remote.Length}, but has different name at i={i}, remote: {remoteTopology.Name}, local: {localTopology.Name}");
                         AddStampToAllRemotes(index, remote);
                         return true;
                     }
@@ -2757,7 +2757,7 @@ namespace Raven.Server.ServerWide
                 using (var rawRecord = ReadRawDatabaseRecord(context, name))
                 {
                     // we can't squeeze sharded database to a single node
-                    if (rawRecord.IsSharded())
+                    if (rawRecord.IsSharded)
                         continue;
 
                     var topology = rawRecord.Topology;
@@ -3436,7 +3436,7 @@ namespace Raven.Server.ServerWide
 
             return new RawDatabaseRecord(context, databaseRecord);
         }
-        
+
         private static BlittableJsonReaderObject BuildShardedDatabaseRecord(JsonOperationContext context, BlittableJsonReaderObject rawRecord, int shardNumber)
         {
             if (rawRecord == null)
@@ -3494,7 +3494,7 @@ namespace Raven.Server.ServerWide
         {
             using (var databaseRecord = ReadRawDatabaseRecord(context, name))
             {
-                if (databaseRecord.IsSharded())
+                if (databaseRecord.IsSharded)
                     throw new InvalidOperationException($"The database record '{name}' is sharded and doesn't contain topology directly.");
 
                 var topology = databaseRecord.Topology;
@@ -3510,14 +3510,14 @@ namespace Raven.Server.ServerWide
         {
             using (var databaseRecord = ReadRawDatabaseRecord(context, name))
             {
-                if (databaseRecord.IsSharded() == false)
+                if (databaseRecord.IsSharded == false)
                     throw new InvalidOperationException($"The database record '{name}' is not sharded.");
 
-                if (shard >= databaseRecord.Shards.Length)
+                if (shard >= databaseRecord.Sharding.Shards.Length)
                     throw new InvalidOperationException($"Requested invalid shard. " +
-                                                        $"Requested shard '{shard}', while the database record '{name}' has '{databaseRecord.Shards.Length}' shards.");
+                                                        $"Requested shard '{shard}', while the database record '{name}' has '{databaseRecord.Sharding.Shards.Length}' shards.");
 
-                var topology = databaseRecord.Shards[shard];
+                var topology = databaseRecord.Sharding.Shards[shard];
                 if (topology == null)
                     throw new InvalidOperationException($"The database record '{name}' doesn't contain topology.");
 
@@ -3549,7 +3549,7 @@ namespace Raven.Server.ServerWide
             }
         }
 
-        public PullReplicationDefinition ReadPullReplicationDefinition<TRavenTranscation>(string database, string definitionName, TransactionOperationContext<TRavenTranscation> context) where TRavenTranscation : RavenTransaction  
+        public PullReplicationDefinition ReadPullReplicationDefinition<TRavenTranscation>(string database, string definitionName, TransactionOperationContext<TRavenTranscation> context) where TRavenTranscation : RavenTransaction
         {
             using (var databaseRecord = ReadRawDatabaseRecord(context, database))
             {
@@ -3799,7 +3799,7 @@ namespace Raven.Server.ServerWide
 
                 info = await ReplicationUtils.GetTcpInfoAsync(url, null, "Cluster", certificate, cts.Token);
             }
-            
+
             TcpClient tcpClient = null;
             Stream stream = null;
             try
@@ -3808,8 +3808,8 @@ namespace Raven.Server.ServerWide
                 using (ContextPoolForReadOnlyOperations.AllocateOperationContext(out JsonOperationContext context))
                 {
                     var result = await TcpUtils.ConnectSecuredTcpSocket(info, _parent.ClusterCertificate, _parent.CipherSuitesPolicy,
-                        TcpConnectionHeaderMessage.OperationTypes.Cluster, 
-                        (string destUrl, TcpConnectionInfo tcpInfo, Stream conn, JsonOperationContext ctx, List<string> _) => NegotiateProtocolVersionAsyncForCluster(destUrl, tcpInfo, conn, ctx, tag), 
+                        TcpConnectionHeaderMessage.OperationTypes.Cluster,
+                        (string destUrl, TcpConnectionInfo tcpInfo, Stream conn, JsonOperationContext ctx, List<string> _) => NegotiateProtocolVersionAsyncForCluster(destUrl, tcpInfo, conn, ctx, tag),
                         context, _parent.TcpConnectionTimeout, null, token);
 
                     tcpClient = result.TcpClient;
