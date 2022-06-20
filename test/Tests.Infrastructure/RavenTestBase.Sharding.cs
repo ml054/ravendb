@@ -82,7 +82,7 @@ public partial class RavenTestBase
         {
             var record = await store.Maintenance.Server.SendAsync(new GetDatabaseRecordOperation(store.Database));
             var bucket = ShardHelper.GetBucket(id);
-            return ShardHelper.GetShardNumber(record.Sharding.ShardBucketRanges, bucket);
+            return ShardHelper.GetShardNumber(record.Sharding.BucketRanges, bucket);
         }
 
         public async Task<IEnumerable<DocumentDatabase>> GetShardsDocumentDatabaseInstancesFor(IDocumentStore store, string database = null)
@@ -428,7 +428,7 @@ public partial class RavenTestBase
 
                 var record = await store.Maintenance.Server.SendAsync(new GetDatabaseRecordOperation(store.Database));
                 var bucket = ShardHelper.GetBucket(id);
-                var location = ShardHelper.GetShardNumber(record.Sharding.ShardBucketRanges, bucket);
+                var location = ShardHelper.GetShardNumber(record.Sharding.BucketRanges, bucket);
                 var newLocation = (location + 1) % record.Sharding.Shards.Length;
 
                 var destination = record.Sharding.Shards[newLocation];
