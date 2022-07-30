@@ -15,8 +15,10 @@
         "storybook": "start-storybook --no-manager-cache -p 6006",
         "build-storybook": "build-storybook",
         "lint": "eslint typescript/**/*.{tsx,ts}",
+        "lint-fix": "eslint --fix typescript/**/*.{tsx,ts}",
         "prettier": "prettier --check typescript/components/**/*.{tsx,ts}",
-        "prettier-fix": "prettier --write typescript/components/**/*.{tsx,ts}"
+        "prettier-fix": "prettier --write typescript/components/**/*.{tsx,ts}",
+        "check-style": "npm run lint && npm run prettier"
     },
     "private": true,
     "devDependencies": {

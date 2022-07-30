@@ -33,6 +33,7 @@ require("knockout-delegated-events");
 const { DirtyFlag } = require("./external/dirtyFlag");
 ko.DirtyFlag = DirtyFlag;
 
+// eslint-disable-next-line
 system.debug(!(window as any).ravenStudioRelease);
 
 app.title = "Raven.Studio";

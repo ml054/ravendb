@@ -34,9 +34,28 @@ jobs:
       working-directory: ./src/Raven.Studio
 
     - name: Compile Studio
+      id: studio_compile
       run: npm run compile
       working-directory: ./src/Raven.Studio
 
     - name: Test Studio
       run: npm run test
+      id: studio_test
+      continue-on-error: true
       working-directory: ./src/Raven.Studio
+
+    - name: Lint Studio
+      run: npm run lint
+      id: studio_lint
+      continue-on-error: true
+      working-directory: ./src/Raven.Studio
+
+    - name: Prettier Studio
+      run: npm run prettier
+      id: studio_prettier
+      continue-on-error: true
+      working-directory: ./src/Raven.Studio
+      
+    - name: Check on failures
+      if: steps.studio_test.outcome != 'success' || steps.studio_lint.outcome != 'success' || steps.studio_prettier.outcome != 'success'
+      run: echo "Tests status = ${{ steps.studio_test.outcome }}, Linter status = ${{ steps.studio_lint.outcome }}, Prettier status = ${{ steps.studio_prettier.outcome }} " && exit 1
