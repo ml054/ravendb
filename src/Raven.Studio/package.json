@@ -13,7 +13,10 @@
         "fix-packages": "node scripts/fix_packages.js",
         "test": "jest",
         "storybook": "start-storybook --no-manager-cache -p 6006",
-        "build-storybook": "build-storybook"
+        "build-storybook": "build-storybook",
+        "lint": "eslint typescript/**/*.{tsx,ts}",
+        "prettier": "prettier --check typescript/components/**/*.{tsx,ts}",
+        "prettier-fix": "prettier --write typescript/components/**/*.{tsx,ts}"
     },
     "private": true,
     "devDependencies": {
@@ -51,6 +54,8 @@
         "@types/sortablejs": "^1.10.7",
         "@types/testing-library__jest-dom": "^5.14.3",
         "@types/toastr": "^2.1.39",
+        "@typescript-eslint/eslint-plugin": "^5.31.0",
+        "@typescript-eslint/parser": "^5.31.0",
         "acorn": "^8.7.0",
         "antlr4ts-cli": "^0.5.0-alpha.4",
         "circular-dependency-plugin": "^5.2.0",
@@ -58,6 +63,11 @@
         "copy-webpack-plugin": "^9.0.1",
         "css-loader": "^6.6.0",
         "css-minimizer-webpack-plugin": "^3.4.1",
+        "eslint": "^8.20.0",
+        "eslint-config-prettier": "^8.5.0",
+        "eslint-plugin-jest": "^26.7.0",
+        "eslint-plugin-react": "^7.30.1",
+        "eslint-plugin-react-hooks": "^4.6.0",
         "exports-loader": "^3.1.0",
         "glob": "^7.2.0",
         "html-loader": "^3.1.0",
