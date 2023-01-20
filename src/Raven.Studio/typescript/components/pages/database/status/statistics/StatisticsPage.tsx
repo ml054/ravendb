@@ -9,13 +9,42 @@ import useBoolean from "hooks/useBoolean";
 import classNames from "classnames";
 import { useStatisticsController } from "components/pages/database/status/statistics/useStatisticsController";
 import { StickyHeader } from "components/common/StickyHeader";
+import { pokemonApi, RootState, useAppDispatch, useAppSelector, useGetPokemonByNameQuery } from "components/store";
+import {
+    addBook,
+    decrement,
+    fetchUserById,
+    increment,
+    incrementByAmount,
+    selectCount,
+    selectDatabases,
+} from "components/pages/database/status/statistics/logic/statisticsSlice";
+import { useSelector } from "react-redux";
 
 interface StatisticsPageProps {
     database: database;
 }
 
+const bulbasaurSelector = pokemonApi.endpoints.getPokemonByName.select("bulbasaur");
+
+console.log("selector = " + bulbasaurSelector);
+
 export function StatisticsPage(props: StatisticsPageProps) {
     const { database } = props;
+
+    const count = useAppSelector(selectCount);
+    const dbs = useAppSelector(selectDatabases);
+
+    const { data } = useAppSelector(bulbasaurSelector);
+    console.log("DATA", data);
+
+    const dispatch = useAppDispatch();
+
+    pokemonApi.endpoints.getPokemonByName.useQuerySubscription("bulbasaur", {
+        pollingInterval: 5000,
+    });
+
+    useGetPokemonByNameQuery("bulbasaur");
 
     const {
         essentialStats,
@@ -53,8 +82,24 @@ export function StatisticsPage(props: StatisticsPageProps) {
         <>
             <StickyHeader>
                 <Row>
+                    value: {count}
+                    db: {dbs.join(", ")}
+                    <Button type="button" onClick={() => dispatch(increment())}>
+                        INC
+                    </Button>
+                    <Button type="button" onClick={() => dispatch(decrement())}>
+                        DEC
+                    </Button>
+                    <Button type="button" onClick={() => dispatch(incrementByAmount(5))}>
+                        inc5
+                    </Button>
+                    <Button type="button" onClick={() => dispatch(fetchUserById(5))}>
+                        fetchdsb
+                    </Button>
+                    <Button type="button" onClick={() => dispatch(addBook({ bookId: "5", title: "Ho" }))}>
+                        add book
+                    </Button>
                     <Col />
-
                     <Col sm="auto">
                         <Button
                             color="primary"
