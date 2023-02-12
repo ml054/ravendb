@@ -261,7 +261,7 @@ namespace Raven.Server.Documents.PeriodicBackup
 
                     runningBackupStatus.NodeTag = _database.ServerStore.NodeTag;
                     runningBackupStatus.DurationInMs = totalSw.ElapsedMilliseconds;
-                    UpdateOperationId(runningBackupStatus);
+                    runningBackupStatus.LastOperationId = _operationId;
 
                     if (_isOneTimeBackup == false)
                     {
@@ -846,29 +846,18 @@ namespace Raven.Server.Documents.PeriodicBackup
             backupUploader.ExecuteUpload();
         }
 
-        private void UpdateOperationId(PeriodicBackupStatus runningBackupStatus)
-        {
-            runningBackupStatus.LastOperationId = _operationId;
-            if (_previousBackupStatus.LastOperationId == null ||
-                _previousBackupStatus.NodeTag != _database.ServerStore.NodeTag ||
-                _previousBackupStatus.Error != null)
-                return;
-
-            // dismiss the previous operation
-            var id = $"{NotificationType.OperationChanged}/{_previousBackupStatus.LastOperationId.Value}";
-            _database.NotificationCenter.Dismiss(id);
-        }
-
         public static void SaveBackupStatus(PeriodicBackupStatus status, DocumentDatabase documentDatabase, Logger logger,
             BackupResult backupResult = default, Action<IOperationProgress> onProgress = default, OperationCancelToken operationCancelToken = default)
         {
+            var command = new UpdatePeriodicBackupStatusCommand(documentDatabase.Name, RaftIdGenerator.NewId())
+            {
+                PeriodicBackupStatus = status,
+                BackupHistoryEntries = documentDatabase.ConfigurationStorage.BackupHistoryStorage.RetractTemporaryStoredBackupHistoryEntries(),
+                MaxNumberOfFullBackupsInBackupHistory = MaxNumberOfFullBackupsInBackupHistory
+            };
+
             try
             {
-                var command = new UpdatePeriodicBackupStatusCommand(documentDatabase.Name, RaftIdGenerator.NewId())
-                {
-                    PeriodicBackupStatus = status
-                };
-
                 AsyncHelpers.RunSync(async () =>
                 {
                     var index = await BackupHelper.RunWithRetriesAsync(maxRetries: 10, async () =>
@@ -889,9 +878,6 @@ namespace Raven.Server.Documents.PeriodicBackup
                         errorMessage: "Failed to verify that the backup status was successfully saved in the cluster",
                         backupResult, onProgress, operationCancelToken);
                 });
-
-                if (logger.IsInfoEnabled)
-                    logger.Info($"Periodic backup status with task id {status.TaskId} was updated");
             }
             catch (Exception e)
             {
@@ -901,7 +887,10 @@ namespace Raven.Server.Documents.PeriodicBackup
                     logger.Operations(message, e);
 
                 backupResult?.AddError($"{message}{Environment.NewLine}{e}");
+                documentDatabase.ConfigurationStorage.BackupHistoryStorage.StoreBackupHistoryEntries(command);
             }
+
+            documentDatabase.ConfigurationStorage.BackupHistoryStorage.StoreBackupDetails(backupResult, status);
         }
 
         public static string GetDateTimeFormat(string fileName)
