@@ -1,5 +1,6 @@
 using System;
 using System.Buffers;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -98,6 +99,8 @@ namespace Raven.Server
         private readonly Logger _tcpLogger;
         private readonly ExternalCertificateValidator _externalCertificateValidator;
         internal readonly JsonContextPool _tcpContextPool;
+
+        private readonly ConcurrentDictionary<string, DateTime> _twoFactoAuthTimeByCertThumbprintExpiry = new();
 
         public event Action AfterDisposal;
 
@@ -1544,10 +1547,21 @@ namespace Raven.Server
 
             public string WrongProtocolMessage;
 
-            private AuthenticationStatus _status;
+            private AuthenticationStatus _status, _statusAfterTwoFactorAuth;
 
             public AuthenticationStatus StatusForAudit => _status;
 
+            public void WaitingForTwoFactorAuthentication()
+            {
+                _statusAfterTwoFactorAuth = _status;
+                _status = AuthenticationStatus.TwoFactorAuthNotProvided;
+            }
+
+            public void SuccessfulTwoFactorAuthentication()
+            {
+                _status = _statusAfterTwoFactorAuth;
+            }
+            
             public AuthenticationStatus Status
             {
                 get
@@ -1650,6 +1664,28 @@ namespace Raven.Server
                         var definition = JsonDeserializationServer.CertificateDefinition(cert);
 
                         authenticationStatus.SetBasedOnCertificateDefinition(definition);
+                        
+                        if (cert.TryGet(nameof(PutCertificateCommand.TwoFactorAuthenticationKey), out string _))
+                        {
+                            bool hasTotpRecently = false;
+                            if (_twoFactoAuthTimeByCertThumbprintExpiry.TryGetValue(certificate.Thumbprint, out var expiry))
+                            {
+                                if (Time.GetUtcNow() < expiry)
+                                {
+                                    hasTotpRecently = true;
+                                }
+                                else
+                                {
+                                    _twoFactoAuthTimeByCertThumbprintExpiry.TryRemove(new KeyValuePair<string, DateTime>(certificate.Thumbprint, expiry));
+                                }
+                            }
+                            if(hasTotpRecently == false)
+                            {
+                                authenticationStatus.WaitingForTwoFactorAuthentication();
+                                return authenticationStatus;
+                            }
+                        }
+     
                     }
                 }
             }
@@ -2794,7 +2830,8 @@ namespace Raven.Server
             Operator,
             ClusterAdmin,
             Expired,
-            NotYetValid
+            NotYetValid,
+            TwoFactorAuthNotProvided
         }
 
         internal TestingStuff ForTestingPurposesOnly()
@@ -2900,6 +2937,11 @@ namespace Raven.Server
             }
 
             ArrayPool<byte>.Shared.Return(buffer);
+        }
+
+        public void RegisterTwoFactorAuthSuccess(string thumbprint, TimeSpan period)
+        {
+            _twoFactoAuthTimeByCertThumbprintExpiry[thumbprint] = Time.GetUtcNow() + period;
         }
     }
 }
