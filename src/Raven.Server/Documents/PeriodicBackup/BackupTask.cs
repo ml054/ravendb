@@ -890,7 +890,7 @@ namespace Raven.Server.Documents.PeriodicBackup
                     logger.Operations(message, e);
 
                 backupResult?.AddError($"{message}{Environment.NewLine}{e}");
-                documentDatabase.ConfigurationStorage.BackupHistoryStorage.StoreBackupHistoryEntries(command);
+                documentDatabase.ConfigurationStorage.BackupHistoryStorage.StoreBackupHistoryEntries(command.CurrentAndTemporarySavedEntries);
             }
 
             documentDatabase.ConfigurationStorage.BackupHistoryStorage.StoreBackupDetails(backupResult, status);
