@@ -307,21 +307,6 @@ namespace Raven.Server.Documents.Subscriptions
             return subscription;
         }
 
-        public bool TryGetRunningSubscriptionConnectionsState(long subscriptionId, out SubscriptionConnectionsState connections)
-        {
-            connections = null;
-
-            if (_subscriptions.TryGetValue(subscriptionId, out var concurrentSubscription) == false)
-                return false;
-
-            if (concurrentSubscription == null)
-                return false;
-
-            connections = concurrentSubscription;
-
-            return true;
-        }
-
         public class SubscriptionGeneralDataAndStats : SubscriptionState
         {
             public SubscriptionConnection Connection => Connections?.FirstOrDefault();
