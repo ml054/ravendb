@@ -331,7 +331,13 @@ internal abstract class OngoingTasksHandlerProcessorForGetOngoingTasksInfo : Abs
                 TaskId = subscriptionState.SubscriptionId,
                 Query = subscriptionState.Query,
                 TaskConnectionStatus = connectionStatus,
-                //TODO: client ack, connect time + change vectors?
+                LastClientConnectionTime = subscriptionState.LastClientConnectionTime,
+                LastBatchAckTime = subscriptionState.LastBatchAckTime,
+                ChangeVectorForNextBatchStartingPoint = subscriptionState.ChangeVectorForNextBatchStartingPoint,
+                ChangeVectorForNextBatchStartingPointPerShard = null,
+                Disabled = subscriptionState.Disabled,
+                SubscriptionId = subscriptionState.SubscriptionId,
+                SubscriptionName = subscriptionState.SubscriptionName,
             };
         }
     }

@@ -9,6 +9,7 @@ using Raven.Client.Documents.Subscriptions;
 using Raven.Client.Http;
 using Raven.Client.Json.Serialization;
 using Raven.Client.ServerWide;
+using Raven.Client.ServerWide.Operations;
 using Raven.Server.Documents.ETL.Providers.Raven;
 using Raven.Server.Documents.Replication;
 using Raven.Server.ServerWide;
@@ -31,13 +32,44 @@ internal abstract class ShardedOngoingTasksHandlerProcessorForGetOngoingTasksInf
         foreach (var keyValue in ClusterStateMachine.ReadValuesStartingWith(context, SubscriptionState.SubscriptionPrefix(databaseRecord.DatabaseName)))
         {
             var subscriptionState = JsonDeserializationClient.SubscriptionState(keyValue.Value);
-
+            
+            var tag = ServerStore.WhoseTaskIsIt(databaseRecord.Sharding.Orchestrator.Topology, subscriptionState, subscriptionState);
+            
+            OngoingTaskConnectionStatus connectionStatus;
+            if (tag != ServerStore.NodeTag)
+            {
+                connectionStatus = OngoingTaskConnectionStatus.NotOnThisNode;
+            }
+            else if (RequestHandler.DatabaseContext.SubscriptionsStorage.TryGetRunningSubscriptionConnectionsState(subscriptionState.SubscriptionId, out var connectionsState))
+            {
+                connectionStatus = connectionsState.IsSubscriptionActive() ? OngoingTaskConnectionStatus.Active : OngoingTaskConnectionStatus.NotActive;
+            }
+            else
+            {
+                connectionStatus = OngoingTaskConnectionStatus.NotActive;
+            }
+            
             yield return new OngoingTaskSubscription
             {
                 TaskName = subscriptionState.SubscriptionName,
                 TaskState = subscriptionState.Disabled ? OngoingTaskState.Disabled : OngoingTaskState.Enabled,
                 TaskId = subscriptionState.SubscriptionId,
                 Query = subscriptionState.Query,
+                LastClientConnectionTime = subscriptionState.LastClientConnectionTime,
+                LastBatchAckTime = subscriptionState.LastBatchAckTime,
+                MentorNode = subscriptionState.MentorNode,
+                PinToMentorNode = subscriptionState.PinToMentorNode,
+                Disabled = subscriptionState.Disabled,
+                ResponsibleNode = new NodeId
+                {
+                    NodeTag = tag,
+                    NodeUrl = clusterTopology.GetUrlFromTag(tag)
+                },
+                ChangeVectorForNextBatchStartingPointPerShard = subscriptionState.ShardingState.ChangeVectorForNextBatchStartingPointPerShard,
+                ChangeVectorForNextBatchStartingPoint = null,
+                SubscriptionId = subscriptionState.SubscriptionId,
+                SubscriptionName = subscriptionState.SubscriptionName,
+                TaskConnectionStatus = connectionStatus,
             };
         }
     }
