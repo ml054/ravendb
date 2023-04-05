@@ -7,7 +7,7 @@ import {
     OngoingTaskStatus,
     useTasksOperations,
 } from "../shared";
-import { OngoingTaskPeriodicBackupInfo } from "../../../../models/tasks";
+import { OngoingTaskPeriodicBackupInfo } from "components/models/tasks";
 import { useAccessManager } from "hooks/useAccessManager";
 import { useAppUrls } from "hooks/useAppUrls";
 import {
@@ -17,8 +17,7 @@ import {
     RichPanelDetails,
     RichPanelHeader,
     RichPanelInfo,
-    RichPanelName,
-} from "../../../../common/RichPanel";
+} from "components/common/RichPanel";
 import genUtils from "common/generalUtils";
 import moment = require("moment");
 import assertUnreachable from "../../../../utils/assertUnreachable";
