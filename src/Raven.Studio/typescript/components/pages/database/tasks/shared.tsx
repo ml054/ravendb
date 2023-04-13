@@ -13,22 +13,14 @@ import { RichPanelDetailItem, RichPanelName } from "../../../common/RichPanel";
 import ongoingTaskModel from "models/database/tasks/ongoingTaskModel";
 import viewHelpers from "common/helpers/view/viewHelpers";
 import genUtils from "common/generalUtils";
-import {
-    Button,
-    ButtonGroup,
-    Dropdown,
-    DropdownItem,
-    DropdownMenu,
-    DropdownToggle,
-    UncontrolledDropdown,
-} from "reactstrap";
+import { Button, ButtonGroup, DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 
 export interface BaseOngoingTaskPanelProps<T extends OngoingTaskInfo> {
     db: database;
     data: T;
     onDelete: (task: OngoingTaskSharedInfo) => void;
     toggleState: (task: OngoingTaskSharedInfo, enable: boolean) => void;
-    onToggleDetails?: () => void;
+    onToggleDetails?: (newState: boolean) => void;
 }
 
 export interface ICanShowTransformationScriptPreview {
@@ -90,8 +82,8 @@ export function useTasksOperations(editUrl: string, props: BaseOngoingTaskPanelP
 
     const toggleDetails = useCallback(() => {
         toggleDetailsVisible();
-        onToggleDetails?.();
-    }, [onToggleDetails, toggleDetailsVisible]);
+        onToggleDetails?.(!detailsVisible);
+    }, [onToggleDetails, toggleDetailsVisible, detailsVisible]);
 
     return {
         detailsVisible,
@@ -148,7 +140,7 @@ export function OngoingTaskResponsibleNode(props: { task: OngoingTaskInfo }) {
 }
 
 export function OngoingTaskName(props: { task: OngoingTaskInfo; canEdit: boolean; editUrl: string }) {
-    const { task, canEdit, editUrl } = props;
+    const { task, editUrl } = props;
     return (
         <RichPanelName>
             <a href={editUrl} title={"Task name: " + task.shared.taskName}>
