@@ -106,8 +106,6 @@ export function SubscriptionTaskProgress(props: SubscriptionTaskProgressProps) {
         return <ProgressCircle state="running" icon="icon-warning" />;
     }
 
-    //TODO: show clients count?
-
     return (
         <ProgressCircle state="running" icon="icon-check">
             OK
