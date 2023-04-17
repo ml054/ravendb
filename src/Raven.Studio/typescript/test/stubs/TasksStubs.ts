@@ -54,6 +54,24 @@ export class TasksStubs {
         };
     }
 
+    static subscriptionConnectionDetails(): Raven.Server.Documents.TcpHandlers.SubscriptionConnectionsDetails {
+        //TODO:
+        return {
+            Results: [],
+            SubscriptionMode: "None",
+        };
+    }
+
+    static subscriptionTaskInfo(): Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskSubscription {
+        return {
+            ResponsibleNode: {
+                NodeTag: "C",
+                NodeUrl: "aa",
+                ResponsibleNode: "C",
+            },
+        } as any; //TODO:
+    }
+
     static getManualBackup(): GetPeriodicBackupStatusOperationResult {
         const emptyUpload: CloudUploadStatus = {
             LastFullBackup: null as string,

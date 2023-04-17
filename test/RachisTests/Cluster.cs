@@ -77,6 +77,8 @@ namespace RachisTests
                 var doc = new DatabaseRecord(databaseName);
                 var databaseResult = store.Maintenance.Server.Send(new CreateDatabaseOperation(doc, replicationFactor));
 
+                WaitForUserToContinueTheTest(store);
+                
                 int numberOfInstances = 0;
                 await AssertNumberOfNodesContainingDatabase(databaseResult.RaftCommandIndex, databaseName, numberOfInstances, replicationFactor);
                 databaseResult = store.Maintenance.Server.Send(new AddDatabaseNodeOperation(databaseName));
