@@ -1490,6 +1490,7 @@ namespace Raven.Server
 
             public AuthenticateConnection()
             {
+                Console.WriteLine("New authenticated connection");
             }
 
             public bool CanAccess(string database, bool requireAdmin, bool requireWrite)
@@ -1561,6 +1562,8 @@ namespace Raven.Server
 
             public void SuccessfulTwoFactorAuthentication()
             {
+                Console.WriteLine("SuccessfulTwoFactorAuthentication::" + TwoFactorAuthRegistration);
+                //TODO: check if previous state was waiting for?
                 _status = _statusAfterTwoFactorAuth;
             }
             
@@ -1669,17 +1672,21 @@ namespace Raven.Server
                         
                         if (cert.TryGet(nameof(PutCertificateCommand.TwoFactorAuthenticationKey), out string _))
                         {
+                            
+                            Console.WriteLine("AuthenticateConnectionCertificate::New connection");
                             bool hasTotpRecently = false;
                             if (_twoFactorAuthTimeByCertThumbprintExpiry.TryGetValue(certificate.Thumbprint, out var twoFactorAuthRegistration))
                             {
                                 if (Time.GetUtcNow() < twoFactorAuthRegistration.Expiry)
                                 {
-                                    if (twoFactorAuthRegistration.HasLimits && twoFactorAuthRegistration.IpAddresses != null &&
+                                    if (twoFactorAuthRegistration.HasLimits && twoFactorAuthRegistration.IpAddresses != null && //TODO: what's the purpose?
                                         Array.IndexOf(twoFactorAuthRegistration.IpAddresses, address.ToString()) == -1)
                                     {
                                         authenticationStatus.Status = AuthenticationStatus.TwoFactorAuthFromInvalidLimit;
                                         return authenticationStatus;
                                     }
+                                    
+                                    Console.WriteLine("AuthenticateConnectionCertificate::Assigned existing two factor auth");
 
                                     authenticationStatus.TwoFactorAuthRegistration = twoFactorAuthRegistration;
                                     hasTotpRecently = true;
@@ -1689,8 +1696,9 @@ namespace Raven.Server
                                     _twoFactorAuthTimeByCertThumbprintExpiry.TryRemove(new KeyValuePair<string, TwoFactorAuthRegistration>(certificate.Thumbprint, twoFactorAuthRegistration));
                                 }
                             }
-                            if(hasTotpRecently == false)
+                            if (hasTotpRecently == false)
                             {
+                                Console.WriteLine("AuthenticateConnectionCertificate::Waiting for two factor");
                                 authenticationStatus.WaitingForTwoFactorAuthentication();
                                 return authenticationStatus;
                             }

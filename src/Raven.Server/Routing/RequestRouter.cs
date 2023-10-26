@@ -150,15 +150,17 @@ namespace Raven.Server.Routing
                 return (false, feature.Status);
             }
 
-            if (feature.TwoFactorAuthRegistration is { HasLimits: true })
+            if (feature.TwoFactorAuthRegistration is { HasLimits: true }) //TODO: what's the purpose?
             {
-                if (ValidateTwoFactorLimits(context, feature, out var msg) == false)
+                if (ValidateTwoFactorLimits(route, context, feature, out var msg) == false)
                 {
                     if (LoggingSource.AuditLog.IsInfoEnabled)
                     {
                         var auditLog = LoggingSource.AuditLog.GetLogger("RequestRouter", "Audit");
                         auditLog.Info($"Rejected request {context.Request.Method} {context.Request.GetFullUrl()} because: {msg}");
                     }
+
+                    await UnlikelyFailAuthorizationAsync(context, database?.Name, feature, route.AuthorizationStatus);
 
                     return (false, RavenServer.AuthenticationStatus.TwoFactorAuthFromInvalidLimit);
                 }
@@ -167,8 +169,14 @@ namespace Raven.Server.Routing
             return (true, feature.Status);
         }
 
-        private bool ValidateTwoFactorLimits(HttpContext context, RavenServer.AuthenticateConnection feature, out string msg)
+        private bool ValidateTwoFactorLimits(RouteInformation routeInformation, HttpContext context, RavenServer.AuthenticateConnection feature, out string msg)
         {
+            if (routeInformation.AuthorizationStatus == AuthorizationStatus.UnauthenticatedClients)
+            {
+                msg = null;
+                return true;
+            }
+            
             if (context.Request.Cookies.TryGetValue(TwoFactorAuthentication.CookieName, out var cookieStr) == false)
             {
                 msg = $"Missing the '{TwoFactorAuthentication.CookieName}' in the request";
@@ -233,6 +241,7 @@ namespace Raven.Server.Routing
                     switch (feature.Status)
                     {
                         case RavenServer.AuthenticationStatus.TwoFactorAuthFromInvalidLimit:
+                        case RavenServer.AuthenticationStatus.TwoFactorAuthNotProvided:
                         case RavenServer.AuthenticationStatus.NoCertificateProvided:
                         case RavenServer.AuthenticationStatus.Expired:
                         case RavenServer.AuthenticationStatus.NotYetValid:
@@ -517,6 +526,8 @@ namespace Raven.Server.Routing
                 }
                 else if (feature.Status == RavenServer.AuthenticationStatus.TwoFactorAuthFromInvalidLimit)
                 {
+                    statusCode = (int)HttpStatusCode.PreconditionRequired;
+                    //TODO: rework message below
                     message = $"The supplied client certificate '{name}' requires two factor authorization and is limited to a specified IP address, but this request came from a different IP address. Please POST the relevant TOTP value to /authentication/2fa to register this IP address";
                 }
                 else
@@ -550,6 +561,7 @@ namespace Raven.Server.Routing
                 {
                     context.Response.StatusCode = (int)HttpStatusCode.Redirect;
                     context.Response.Headers["Location"] = "/auth-error.html?err=" + Uri.EscapeDataString(message);
+                    
                     return;
                 }
 

@@ -212,6 +212,14 @@ namespace Raven.Server.Web.System
             );
             return GetStudioFileInternal(serverRelativeFileName);
         }
+        
+        [RavenAction("/2fa/index.html", "GET", AuthorizationStatus.UnauthenticatedClients)]
+        public Task GetTwoFactorIndexFile()
+        {
+            //TODO: if 2fa provided redirect to studio!
+            
+            return GetStudioFileInternal("index.html");
+        }
 
         [RavenAction("/wizard/index.html", "GET", AuthorizationStatus.UnauthenticatedClients)]
         public Task GetSetupIndexFile()
@@ -270,6 +278,9 @@ namespace Raven.Server.Web.System
                 HttpContext.Response.StatusCode = (int)HttpStatusCode.TemporaryRedirect;
                 return Task.CompletedTask;
             }
+            
+            //TODO: if request contains cookie for authenticated 2fa, then include CSRF is index.html meta tag
+            //TODO: it should allow us to use session with-in single browser - each new connection / studio will get same CSRF token based on cookie 
 
             return GetStudioFileInternal("index.html");
         }

@@ -44,7 +44,7 @@ public static class TwoFactorAuthentication
     // https://github.com/dotnet/aspnetcore/blob/6a7bcda42de7b98196b38924cc354216eba57c9b/src/Identity/Extensions.Core/src/Rfc6238AuthenticationService.cs#L15
     public static class Rfc6238AuthenticationService
     {
-        private static readonly TimeSpan _timestep = TimeSpan.FromMinutes(3);
+        private static readonly TimeSpan _timestep = TimeSpan.FromSeconds(30);
         private static readonly Encoding _encoding = new UTF8Encoding(false, true);
 
         

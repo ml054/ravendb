@@ -1,5 +1,7 @@
 /// <reference path="../typings/tsd.d.ts" />
 
+import eulaShell from "viewmodels/eulaShell";
+
 require('../wwwroot/Content/css/fonts/icomoon.font');
 
 import { overrideViews } from "./overrides/views";
@@ -57,6 +59,9 @@ app.start().then(() => {
         } else if (window.location.pathname.startsWith("/eula")) {
             const eulaShell = require("viewmodels/eulaShell");
             app.setRoot(eulaShell);
+        } else if (window.location.pathname.startsWith("/2fa")) {
+            const twoFactorShell = require("viewmodels/twoFactorShell");
+            app.setRoot(twoFactorShell);
         } else {
             const setupShell = require("viewmodels/wizard/setupShell");
             app.setRoot(setupShell);

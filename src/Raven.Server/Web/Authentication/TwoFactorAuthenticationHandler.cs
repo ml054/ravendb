@@ -30,15 +30,15 @@ public class TwoFactorAuthenticationHandler : ServerRequestHandler
         using var _ = ServerStore.ContextPool.AllocateOperationContext(out TransactionOperationContext ctx);
         ctx.OpenReadTransaction();
 
-        bool hasLimits = GetBoolValueQueryString("hasLimits") ?? false;
-        var ipsStrVals = GetStringValuesQueryString("ip");
+        bool hasLimits = GetBoolValueQueryString("hasLimits", false) ?? true; //tODO: default to false?
+        var ipsStrVals = GetStringValuesQueryString("ip", false);
         var ips = ipsStrVals.Count == 0 ? new[] { HttpContext.Connection.RemoteIpAddress?.ToString() } : ipsStrVals.ToArray();
 
         var clientCert = GetCurrentCertificate();
 
         if (clientCert == null)
         {
-            ReplyWith(ctx, "Two factor authentication requires that you'll use a client certificate, but none was provided.", HttpStatusCode.BadRequest);
+            await ReplyWith(ctx, "Two factor authentication requires that you'll use a client certificate, but none was provided.", HttpStatusCode.BadRequest);
             return;
         }
 
@@ -47,16 +47,15 @@ public class TwoFactorAuthenticationHandler : ServerRequestHandler
         var certificate = ServerStore.Cluster.GetCertificateByThumbprint(ctx, clientCert.Thumbprint);
         if (certificate == null)
         {
-            ReplyWith(ctx, $"The certificate {clientCert.Thumbprint} ({clientCert.FriendlyName}) is not known to the server", HttpStatusCode.BadRequest);
+            await ReplyWith(ctx, $"The certificate {clientCert.Thumbprint} ({clientCert.FriendlyName}) is not known to the server", HttpStatusCode.BadRequest);
             return;
         }
 
         if (certificate.TryGet(nameof(PutCertificateCommand.TwoFactorAuthenticationKey), out string key) == false)
         {
-            ReplyWith(ctx, $"The certificate {clientCert.Thumbprint} ({clientCert.FriendlyName}) is not set up for two factor authentication", HttpStatusCode.BadRequest);
+            await ReplyWith(ctx, $"The certificate {clientCert.Thumbprint} ({clientCert.FriendlyName}) is not set up for two factor authentication", HttpStatusCode.BadRequest);
             return;
         }
-
 
         input.TryGet("Token", out int token);
 
@@ -66,8 +65,7 @@ public class TwoFactorAuthenticationHandler : ServerRequestHandler
             {
                 period = TimeSpan.FromHours(2);
             }
-            var feature = (RavenServer.AuthenticateConnection)HttpContext.Features.Get<IHttpAuthenticationFeature>();
-            feature.SuccessfulTwoFactorAuthentication(); // enable access for the current connection
+           
             
             if (_auditLogger.IsInfoEnabled)
             {
@@ -86,8 +84,8 @@ public class TwoFactorAuthenticationHandler : ServerRequestHandler
                 SameSite = SameSiteMode.Strict,
                 Secure = true
             });
-            
-            Server.RegisterTwoFactorAuthSuccess(new RavenServer.TwoFactorAuthRegistration
+
+            RavenServer.TwoFactorAuthRegistration twoFactorAuthRegistration = new()
             {
                 Thumbprint = clientCert.Thumbprint,
                 Period = period,
@@ -95,23 +93,31 @@ public class TwoFactorAuthenticationHandler : ServerRequestHandler
                 HasLimits = hasLimits,
                 CsrfAccessToken = csrfAccessToken,
                 ExpectedCookieValue = expectedCookieValue
-            });
+            };
+
+            Server.RegisterTwoFactorAuthSuccess(twoFactorAuthRegistration);
+            
+            var feature = (RavenServer.AuthenticateConnection)HttpContext.Features.Get<IHttpAuthenticationFeature>();
+            feature.TwoFactorAuthRegistration = twoFactorAuthRegistration;
+            feature.SuccessfulTwoFactorAuthentication(); // enable access for the current connection
+            
             HttpContext.Response.StatusCode = (int)HttpStatusCode.Accepted;
-            using (var writer = new BlittableJsonTextWriter(ctx, ResponseBodyStream()))
+            await using (var writer = new AsyncBlittableJsonTextWriter(ctx, ResponseBodyStream()))
             {
                 writer.WriteStartObject();
                 writer.WritePropertyName("Token");
                 writer.WriteString(csrfAccessToken);
+                //TODO: expose expiration?
                 writer.WriteEndObject();
             }
         }
         else
         {
-            ReplyWith(ctx, $"Wrong token provided for {clientCert.Thumbprint} ({clientCert.FriendlyName})", HttpStatusCode.NotAcceptable);
+            await ReplyWith(ctx, $"Wrong token provided for {clientCert.Thumbprint} ({clientCert.FriendlyName})", HttpStatusCode.NotAcceptable);
         }
     }
 
-    private void ReplyWith(TransactionOperationContext ctx, string err, HttpStatusCode httpStatusCode)
+    private async Task ReplyWith(TransactionOperationContext ctx, string err, HttpStatusCode httpStatusCode)
     {
         if (_auditLogger.IsInfoEnabled)
         {
@@ -120,7 +126,7 @@ public class TwoFactorAuthenticationHandler : ServerRequestHandler
                 $"Two factor auth failure from IP: {HttpContext.Connection.RemoteIpAddress}  with cert: '{clientCert?.Thumbprint ?? "None"}/{clientCert?.Subject ?? "None"}' because: {err}");
         }
         HttpContext.Response.StatusCode = (int)httpStatusCode;
-        using (var writer = new BlittableJsonTextWriter(ctx, ResponseBodyStream()))
+        await using (var writer = new AsyncBlittableJsonTextWriter(ctx, ResponseBodyStream()))
         {
             writer.WriteStartObject();
             writer.WritePropertyName("Error");
