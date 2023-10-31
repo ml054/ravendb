@@ -5,7 +5,6 @@ import validateTwoFactorSecretCommand from "commands/auth/validateTwoFactorSecre
 class twoFactorShell extends viewModelBase {
     view = require("views/twoFactorShell.html");
     
-    
     compositionComplete() {
         super.compositionComplete();
         
@@ -14,7 +13,10 @@ class twoFactorShell extends viewModelBase {
         //TODO: extra params!
         
         new validateTwoFactorSecretCommand(response)
-            .execute();
+            .execute()
+            .done(() => {
+                window.location.href = "https://a.marcin2010.development.run:4433/studio/index.html" //TODO:
+            })
     }
 }
 

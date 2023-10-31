@@ -213,7 +213,7 @@ namespace Raven.Server.Web.System
             return GetStudioFileInternal(serverRelativeFileName);
         }
         
-        [RavenAction("/2fa/index.html", "GET", AuthorizationStatus.UnauthenticatedClients)]
+        [RavenAction("/twoFactor/index.html", "GET", AuthorizationStatus.UnauthenticatedClients)]
         public Task GetTwoFactorIndexFile()
         {
             //TODO: if 2fa provided redirect to studio!

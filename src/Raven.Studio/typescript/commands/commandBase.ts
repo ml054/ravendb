@@ -132,7 +132,7 @@ class commandBase {
             },
             statusCode: {
                 428: function () {
-                    window.location.href = "https://a.marcin2010.development.run:4433/2fa/index.html" //TODO:
+                    window.location.href = "https://a.marcin2010.development.run:4433/twoFactor/index.html" //TODO:
                 }
             }
         };

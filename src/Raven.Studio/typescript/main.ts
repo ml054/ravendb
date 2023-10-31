@@ -59,7 +59,7 @@ app.start().then(() => {
         } else if (window.location.pathname.startsWith("/eula")) {
             const eulaShell = require("viewmodels/eulaShell");
             app.setRoot(eulaShell);
-        } else if (window.location.pathname.startsWith("/2fa")) {
+        } else if (window.location.pathname.startsWith("/twoFactor")) {
             const twoFactorShell = require("viewmodels/twoFactorShell");
             app.setRoot(twoFactorShell);
         } else {

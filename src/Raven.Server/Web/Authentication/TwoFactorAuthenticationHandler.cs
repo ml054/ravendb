@@ -30,7 +30,7 @@ public class TwoFactorAuthenticationHandler : ServerRequestHandler
         using var _ = ServerStore.ContextPool.AllocateOperationContext(out TransactionOperationContext ctx);
         ctx.OpenReadTransaction();
 
-        bool hasLimits = GetBoolValueQueryString("hasLimits", false) ?? true; //tODO: default to false?
+        bool hasLimits = GetBoolValueQueryString("hasLimits", false) ?? false; //tODO: default to false?
         var ipsStrVals = GetStringValuesQueryString("ip", false);
         var ips = ipsStrVals.Count == 0 ? new[] { HttpContext.Connection.RemoteIpAddress?.ToString() } : ipsStrVals.ToArray();
 
