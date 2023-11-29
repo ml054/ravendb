@@ -11,6 +11,7 @@ export type TextColor =
     | "warning"
     | "danger"
     | "muted"
+    | "emphasis"
     | "node"
     | "shard"
     | "orchestrator";
