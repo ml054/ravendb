@@ -553,3 +553,15 @@ select {
 .btn-close:focus {
     box-shadow: none;
 }
+
+//Classes for different panel colors
+$panels: (
+    1: --panel-bg-1,
+    2: --panel-bg-2,
+    3: --panel-bg-3,
+);
+@each $key, $color in $panels {
+    .panel-bg-#{$key} {
+        background-color: var(#{$color});
+    }
+}
