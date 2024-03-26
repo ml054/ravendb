@@ -139,6 +139,7 @@ const connectionStringsOptions: SelectOptionWithIcon<StudioEtlType>[] = [
     { value: "ElasticSearch", label: "ElasticSearch", icon: "elasticsearch" },
     { value: "Kafka", label: "Kafka", icon: "kafka" },
     { value: "RabbitMQ", label: "RabbitMQ", icon: "rabbitmq" },
+    { value: "AzureQueueStorage", label: "Azure Queue Storage", icon: "azure-queue-storage-etl" },
 ];
 
 function getAvailableConnectionStringsOptions(
@@ -157,6 +158,7 @@ function getAvailableConnectionStringsOptions(
                 return features.hasElasticSearchEtl;
             case "Kafka":
             case "RabbitMQ":
+            case "AzureQueueStorage":
                 return features.hasQueueEtl;
             default:
                 return assertUnreachable(type);

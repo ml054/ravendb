@@ -40,7 +40,7 @@ const initialState: ConnectionStringsState = {
     initialEditConnection: null,
 };
 
-type StudioEtlType = "Raven" | "Sql" | "Olap" | "ElasticSearch" | "Kafka" | "RabbitMQ";
+type StudioEtlType = "Raven" | "Sql" | "Olap" | "ElasticSearch" | "Kafka" | "RabbitMQ" | "AzureQueueStorage";
 
 export const connectionStringsSlice = createSlice({
     name: "connectionStrings",

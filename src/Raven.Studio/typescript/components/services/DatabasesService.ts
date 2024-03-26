@@ -57,6 +57,7 @@ import deleteConnectionStringCommand = require("commands/database/settings/delet
 import getConnectionStringsCommand = require("commands/database/settings/getConnectionStringsCommand");
 import saveConnectionStringCommand = require("commands/database/settings/saveConnectionStringCommand");
 import { ConnectionStringDto } from "components/pages/database/settings/connectionStrings/connectionStringsTypes";
+import testAzureQueueStorageServerConnectionCommand from "commands/database/cluster/testAzureQueueStorageServerConnectionCommand";
 import saveCustomSorterCommand = require("commands/database/settings/saveCustomSorterCommand");
 import queryCommand = require("commands/database/query/queryCommand");
 
@@ -254,6 +255,10 @@ export default class DatabasesService {
 
     async testRabbitMqServerConnection(databaseName: string, connectionString: string) {
         return new testRabbitMqServerConnectionCommand(databaseName, connectionString).execute();
+    }
+
+    async testAzureQueueStorageServerConnection(db: database, connectionString: string) {
+        return new testAzureQueueStorageServerConnectionCommand(db, connectionString).execute();
     }
 
     async testKafkaServerConnection(

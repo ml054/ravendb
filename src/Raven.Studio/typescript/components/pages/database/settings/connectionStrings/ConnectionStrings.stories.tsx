@@ -93,6 +93,7 @@ function mockTestResults(isSuccess: boolean) {
         tasksService.withTestSqlConnectionString();
         tasksService.withTestKafkaServerConnection();
         tasksService.withTestRabbitMqServerConnection();
+        tasksService.withTestAzureQueueStorageServerConnection();
         tasksService.withTestElasticSearchNodeConnection();
         manageServerService.withTestPeriodicBackupCredentials();
     } else {
@@ -100,6 +101,7 @@ function mockTestResults(isSuccess: boolean) {
         tasksService.withTestSqlConnectionString(SharedStubs.nodeConnectionTestErrorResult());
         tasksService.withTestKafkaServerConnection(SharedStubs.nodeConnectionTestErrorResult());
         tasksService.withTestRabbitMqServerConnection(SharedStubs.nodeConnectionTestErrorResult());
+        tasksService.withTestAzureQueueStorageServerConnection(SharedStubs.nodeConnectionTestErrorResult());
         tasksService.withTestElasticSearchNodeConnection(SharedStubs.nodeConnectionTestErrorResult());
         manageServerService.withTestPeriodicBackupCredentials(SharedStubs.nodeConnectionTestErrorResult());
     }

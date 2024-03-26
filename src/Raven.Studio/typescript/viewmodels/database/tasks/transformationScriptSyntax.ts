@@ -59,6 +59,9 @@ class transformationScriptSyntax extends dialogViewModelBase {
             case "RabbitMQ":
                 sampleText = transformationScriptSyntax.rabbitMqEtlSampleText;
                 break;
+            case "AzureQueueStorage":
+                sampleText = transformationScriptSyntax.azureQueueStorageEtlSampleText;
+                break;
             default:
                 genUtils.assertUnreachable(type, "Unknown studioEtlType: " + type);
         }

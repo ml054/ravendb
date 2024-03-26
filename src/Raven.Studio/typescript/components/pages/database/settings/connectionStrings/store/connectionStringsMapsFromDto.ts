@@ -50,6 +50,9 @@ function getConnectionStringUsedTasks(
         case "Kafka":
             filteredTasks = tasks.filter((task) => task.BrokerType === "Kafka");
             break;
+        case "AzureQueueStorage":
+            filteredTasks = tasks.filter((task) => task.BrokerType === "AzureQueueStorage");
+            break;
         default:
             assertUnreachable(connectionType);
     }

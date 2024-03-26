@@ -186,6 +186,7 @@ module.exports = (env, args) => {
                                     "kafka-sink": 0xf131,
                                     "rabbitmq-sink": 0xf132,
                                     "preview": 0xf133,
+                                    "azure-queue-storage-etl": 0xf134,
                                     "corax-include-null-match": 0xf140,
                                     "corax-fallback": 0xf141,
                                     "corax-all-entries-match": 0xf142,
@@ -204,6 +205,7 @@ module.exports = (env, args) => {
                                     "corax-backward": 0xf14F,
                                     "corax-sort-az": 0xf150,
                                     "corax-sort-za": 0xf151,
+                                    "close": 0xf162,
                                 },
                                 cssTemplate: path.resolve(__dirname, "wwwroot/Content/css/fonts/icomoon.template.css.hbs")
                             }

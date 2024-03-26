@@ -78,6 +78,8 @@ function getIcon(type: StudioEtlType): IconName {
             return "kafka";
         case "RabbitMQ":
             return "rabbitmq";
+        case "AzureQueueStorage":
+            return "azure-queue-storage";
         default:
             return null;
     }

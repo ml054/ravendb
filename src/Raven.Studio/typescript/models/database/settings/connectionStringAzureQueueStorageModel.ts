@@ -2,75 +2,80 @@
 import database = require("models/resources/database");
 import connectionStringModel = require("models/database/settings/connectionStringModel");
 import saveConnectionStringCommand_OLD = require("commands/database/settings/saveConnectionStringCommand_OLD");
-import testRabbitMqServerConnectionCommand from "commands/database/cluster/testRabbitMqServerConnectionCommand";
 import jsonUtil = require("common/jsonUtil");
+import testAzureQueueStorageServerConnectionCommand
+    from "commands/database/cluster/testAzureQueueStorageServerConnectionCommand";
 
-class connectionStringRabbitMqModel extends connectionStringModel {
-    
-    rabbitMqConnectionString = ko.observable<string>();
-    
-    validationGroup: KnockoutValidationGroup;    
+class connectionStringAzureQueueStorageModel extends connectionStringModel {
+
+    azureQueueStorageConnectionString = ko.observable<string>();
+
+    validationGroup: KnockoutValidationGroup;
     dirtyFlag: () => DirtyFlag;
-    
+
     constructor(dto: Raven.Client.Documents.Operations.ETL.Queue.QueueConnectionString, isNew: boolean, tasks: { taskName: string; taskId: number }[]) {
         super(isNew, tasks);
-        
+
         this.update(dto);
         this.initValidation();
-        
+
         this.dirtyFlag = new ko.DirtyFlag([
             this.connectionStringName,
-            this.rabbitMqConnectionString
+            this.azureQueueStorageConnectionString
         ], false, jsonUtil.newLineNormalizingHashFunction);
     }
 
     update(dto: Raven.Client.Documents.Operations.ETL.Queue.QueueConnectionString) {
         super.update(dto);
-        
-        const rabbitSettings = dto.RabbitMqConnectionSettings;
-        this.rabbitMqConnectionString(rabbitSettings.ConnectionString);
+
+        const settings = dto.AzureQueueStorageConnectionSettings;
+        this.azureQueueStorageConnectionString(settings.Authentication.ConnectionString); //TODO: entra id
     }
 
     initValidation() {
         super.initValidation();
-        
-        this.rabbitMqConnectionString.extend({
+
+        this.azureQueueStorageConnectionString.extend({
             required: true
         });
-       
+
         this.validationGroup = ko.validatedObservable({
             connectionStringName: this.connectionStringName,
-            rabbitMqConnectionString: this.rabbitMqConnectionString,
+            azureQueueStorageConnectionString: this.azureQueueStorageConnectionString,
         });
     }
 
-    static empty(): connectionStringRabbitMqModel {
-        return new connectionStringRabbitMqModel({
+    static empty(): connectionStringAzureQueueStorageModel {
+        return new connectionStringAzureQueueStorageModel({
             Type: "Queue",
-            BrokerType: "RabbitMq",
+            BrokerType: "AzureQueueStorage",
             Name: "",
-            
-            RabbitMqConnectionSettings: {
-                ConnectionString: ""
-            },
-            
+
+            RabbitMqConnectionSettings: null,
             KafkaConnectionSettings: null,
-            AzureQueueStorageConnectionSettings: null,
+            AzureQueueStorageConnectionSettings: {
+                Authentication: {
+                    ConnectionString: "",
+                    EntraId: null
+                }
+            },
         }, true, []);
     }
-    
+
     toDto(): Raven.Client.Documents.Operations.ETL.Queue.QueueConnectionString  {
         return {
             Type: "Queue",
-            BrokerType: "RabbitMq",
+            BrokerType: "AzureQueueStorage",
             Name: this.connectionStringName(),
-            
-            RabbitMqConnectionSettings: {
-                ConnectionString: this.rabbitMqConnectionString()
-            },
 
+            RabbitMqConnectionSettings: null,
             KafkaConnectionSettings: null,
-            AzureQueueStorageConnectionSettings: null,
+            AzureQueueStorageConnectionSettings: {
+                Authentication: {
+                    ConnectionString: this.azureQueueStorageConnectionString(),
+                    EntraId: null,
+                }
+            },
         };
     }
 
@@ -80,9 +85,9 @@ class connectionStringRabbitMqModel extends connectionStringModel {
     }
 
     testConnection(db: database): JQueryPromise<Raven.Server.Web.System.NodeConnectionTestResult> {
-        return new testRabbitMqServerConnectionCommand(db, this.rabbitMqConnectionString())
+        return new testAzureQueueStorageServerConnectionCommand(db, this.azureQueueStorageConnectionString())
             .execute();
     }
 }
 
-export = connectionStringRabbitMqModel;
+export = connectionStringAzureQueueStorageModel;

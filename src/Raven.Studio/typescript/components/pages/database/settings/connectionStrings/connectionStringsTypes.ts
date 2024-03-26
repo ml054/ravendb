@@ -66,13 +66,18 @@ export interface RabbitMqConnection extends ConnectionBase {
     connectionString?: string;
 }
 
+export interface AzureQueueStorageConnection extends ConnectionBase {
+    type: Extract<StudioEtlType, "AzureQueueStorage">;
+}
+
 export type Connection =
     | RavenConnection
     | SqlConnection
     | OlapConnection
     | ElasticSearchConnection
     | KafkaConnection
-    | RabbitMqConnection;
+    | RabbitMqConnection
+    | AzureQueueStorageConnection;
 
 export type ConnectionStringDto = Partial<
     | ElasticSearchConnectionStringDto

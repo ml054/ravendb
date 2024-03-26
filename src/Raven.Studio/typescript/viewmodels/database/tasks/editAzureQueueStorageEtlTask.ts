@@ -8,9 +8,7 @@ import eventsCollector = require("common/eventsCollector");
 import getConnectionStringsCommand = require("commands/database/settings/getConnectionStringsCommand");
 import saveEtlTaskCommand = require("commands/database/tasks/saveEtlTaskCommand");
 import generalUtils = require("common/generalUtils");
-import ongoingTaskRabbitMqEtlEditModel = require("models/database/tasks/ongoingTaskRabbitMqEtlEditModel");
 import ongoingTaskQueueEtlTransformationModel = require("models/database/tasks/ongoingTaskQueueEtlTransformationModel");
-import connectionStringRabbitMqEtlModel = require("models/database/settings/connectionStringRabbitMqModel");
 import collectionsTracker = require("common/helpers/database/collectionsTracker");
 import transformationScriptSyntax = require("viewmodels/database/tasks/transformationScriptSyntax");
 import getConnectionStringInfoCommand = require("commands/database/settings/getConnectionStringInfoCommand");
@@ -25,9 +23,11 @@ import document = require("models/database/documents/document");
 import popoverUtils = require("common/popoverUtils");
 import { highlight, languages } from "prismjs";
 import licenseModel from "models/auth/licenseModel";
-import { EditRabbitMqEtlInfoHub } from "viewmodels/database/tasks/EditRabbitMqEtlInfoHub";
+import { EditAzureQueueStorageEtlInfoHub } from "viewmodels/database/tasks/EditAzureQueueStorageEtlInfoHub";
+import ongoingTaskAzureQueueStorageEtlEditModel from "models/database/tasks/ongoingTaskAzureQueueStorageEtlEditModel";
+import connectionStringAzureQueueStorageModel from "models/database/settings/connectionStringAzureQueueStorageModel";
 
-class rabbitMqTaskTestMode {
+class azureQueueStorageTaskTestMode {
     documentId = ko.observable<string>();
     testDelete = ko.observable<boolean>(false);
     docsIdsAutocompleteResults = ko.observableArray<string>([]);
@@ -134,9 +134,9 @@ class rabbitMqTaskTestMode {
                 Configuration: this.configurationProvider()
             };
 
-            eventsCollector.default.reportEvent("rabbitmq-etl", "test-script");
+            eventsCollector.default.reportEvent("azure-queue-storage-etl", "test-script");
 
-            new testQueueEtlCommand(this.db(), dto, "RabbitMq")
+            new testQueueEtlCommand(this.db(), dto, "AzureQueueStorage")
                 .execute()
                 .done(simulationResult => {
                     this.testResults(simulationResult.Summary);
@@ -156,91 +156,91 @@ class rabbitMqTaskTestMode {
     }
 }
 
-class editRabbitMqEtlTask extends viewModelBase {
+class editAzureQueueStorageEtlTask extends viewModelBase {
 
-    view = require("views/database/tasks/editRabbitMqEtlTask.html");
+    view = require("views/database/tasks/editAzureQueueStorageEtlTask.html");
     optionsPerQueueEtlView = require("views/database/tasks/optionsPerQueueEtl.html");
-    connectionStringView = require("views/database/settings/connectionStringRabbitMq.html");
+    connectionStringView = require("views/database/settings/connectionStringAzureQueueStorage.html");
     pinResponsibleNodeButtonsScriptView = require("views/partial/pinResponsibleNodeButtonsScript.html");
     pinResponsibleNodeTextScriptView = require("views/partial/pinResponsibleNodeTextScript.html");
-    
+
     static readonly scriptNamePrefix = "Script_";
     static isApplyToAll = ongoingTaskQueueEtlTransformationModel.isApplyToAll;
 
     enableTestArea = ko.observable<boolean>(false);
     showAdvancedOptions = ko.observable<boolean>(false);
 
-    test: rabbitMqTaskTestMode;
-    
-    editedRabbitMqEtl = ko.observable<ongoingTaskRabbitMqEtlEditModel>();
-    isAddingNewRabbitMqEtlTask = ko.observable<boolean>(true);
-    
-    rabbitMqEtlConnectionStringsDetails = ko.observableArray<Raven.Client.Documents.Operations.ETL.Queue.QueueConnectionString>([]);
+    test: azureQueueStorageTaskTestMode;
+
+    editedEtl = ko.observable<ongoingTaskAzureQueueStorageEtlEditModel>();
+    isAddingNewEtlTask = ko.observable<boolean>(true);
+
+    etlConnectionStringsDetails = ko.observableArray<Raven.Client.Documents.Operations.ETL.Queue.QueueConnectionString>([]);
 
     possibleMentors = ko.observableArray<string>([]);
-    
+
     spinners = {
         test: ko.observable<boolean>(false),
         save: ko.observable<boolean>(false)
     };
-    
+
     fullErrorDetailsVisible = ko.observable<boolean>(false);
     shortErrorText: KnockoutObservable<string>;
-    
+
     createNewConnectionString = ko.observable<boolean>(false);
-    newConnectionString = ko.observable<connectionStringRabbitMqEtlModel>();
+    newConnectionString = ko.observable<connectionStringAzureQueueStorageModel>();
 
     connectionStringDefined: KnockoutComputed<boolean>;
     testConnectionResult = ko.observable<Raven.Server.Web.System.NodeConnectionTestResult>();
-    
+
     collections = collectionsTracker.default.collections;
 
     isSharded = ko.pureComputed(() => {
         const db = this.activeDatabase();
         return db ? db.isSharded() : false;
     });
-    
+
     hasQueueEtl = licenseModel.getStatusValue("HasQueueEtl");
-    infoHubView: ReactInKnockout<typeof EditRabbitMqEtlInfoHub>;
-    
+    infoHubView: ReactInKnockout<typeof EditAzureQueueStorageEtlInfoHub>;
+
     constructor() {
         super();
-        
+
         aceEditorBindingHandler.install();
-        this.bindToCurrentInstance("useConnectionString", "onTestConnectionRabbitMq", "removeTransformationScript",
-                                   "cancelEditedTransformation", "saveEditedTransformation", "syntaxHelp",
-                                   "toggleTestArea", "toggleAdvancedArea", "setState");
+        this.bindToCurrentInstance("useConnectionString", "onTestConnection", "removeTransformationScript",
+            "cancelEditedTransformation", "saveEditedTransformation", "syntaxHelp",
+            "toggleTestArea", "toggleAdvancedArea", "setState");
         this.infoHubView = ko.pureComputed(() => ({
-            component: EditRabbitMqEtlInfoHub
+            component: EditAzureQueueStorageEtlInfoHub
         }))
     }
 
     activate(args: any) {
         super.activate(args);
         const deferred = $.Deferred<void>();
-        
+
         this.loadPossibleMentors();
 
         if (args.taskId) {
             // 1. Editing an Existing task
-            this.isAddingNewRabbitMqEtlTask(false);
-            
+            this.isAddingNewEtlTask(false);
+
             getOngoingTaskInfoCommand.forQueueEtl(this.activeDatabase(), args.taskId)
                 .execute()
                 .done((result: Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskQueueEtl) => {
-                    this.editedRabbitMqEtl(new ongoingTaskRabbitMqEtlEditModel(result));
-                    this.showAdvancedOptions(this.editedRabbitMqEtl().hasAdvancedOptionsDefined());
+                    this.editedEtl(new ongoingTaskAzureQueueStorageEtlEditModel(result));
+                    this.showAdvancedOptions(this.editedEtl().hasAdvancedOptionsDefined());
                     deferred.resolve();
                 })
-                .fail(() => { 
+                .fail(() => {
                     deferred.reject();
-                    router.navigate(appUrl.forOngoingTasks(this.activeDatabase())); 
+                    router.navigate(appUrl.forOngoingTasks(this.activeDatabase()));
                 });
         } else {
             // 2. Creating a New task
-            this.isAddingNewRabbitMqEtlTask(true);
-            this.editedRabbitMqEtl(ongoingTaskRabbitMqEtlEditModel.empty());
-            this.editedRabbitMqEtl().editedTransformationScriptSandbox(ongoingTaskQueueEtlTransformationModel.empty(this.findNameForNewTransformation()));
+            this.isAddingNewEtlTask(true);
+            this.editedEtl(ongoingTaskAzureQueueStorageEtlEditModel.empty());
+            this.editedEtl().editedTransformationScriptSandbox(ongoingTaskQueueEtlTransformationModel.empty(this.findNameForNewTransformation()));
             deferred.resolve();
         }
 
@@ -258,12 +258,13 @@ class editRabbitMqEtlTask extends viewModelBase {
 
         this.possibleMentors(members);
     }
-    
+
     compositionComplete() {
         super.compositionComplete();
 
-        $('.edit-rabbitmq-etl-task [data-toggle="tooltip"]').tooltip();
+        $('.edit-azure-queue-storage-etl-task [data-toggle="tooltip"]').tooltip();
 
+        
         popoverUtils.longWithHover($(".skip-automatic-declaration"),
             {
                 content: `<small class="margin-top-xs no-padding-left">
@@ -277,8 +278,8 @@ class editRabbitMqEtlTask extends viewModelBase {
             .execute()
             .done((result: Raven.Client.Documents.Operations.ConnectionStrings.GetConnectionStringsResult) => {
                 const queueConnectionStrings = Object.values(result.QueueConnectionStrings);
-                const rabbitMqStrings = queueConnectionStrings.filter(x => x.BrokerType === "RabbitMq");
-                this.rabbitMqEtlConnectionStringsDetails(_.sortBy(rabbitMqStrings, x => x.Name.toUpperCase()));
+                const azureQueueStorageStrings = queueConnectionStrings.filter(x => x.BrokerType === "AzureQueueStorage");
+                this.etlConnectionStringsDetails(_.sortBy(azureQueueStorageStrings, x => x.Name.toUpperCase()));
             });
     }
 
@@ -290,57 +291,57 @@ class editRabbitMqEtlTask extends viewModelBase {
             }
             return generalUtils.trimMessage(result.Error);
         });
-        
-        this.newConnectionString(connectionStringRabbitMqEtlModel.empty());
-        this.newConnectionString().setNameUniquenessValidator(name => !this.rabbitMqEtlConnectionStringsDetails().find(x => x.Name.toLocaleLowerCase() === name.toLocaleLowerCase()));
-        
-        const connectionStringName = this.editedRabbitMqEtl().connectionStringName();
-        const connectionStringIsMissing = connectionStringName && !this.rabbitMqEtlConnectionStringsDetails()
+
+        this.newConnectionString(connectionStringAzureQueueStorageModel.empty());
+        this.newConnectionString().setNameUniquenessValidator(name => !this.etlConnectionStringsDetails().find(x => x.Name.toLocaleLowerCase() === name.toLocaleLowerCase()));
+
+        const connectionStringName = this.editedEtl().connectionStringName();
+        const connectionStringIsMissing = connectionStringName && !this.etlConnectionStringsDetails()
             .find(x => x.Name.toLocaleLowerCase() === connectionStringName.toLocaleLowerCase());
 
-        if (!this.rabbitMqEtlConnectionStringsDetails().length || connectionStringIsMissing) {
+        if (!this.etlConnectionStringsDetails().length || connectionStringIsMissing) {
             this.createNewConnectionString(true);
         }
 
         if (connectionStringIsMissing) {
             // looks like user imported data w/o connection strings, prefill form with desired name
             this.newConnectionString().connectionStringName(connectionStringName);
-            this.editedRabbitMqEtl().connectionStringName(null);
+            this.editedEtl().connectionStringName(null);
         }
-        
+
         // Discard test connection result when needed
         this.createNewConnectionString.subscribe(() => this.testConnectionResult(null));
-        this.newConnectionString().rabbitMqConnectionString.subscribe(() => this.testConnectionResult(null));
+        this.newConnectionString().azureQueueStorageConnectionString.subscribe(() => this.testConnectionResult(null));
 
         this.connectionStringDefined = ko.pureComputed(() => {
-            const editedEtl = this.editedRabbitMqEtl();
+            const editedEtl = this.editedEtl();
             if (this.createNewConnectionString()) {
-                return !!this.newConnectionString().rabbitMqConnectionString();
+                return !!this.newConnectionString().azureQueueStorageConnectionString();
             } else {
                 return !!editedEtl.connectionStringName();
             }
         });
-        
+
         this.enableTestArea.subscribe(testMode => {
             $("body").toggleClass('show-test', testMode);
         });
 
         const dtoProvider = () => {
-            const dto = this.editedRabbitMqEtl().toDto();
+            const dto = this.editedEtl().toDto();
 
             // override transforms - use only current transformation
-            const transformationScriptDto = this.editedRabbitMqEtl().editedTransformationScriptSandbox().toDto();
+            const transformationScriptDto = this.editedEtl().editedTransformationScriptSandbox().toDto();
             transformationScriptDto.Name = "Script_1"; // assign fake name
             dto.Transforms = [transformationScriptDto];
 
             if (!dto.Name) {
-                dto.Name = "Test RabbitMQ ETL Task"; // assign fake name
+                dto.Name = "Test Azure Queue Storage ETL Task"; // assign fake name
             }
             return dto;
         };
 
-        this.test = new rabbitMqTaskTestMode(this.activeDatabase, () => {
-            return this.isValid(this.editedRabbitMqEtl().editedTransformationScriptSandbox().validationGroup);
+        this.test = new azureQueueStorageTaskTestMode(this.activeDatabase, () => {
+            return this.isValid(this.editedEtl().editedTransformationScriptSandbox().validationGroup);
         }, dtoProvider);
 
         this.test.initObservables();
@@ -348,16 +349,16 @@ class editRabbitMqEtlTask extends viewModelBase {
         this.dirtyFlag = new ko.DirtyFlag([
             this.createNewConnectionString,
             this.newConnectionString().dirtyFlag().isDirty,
-            this.editedRabbitMqEtl().dirtyFlag().isDirty
+            this.editedEtl().dirtyFlag().isDirty
         ], false, jsonUtil.newLineNormalizingHashFunction);
     }
 
     useConnectionString(connectionStringToUse: string) {
-        this.editedRabbitMqEtl().connectionStringName(connectionStringToUse);
+        this.editedEtl().connectionStringName(connectionStringToUse);
     }
 
-    onTestConnectionRabbitMq() {
-        eventsCollector.default.reportEvent("rabbitmq-connection-string", "test-connection");
+    onTestConnection() {
+        eventsCollector.default.reportEvent("azure-queue-storage-connection-string", "test-connection");
         this.spinners.test(true);
         this.testConnectionResult(null);
 
@@ -372,10 +373,11 @@ class editRabbitMqEtlTask extends viewModelBase {
                 });
         } else {
             // Existing connection string
-            getConnectionStringInfoCommand.forRabbitMqEtl(this.activeDatabase(), this.editedRabbitMqEtl().connectionStringName())
+            
+            getConnectionStringInfoCommand.forAzureQueueStorageEtl(this.activeDatabase(), this.editedEtl().connectionStringName())
                 .execute()
                 .done((result: Raven.Client.Documents.Operations.ConnectionStrings.GetConnectionStringsResult) => {
-                    new connectionStringRabbitMqEtlModel(result.QueueConnectionStrings[this.editedRabbitMqEtl().connectionStringName()], true, [])
+                    new connectionStringAzureQueueStorageModel(result.QueueConnectionStrings[this.editedEtl().connectionStringName()], true, [])
                         .testConnection(this.activeDatabase())
                         .done((testResult) => this.testConnectionResult(testResult))
                         .always(() => {
@@ -384,12 +386,12 @@ class editRabbitMqEtlTask extends viewModelBase {
                 });
         }
     }
-    
-    saveRabbitMqEtl() {
+
+    saveEtl() {
         let hasAnyErrors = false;
         this.spinners.save(true);
-        const editedEtl = this.editedRabbitMqEtl();
-        
+        const editedEtl = this.editedEtl();
+
         // 1. Validate *edited transformation script*
         if (editedEtl.showEditTransformationArea()) {
             if (!this.isValid(editedEtl.editedTransformationScriptSandbox().validationGroup)) {
@@ -398,12 +400,12 @@ class editRabbitMqEtlTask extends viewModelBase {
                 this.saveEditedTransformation();
             }
         }
-        
+
         // 2. Validate *new connection string* (if relevant..)
         if (this.createNewConnectionString()) {
-            
+
             // todo test the string box if valid...
-            
+
             if (!this.isValid(this.newConnectionString().validationGroup)) {
                 hasAnyErrors = true;
             } else {
@@ -442,10 +444,10 @@ class editRabbitMqEtlTask extends viewModelBase {
             savingNewStringAction.resolve();
         }
 
-        // 5. All is well, Save RabbitMQ Etl task
+        // 5. All is well, Save Etl task
         savingNewStringAction.done(()=> {
-            eventsCollector.default.reportEvent("rabbitMQ-etl", "save");
-            
+            eventsCollector.default.reportEvent("azure-queue-storage-etl", "save");
+
             const scriptsToReset = editedEtl.transformationScripts().filter(x => x.resetScript()).map(x => x.name());
 
             const dto = editedEtl.toDto();
@@ -460,54 +462,54 @@ class editRabbitMqEtlTask extends viewModelBase {
     }
 
     addNewTransformation() {
-        this.editedRabbitMqEtl().transformationScriptSelectedForEdit(null);
-        this.editedRabbitMqEtl().editedTransformationScriptSandbox(ongoingTaskQueueEtlTransformationModel.empty(this.findNameForNewTransformation()));
+        this.editedEtl().transformationScriptSelectedForEdit(null);
+        this.editedEtl().editedTransformationScriptSandbox(ongoingTaskQueueEtlTransformationModel.empty(this.findNameForNewTransformation()));
     }
 
     cancelEditedTransformation() {
-        this.editedRabbitMqEtl().editedTransformationScriptSandbox(null);
-        this.editedRabbitMqEtl().transformationScriptSelectedForEdit(null);
+        this.editedEtl().editedTransformationScriptSandbox(null);
+        this.editedEtl().transformationScriptSelectedForEdit(null);
         this.enableTestArea(false);
     }
 
     saveEditedTransformation() {
         this.enableTestArea(false);
-        const transformation = this.editedRabbitMqEtl().editedTransformationScriptSandbox();
+        const transformation = this.editedEtl().editedTransformationScriptSandbox();
         if (!this.isValid(transformation.validationGroup)) {
             return;
         }
-        
+
         if (transformation.isNew()) {
-            const newTransformationItem = new ongoingTaskQueueEtlTransformationModel(transformation.toDto(), true, false); 
+            const newTransformationItem = new ongoingTaskQueueEtlTransformationModel(transformation.toDto(), true, false);
             newTransformationItem.name(transformation.name());
             newTransformationItem.dirtyFlag().forceDirty();
-            this.editedRabbitMqEtl().transformationScripts.push(newTransformationItem);
+            this.editedEtl().transformationScripts.push(newTransformationItem);
         } else {
-            const oldItem = this.editedRabbitMqEtl().transformationScriptSelectedForEdit();
+            const oldItem = this.editedEtl().transformationScriptSelectedForEdit();
             const newItem = new ongoingTaskQueueEtlTransformationModel(transformation.toDto(), false, transformation.resetScript());
-            
+
             if (oldItem.dirtyFlag().isDirty() || newItem.hasUpdates(oldItem)) {
                 newItem.dirtyFlag().forceDirty();
             }
-            
-            this.editedRabbitMqEtl().transformationScripts.replace(oldItem, newItem);
+
+            this.editedEtl().transformationScripts.replace(oldItem, newItem);
         }
 
-        this.editedRabbitMqEtl().transformationScripts.sort((a, b) => a.name().toLowerCase().localeCompare(b.name().toLowerCase()));
-        this.editedRabbitMqEtl().editedTransformationScriptSandbox(null);
-        this.editedRabbitMqEtl().transformationScriptSelectedForEdit(null);
+        this.editedEtl().transformationScripts.sort((a, b) => a.name().toLowerCase().localeCompare(b.name().toLowerCase()));
+        this.editedEtl().editedTransformationScriptSandbox(null);
+        this.editedEtl().transformationScriptSelectedForEdit(null);
     }
-    
+
     private findNameForNewTransformation() {
-        const scriptsWithPrefix = this.editedRabbitMqEtl().transformationScripts().filter(script => {
-            return script.name().startsWith(editRabbitMqEtlTask.scriptNamePrefix);
+        const scriptsWithPrefix = this.editedEtl().transformationScripts().filter(script => {
+            return script.name().startsWith(editAzureQueueStorageEtlTask.scriptNamePrefix);
         });
-        
+
         const maxNumber = _.max(scriptsWithPrefix
-            .map(x => x.name().substr(editRabbitMqEtlTask.scriptNamePrefix.length))
+            .map(x => x.name().substr(editAzureQueueStorageEtlTask.scriptNamePrefix.length))
             .map(x => _.toInteger(x))) || 0;
-        
-        return editRabbitMqEtlTask.scriptNamePrefix + (maxNumber + 1);
+
+        return editAzureQueueStorageEtlTask.scriptNamePrefix + (maxNumber + 1);
     }
 
     cancelOperation() {
@@ -534,21 +536,21 @@ class editRabbitMqEtlTask extends viewModelBase {
             } else {
                 result = filteredOptions;
             }
-            
-            if (!_.includes(this.editedRabbitMqEtl().editedTransformationScriptSandbox().transformScriptCollections(), ongoingTaskQueueEtlTransformationModel.applyToAllCollectionsText)) {
+
+            if (!_.includes(this.editedEtl().editedTransformationScriptSandbox().transformScriptCollections(), ongoingTaskQueueEtlTransformationModel.applyToAllCollectionsText)) {
                 result.unshift(ongoingTaskQueueEtlTransformationModel.applyToAllCollectionsText);
             }
-            
+
             return result;
         });
     }
 
     removeTransformationScript(model: ongoingTaskQueueEtlTransformationModel) {
-        this.editedRabbitMqEtl().deleteTransformationScript(model);
+        this.editedEtl().deleteTransformationScript(model);
     }
 
     syntaxHelp() {
-        const viewmodel = new transformationScriptSyntax("RabbitMQ");
+        const viewmodel = new transformationScriptSyntax("AzureQueueStorage");
         app.showBootstrapDialog(viewmodel);
     }
 
@@ -559,14 +561,14 @@ class editRabbitMqEtlTask extends viewModelBase {
             this.enableTestArea(false);
         }
     }
-    
+
     toggleAdvancedArea() {
         this.showAdvancedOptions.toggle();
     }
 
     setState(state: Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskState): void {
-        this.editedRabbitMqEtl().taskState(state);
+        this.editedEtl().taskState(state);
     }
 }
 
-export = editRabbitMqEtlTask;
+export = editAzureQueueStorageEtlTask;

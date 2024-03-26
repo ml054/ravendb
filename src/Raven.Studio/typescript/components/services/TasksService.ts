@@ -26,6 +26,7 @@ import saveConnectionStringCommand from "commands/database/settings/saveConnecti
 import { ConnectionStringDto } from "components/pages/database/settings/connectionStrings/connectionStringsTypes";
 import getFolderPathOptionsCommand from "commands/resources/getFolderPathOptionsCommand";
 import getBackupLocationCommand from "commands/database/tasks/getBackupLocationCommand";
+import testAzureQueueStorageServerConnectionCommand from "commands/database/cluster/testAzureQueueStorageServerConnectionCommand";
 
 export default class TasksService {
     async getOngoingTasks(databaseName: string, location: databaseLocationSpecifier) {
@@ -115,6 +116,10 @@ export default class TasksService {
 
     async testRabbitMqServerConnection(databaseName: string, connectionString: string) {
         return new testRabbitMqServerConnectionCommand(databaseName, connectionString).execute();
+    }
+
+    async testAzureQueueStorageServerConnection(db: database, connectionString: string) {
+        return new testAzureQueueStorageServerConnectionCommand(db, connectionString).execute();
     }
 
     async testKafkaServerConnection(
