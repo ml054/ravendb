@@ -141,7 +141,7 @@ export default function OngoingTaskAddModal(props: OngoingTaskAddModalProps) {
                 <Row className="gy-sm">
                     <TaskItem
                         title="Create new Backup task"
-                        href={appUrl.forEditPeriodicBackupTask(db, "OngoingTasks")}
+                        href={appUrl.forEditPeriodicBackupTask(db.name, "OngoingTasks")}
                         className="backup"
                         target="PeriodicBackup"
                     >
@@ -152,7 +152,7 @@ export default function OngoingTaskAddModal(props: OngoingTaskAddModalProps) {
 
                     <TaskItem
                         title="Create new Subscription task"
-                        href={appUrl.forEditSubscription(db)}
+                        href={appUrl.forEditSubscription(db.name)}
                         className="subscription"
                         target="Subscription"
                         disabled={isSubscriptionDisabled}
@@ -243,7 +243,7 @@ export default function OngoingTaskAddModal(props: OngoingTaskAddModalProps) {
 
                     <TaskItem
                         title="Create new Azure Queue Storage ETL task"
-                        href={appUrl.forEditAzureQueueStorageEtl(db)}
+                        href={appUrl.forEditAzureQueueStorageEtl(db.name)}
                         className="azure-queue-storage-etl"
                         target="AzureQueueStorageETL"
                         disabled={isSharded}

@@ -118,8 +118,11 @@ export default class TasksService {
         return new testRabbitMqServerConnectionCommand(databaseName, connectionString).execute();
     }
 
-    async testAzureQueueStorageServerConnection(db: database, connectionString: string) {
-        return new testAzureQueueStorageServerConnectionCommand(db, connectionString).execute();
+    async testAzureQueueStorageServerConnection(
+        databaseName: string,
+        authentication: Raven.Client.Documents.Operations.ETL.Queue.Authentication
+    ) {
+        return new testAzureQueueStorageServerConnectionCommand(databaseName, authentication).execute();
     }
 
     async testKafkaServerConnection(

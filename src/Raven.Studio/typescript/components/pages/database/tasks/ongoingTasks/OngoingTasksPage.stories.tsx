@@ -19,6 +19,7 @@ import OngoingTaskBackup = Raven.Client.Documents.Operations.OngoingTasks.Ongoin
 import OngoingTaskReplication = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskReplication;
 import OngoingTaskSubscription = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskSubscription;
 import { mockStore } from "test/mocks/store/MockStore";
+import { DatabasesStubs } from "test/stubs/DatabasesStubs";
 
 export default {
     title: "Pages/Database/Tasks/Ongoing tasks",
@@ -436,7 +437,7 @@ export const AzureQueueStorageEtlTemplate = (args: {
 
     mockEtlProgress(tasksService, args.completed, args.disabled, args.emptyScript);
 
-    return <OngoingTasksPage {...forceStoryRerender()} db={db} />;
+    return <OngoingTasksPage {...forceStoryRerender()} />;
 };
 
 export const AzureQueueStorageEtlDisabled = boundCopy(AzureQueueStorageEtlTemplate, {

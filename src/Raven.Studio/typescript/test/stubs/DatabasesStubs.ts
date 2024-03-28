@@ -537,6 +537,7 @@ export class DatabasesStubs {
                         Authentication: {
                             ConnectionString: "some-connection-string",
                             EntraId: null,
+                            Passwordless: false,
                         },
                     },
                 },

@@ -190,7 +190,6 @@ class editAzureQueueStorageEtlTask extends viewModelBase {
     createNewConnectionString = ko.observable<boolean>(false);
     newConnectionString = ko.observable<connectionStringAzureQueueStorageModel>();
 
-    connectionStringDefined: KnockoutComputed<boolean>;
     testConnectionResult = ko.observable<Raven.Server.Web.System.NodeConnectionTestResult>();
 
     collections = collectionsTracker.default.collections;
@@ -263,14 +262,6 @@ class editAzureQueueStorageEtlTask extends viewModelBase {
         super.compositionComplete();
 
         $('.edit-azure-queue-storage-etl-task [data-toggle="tooltip"]').tooltip();
-
-        
-        popoverUtils.longWithHover($(".skip-automatic-declaration"),
-            {
-                content: `<small class="margin-top-xs no-padding-left">
-                              Use this option when manually defining the Exchanges, Queues & Bindings.
-                          </small>`
-            });
     }
 
     private getAllConnectionStrings() {
@@ -311,16 +302,7 @@ class editAzureQueueStorageEtlTask extends viewModelBase {
 
         // Discard test connection result when needed
         this.createNewConnectionString.subscribe(() => this.testConnectionResult(null));
-        this.newConnectionString().azureQueueStorageConnectionString.subscribe(() => this.testConnectionResult(null));
-
-        this.connectionStringDefined = ko.pureComputed(() => {
-            const editedEtl = this.editedEtl();
-            if (this.createNewConnectionString()) {
-                return !!this.newConnectionString().azureQueueStorageConnectionString();
-            } else {
-                return !!editedEtl.connectionStringName();
-            }
-        });
+        this.newConnectionString().onChange(() => this.testConnectionResult());
 
         this.enableTestArea.subscribe(testMode => {
             $("body").toggleClass('show-test', testMode);

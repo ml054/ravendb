@@ -1036,3 +1036,6 @@ type SqlConnectionString = Raven.Client.Documents.Operations.ETL.SQL.SqlConnecti
 type GetConnectionStringsResult = Omit<Raven.Client.Documents.Operations.ConnectionStrings.GetConnectionStringsResult, "SqlConnectionStrings"> & {
     SqlConnectionStrings: {[key: string]: SqlConnectionString;};
 }
+
+
+type AzureQueueStorageAuthenticationType = "connectionString" | "entraId" | "passwordless";
