@@ -14,6 +14,14 @@ class AzureQueueStorageConnectionStringModel {
         this.connectionString.subscribe(action);
     }
     
+    initValidation(condition: () => boolean) {
+        this.connectionString.extend({
+            required: {
+                onlyIf: condition
+            }
+        });
+    }
+    
     toDto(): Raven.Client.Documents.Operations.ETL.Queue.Authentication {
         return {
             ConnectionString: this.connectionString(),
@@ -34,6 +42,29 @@ class AzureQueueStorageEntraIdModel {
         this.clientSecret.subscribe(action);
         this.storageAccountName.subscribe(action);
         this.tenantId.subscribe(action);
+    }
+
+    initValidation(condition: () => boolean) {
+        this.clientId.extend({
+            required: {
+                onlyIf: condition
+            }
+        });
+        this.clientSecret.extend({
+            required: {
+                onlyIf: condition
+            }
+        });
+        this.storageAccountName.extend({
+            required: {
+                onlyIf: condition
+            }
+        });
+        this.tenantId.extend({
+            required: {
+                onlyIf: condition
+            }
+        });
     }
     
     toDto(): Raven.Client.Documents.Operations.ETL.Queue.Authentication {
@@ -76,7 +107,7 @@ class connectionStringAzureQueueStorageModel extends connectionStringModel {
 
     authenticationType = ko.observable<AzureQueueStorageAuthenticationType>("connectionString");
     
-    connectionStringConfiguration = new AzureQueueStorageConnectionStringModel();
+    connectionStringModel = new AzureQueueStorageConnectionStringModel();
     entraIdModel = new AzureQueueStorageEntraIdModel();
     passwordlessModel = new AzureQueueStoragePasswordlessModel();
 
@@ -92,7 +123,7 @@ class connectionStringAzureQueueStorageModel extends connectionStringModel {
         this.dirtyFlag = new ko.DirtyFlag([
             this.connectionStringName,
             this.authenticationType,
-            this.connectionStringConfiguration.connectionString,
+            this.connectionStringModel.connectionString,
             this.entraIdModel.tenantId,
             this.entraIdModel.storageAccountName,
             this.entraIdModel.clientSecret,
@@ -100,9 +131,22 @@ class connectionStringAzureQueueStorageModel extends connectionStringModel {
         ], false, jsonUtil.newLineNormalizingHashFunction);
     }
     
+    formatAuthenticationType(authenticationType: AzureQueueStorageAuthenticationType) {
+        switch (authenticationType) {
+            case "connectionString":
+                return "Connection String";
+            case "entraId":
+                return "Entra ID";
+            case "passwordless":
+                return "Passwordless";
+            default:
+                assertUnreachable(authenticationType);
+        }
+    }
+    
     onChange(action: () => void) {
         this.authenticationType.subscribe(action);
-        this.connectionStringConfiguration.onChange(action);
+        this.connectionStringModel.onChange(action);
         this.entraIdModel.onChange(action);
         this.passwordlessModel.onChange(action);
     }
@@ -115,7 +159,7 @@ class connectionStringAzureQueueStorageModel extends connectionStringModel {
             this.authenticationType("passwordless");
         } else if (settings.Authentication.ConnectionString) {
             this.authenticationType("connectionString");
-            this.connectionStringConfiguration.connectionString(settings.Authentication.ConnectionString);
+            this.connectionStringModel.connectionString(settings.Authentication.ConnectionString);
         } else if (settings.Authentication.EntraId) {
             this.authenticationType("entraId");
             this.entraIdModel.update(settings.Authentication.EntraId);
@@ -124,10 +168,13 @@ class connectionStringAzureQueueStorageModel extends connectionStringModel {
 
     initValidation() {
         super.initValidation();
+        
+        this.connectionStringModel.initValidation(() => this.authenticationType() === "connectionString");
+        this.entraIdModel.initValidation(() => this.authenticationType() === "entraId");
 
         this.validationGroup = ko.validatedObservable({
             connectionStringName: this.connectionStringName,
-            connectionStringConfigurationConnectionString: this.connectionStringConfiguration.connectionString,
+            connectionStringConfigurationConnectionString: this.connectionStringModel.connectionString,
             entraIdClientId: this.entraIdModel.clientId,
             entraIdClientSecret: this.entraIdModel.clientSecret,
             entraIdStorageAccountName: this.entraIdModel.storageAccountName,
@@ -157,7 +204,7 @@ class connectionStringAzureQueueStorageModel extends connectionStringModel {
         const authenticationType = this.authenticationType();
         switch (authenticationType) {
             case "connectionString": 
-                return this.connectionStringConfiguration.toDto();
+                return this.connectionStringModel.toDto();
             case "entraId":
                 return this.entraIdModel.toDto();
             case "passwordless":
