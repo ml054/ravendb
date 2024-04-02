@@ -68,6 +68,7 @@ export interface RabbitMqConnection extends ConnectionBase {
 
 export interface AzureQueueStorageConnection extends ConnectionBase {
     type: Extract<StudioEtlType, "AzureQueueStorage">;
+    connectionString?: string; //TODO: other props
 }
 
 export type Connection =

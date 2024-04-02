@@ -5,6 +5,7 @@ import {
     KafkaConnection,
     OlapConnection,
     RabbitMqConnection,
+    //TODO: azure
     RavenConnection,
     SqlConnection,
 } from "../connectionStringsTypes";
@@ -212,3 +213,5 @@ export function mapRabbitMqConnectionsFromDto(
                 }) satisfies RabbitMqConnection
         );
 }
+
+//TODO: map azure

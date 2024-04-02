@@ -9,6 +9,7 @@ import {
     mapKafkaConnectionsFromDto,
     mapOlapConnectionsFromDto,
     mapRabbitMqConnectionsFromDto,
+    //TODO azure
     mapRavenConnectionsFromDto,
     mapSqlConnectionsFromDto,
 } from "./connectionStringsMapsFromDto";
@@ -32,6 +33,7 @@ const initialState: ConnectionStringsState = {
         ElasticSearch: [],
         Kafka: [],
         RabbitMQ: [],
+        AzureQueueStorage: [],
     },
     urlParameters: {
         name: null,
@@ -108,6 +110,8 @@ export const connectionStringsSlice = createSlice({
                     connectionStringsDto.QueueConnectionStrings,
                     ongoingTasks
                 );
+
+                //TODO: map azure
 
                 state.loadStatus = "success";
 

@@ -36,6 +36,8 @@ export function ConnectionStringsInfoHub() {
                 featureName: defaultFeatureAvailability[5].featureName,
                 value: features.hasQueueEtl,
             },
+
+            //TODO: azure
         ],
     });
 
@@ -117,4 +119,5 @@ const defaultFeatureAvailability: FeatureAvailabilityData[] = [
         professional: { value: false },
         enterprise: { value: true },
     },
+    //TODO: azure
 ];

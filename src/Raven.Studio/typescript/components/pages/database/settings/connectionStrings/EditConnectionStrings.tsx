@@ -180,6 +180,8 @@ function getEditConnectionStringComponent(type: StudioEtlType): (props: EditConn
             return KafkaConnectionString;
         case "RabbitMQ":
             return RabbitMqConnectionString;
+        case "AzureQueueStorage":
+            throw new Error("Not implemeted"); //TODO:
         default:
             return null;
     }

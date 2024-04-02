@@ -7,6 +7,7 @@ import {
     ElasticSearchConnection,
     KafkaConnection,
     RabbitMqConnection,
+    //TODO: azure
     OlapConnection,
     ConnectionFormData,
 } from "../connectionStringsTypes";
@@ -103,6 +104,7 @@ export function mapRabbitMqStringToDto(connection: RabbitMqConnection): Connecti
         },
     };
 }
+//TODO: map azure
 
 export function mapConnectionStringToDto(connection: Connection): ConnectionStringDto {
     const type = connection.type;
@@ -120,6 +122,8 @@ export function mapConnectionStringToDto(connection: Connection): ConnectionStri
             return mapKafkaConnectionStringToDto(connection);
         case "RabbitMQ":
             return mapRabbitMqStringToDto(connection);
+        case "AzureQueueStorage":
+            throw new Error("NOT IMPLETED"); //TODO:
         default:
             return assertUnreachable(type);
     }

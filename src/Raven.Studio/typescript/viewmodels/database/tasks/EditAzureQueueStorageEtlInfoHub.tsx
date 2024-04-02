@@ -17,6 +17,8 @@ export function EditAzureQueueStorageEtlInfoHub() {
             },
         ],
     });
+
+    //TODO: update docs link
     const azureQueueStorageEtlDocsLink = useRavenLink({ hash: "TODO" }); 
 
     return (
@@ -66,6 +68,13 @@ export function EditAzureQueueStorageEtlInfoHub() {
                     </ul>
                 </div>
                 <hr />
+                {
+                /* TODO
+                <div className="small-label mb-2">useful links</div>    
+                <a href={azureQueueStorageEtlDocsLink} target="_blank">
+                    <Icon icon="newtab" /> Docs - Azure Queue Storage ETL
+                </a>
+                 */}
             </AccordionItemWrapper>
             <FeatureAvailabilitySummaryWrapper
                 isUnlimited={hasQueueEtl}
