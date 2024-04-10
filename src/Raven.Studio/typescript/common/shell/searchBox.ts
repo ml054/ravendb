@@ -107,6 +107,7 @@ class searchBox {
             this.highlightFirst();
         });
         
+        /* TODO
         this.$searchInput.keydown(e => {
             if (e.key === "ArrowDown" || e.key === "ArrowUp") {
                 this.changeHighlightedItem(e.key === "ArrowDown" ? "down" : "up", [
@@ -126,7 +127,7 @@ class searchBox {
             }
             
             return true;
-        });
+        });*/
 
         this.searchQuery.subscribe(() => {
             this.highlightedItem(null);
@@ -161,7 +162,7 @@ class searchBox {
                         }));
                         this.results.get("document")(documents);
 
-                        this.highlightFirst();
+                        //TODO: this.highlightFirst();
                     })
                     .always(() => this.spinners.startsWith(false));
             } else {
@@ -240,6 +241,8 @@ class searchBox {
         
         this.omniSearch.register("collection", searchItems);
     }
+    
+    // TODO: call this!
     onIndexesUpdated(indexNames: string[]) {
         const searchItems: SearchItem[] = indexNames.map(indexName => {
             return {
@@ -251,15 +254,19 @@ class searchBox {
         });
 
         this.omniSearch.register("index", searchItems);
+    }
+    
     private highlightFirst() {
+        /* TODO
         if (this.matchedDocumentIds().length) {
             this.highlightedItem({ index: 0, listing: "matchedDocument" });
         } else if (this.recentDocumentsList().length) {
             this.highlightedItem({ index: 0, listing: "recentDocument" });
-        }
+        }*/
     }
     
     private changeHighlightedItem(direction: "up" | "down", items: Array<{ listName: "matchedDocument" | "recentDocument", list: Array<any>}>) {
+        /*
         const highlight = this.highlightedItem();
         items = items.filter(x => x.list.length);
         
@@ -321,10 +328,12 @@ class searchBox {
                     listing: items[previousListingIdx].listName
                 });
             }
+        }*/
     }
     
     private dispatchGoToItem(newTab: boolean) {
         const highlight = this.highlightedItem();
+        /* TODO
         if (highlight) {
             switch (highlight.listing) {
                 case "recentDocument":
@@ -338,7 +347,8 @@ class searchBox {
             // user hit enter but values still loading
             // try to load document by name
             this.goToDocument(this.searchQuery(), newTab);
-        }
+        }*/
+    }
 
     private goToMenuItem(item: leafMenuItem, event: JQueryMouseEventObject) {
         const url = item.dynamicHash();

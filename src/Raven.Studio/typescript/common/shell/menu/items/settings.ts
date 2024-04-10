@@ -56,6 +56,16 @@ function getSettingsMenuItem(appUrls: computedAppUrls) {
         new leafMenuItem({
             route: 'databases/settings/clientConfiguration',
             moduleId: bridgeToReact(ClientDatabaseConfiguration, "nonShardedView"),
+            search: {
+                innerActions: [
+                    {
+                        name: "Identity parts separator"
+                    },
+                    {
+                        name: "Maximum number of requests per session"
+                    }
+                ],
+            },
             shardingMode: "allShards",
             title: 'Client Configuration',
             nav: true,
@@ -65,6 +75,18 @@ function getSettingsMenuItem(appUrls: computedAppUrls) {
         }),
         new leafMenuItem({
             route: 'databases/settings/studioConfiguration',
+            search: {
+                alternativeTitles: ["testing"], //TODO:
+                innerActions: [
+                    {
+                        name: "Database Environment",
+                        alternativeNames: ["baca", "ml054"]// TODO:
+                    },
+                    {
+                        name: "Storage Environment",
+                    }
+                ],
+            },
             moduleId: bridgeToReact(StudioDatabaseConfiguration, "nonShardedView"),
             shardingMode: "allShards",
             title: 'Studio Configuration',
@@ -78,6 +100,16 @@ function getSettingsMenuItem(appUrls: computedAppUrls) {
             moduleId: bridgeToReact(DocumentRevisions, "nonShardedView"),
             shardingMode: "allShards",
             title: 'Document Revisions',
+            search: {
+                innerActions: [
+                    {
+                        name: "Revert revisions"
+                    },
+                    {
+                        name: "Enforce revisions configuration"
+                    }
+                ],
+            },
             nav: true,
             css: 'icon-revisions',
             dynamicHash: appUrls.revisions
