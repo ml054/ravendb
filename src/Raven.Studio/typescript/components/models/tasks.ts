@@ -26,6 +26,10 @@ export interface OngoingTaskNodeEtlProgressDetails {
     transactionalId?: string;
 }
 
+export interface OngoingTaskNodeReplicationProgressDetails {
+    //TODO:
+}
+
 export interface OngoingTaskNodeInfoDetails {
     taskConnectionStatus: Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskConnectionStatus;
     responsibleNode: string;

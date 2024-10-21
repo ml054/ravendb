@@ -225,6 +225,8 @@ export function OngoingTasksPage() {
             return task;
         });
 
+        //TODO: replication hub can work in hub to sink and sink to hub mode!
+
         const taskInfo = await Promise.all(loadTasks);
 
         const targetNode = taskInfo.find((x) => x.ResponsibleNode.NodeTag);

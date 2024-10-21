@@ -146,6 +146,12 @@ function mapEtlProgress(taskProgress: EtlProcessProgress): OngoingTaskNodeEtlPro
         transactionalId: taskProgress.TransactionalId,
     };
 }
+
+function mapReplicationProgress(taskProgress: ReplicationProcessProgress): OngoingTaskNodeReplicationProgressDetails {
+    //TODO:
+    return null;
+}
+
 function mapSharedInfo(task: OngoingTask): OngoingTaskSharedInfo {
     const taskType = task.TaskType;
 
@@ -590,7 +596,30 @@ export const ongoingTasksReducer: Reducer<OngoingTasksState, OngoingTaskReducerA
                             x.TaskName === task.shared.taskName
                     );
                     (perLocationDraft as Draft<OngoingEtlTaskNodeInfo>).etlProgress = progressToApply
-                        ? progressToApply.ProcessesProgress.map(mapProgress)
+                        ? progressToApply.ProcessesProgress.map(mapEtlProgress)
+                        : null;
+                });
+            });
+        }
+
+        case "ReplicationProgressLoaded": {
+            const incomingProgress = action.progress;
+            const incomingLocation = action.location;
+
+            return produce(state, (draft) => {
+                draft.tasks.forEach((task) => {
+                    const perLocationDraft = task.nodesInfo.find((x) =>
+                        databaseLocationComparator(x.location, incomingLocation)
+                    );
+
+                    //TODO: handle types different then external replication!
+
+                    const progressToApply = incomingProgress.find(
+                        (x) => x.ReplicationType === "External" && x.TaskName === task.shared.taskName
+                    );
+
+                    (perLocationDraft as Draft<OngoingReplicationProgressAwareTaskNodeInfo>).progress = progressToApply
+                        ? progressToApply.ProcessesProgress.map(mapReplicationProgress)
                         : null;
                 });
             });
