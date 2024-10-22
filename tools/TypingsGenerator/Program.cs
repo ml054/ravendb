@@ -61,6 +61,7 @@ using Raven.Server.Dashboard;
 using Raven.Server.Dashboard.Cluster;
 using Raven.Server.Dashboard.Cluster.Notifications;
 using Raven.Server.Documents;
+using Raven.Server.Documents.Commands.Replication;
 using Raven.Server.Documents.ETL;
 using Raven.Server.Documents.ETL.Providers.ElasticSearch.Test;
 using Raven.Server.Documents.ETL.Providers.OLAP;
@@ -516,6 +517,10 @@ namespace TypingsGenerator
             scripter.AddType(typeof(SubscriptionOpeningStrategy));
             scripter.AddType(typeof(SubscriptionTaskPerformanceStats));
 
+            // ongoing tasks - non-etl progress
+            scripter.AddType(typeof(GetReplicationOngoingTasksProgressCommand.ReplicationTaskProgressResponse));
+            scripter.AddType(typeof(GetOutgoingInternalReplicationProgressCommand.ReplicationTaskProgressResponse));
+            
             // ongoing tasks - ravenDB ETL
             scripter.AddType(typeof(EtlTaskProgress));
             scripter.AddType(typeof(OngoingTaskRavenEtl));
