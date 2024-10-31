@@ -136,11 +136,12 @@ public sealed class OngoingTasks : AbstractOngoingTasks<SubscriptionConnectionsS
     }
 
     protected override (string Url, OngoingTaskConnectionStatus Status) GetReplicationTaskConnectionStatus<T>(DatabaseTopology databaseTopology, ClusterTopology clusterTopology, T replication, 
-        Dictionary<string, RavenConnectionString> connectionStrings, out ExternalReplicationState replicationState, out string responsibleNodeTag, out RavenConnectionString connection)
+        Dictionary<string, RavenConnectionString> connectionStrings, out ExternalReplicationState replicationState, out string responsibleNodeTag, out RavenConnectionString connection, out long lastDatabaseEtag)
     {
         connectionStrings.TryGetValue(replication.ConnectionStringName, out connection);
         replication.Database = connection?.Database;
         replication.ConnectionString = connection;
+        lastDatabaseEtag = _database.ReadLastEtag();
 
         replicationState = ReplicationLoader.GetExternalReplicationState(_server, _database.Name, replication.TaskId);
         responsibleNodeTag = OngoingTasksUtils.WhoseTaskIsIt(_server, databaseTopology, replication, replicationState, _database.NotificationCenter);

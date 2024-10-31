@@ -162,6 +162,7 @@ namespace Raven.Client.Documents.Operations.OngoingTasks
         public string LastAcceptedChangeVectorFromDestination { get; set; }
         public string SourceDatabaseChangeVector { get; set; }
         public long LastSentEtag { get; set; }
+        public long LastDatabaseEtag { get; set; }
 
         public override DynamicJsonValue ToJson()
         {
@@ -175,6 +176,7 @@ namespace Raven.Client.Documents.Operations.OngoingTasks
             json[nameof(LastAcceptedChangeVectorFromDestination)] = LastAcceptedChangeVectorFromDestination;
             json[nameof(SourceDatabaseChangeVector)] = SourceDatabaseChangeVector;
             json[nameof(LastSentEtag)] = LastSentEtag;
+            json[nameof(LastDatabaseEtag)] = LastDatabaseEtag;
             return json;
         }
     }

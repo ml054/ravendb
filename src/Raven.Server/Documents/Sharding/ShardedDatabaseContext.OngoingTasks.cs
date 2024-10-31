@@ -54,11 +54,12 @@ public partial class ShardedDatabaseContext
         }
 
         protected override (string Url, OngoingTaskConnectionStatus Status) GetReplicationTaskConnectionStatus<T>(DatabaseTopology databaseTopology, ClusterTopology clusterTopology, T replication,
-            Dictionary<string, RavenConnectionString> connectionStrings, out ExternalReplicationState replicationState, out string responsibleNodeTag, out RavenConnectionString connection)
+            Dictionary<string, RavenConnectionString> connectionStrings, out ExternalReplicationState replicationState, out string responsibleNodeTag, out RavenConnectionString connection, out long lastDatabaseEtag)
         {
             connectionStrings.TryGetValue(replication.ConnectionStringName, out connection);
             replication.Database = connection?.Database;
             replication.ConnectionString = connection;
+            lastDatabaseEtag = 0;
             replicationState = null;
             responsibleNodeTag = null;
             return (null, OngoingTaskConnectionStatus.None);
