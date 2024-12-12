@@ -299,6 +299,10 @@ namespace Raven.Server.Json
                     w.WritePropertyName(nameof(processProgress.Completed));
                     w.WriteBool(processProgress.Completed);
                     w.WriteComma();
+                    
+                    w.WritePropertyName(nameof(processProgress.HandlerId));
+                    w.WriteString(processProgress.HandlerId);
+                    w.WriteComma();
 
                     w.WritePropertyName(nameof(processProgress.AverageProcessedPerSecond));
                     w.WriteDouble(processProgress.AverageProcessedPerSecond);

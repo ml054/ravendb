@@ -216,6 +216,7 @@ export class TasksStubs {
             FromToString: "from src at A to [dst @ http://localhost:8080]",
             LastAcceptedChangeVectorFromDestination: "A:1-1DY5O5W9RUCDrntDONmNmw",
             LastSentEtag: 1,
+            LastDatabaseEtag: 1,
             SourceDatabaseChangeVector: "A:1-1DY5O5W9RUCDrntDONmNmw",
         };
     }
@@ -399,6 +400,7 @@ export class TasksStubs {
             ResponsibleNode: TasksStubs.getResponsibleNode(),
             TaskType: "PullReplicationAsHub",
             MentorNode: null,
+            HandlerId: "hub-id",
             DestinationDatabase: "target-hub-db",
             DestinationUrl: "http://target-hub-host:8080",
             DelayReplicationFor: null,

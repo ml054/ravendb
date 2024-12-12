@@ -26,6 +26,18 @@ export interface OngoingTaskNodeEtlProgressDetails {
     transactionalId?: string;
 }
 
+export interface OngoingTaskNodeReplicationProgressDetails {
+    completed: boolean;
+    global: Progress;
+    documents: Progress;
+    documentTombstones: Progress;
+    counterGroups: Progress;
+    attachments: Progress;
+    revisions: Progress;
+    timeSeriesDeletedRanges: Progress;
+    timeSeries: Progress;
+}
+
 export interface OngoingTaskNodeInfoDetails {
     taskConnectionStatus: Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskConnectionStatus;
     responsibleNode: string;
@@ -44,9 +56,9 @@ export interface OngoingEtlTaskNodeInfo<TNodeInfo extends OngoingTaskNodeInfoDet
 }
 
 export interface OngoingReplicationProgressAwareTaskNodeInfo<
-    TNodeInfo extends OngoingTaskNodeInfoDetails = OngoingTaskNodeInfoDetails,
+    TNodeInfo extends OngoingTaskNodeInfoHandlerAwareDetails = OngoingTaskNodeInfoHandlerAwareDetails,
 > extends OngoingTaskNodeInfo<TNodeInfo> {
-    progress: OngoingTaskNodeReplicationProgressDetails[];
+    progress: OngoingTaskNodeReplicationProgressDetails;
 }
 
 export type OngoingSubscriptionTaskNodeInfo = OngoingTaskNodeInfo<OngoingTaskSubscriptionNodeInfoDetails>;
@@ -72,10 +84,6 @@ export interface OngoingTaskExternalReplicationSharedInfo extends OngoingTaskSha
     connectionStringName: string;
     topologyDiscoveryUrls: string[];
     delayReplicationTime: number;
-    fromToString: string;
-    lastAcceptedChangeVectorFromDestination: string;
-    sourceDatabaseChangeVector: string;
-    lastSentEtag: number;
 }
 
 export interface OngoingTaskOlapEtlSharedInfo extends OngoingTaskSharedInfo {
@@ -151,7 +159,19 @@ export interface OngoingTaskSubscriptionSharedInfo extends OngoingTaskSharedInfo
 
 export type OngoingTaskElasticSearchEtlNodeInfoDetails = OngoingTaskNodeInfoDetails;
 
-export type OngoingTaskExternalReplicationNodeInfoDetails = OngoingTaskNodeInfoDetails;
+export interface OngoingTaskNodeInfoHandlerAwareDetails extends OngoingTaskNodeInfoDetails {
+    handlerId: string;
+}
+
+export interface OngoingTaskAbstractReplicationNodeInfoDetails extends OngoingTaskNodeInfoHandlerAwareDetails {
+    fromToString: string;
+    lastAcceptedChangeVectorFromDestination: string;
+    lastSentEtag: number;
+    lastDatabaseEtag: number;
+    sourceDatabaseChangeVector: string;
+}
+
+export type OngoingTaskExternalReplicationNodeInfoDetails = OngoingTaskAbstractReplicationNodeInfoDetails;
 
 export type OngoingTaskOlapEtlNodeInfoDetails = OngoingTaskNodeInfoDetails;
 
@@ -161,7 +181,7 @@ export interface OngoingTaskPeriodicBackupNodeInfoDetails extends OngoingTaskNod
 
 export type OngoingTaskRavenEtlNodeInfoDetails = OngoingTaskNodeInfoDetails;
 
-export type OngoingTaskReplicationHubNodeInfoDetails = OngoingTaskNodeInfoDetails;
+export type OngoingTaskReplicationHubNodeInfoDetails = OngoingTaskAbstractReplicationNodeInfoDetails;
 
 export type OngoingTaskReplicationSinkNodeInfoDetails = OngoingTaskNodeInfoDetails;
 
@@ -223,7 +243,7 @@ export type OngoingTaskRavenEtlInfo = OngoingTaskInfo<
 
 export type OngoingTaskReplicationHubInfo = OngoingTaskInfo<
     OngoingTaskReplicationHubSharedInfo,
-    OngoingTaskNodeInfo<OngoingTaskReplicationHubNodeInfoDetails>
+    OngoingReplicationProgressAwareTaskNodeInfo<OngoingTaskReplicationHubNodeInfoDetails>
 >;
 
 export type OngoingTaskHubDefinitionInfo = OngoingTaskInfo<OngoingTaskHubDefinitionSharedInfo, never>;

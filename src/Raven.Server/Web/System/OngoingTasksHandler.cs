@@ -26,7 +26,7 @@ namespace Raven.Server.Web.System
                 await processor.ExecuteAsync();
         }
 
-        internal OngoingTaskPullReplicationAsHub GetPullReplicationAsHubTaskInfo(ClusterTopology clusterTopology, ExternalReplication ex)
+        internal OngoingTaskPullReplicationAsHub GetPullReplicationAsHubTaskInfo(ClusterTopology clusterTopology, ExternalReplication ex, string handlerId)
         {
             var connectionResult = Database.ReplicationLoader.GetPullReplicationDestination(ex.TaskId, ex.Database);
             var tag = Server.ServerStore.NodeTag; // we can't know about pull replication tasks on other nodes.
@@ -38,6 +38,7 @@ namespace Raven.Server.Web.System
                 ResponsibleNode = new NodeId { NodeTag = tag, NodeUrl = clusterTopology.GetUrlFromTag(tag) },
                 TaskState = ex.Disabled ? OngoingTaskState.Disabled : OngoingTaskState.Enabled,
                 DestinationDatabase = ex.Database,
+                HandlerId = handlerId,
                 DestinationUrl = connectionResult.Url,
                 MentorNode = ex.MentorNode,
                 PinToMentorNode = ex.PinToMentorNode,

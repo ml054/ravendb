@@ -46,8 +46,8 @@ function Details(props: ReplicationHubPanelProps & { canEdit: boolean }) {
             </RichPanelDetails>
             {connectedSinks.length > 0 && (
                 <div className="my-1 mx-3">
-                    {connectedSinks.map((sink) => (
-                        <ReplicationHubConnectedSinkPanel key={sink.shared.taskId + sink.shared.taskName} data={sink} />
+                    {connectedSinks.map((sink, sinkIdx) => (
+                        <ReplicationHubConnectedSinkPanel key={sinkIdx} data={sink} />
                     ))}
                 </div>
             )}

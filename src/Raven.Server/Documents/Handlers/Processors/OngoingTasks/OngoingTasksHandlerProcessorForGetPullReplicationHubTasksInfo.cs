@@ -25,7 +25,7 @@ namespace Raven.Server.Documents.Handlers.Processors.OngoingTasks
             long key)
         {
             return RequestHandler.Database.ReplicationLoader.OutgoingHandlers.Where(o => o.Destination is ExternalReplication ex && ex.TaskId == key)
-                .Select(x => _ongoingTasksHandler.GetPullReplicationAsHubTaskInfo(clusterTopology, x.Destination as ExternalReplication))
+                .Select(x => _ongoingTasksHandler.GetPullReplicationAsHubTaskInfo(clusterTopology, x.Destination as ExternalReplication, x.HandlerId))
                 .ToList();
         }
     }

@@ -191,6 +191,7 @@ namespace Raven.Client.Documents.Operations.OngoingTasks
         public string DestinationUrl { get; set; }
         public string DestinationDatabase { get; set; }
         public TimeSpan DelayReplicationFor { get; set; }
+        public string HandlerId { get; set; }
 
         public override DynamicJsonValue ToJson()
         {
@@ -198,6 +199,7 @@ namespace Raven.Client.Documents.Operations.OngoingTasks
             json[nameof(DestinationUrl)] = DestinationUrl;
             json[nameof(DestinationDatabase)] = DestinationDatabase;
             json[nameof(DelayReplicationFor)] = DelayReplicationFor;
+            json[nameof(HandlerId)] = HandlerId;
             return json;
         }
     }

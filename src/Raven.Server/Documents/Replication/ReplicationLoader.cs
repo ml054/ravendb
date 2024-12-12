@@ -1910,6 +1910,7 @@ namespace Raven.Server.Documents.Replication
             var progress = new ReplicationProcessProgress
             {
                 FromToString = handler.FromToString,
+                HandlerId = handler.HandlerId,
                 LastEtagSent = lastProcessedEtag,
                 DestinationChangeVector = handler.LastAcceptedChangeVector,
                 SourceChangeVector = handler.LastSentChangeVector,

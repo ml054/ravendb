@@ -63,6 +63,7 @@ public sealed class OngoingTasks : AbstractOngoingTasks<SubscriptionConnectionsS
                 ResponsibleNode = new NodeId { NodeTag = tag, NodeUrl = clusterTopology.GetUrlFromTag(tag) },
                 TaskState = ex.Disabled ? OngoingTaskState.Disabled : OngoingTaskState.Enabled,
                 DestinationDatabase = ex.Database,
+                HandlerId = handler.HandlerId,
                 DestinationUrl = connectionResult.Url,
                 MentorNode = ex.MentorNode,
                 PinToMentorNode = ex.PinToMentorNode,

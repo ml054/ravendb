@@ -17,6 +17,8 @@ namespace Raven.Server.Documents.Replication.Stats
         public string FromToString { get; set; }
 
         public bool Completed { get; set; }
+        
+        public string HandlerId { get; set; }
 
         public double AverageProcessedPerSecond { get; set; }
 

@@ -31,6 +31,8 @@ namespace Raven.Server.Documents.Replication.Outgoing
 {
     public abstract class DatabaseOutgoingReplicationHandler : AbstractOutgoingReplicationHandler<DocumentsContextPool, DocumentsOperationContext>
     {
+        public string HandlerId = Guid.NewGuid().ToString();
+        
         public const string AlertTitle = "Replication";
 
         internal readonly DocumentDatabase _database;
