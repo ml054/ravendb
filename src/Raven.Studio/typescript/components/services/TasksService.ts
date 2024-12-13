@@ -28,6 +28,7 @@ import getFolderPathOptionsCommand from "commands/resources/getFolderPathOptions
 import getBackupLocationCommand from "commands/database/tasks/getBackupLocationCommand";
 import testAzureQueueStorageServerConnectionCommand from "commands/database/cluster/testAzureQueueStorageServerConnectionCommand";
 import replicationProgressCommand from "commands/database/tasks/replicationProgressCommand";
+import internalReplicationProgressCommand from "commands/database/tasks/internalReplicationProgressCommand";
 
 export default class TasksService {
     async getOngoingTasks(databaseName: string, location: databaseLocationSpecifier) {
@@ -73,6 +74,10 @@ export default class TasksService {
 
     async getReplicationProgress(databaseName: string, location: databaseLocationSpecifier) {
         return new replicationProgressCommand(databaseName, location, false).execute();
+    }
+
+    async getInternalReplicationProgress(databaseName: string, location: databaseLocationSpecifier) {
+        return new internalReplicationProgressCommand(databaseName, location, false).execute();
     }
 
     async getManualBackup(databaseName: string) {

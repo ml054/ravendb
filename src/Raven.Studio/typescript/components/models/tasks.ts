@@ -58,7 +58,7 @@ export interface OngoingEtlTaskNodeInfo<TNodeInfo extends OngoingTaskNodeInfoDet
 export interface OngoingReplicationProgressAwareTaskNodeInfo<
     TNodeInfo extends OngoingTaskNodeInfoHandlerAwareDetails = OngoingTaskNodeInfoHandlerAwareDetails,
 > extends OngoingTaskNodeInfo<TNodeInfo> {
-    progress: OngoingTaskNodeReplicationProgressDetails;
+    progress: OngoingTaskNodeReplicationProgressDetails[];
 }
 
 export type OngoingSubscriptionTaskNodeInfo = OngoingTaskNodeInfo<OngoingTaskSubscriptionNodeInfoDetails>;
@@ -172,6 +172,7 @@ export interface OngoingTaskAbstractReplicationNodeInfoDetails extends OngoingTa
 }
 
 export type OngoingTaskExternalReplicationNodeInfoDetails = OngoingTaskAbstractReplicationNodeInfoDetails;
+export type OngoingTaskInternalReplicationNodeInfoDetails = OngoingTaskAbstractReplicationNodeInfoDetails;
 
 export type OngoingTaskOlapEtlNodeInfoDetails = OngoingTaskNodeInfoDetails;
 

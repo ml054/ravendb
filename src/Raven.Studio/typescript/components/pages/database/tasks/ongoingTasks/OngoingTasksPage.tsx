@@ -149,6 +149,17 @@ export function OngoingTasksPage() {
         [dispatch]
     );
 
+    const onInternalReplicationProgress = useCallback(
+        (progress: ReplicationTaskProgress[], location: databaseLocationSpecifier) => {
+            dispatch({
+                type: "InternalReplicationProgressLoaded",
+                progress,
+                location,
+            });
+        },
+        [dispatch]
+    );
+
     const showItemPreview = useCallback(
         (task: OngoingTaskInfo, scriptName: string) => {
             const taskType = TaskUtils.studioTaskTypeToTaskType(task.shared.taskType);
@@ -364,6 +375,7 @@ export function OngoingTasksPage() {
                 <OngoingTaskProgressProvider
                     onEtlProgress={onEtlProgress}
                     onReplicationProgress={onReplicationProgress}
+                    onInternalReplicationProgress={onInternalReplicationProgress}
                 />
             )}
             {operationConfirm && <OngoingTaskOperationConfirm {...operationConfirm} toggle={cancelOperationConfirm} />}

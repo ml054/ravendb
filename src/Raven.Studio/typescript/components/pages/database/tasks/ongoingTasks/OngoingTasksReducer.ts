@@ -28,8 +28,7 @@ import {
     OngoingTaskNodeReplicationProgressDetails,
     OngoingTaskExternalReplicationNodeInfoDetails,
     OngoingTaskReplicationHubNodeInfoDetails,
-    OngoingTaskExternalReplicationInfo,
-    OngoingTaskReplicationSinkInfo,
+    OngoingTaskInternalReplicationNodeInfoDetails,
 } from "components/models/tasks";
 import OngoingTasksResult = Raven.Server.Web.System.OngoingTasksResult;
 import OngoingTask = Raven.Client.Documents.Operations.OngoingTasks.OngoingTask;
@@ -45,7 +44,7 @@ import OngoingTaskPullReplicationAsHub = Raven.Client.Documents.Operations.Ongoi
 import EtlTaskProgress = Raven.Server.Documents.ETL.Stats.EtlTaskProgress;
 import EtlProcessProgress = Raven.Server.Documents.ETL.Stats.EtlProcessProgress;
 import TaskUtils from "../../../../utils/TaskUtils";
-import { produce, Draft, WritableDraft } from "immer";
+import { produce, Draft } from "immer";
 import OngoingTaskSubscription = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskSubscription;
 import OngoingTaskQueueEtlListView = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskQueueEtl;
 import OngoingTaskQueueSinkListView = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskQueueSink;
@@ -87,6 +86,12 @@ interface ActionReplicationProgressLoaded {
     type: "ReplicationProgressLoaded";
 }
 
+interface ActionInternalReplicationProgressLoaded {
+    location: databaseLocationSpecifier;
+    progress: ReplicationTaskProgress[];
+    type: "InternalReplicationProgressLoaded";
+}
+
 interface ActionTasksLoadError {
     type: "TasksLoadError";
     location: databaseLocationSpecifier;
@@ -100,6 +105,7 @@ export interface OngoingTasksState {
     orchestrators: string[];
     replicationHubs: OngoingTaskHubDefinitionInfo[];
     subscriptionConnectionDetails: SubscriptionConnectionsDetailsWithId[];
+    internalReplication: OngoingTaskNodeInfo<OngoingTaskInternalReplicationNodeInfoDetails>[];
 }
 
 export type SubscriptionConnectionsDetailsWithId = SubscriptionConnectionsDetails & {
@@ -111,6 +117,7 @@ type OngoingTaskReducerAction =
     | ActionTasksLoaded
     | ActionEtlProgressLoaded
     | ActionReplicationProgressLoaded
+    | ActionInternalReplicationProgressLoaded
     | ActionTasksLoadError
     | ActionTaskLoaded
     | ActionSubscriptionConnectionDetailsLoaded;
@@ -718,43 +725,58 @@ export const ongoingTasksReducer: Reducer<OngoingTasksState, OngoingTaskReducerA
                         return;
                     }
 
-                    const supportTaskTypes: StudioTaskType[] = [
-                        "Replication",
-                        "PullReplicationAsHub",
-                        "PullReplicationAsSink",
-                    ];
+                    const matchedProgress = matchProgresses(task, perLocationDraft, incomingProgresses);
 
-                    if (!supportTaskTypes.includes(task.shared.taskType)) {
-                        return;
-                    }
-
-                    const hubDraft = perLocationDraft as Draft<OngoingReplicationProgressAwareTaskNodeInfo>;
-                    const handlerId = hubDraft.details.handlerId;
-
-                    const matchedProgresses = incomingProgresses.flatMap((p) =>
-                        p.ProcessesProgress.filter((pp) => pp.HandlerId === handlerId)
-                    );
-                    if (matchedProgresses.length > 1) {
-                        console.error(
-                            "Found more than one progress to apply: ",
-                            matchedProgresses,
-                            " for task: " + task
-                        );
-                        return;
-                    }
-
-                    const matchProgress = matchedProgresses[0];
-
-                    (perLocationDraft as Draft<OngoingReplicationProgressAwareTaskNodeInfo>).progress = matchProgress
-                        ? mapReplicationProgress(matchProgress)
-                        : null;
+                    (perLocationDraft as Draft<OngoingReplicationProgressAwareTaskNodeInfo>).progress =
+                        matchedProgress.map(mapReplicationProgress);
                 });
+            });
+        }
+
+        case "InternalReplicationProgressLoaded": {
+            const incomingProgresses = action.progress;
+            const incomingLocation = action.location;
+            return produce(state, (draft) => {
+                const internalReplication = draft.internalReplication;
+                const perLocationDraft = internalReplication.find((x) =>
+                    databaseLocationComparator(x.location, incomingLocation)
+                );
+
+                if (!perLocationDraft) {
+                    console.log("Unable to find draft for: ", incomingLocation);
+                    return;
+                }
+
             });
         }
     }
 
     return state;
 };
+
+function matchProgresses(
+    task: OngoingTaskInfo,
+    nodeInfo: OngoingTaskNodeInfo,
+    progresses: ReplicationTaskProgress[]
+): ReplicationProcessProgress[] {
+    switch (task.shared.taskType) {
+        case "PullReplicationAsHub": {
+            const hubDraft = nodeInfo as OngoingReplicationProgressAwareTaskNodeInfo;
+            const handlerId = hubDraft.details.handlerId;
+
+            return progresses.flatMap((p) => p.ProcessesProgress.filter((pp) => pp.HandlerId === handlerId));
+        }
+        case "Replication": {
+            const matchedProgress = progresses.find(
+                (x) => x.ReplicationType === "External" && x.TaskName === task.shared.taskName
+            );
+
+            return matchedProgress?.ProcessesProgress ?? [];
+        }
+        default:
+            return [];
+    }
+}
 
 export const ongoingTasksReducerInitializer = (db: DatabaseSharedInfo): OngoingTasksState => {
     const locations = DatabaseUtils.getLocations(db);
@@ -767,5 +789,6 @@ export const ongoingTasksReducerInitializer = (db: DatabaseSharedInfo): OngoingT
         locations,
         orchestrators,
         subscriptionConnectionDetails: [],
+        internalReplication: [],
     };
 };
