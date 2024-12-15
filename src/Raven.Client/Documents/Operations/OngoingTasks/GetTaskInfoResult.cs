@@ -188,18 +188,28 @@ namespace Raven.Client.Documents.Operations.OngoingTasks
             TaskType = OngoingTaskType.PullReplicationAsHub;
         }
 
+        public string FromToString { get; set; }
         public string DestinationUrl { get; set; }
         public string DestinationDatabase { get; set; }
         public TimeSpan DelayReplicationFor { get; set; }
         public string HandlerId { get; set; }
+        public string LastAcceptedChangeVectorFromDestination { get; set; }
+        public string SourceDatabaseChangeVector { get; set; }
+        public long LastSentEtag { get; set; }
+        public long LastDatabaseEtag { get; set; }
 
         public override DynamicJsonValue ToJson()
         {
             var json = base.ToJson();
+            json[nameof(FromToString)] = FromToString;
             json[nameof(DestinationUrl)] = DestinationUrl;
             json[nameof(DestinationDatabase)] = DestinationDatabase;
             json[nameof(DelayReplicationFor)] = DelayReplicationFor;
             json[nameof(HandlerId)] = HandlerId;
+            json[nameof(LastAcceptedChangeVectorFromDestination)] = LastAcceptedChangeVectorFromDestination;
+            json[nameof(SourceDatabaseChangeVector)] = SourceDatabaseChangeVector;
+            json[nameof(LastSentEtag)] = LastSentEtag;
+            json[nameof(LastDatabaseEtag)] = LastDatabaseEtag;
             return json;
         }
     }

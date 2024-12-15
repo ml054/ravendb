@@ -60,6 +60,7 @@ public sealed class OngoingTasks : AbstractOngoingTasks<SubscriptionConnectionsS
             {
                 TaskId = ex.TaskId,
                 TaskName = ex.Name,
+                FromToString = handler.FromToString,
                 ResponsibleNode = new NodeId { NodeTag = tag, NodeUrl = clusterTopology.GetUrlFromTag(tag) },
                 TaskState = ex.Disabled ? OngoingTaskState.Disabled : OngoingTaskState.Enabled,
                 DestinationDatabase = ex.Database,
@@ -68,7 +69,11 @@ public sealed class OngoingTasks : AbstractOngoingTasks<SubscriptionConnectionsS
                 MentorNode = ex.MentorNode,
                 PinToMentorNode = ex.PinToMentorNode,
                 TaskConnectionStatus = connectionResult.Status,
-                DelayReplicationFor = ex.DelayReplicationFor
+                DelayReplicationFor = ex.DelayReplicationFor,
+                LastAcceptedChangeVectorFromDestination = handler.LastAcceptedChangeVector,
+                SourceDatabaseChangeVector = handler.LastSentChangeVector,
+                LastSentEtag = handler.LastSentDocumentEtag,
+                LastDatabaseEtag = _database.ReadLastEtag()
             };
         }
     }

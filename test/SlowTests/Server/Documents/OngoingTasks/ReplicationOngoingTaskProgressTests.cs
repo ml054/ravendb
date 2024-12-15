@@ -193,6 +193,8 @@ namespace SlowTests.Server.Documents.OngoingTasks
                 Assert.True(processProgress.FromToString.Contains(sink1.Database) || processProgress.FromToString.Contains(sink2.Database));
             }
 
+            Assert.NotEqual(processesProgress[0].HandlerId, processesProgress[1].HandlerId);
+
             // continue the replication and let the items replicate to the sink
 
             replication.Mend();
