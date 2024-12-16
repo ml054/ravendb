@@ -19,7 +19,7 @@ namespace Raven.Server.Documents.Sharding.Handlers.Processors.Replication
 
         protected override ValueTask HandleCurrentNodeAsync() => throw new NotSupportedException();
 
-        protected override Task HandleRemoteNodeAsync(ProxyCommand<ReplicationTaskProgress[]> command, OperationCancelToken token)
+        protected override Task HandleRemoteNodeAsync(ProxyCommand<IReplicationTaskProgress[]> command, OperationCancelToken token)
         {
             var shardNumber = GetShardNumber();
 

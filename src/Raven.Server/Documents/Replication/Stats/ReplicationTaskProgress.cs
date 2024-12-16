@@ -3,13 +3,18 @@ using Raven.Client.Documents.Replication;
 
 namespace Raven.Server.Documents.Replication.Stats
 {
-    public sealed class ReplicationTaskProgress
+    public class ReplicationTaskProgress : IReplicationTaskProgress
     {
         public string TaskName { get; set; }
 
         public ReplicationNode.ReplicationType ReplicationType { get; set; }
 
         public List<ReplicationProcessProgress> ProcessesProgress { get; set; }
+    }
+
+    public sealed class InternalReplicationTaskProgress : ReplicationTaskProgress
+    {
+        public string DestinationNodeTag { get; set; }
     }
 
     public sealed class ReplicationProcessProgress

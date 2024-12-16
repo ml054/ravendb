@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Raven.Client.Documents.Operations.Replication;
 using Raven.Client.Documents.Replication;
 using Raven.Server.Documents.Replication.Outgoing;
 using Raven.Server.Documents.Replication.Stats;
@@ -31,21 +32,23 @@ namespace Raven.Server.Documents.Handlers.Processors.Replication
             }
         }
 
-        protected override Task HandleRemoteNodeAsync(ProxyCommand<ReplicationTaskProgress[]> command, OperationCancelToken token) => RequestHandler.ExecuteRemoteAsync(command, token.Token);
+        protected override Task HandleRemoteNodeAsync(ProxyCommand<IReplicationTaskProgress[]> command, OperationCancelToken token) => RequestHandler.ExecuteRemoteAsync(command, token.Token);
 
-        public IList<ReplicationTaskProgress> GetProcessesProgress(DocumentsOperationContext context)
+        public IList<InternalReplicationTaskProgress> GetProcessesProgress(DocumentsOperationContext context)
         {
-            var replicationTasks = new List<ReplicationTaskProgress>();
+            var replicationTasks = new List<InternalReplicationTaskProgress>();
 
             foreach (var handler in RequestHandler.Database.ReplicationLoader.OutgoingHandlers)
             {
-                if (handler is not OutgoingInternalReplicationHandler)
+                if (handler is not OutgoingInternalReplicationHandler || 
+                    handler.Destination is not InternalReplication internalReplication)
                     continue;
 
-                replicationTasks.Add(new ReplicationTaskProgress
+                replicationTasks.Add(new InternalReplicationTaskProgress
                 {
                     TaskName = handler.FromToString,
                     ReplicationType = ReplicationNode.ReplicationType.Internal,
+                    DestinationNodeTag = internalReplication.NodeTag,
                     ProcessesProgress = new List<ReplicationProcessProgress>
                     {
                         RequestHandler.Database.ReplicationLoader.GetOutgoingReplicationProgress(context, handler)

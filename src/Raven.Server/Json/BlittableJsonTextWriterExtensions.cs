@@ -272,7 +272,7 @@ namespace Raven.Server.Json
             writer.WriteEndObject();
         }
 
-        public static void WriteReplicationTaskProgress<TWriter>(this TWriter writer, JsonOperationContext context, IEnumerable<ReplicationTaskProgress> progress)
+        public static void WriteReplicationTaskProgress<TWriter>(this TWriter writer, JsonOperationContext context, IEnumerable<IReplicationTaskProgress> progress)
         where TWriter : IBlittableJsonTextWriter
         {
             writer.WriteStartObject();
@@ -287,6 +287,13 @@ namespace Raven.Server.Json
                 w.WritePropertyName(nameof(taskStats.ReplicationType));
                 w.WriteString(taskStats.ReplicationType.ToString());
                 w.WriteComma();
+
+                if (taskStats is InternalReplicationTaskProgress internalTaskStats)
+                {
+                    w.WritePropertyName(nameof(internalTaskStats.DestinationNodeTag));
+                    w.WriteString(internalTaskStats.DestinationNodeTag);
+                    w.WriteComma();
+                }
 
                 writer.WriteArray(context, nameof(taskStats.ProcessesProgress), taskStats.ProcessesProgress, (w, c, processProgress) =>
                 {

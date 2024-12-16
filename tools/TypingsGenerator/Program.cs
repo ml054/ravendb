@@ -519,7 +519,7 @@ namespace TypingsGenerator
 
             // ongoing tasks - non-etl progress
             scripter.AddType(typeof(GetReplicationOngoingTasksProgressCommand.ReplicationTaskProgressResponse));
-            scripter.AddType(typeof(GetOutgoingInternalReplicationProgressCommand.ReplicationTaskProgressResponse));
+            scripter.AddType(typeof(GetOutgoingInternalReplicationProgressCommand.InternalReplicationTaskProgressResponse));
             
             // ongoing tasks - ravenDB ETL
             scripter.AddType(typeof(EtlTaskProgress));

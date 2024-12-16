@@ -6,7 +6,7 @@ using Sparrow.Json;
 
 namespace Raven.Server.Documents.Commands.Replication
 {
-    internal sealed class GetOutgoingInternalReplicationProgressCommand : RavenCommand<ReplicationTaskProgress[]>
+    internal sealed class GetOutgoingInternalReplicationProgressCommand : RavenCommand<IReplicationTaskProgress[]>
     {
         public GetOutgoingInternalReplicationProgressCommand(string nodeTag)
         {
@@ -27,12 +27,12 @@ namespace Raven.Server.Documents.Commands.Replication
             if (response == null)
                 return;
 
-            Result = JsonDeserializationServer.ReplicationTaskProgressResponse(response).Results;
+            Result = JsonDeserializationServer.InternalReplicationTaskProgressResponse(response).Results;
         }
 
-        internal sealed class ReplicationTaskProgressResponse
+        internal sealed class InternalReplicationTaskProgressResponse
         {
-            public ReplicationTaskProgress[] Results { get; set; }
+            public InternalReplicationTaskProgress[] Results { get; set; }
         }
     }
 }

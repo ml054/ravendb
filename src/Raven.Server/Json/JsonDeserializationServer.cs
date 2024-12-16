@@ -297,6 +297,8 @@ namespace Raven.Server.Json
         
         internal static readonly Func<BlittableJsonReaderObject, GetReplicationOngoingTasksProgressCommand.ReplicationTaskProgressResponse> ReplicationTaskProgressResponse = GenerateJsonDeserializationRoutine<GetReplicationOngoingTasksProgressCommand.ReplicationTaskProgressResponse>();
 
+        internal static readonly Func<BlittableJsonReaderObject, GetOutgoingInternalReplicationProgressCommand.InternalReplicationTaskProgressResponse> InternalReplicationTaskProgressResponse = GenerateJsonDeserializationRoutine<GetOutgoingInternalReplicationProgressCommand.InternalReplicationTaskProgressResponse>();
+
         internal static readonly Func<BlittableJsonReaderObject, GetPeriodicBackupTimersCommand.PeriodicBackupTimersResponse> GetPeriodicBackupTimersCommandResponse = GenerateJsonDeserializationRoutine<GetPeriodicBackupTimersCommand.PeriodicBackupTimersResponse>();
 
         internal static readonly Func<BlittableJsonReaderObject, NotificationCenterDatabaseStats> NotificationCenterDatabaseStats = GenerateJsonDeserializationRoutine<NotificationCenterDatabaseStats>();

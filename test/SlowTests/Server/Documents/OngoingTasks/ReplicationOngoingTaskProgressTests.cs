@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -49,25 +50,16 @@ namespace SlowTests.Server.Documents.OngoingTasks
 
             // since we broke replication, we expect incomplete results with items to process
 
-            var result = await GetReplicationProgress(source, sourceDb.Name);
-
-            AssertReplicationProgress(result, ReplicationNode.ReplicationType.External);
-            AssertPendingItemsToProcess(result);
+            await VerifyReplicationProgress(source, sourceDb, ReplicationNode.ReplicationType.External, isCompleted: false);
 
             // continue the replication and let the items replicate to the destination
 
             replication.Mend();
             Assert.NotNull(await WaitForDocumentToReplicateAsync<User>(destination, UserId, TimeSpan.FromSeconds(10)));
 
-            result = await GetReplicationProgress(source, sourceDb.Name);
-
             // now we should have values for the last sent Etag and change vectors, so we retrieve them to verify they are correct
 
-            var (lastSentEtag, sourceChangeVector, destinationChangeVector) = GetReplicationHandlerState(sourceDb);
-
-            AssertReplicationCompletion(result, lastSentEtag, sourceChangeVector, destinationChangeVector);
-            AssertPendingItemsToProcess(result, documentsToProcess: 0, countersToProcess: 0, timeSeriesSegmentsToProcess: 0, attachmentsToProcess: 0);
-            AssertItemsProcessed(result);
+            await VerifyReplicationProgress(source, sourceDb, ReplicationNode.ReplicationType.External, isCompleted: true);
 
             // break the replication again to perform deletion and check tombstone items
 
@@ -75,10 +67,7 @@ namespace SlowTests.Server.Documents.OngoingTasks
 
             await DeleteUserDocument(source);
 
-            result = await GetReplicationProgress(source, sourceDb.Name);
-
-            AssertReplicationProgress(result, ReplicationNode.ReplicationType.External);
-            AssertPendingTombstoneItemsToProcess(result);
+            await VerifyReplicationProgress(source, sourceDb, ReplicationNode.ReplicationType.External, isCompleted: false, hasTombstones: true);
 
             // continue the replication and check if all tombstones are processed
 
@@ -86,13 +75,7 @@ namespace SlowTests.Server.Documents.OngoingTasks
 
             Assert.True(WaitForDocumentDeletion(destination, UserId));
 
-            result = await GetReplicationProgress(source, sourceDb.Name);
-
-            (lastSentEtag, sourceChangeVector, destinationChangeVector) = GetReplicationHandlerState(sourceDb);
-
-            AssertReplicationCompletion(result, lastSentEtag, sourceChangeVector, destinationChangeVector);
-            AssertPendingTombstoneItemsToProcess(result, documentTombstonesToProcess: 0, timeSeriesDeletedRangesToProcess: 0);
-            AssertTombstoneItemsProcessed(result);
+            await VerifyReplicationProgress(source, sourceDb, ReplicationNode.ReplicationType.External, isCompleted: true, hasTombstones: true);
         }
 
         [RavenTheory(RavenTestCategory.Replication | RavenTestCategory.Studio)]
@@ -114,25 +97,18 @@ namespace SlowTests.Server.Documents.OngoingTasks
 
             // since we broke replication, we expect incomplete results with items to process
 
-            var result = await GetReplicationProgress(hub);
+            var hubDatabase = await GetDocumentDatabaseInstanceForAsync(hub.Database);
 
-            AssertReplicationProgress(result, ReplicationNode.ReplicationType.PullAsHub);
-            AssertPendingItemsToProcess(result);
+            await VerifyReplicationProgress(hub, hubDatabase, ReplicationNode.ReplicationType.PullAsHub, isCompleted: false);
 
             // continue the replication and let the items replicate to the sink
 
             replication.Mend();
             Assert.NotNull(await WaitForDocumentToReplicateAsync<User>(sink, UserId, TimeSpan.FromSeconds(10)));
 
-            result = await GetReplicationProgress(hub);
-
             // now we should have values for the last sent Etag and change vectors, so we retrieve them to verify they are correct
-            var hubDb = await GetDatabase(hub.Database);
-            var (lastSentEtag, sourceChangeVector, destinationChangeVector) = GetReplicationHandlerState(hubDb);
 
-            AssertReplicationCompletion(result, lastSentEtag, sourceChangeVector, destinationChangeVector);
-            AssertPendingItemsToProcess(result, documentsToProcess: 0, countersToProcess: 0, timeSeriesSegmentsToProcess: 0, attachmentsToProcess: 0);
-            AssertItemsProcessed(result);
+            await VerifyReplicationProgress(hub, hubDatabase, ReplicationNode.ReplicationType.PullAsHub, isCompleted: true);
 
             // break the replication again to perform deletion and check tombstone items
 
@@ -140,22 +116,14 @@ namespace SlowTests.Server.Documents.OngoingTasks
 
             await DeleteUserDocument(hub);
 
-            result = await GetReplicationProgress(hub);
-
-            AssertReplicationProgress(result, ReplicationNode.ReplicationType.PullAsHub);
-            AssertPendingTombstoneItemsToProcess(result);
+            await VerifyReplicationProgress(hub, hubDatabase, ReplicationNode.ReplicationType.PullAsHub, isCompleted: false, hasTombstones: true);
 
             // continue the replication and check if all tombstones are processed
 
             replication.Mend();
             Assert.True(WaitForDocumentDeletion(sink, UserId));
 
-            result = await GetReplicationProgress(hub);
-
-            (lastSentEtag, sourceChangeVector, destinationChangeVector) = GetReplicationHandlerState(hubDb);
-
-            AssertReplicationCompletion(result, lastSentEtag, sourceChangeVector, destinationChangeVector);
-            AssertTombstoneItemsProcessed(result);
+            await VerifyReplicationProgress(hub, hubDatabase, ReplicationNode.ReplicationType.PullAsHub, isCompleted: true, hasTombstones: true);
         }
 
         [RavenTheory(RavenTestCategory.Replication | RavenTestCategory.Studio)]
@@ -179,21 +147,9 @@ namespace SlowTests.Server.Documents.OngoingTasks
 
             // since we broke replication, we expect incomplete results with items to process
 
-            var result = await GetReplicationProgress(hub);
+            var hubDatabase = await GetDatabase(hub.Database);
 
-            AssertReplicationProgress(result, ReplicationNode.ReplicationType.PullAsHub);
-
-            // we should have 2 results, one per each sink
-
-            var processesProgress = result[0].ProcessesProgress;
-            Assert.Equal(2, processesProgress.Count);
-            foreach (var processProgress in processesProgress)
-            {
-                AssertPendingItemsToProcess(result, processProgress: processProgress);
-                Assert.True(processProgress.FromToString.Contains(sink1.Database) || processProgress.FromToString.Contains(sink2.Database));
-            }
-
-            Assert.NotEqual(processesProgress[0].HandlerId, processesProgress[1].HandlerId);
+            await VerifyPullAsHubReplicationProgress(hub, hubDatabase, isCompleted: false);
 
             // continue the replication and let the items replicate to the sink
 
@@ -201,15 +157,7 @@ namespace SlowTests.Server.Documents.OngoingTasks
             Assert.NotNull(await WaitForDocumentToReplicateAsync<User>(sink1, UserId, TimeSpan.FromSeconds(10)));
             Assert.NotNull(await WaitForDocumentToReplicateAsync<User>(sink2, UserId, TimeSpan.FromSeconds(10)));
 
-            result = await GetReplicationProgress(hub);
-
-            processesProgress = result[0].ProcessesProgress;
-            Assert.Equal(2, processesProgress.Count);
-            foreach (var processProgress in processesProgress)
-            {
-                AssertPendingItemsToProcess(result, processProgress: processProgress, documentsToProcess: 0, countersToProcess: 0, timeSeriesSegmentsToProcess: 0, attachmentsToProcess: 0);
-                AssertItemsProcessed(result, processProgress: processProgress);
-            }
+            await VerifyPullAsHubReplicationProgress(hub, hubDatabase, isCompleted: true);
 
             // break the replication again to perform deletion and check tombstone items
 
@@ -217,16 +165,7 @@ namespace SlowTests.Server.Documents.OngoingTasks
 
             await DeleteUserDocument(hub);
 
-            result = await GetReplicationProgress(hub);
-
-            AssertReplicationProgress(result, ReplicationNode.ReplicationType.PullAsHub);
-
-            processesProgress = result[0].ProcessesProgress;
-            Assert.Equal(2, processesProgress.Count);
-            foreach (var processProgress in processesProgress)
-            {
-                AssertPendingTombstoneItemsToProcess(result, processProgress: processProgress);
-            }
+            await VerifyPullAsHubReplicationProgress(hub, hubDatabase, isCompleted: false, hasTombstones: true);
 
             // continue the replication and check if all tombstones are processed
 
@@ -234,14 +173,7 @@ namespace SlowTests.Server.Documents.OngoingTasks
             Assert.True(WaitForDocumentDeletion(sink1, UserId));
             Assert.True(WaitForDocumentDeletion(sink2, UserId));
 
-            result = await GetReplicationProgress(hub);
-
-            processesProgress = result[0].ProcessesProgress;
-            Assert.Equal(2, processesProgress.Count);
-            foreach (var processProgress in processesProgress)
-            {
-                AssertTombstoneItemsProcessed(result, processProgress: processProgress);
-            }
+            await VerifyPullAsHubReplicationProgress(hub, hubDatabase, isCompleted: true, hasTombstones: true);
         }
 
         [RavenTheory(RavenTestCategory.Replication | RavenTestCategory.Studio)]
@@ -305,16 +237,14 @@ namespace SlowTests.Server.Documents.OngoingTasks
 
             Assert.NotNull(await WaitForDocumentToReplicateAsync<User>(hub, UserId, TimeSpan.FromSeconds(10)));
 
-            var result = await GetReplicationProgress(sink, server: leader);
+            var sinkDatabase = await GetDatabase(leader, sink.Database);
 
-            AssertItemsProcessed(result);
+            await VerifyReplicationProgress(sink, sinkDatabase, ReplicationNode.ReplicationType.PullAsSink, isCompleted: true, server: leader);
 
             await DeleteUserDocument(sink);
             Assert.True(WaitForDocumentDeletion(hub, UserId));
 
-            result = await GetReplicationProgress(sink, server: leader);
-
-            AssertTombstoneItemsProcessed(result);
+            await VerifyReplicationProgress(sink, sinkDatabase, ReplicationNode.ReplicationType.PullAsSink, isCompleted: true, hasTombstones: true, server: leader);
         }
 
         [RavenTheory(RavenTestCategory.Replication | RavenTestCategory.Studio | RavenTestCategory.Cluster)]
@@ -334,12 +264,13 @@ namespace SlowTests.Server.Documents.OngoingTasks
 
             var db = await GetDocumentDatabaseInstanceForAsync(store, options.DatabaseMode, UserId, leader);
 
+            // validate that the document has replicated to all cluster nodes
             Assert.True(await WaitForDocumentInClusterAsync<User>(nodes, db.Name, UserId, u => u.Name == "shiran", timeout: TimeSpan.FromSeconds(10)));
 
+            // validate replication progress on each node
             foreach (var server in nodes)
             {
-                var result = await GetInternalReplicationProgress(store, db.Name, server);
-                AssertItemsProcessed(result);
+                await VerifyInternalReplicationProgress(store, db, server, nodes);
             }
 
             await DeleteUserDocument(store);
@@ -347,12 +278,11 @@ namespace SlowTests.Server.Documents.OngoingTasks
 
             foreach (var server in nodes)
             {
-                var result = await GetInternalReplicationProgress(store, db.Name, server);
-                AssertTombstoneItemsProcessed(result);
+                await VerifyInternalReplicationProgress(store, db, server, nodes, hasTombstones: true);
             }
         }
 
-        private async Task<ReplicationTaskProgress[]> GetReplicationProgress(DocumentStore store, string databaseName = null, RavenServer server = null)
+        private async Task<IReplicationTaskProgress[]> GetReplicationProgress(DocumentStore store, string databaseName = null, RavenServer server = null)
         {
             using var commands = store.Commands(databaseName);
             var nodeTag = server?.ServerStore.NodeTag ?? Server.ServerStore.NodeTag;
@@ -361,7 +291,7 @@ namespace SlowTests.Server.Documents.OngoingTasks
             return cmd.Result;
         }
 
-        private async Task<ReplicationTaskProgress[]> GetInternalReplicationProgress(DocumentStore store, string databaseName = null, RavenServer server = null)
+        private async Task<IReplicationTaskProgress[]> GetInternalReplicationProgress(DocumentStore store, string databaseName = null, RavenServer server = null)
         {
             using var commands = store.Commands(databaseName);
             var nodeTag = server?.ServerStore.NodeTag ?? Server.ServerStore.NodeTag;
@@ -405,7 +335,102 @@ namespace SlowTests.Server.Documents.OngoingTasks
             }
         }
 
-        private void AssertReplicationProgress(ReplicationTaskProgress[] result, ReplicationNode.ReplicationType replicationType)
+        private async Task VerifyReplicationProgress(DocumentStore store, DocumentDatabase database, ReplicationNode.ReplicationType replicationType,
+            bool isCompleted = false, bool hasTombstones = false, RavenServer server = null)
+        {
+            var results = await GetReplicationProgress(store, database.Name, server);
+
+            if (isCompleted)
+            {
+                if (replicationType != ReplicationNode.ReplicationType.PullAsSink)
+                {
+                    var (lastSentEtag, sourceChangeVector, destinationChangeVector) = GetReplicationHandlerState(database);
+                    AssertReplicationBatchCompleted(results, lastSentEtag, sourceChangeVector, destinationChangeVector);
+                }
+
+                if (hasTombstones)
+                    AssertTombstoneItemsProcessed(results);
+                else
+                    AssertItemsProcessed(results);
+
+                return;
+            }
+
+            AssertReplicationStillInProgress(results, replicationType);
+
+            if (hasTombstones)
+                AssertPendingTombstoneItemsToProcess(results);
+            else
+                AssertPendingItemsToProcess(results);
+        }
+
+        private async Task VerifyPullAsHubReplicationProgress(DocumentStore store, DocumentDatabase database,
+            bool isCompleted = false, bool hasTombstones = false, RavenServer server = null)
+        {
+            var results = await GetReplicationProgress(store, database.Name, server);
+
+            var result = Assert.Single(results);
+            var processesProgress = result.ProcessesProgress;
+            Assert.Equal(2, processesProgress.Count); // we should have 2 results, one per each sink
+            Assert.NotEqual(processesProgress[0].HandlerId, processesProgress[1].HandlerId);
+
+            if (isCompleted)
+            {
+                if (hasTombstones)
+                {
+                    AssertTombstoneItemsProcessed(results, processesProgress[0]);
+                    AssertTombstoneItemsProcessed(results, processesProgress[1]);
+                }
+                else
+                {
+                    AssertItemsProcessed(results, processesProgress[0]);
+                    AssertItemsProcessed(results, processesProgress[1]);
+                }
+
+                return;
+            }
+
+            AssertReplicationStillInProgress(results, ReplicationNode.ReplicationType.PullAsHub);
+
+            if (hasTombstones)
+            {
+                AssertPendingTombstoneItemsToProcess(results, processesProgress[0]);
+                AssertPendingTombstoneItemsToProcess(results, processesProgress[1]);
+            }
+            else
+            {
+                AssertPendingItemsToProcess(results, processesProgress[0]);
+                AssertPendingItemsToProcess(results, processesProgress[1]);
+            }
+        }
+
+        private async Task VerifyInternalReplicationProgress(DocumentStore store, DocumentDatabase database, RavenServer server,
+            List<RavenServer> nodes, bool hasTombstones = false)
+        {
+            var results = await GetInternalReplicationProgress(store, database.Name, server);
+            Assert.Equal(2, results.Length);
+
+            var expectedDestinations = nodes
+                .Where(n => n.ServerStore.NodeTag != server.ServerStore.NodeTag)
+                .Select(n => n.ServerStore.NodeTag)
+                .ToList();
+
+            foreach (var result in results)
+            {
+                Assert.Equal(ReplicationNode.ReplicationType.Internal, result.ReplicationType);
+
+                var internalTaskProgress = Assert.IsType<InternalReplicationTaskProgress>(result);
+                Assert.Contains(internalTaskProgress.DestinationNodeTag, expectedDestinations);
+                var processProgress = Assert.Single(internalTaskProgress.ProcessesProgress);
+
+                if (hasTombstones)
+                    AssertTombstoneItemsProcessed(results, processProgress);
+                else
+                    AssertItemsProcessed(results, processProgress);
+            }
+        }
+
+        private void AssertReplicationStillInProgress(IReplicationTaskProgress[] result, ReplicationNode.ReplicationType replicationType)
         {
             Assert.NotEmpty(result);
             Assert.Single(result);
@@ -415,7 +440,7 @@ namespace SlowTests.Server.Documents.OngoingTasks
             Assert.False(progress.ProcessesProgress[0].Completed);
         }
 
-        private void AssertReplicationCompletion(ReplicationTaskProgress[] result, long lastSentEtag, string sourceChangeVector, string destinationChangeVector)
+        private void AssertReplicationBatchCompleted(IReplicationTaskProgress[] result, long lastSentEtag, string sourceChangeVector, string destinationChangeVector)
         {
             Assert.NotEmpty(result);
             Assert.Single(result);
@@ -428,7 +453,7 @@ namespace SlowTests.Server.Documents.OngoingTasks
             Assert.True(processProgress.Completed);
         }
 
-        private void AssertPendingItemsToProcess(ReplicationTaskProgress[] result, ReplicationProcessProgress processProgress = null,
+        private void AssertPendingItemsToProcess(IReplicationTaskProgress[] result, ReplicationProcessProgress processProgress = null,
             long documentsToProcess = 1, long countersToProcess = 1, long timeSeriesSegmentsToProcess = 1, long attachmentsToProcess = 1)
         {
             processProgress ??= result[0].ProcessesProgress[0];
@@ -439,7 +464,7 @@ namespace SlowTests.Server.Documents.OngoingTasks
             Assert.Equal(attachmentsToProcess, processProgress.NumberOfAttachmentsToProcess);
         }
 
-        private void AssertPendingTombstoneItemsToProcess(ReplicationTaskProgress[] result, ReplicationProcessProgress processProgress = null,
+        private void AssertPendingTombstoneItemsToProcess(IReplicationTaskProgress[] result, ReplicationProcessProgress processProgress = null,
             long documentTombstonesToProcess = 1, long timeSeriesDeletedRangesToProcess = 1)
         {
             processProgress ??= result[0].ProcessesProgress[0];
@@ -448,7 +473,7 @@ namespace SlowTests.Server.Documents.OngoingTasks
             Assert.Equal(timeSeriesDeletedRangesToProcess, processProgress.NumberOfTimeSeriesDeletedRangesToProcess);
         }
 
-        private void AssertItemsProcessed(ReplicationTaskProgress[] result, ReplicationProcessProgress processProgress = null,
+        private void AssertItemsProcessed(IReplicationTaskProgress[] result, ReplicationProcessProgress processProgress = null,
             long numberOfDocuments = 1, long numberOfCounters = 1, long numberOfTimeSeriesSegments = 1, long numberOfAttachments = 1)
         {
             processProgress ??= result[0].ProcessesProgress[0];
@@ -459,7 +484,7 @@ namespace SlowTests.Server.Documents.OngoingTasks
             Assert.Equal(numberOfAttachments, processProgress.TotalNumberOfAttachments);
         }
 
-        private void AssertTombstoneItemsProcessed(ReplicationTaskProgress[] result, ReplicationProcessProgress processProgress = null,
+        private void AssertTombstoneItemsProcessed(IReplicationTaskProgress[] result, ReplicationProcessProgress processProgress = null,
             long documentTombstones = 1, long timeSeriesDeletedRanges = 1, long attachmentTombstones = 1)
         {
             processProgress ??= result[0].ProcessesProgress[0];

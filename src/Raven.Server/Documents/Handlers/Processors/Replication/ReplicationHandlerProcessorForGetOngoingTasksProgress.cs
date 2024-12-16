@@ -34,7 +34,7 @@ namespace Raven.Server.Documents.Handlers.Processors.Replication
             }
         }
 
-        protected override Task HandleRemoteNodeAsync(ProxyCommand<ReplicationTaskProgress[]> command, OperationCancelToken token) => RequestHandler.ExecuteRemoteAsync(command, token.Token);
+        protected override Task HandleRemoteNodeAsync(ProxyCommand<IReplicationTaskProgress[]> command, OperationCancelToken token) => RequestHandler.ExecuteRemoteAsync(command, token.Token);
 
         public IDictionary<long, ReplicationTaskProgress> GetProcessesProgress(DocumentsOperationContext context, StringValues names)
         {

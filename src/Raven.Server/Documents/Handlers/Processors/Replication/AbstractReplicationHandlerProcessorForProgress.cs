@@ -7,7 +7,7 @@ using Sparrow.Json;
 
 namespace Raven.Server.Documents.Handlers.Processors.Replication
 {
-    internal abstract class AbstractReplicationHandlerProcessorForProgress<TRequestHandler, TOperationContext> : AbstractHandlerProxyReadProcessor<ReplicationTaskProgress[], TRequestHandler, TOperationContext>
+    internal abstract class AbstractReplicationHandlerProcessorForProgress<TRequestHandler, TOperationContext> : AbstractHandlerProxyReadProcessor<IReplicationTaskProgress[], TRequestHandler, TOperationContext>
         where TOperationContext : JsonOperationContext
         where TRequestHandler : AbstractDatabaseRequestHandler<TOperationContext>
     {
@@ -18,7 +18,7 @@ namespace Raven.Server.Documents.Handlers.Processors.Replication
             _internalReplication = internalReplication;
         }
 
-        protected override RavenCommand<ReplicationTaskProgress[]> CreateCommandForNode(string nodeTag)
+        protected override RavenCommand<IReplicationTaskProgress[]> CreateCommandForNode(string nodeTag)
         {
             if (_internalReplication)
                 return new GetOutgoingInternalReplicationProgressCommand(nodeTag);

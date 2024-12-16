@@ -7,7 +7,7 @@ using Sparrow.Json;
 
 namespace Raven.Server.Documents.Commands.Replication
 {
-    internal sealed class GetReplicationOngoingTasksProgressCommand : RavenCommand<ReplicationTaskProgress[]>
+    internal sealed class GetReplicationOngoingTasksProgressCommand : RavenCommand<IReplicationTaskProgress[]>
     {
         private readonly string[] _names;
 
