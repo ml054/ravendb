@@ -1,7 +1,6 @@
 ﻿import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useServices } from "hooks/useServices";
-import { OngoingTasksState, ongoingTasksReducer, ongoingTasksReducerInitializer } from "./OngoingTasksReducer";
-import appUrl from "common/appUrl";
+import { OngoingTasksState, ongoingTasksReducer, ongoingTasksReducerInitializer } from "./partials/OngoingTasksReducer";
 import { ExternalReplicationPanel } from "./panels/ExternalReplicationPanel";
 import {
     OngoingTaskAzureQueueStorageEtlInfo,
@@ -29,7 +28,7 @@ import { SubscriptionPanel } from "./panels/SubscriptionPanel";
 import { ReplicationSinkPanel } from "./panels/ReplicationSinkPanel";
 import { ReplicationHubDefinitionPanel } from "./panels/ReplicationHubDefinitionPanel";
 import useBoolean from "hooks/useBoolean";
-import { OngoingTaskProgressProvider } from "./OngoingTaskProgressProvider";
+import { OngoingTaskProgressProvider } from "./partials/OngoingTaskProgressProvider";
 import { BaseOngoingTaskPanelProps, taskKey, useOngoingTasksOperations } from "../shared/shared";
 import EtlTaskProgress = Raven.Server.Documents.ETL.Stats.EtlTaskProgress;
 import "./OngoingTaskPage.scss";
@@ -38,46 +37,34 @@ import TaskUtils from "../../../../utils/TaskUtils";
 import { KafkaEtlPanel } from "./panels/KafkaEtlPanel";
 import { RabbitMqEtlPanel } from "./panels/RabbitMqEtlPanel";
 import useInterval from "hooks/useInterval";
-import { Button, Row } from "reactstrap";
+import { Row } from "reactstrap";
 import { HrHeader } from "components/common/HrHeader";
 import { EmptySet } from "components/common/EmptySet";
 import { Icon } from "components/common/Icon";
-import OngoingTasksFilter, { OngoingTaskFilterType, OngoingTasksFilterCriteria } from "./OngoingTasksFilter";
-import { exhaustiveStringTuple } from "components/utils/common";
-import { InputItem } from "components/models/common";
-import assertUnreachable from "components/utils/assertUnreachable";
-import OngoingTaskSelectActions from "./OngoingTaskSelectActions";
+import { OngoingTasksFilterCriteria } from "./partials/OngoingTasksFilter";
 import OngoingTaskOperationConfirm from "../shared/OngoingTaskOperationConfirm";
-import { StickyHeader } from "components/common/StickyHeader";
 import { KafkaSinkPanel } from "components/pages/database/tasks/ongoingTasks/panels/KafkaSinkPanel";
 import { RabbitMqSinkPanel } from "components/pages/database/tasks/ongoingTasks/panels/RabbitMqSinkPanel";
 import { CounterBadge } from "components/common/CounterBadge";
 import { getLicenseLimitReachStatus } from "components/utils/licenseLimitsUtils";
-import AboutViewFloating, { AccordionItemWrapper } from "components/common/AboutView";
-import { FlexGrow } from "components/common/FlexGrow";
-import OngoingTaskAddModal from "./OngoingTaskAddModal";
 import { useAppSelector } from "components/store";
 import { licenseSelectors } from "components/common/shell/licenseSlice";
 import { useRavenLink } from "components/hooks/useRavenLink";
 import { throttledUpdateLicenseLimitsUsage } from "components/common/shell/setup";
 import { AzureQueueStorageEtlPanel } from "components/pages/database/tasks/ongoingTasks/panels/AzureQueueStorageEtlPanel";
 import { databaseSelectors } from "components/common/shell/databaseSliceSelectors";
-import { accessManagerSelectors } from "components/common/shell/accessManagerSliceSelectors";
 import { compareSets } from "common/typeUtils";
 import RichAlert from "components/common/RichAlert";
 import ReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.ReplicationTaskProgress;
 import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.InternalReplicationTaskProgress;
+import { OngoingTasksHeader } from "components/pages/database/tasks/ongoingTasks/partials/OngoingTasksHeader";
 
 export function OngoingTasksPage() {
     const db = useAppSelector(databaseSelectors.activeDatabase);
-    const isClusterAdminOrClusterNode = useAppSelector(accessManagerSelectors.isClusterAdminOrClusterNode);
-    const hasDatabaseAdminAccess = useAppSelector(accessManagerSelectors.getHasDatabaseAdminAccess)();
-    const hasDatabaseWriteAccess = useAppSelector(accessManagerSelectors.getHasDatabaseWriteAccess)();
 
     const { tasksService } = useServices();
     const [tasks, dispatch] = useReducer(ongoingTasksReducer, db, ongoingTasksReducerInitializer);
 
-    const { value: isNewTaskModalOpen, toggle: toggleIsNewTaskModalOpen } = useBoolean(false);
     const { value: progressEnabled, setTrue: startTrackingProgress } = useBoolean(false);
     const [definitionCache] = useState(() => new etlScriptDefinitionCache(db.name));
     const [filter, setFilter] = useState<OngoingTasksFilterCriteria>({
@@ -86,7 +73,6 @@ export function OngoingTasksPage() {
     });
 
     const upgradeLicenseLink = useRavenLink({ hash: "FLDLO4", isDocs: false });
-    const ongoingTasksDocsLink = useRavenLink({ hash: "K4ZTNA" });
 
     const fetchTasks = useCallback(
         async (location: databaseLocationSpecifier) => {
@@ -170,8 +156,6 @@ export function OngoingTasksPage() {
         [definitionCache]
     );
 
-    const serverWideTasksUrl = appUrl.forServerWideTasks();
-
     const filteredTasks = getFilteredTasks(tasks, filter);
 
     const {
@@ -195,11 +179,6 @@ export function OngoingTasksPage() {
     useEffect(() => {
         throttledUpdateLicenseLimitsUsage();
     }, [subscriptions.length]);
-
-    const getSelectedTaskShardedInfos = () =>
-        [...tasks.tasks, ...tasks.subscriptions, ...tasks.replicationHubs]
-            .filter((x) => selectedTaskIds.includes(x.shared.taskId))
-            .map((x) => x.shared);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { replicationHubs: ignored, ...filteredWithoutReplicationHubs } = filteredTasks;
@@ -282,15 +261,8 @@ export function OngoingTasksPage() {
         await tasksService.dropSubscription(db.name, taskId, taskName, nodeTag, workerId);
     };
 
-    const {
-        onTaskOperation,
-        operationConfirm,
-        cancelOperationConfirm,
-        isTogglingState,
-        isDeleting,
-        isTogglingStateAny,
-        isDeletingAny,
-    } = useOngoingTasksOperations(reload);
+    const { onTaskOperation, operationConfirm, cancelOperationConfirm, isTogglingState, isDeleting } =
+        useOngoingTasksOperations(reload);
 
     const sharedPanelProps: Omit<BaseOngoingTaskPanelProps<OngoingTaskInfo>, "data"> = {
         onTaskOperation,
@@ -380,107 +352,17 @@ export function OngoingTasksPage() {
                 />
             )}
             {operationConfirm && <OngoingTaskOperationConfirm {...operationConfirm} toggle={cancelOperationConfirm} />}
-            <StickyHeader>
-                <div className="hstack gap-3 flex-wrap">
-                    {hasDatabaseWriteAccess && (
-                        <>
-                            {isNewTaskModalOpen && (
-                                <OngoingTaskAddModal
-                                    toggle={toggleIsNewTaskModalOpen}
-                                    subscriptionsDatabaseCount={subscriptionsDatabaseCount}
-                                />
-                            )}
-                            <div id="NewTaskButton">
-                                <Button onClick={toggleIsNewTaskModalOpen} color="primary" className="rounded-pill">
-                                    <Icon icon="ongoing-tasks" addon="plus" />
-                                    Add a Database Task
-                                </Button>
-                            </div>
-                        </>
-                    )}
-
-                    <FlexGrow />
-
-                    {isClusterAdminOrClusterNode && (
-                        <Button
-                            color="link"
-                            size="sm"
-                            target="_blank"
-                            href={serverWideTasksUrl}
-                            title="Go to the Server-Wide Tasks view"
-                        >
-                            <Icon icon="server-wide-tasks" />
-                            Server-Wide Tasks
-                        </Button>
-                    )}
-
-                    <AboutViewFloating>
-                        <AccordionItemWrapper
-                            icon="about"
-                            color="info"
-                            heading="About this view"
-                            description="Get additional info on this feature"
-                            targetId="about-view"
-                        >
-                            <div>
-                                <strong>Ongoing-tasks</strong> are work tasks assigned to the database.
-                                <ul className="margin-top-xxs">
-                                    <li>
-                                        A few examples are: <br />
-                                        Executing a periodic backup of the database, replicating to another RavenDB
-                                        instance, or transferring data to external frameworks such as Kafka, RabbitMQ,
-                                        Azure Queue Storage etc.
-                                    </li>
-                                    <li className="margin-top-xxs">
-                                        Click the &quot;Add a Database Task&quot; button to view all available tasks and
-                                        select from the list.
-                                    </li>
-                                </ul>
-                            </div>
-                            <div>
-                                <strong>Running in the background</strong>, each ongoing task is handled by a designated
-                                node from the Database-Group nodes.
-                                <ul className="margin-top-xxs">
-                                    <li>
-                                        For each task, you can specify which node will be responsible for the task and
-                                        whether the cluster may assign a different node when that node is down.
-                                    </li>
-                                    <li className="margin-top-xxs">
-                                        If not specified, the cluster will decide which node will handle the task.
-                                    </li>
-                                </ul>
-                            </div>
-                            <hr />
-                            <div className="small-label mb-2">useful links</div>
-                            <a href={ongoingTasksDocsLink} target="_blank">
-                                <Icon icon="newtab" /> Docs - Ongoing Tasks
-                            </a>
-                        </AccordionItemWrapper>
-                    </AboutViewFloating>
-                </div>
-
-                {allTasksCount > 0 && (
-                    <div className="mt-3">
-                        <OngoingTasksFilter
-                            filter={filter}
-                            setFilter={setFilter}
-                            filterByStatusOptions={getFilterByStatusOptions(tasks)}
-                            tasksCount={allTasksCount}
-                        />
-                    </div>
-                )}
-
-                {allTasksCount > 0 && hasDatabaseAdminAccess && (
-                    <OngoingTaskSelectActions
-                        allTasks={filteredDatabaseTaskIds}
-                        selectedTasks={selectedTaskIds}
-                        setSelectedTasks={setSelectedTaskIds}
-                        onTaskOperation={(type) => onTaskOperation(type, getSelectedTaskShardedInfos())}
-                        isTogglingState={isTogglingStateAny}
-                        isDeleting={isDeletingAny}
-                    />
-                )}
-            </StickyHeader>
+            <OngoingTasksHeader
+                reload={reload}
+                allTasksCount={allTasksCount}
+                tasks={tasks}
+                selectedTaskIds={selectedTaskIds}
+                subscriptionsDatabaseCount={subscriptionsDatabaseCount}
+                filter={filter}
+                setFilter={setFilter}
+                setSelectedTaskIds={setSelectedTaskIds}
+                filteredDatabaseTaskIds={filteredDatabaseTaskIds}
+            />
             <Row className="gy-sm">
                 <div className="flex-vertical">
                     <div className="scroll flex-grow">
@@ -781,45 +663,6 @@ export function OngoingTasksPage() {
             </Row>
             <div id="modalContainer" className="bs5" />
         </div>
-    );
-}
-
-function getFilterByStatusOptions(state: OngoingTasksState): InputItem<OngoingTaskFilterType>[] {
-    const backupCount = state.tasks.filter((x) => x.shared.taskType === "Backup").length;
-    const subscriptionCount = state.subscriptions.length;
-
-    const etlCount = state.tasks.filter((x) => x.shared.taskType.endsWith("Etl")).length;
-
-    const sinkCount = state.tasks.filter(
-        (x) => x.shared.taskType === "KafkaQueueSink" || x.shared.taskType === "RabbitQueueSink"
-    ).length;
-
-    const replicationHubCount = state.replicationHubs.length;
-    const replicationSinkCount = state.tasks.filter((x) => x.shared.taskType === "PullReplicationAsSink").length;
-    const externalReplicationCount = state.tasks.filter((x) => x.shared.taskType === "Replication").length;
-    const replicationCount = externalReplicationCount + replicationHubCount + replicationSinkCount;
-
-    return exhaustiveStringTuple<OngoingTaskFilterType>()("Replication", "ETL", "Sink", "Backup", "Subscription").map(
-        (filterType) => {
-            switch (filterType) {
-                case "Replication":
-                    return {
-                        label: filterType,
-                        value: filterType,
-                        count: replicationCount,
-                    };
-                case "ETL":
-                    return { label: filterType, value: filterType, count: etlCount };
-                case "Sink":
-                    return { label: filterType, value: filterType, count: sinkCount };
-                case "Backup":
-                    return { label: filterType, value: filterType, count: backupCount };
-                case "Subscription":
-                    return { label: filterType, value: filterType, count: subscriptionCount };
-                default:
-                    assertUnreachable(filterType);
-            }
-        }
     );
 }
 

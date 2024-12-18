@@ -96,6 +96,9 @@ export function ReplicationTaskProgressTooltip(props: OngoingReplicationTaskProg
     if (!hasAnyDetailsToShow) {
         return null;
     }
+
+    //TODO: format this tooltip
+
     return (
         <PopoverWithHover rounded="true" target={target} placement="top">
             <div className="vstack gap-3 py-2">

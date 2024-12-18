@@ -10,7 +10,7 @@ import { Icon } from "components/common/Icon";
 import React, { useState } from "react";
 import classNames from "classnames";
 import { ProgressCircle } from "components/common/ProgressCircle";
-import { ReplicationTaskProgressTooltip } from "components/pages/database/tasks/ongoingTasks/ReplicationTaskProgressTooltip";
+import { ReplicationTaskProgressTooltip } from "components/pages/database/tasks/ongoingTasks/partials/ReplicationTaskProgressTooltip";
 
 interface ReplicationTaskDistributionProps {
 

@@ -13,7 +13,7 @@ import {
     DropdownItem,
     Button,
 } from "reactstrap";
-import { OngoingTaskOperationConfirmType } from "../shared/OngoingTaskOperationConfirm";
+import { OngoingTaskOperationConfirmType } from "../../shared/OngoingTaskOperationConfirm";
 
 interface OngoingTaskSelectActionsProps {
     allTasks: number[];

@@ -44,7 +44,6 @@ import OngoingTaskPullReplicationAsSink = Raven.Client.Documents.Operations.Ongo
 import OngoingTaskPullReplicationAsHub = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskPullReplicationAsHub;
 import EtlTaskProgress = Raven.Server.Documents.ETL.Stats.EtlTaskProgress;
 import EtlProcessProgress = Raven.Server.Documents.ETL.Stats.EtlProcessProgress;
-import TaskUtils from "../../../../utils/TaskUtils";
 import { produce, Draft } from "immer";
 import OngoingTaskSubscription = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskSubscription;
 import OngoingTaskQueueEtlListView = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskQueueEtl;
@@ -56,6 +55,7 @@ import { DatabaseSharedInfo } from "components/models/databases";
 import ReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.ReplicationTaskProgress;
 import ReplicationProcessProgress = Raven.Server.Documents.Replication.Stats.ReplicationProcessProgress;
 import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.InternalReplicationTaskProgress;
+import TaskUtils from "components/utils/TaskUtils";
 
 interface ActionTasksLoaded {
     location: databaseLocationSpecifier;
@@ -450,6 +450,7 @@ function mapNodeInfo(task: OngoingTask): OngoingTaskNodeInfoDetails {
                 onGoingBackup: incoming.OnGoingBackup,
             } as OngoingTaskPeriodicBackupNodeInfoDetails;
         }
+        //TODO: sink?
         case "Replication": {
             const incoming = task as OngoingTaskReplication;
             return {

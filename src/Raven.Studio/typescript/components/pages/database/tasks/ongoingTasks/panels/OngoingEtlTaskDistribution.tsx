@@ -3,7 +3,7 @@ import { DistributionItem, DistributionLegend, LocationDistribution } from "comp
 import classNames from "classnames";
 import { AnyEtlOngoingTaskInfo, OngoingEtlTaskNodeInfo, OngoingTaskInfo } from "components/models/tasks";
 import { ProgressCircle } from "components/common/ProgressCircle";
-import { OngoingEtlTaskProgressTooltip } from "../OngoingEtlTaskProgressTooltip";
+import { OngoingEtlTaskProgressTooltip } from "../partials/OngoingEtlTaskProgressTooltip";
 import { Icon } from "components/common/Icon";
 
 interface OngoingEtlTaskDistributionProps {
