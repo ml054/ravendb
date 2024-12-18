@@ -20,7 +20,7 @@ import {
 import { useAppUrls } from "hooks/useAppUrls";
 import { OngoingTaskRavenEtlInfo } from "components/models/tasks";
 import { BaseOngoingTaskPanelProps, useTasksOperations } from "../../shared/shared";
-import { OngoingEtlTaskDistribution } from "./OngoingEtlTaskDistribution";
+import { OngoingEtlTaskDistribution } from "../partials/OngoingEtlTaskDistribution";
 import { Collapse, Input } from "reactstrap";
 import { databaseSelectors } from "components/common/shell/databaseSliceSelectors";
 import { useAppSelector } from "components/store";

@@ -21,7 +21,7 @@ import {
     RichPanelInfo,
     RichPanelSelect,
 } from "components/common/RichPanel";
-import { OngoingEtlTaskDistribution } from "./OngoingEtlTaskDistribution";
+import { OngoingEtlTaskDistribution } from "../partials/OngoingEtlTaskDistribution";
 import { Collapse, Input } from "reactstrap";
 import { databaseSelectors } from "components/common/shell/databaseSliceSelectors";
 import { useAppSelector } from "components/store";

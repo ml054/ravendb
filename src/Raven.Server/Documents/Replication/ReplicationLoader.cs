@@ -1911,7 +1911,8 @@ namespace Raven.Server.Documents.Replication
             {
                 FromToString = handler.FromToString,
                 HandlerId = handler.HandlerId,
-                LastEtagSent = lastProcessedEtag,
+                LastSentEtag = lastProcessedEtag,
+                LastDatabaseEtag = Database.ReadLastEtag(),
                 DestinationChangeVector = handler.LastAcceptedChangeVector,
                 SourceChangeVector = handler.LastSentChangeVector,
                 AverageProcessedPerSecond = handler.Metrics.GetProcessedPerSecondRate() ?? 0.0

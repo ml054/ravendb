@@ -18,14 +18,14 @@ import {
     useTasksOperations,
 } from "../../shared/shared";
 import { useAppUrls } from "hooks/useAppUrls";
-import { SubscriptionTaskDistribution } from "./SubscriptionTaskDistribution";
+import { SubscriptionTaskDistribution } from "../partials/SubscriptionTaskDistribution";
 import genUtils from "common/generalUtils";
 import moment from "moment";
 import { Button, Collapse, Input } from "reactstrap";
 import { PopoverWithHover } from "components/common/PopoverWithHover";
 import { FlexGrow } from "components/common/FlexGrow";
 import { Icon } from "components/common/Icon";
-import { SubscriptionConnectionsDetailsWithId } from "../OngoingTasksReducer";
+import { SubscriptionConnectionsDetailsWithId } from "../partials/OngoingTasksReducer";
 import { useAppSelector } from "components/store";
 import { accessManagerSelectors } from "components/common/shell/accessManagerSliceSelectors";
 import RichAlert from "components/common/RichAlert";

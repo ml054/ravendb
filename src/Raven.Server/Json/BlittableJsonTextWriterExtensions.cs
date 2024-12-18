@@ -315,8 +315,12 @@ namespace Raven.Server.Json
                     w.WriteDouble(processProgress.AverageProcessedPerSecond);
                     w.WriteComma();
 
-                    w.WritePropertyName(nameof(processProgress.LastEtagSent));
-                    w.WriteInteger(processProgress.LastEtagSent);
+                    w.WritePropertyName(nameof(processProgress.LastSentEtag));
+                    w.WriteInteger(processProgress.LastSentEtag);
+                    w.WriteComma();
+                    
+                    w.WritePropertyName(nameof(processProgress.LastDatabaseEtag));
+                    w.WriteInteger(processProgress.LastDatabaseEtag);
                     w.WriteComma();
 
                     w.WritePropertyName(nameof(processProgress.DestinationChangeVector));

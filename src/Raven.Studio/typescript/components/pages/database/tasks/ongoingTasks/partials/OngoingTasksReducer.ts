@@ -760,8 +760,14 @@ export const ongoingTasksReducer: Reducer<OngoingTasksState, OngoingTaskReducerA
 
                 (perLocationDraft as Draft<OngoingInternalReplicationNodeInfo>).progress = incomingProgresses.map(
                     (progress) => {
+                        const firstProgress = progress.ProcessesProgress[0];
                         return {
-                            ...mapReplicationProgress(progress.ProcessesProgress[0]),
+                            ...mapReplicationProgress(firstProgress),
+                            lastSentEtag: firstProgress.LastSentEtag,
+                            lastDatabaseEtag: firstProgress.LastDatabaseEtag,
+                            sourceDatabaseChangeVector: firstProgress.SourceChangeVector,
+                            lastAcceptedChangeVectorFromDestination: firstProgress.DestinationChangeVector,
+                            fromToString: firstProgress.FromToString,
                             destinationNodeTag: progress.DestinationNodeTag,
                         };
                     }

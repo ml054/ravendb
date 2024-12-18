@@ -26,37 +26,21 @@ export function OngoingTaskProgressProvider(props: OngoingTaskProgressProviderPr
 
     const loadProgress = () => {
         locations.forEach(async (location) => {
-            const etlProgressTask = tasksService.getEtlProgress(db.name, location);
-            const replicationProgressTask = tasksService.getReplicationProgress(db.name, location);
-            const internalReplicationTask = tasksService.getInternalReplicationProgress(db.name, location);
+            const etlProgressResponse = await tasksService.getEtlProgress(db.name, location);
+            onEtlProgress(etlProgressResponse.Results, location);
+        });
 
-            const errors: Error[] = [];
+        locations.forEach(async (location) => {
+            const replicationProgressResponse = await tasksService.getReplicationProgress(db.name, location);
+            onReplicationProgress(replicationProgressResponse.Results, location);
+        });
 
-            try {
-                const etlProgressResponse = await etlProgressTask;
-                onEtlProgress(etlProgressResponse.Results, location);
-            } catch (e) {
-                errors.push(e);
-            }
-
-            try {
-                const replicationProgressResponse = await replicationProgressTask;
-                onReplicationProgress(replicationProgressResponse.Results, location);
-            } catch (e) {
-                errors.push(e);
-            }
-
-            try {
-                const internalReplicationProgressResponse = await internalReplicationTask;
-                onInternalReplicationProgress(internalReplicationProgressResponse.Results, location);
-            } catch (e) {
-                errors.push(e);
-            }
-
-            if (errors.length > 0) {
-                errors.forEach(console.error);
-                throw new Error("Unable to load progress");
-            }
+        locations.forEach(async (location) => {
+            const internalReplicationProgressResponse = await tasksService.getInternalReplicationProgress(
+                db.name,
+                location
+            );
+            onInternalReplicationProgress(internalReplicationProgressResponse.Results, location);
         });
     };
 

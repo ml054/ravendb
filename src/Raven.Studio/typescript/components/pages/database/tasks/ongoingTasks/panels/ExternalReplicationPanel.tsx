@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿import React from "react";
 import { OngoingTaskExternalReplicationInfo } from "components/models/tasks";
 import {
     RichPanel,
@@ -23,7 +23,7 @@ import { Collapse, Input } from "reactstrap";
 import { databaseSelectors } from "components/common/shell/databaseSliceSelectors";
 import { useAppSelector } from "components/store";
 import { accessManagerSelectors } from "components/common/shell/accessManagerSliceSelectors";
-import { ReplicationTaskDistribution } from "components/pages/database/tasks/ongoingTasks/panels/ReplicationTaskDistribution";
+import { ExternalReplicationTaskDistribution } from "components/pages/database/tasks/ongoingTasks/partials/ExternalReplicationTaskDistribution";
 
 type ExternalReplicationPanelProps = BaseOngoingTaskPanelProps<OngoingTaskExternalReplicationInfo>;
 
@@ -36,7 +36,6 @@ function Details(props: ExternalReplicationPanelProps & { canEdit: boolean }) {
     const { appUrl } = useAppUrls();
     const databaseName = useAppSelector(databaseSelectors.activeDatabaseName);
     const connectionStringsUrl = appUrl.forConnectionStrings(databaseName, "Raven", data.shared.connectionStringName);
-    const [valuePopover, setValuePopover] = useState<HTMLElement>();
 
     return (
         <RichPanelDetails>
@@ -118,7 +117,7 @@ export function ExternalReplicationPanel(props: ExternalReplicationPanelProps) {
             </RichPanelHeader>
             <Collapse isOpen={detailsVisible}>
                 <Details {...props} canEdit={canEdit} />
-                <ReplicationTaskDistribution task={data} />
+                <ExternalReplicationTaskDistribution task={data} />
             </Collapse>
         </RichPanel>
     );

@@ -447,7 +447,7 @@ namespace SlowTests.Server.Documents.OngoingTasks
 
             var processProgress = result[0].ProcessesProgress[0];
 
-            Assert.Equal(lastSentEtag, processProgress.LastEtagSent);
+            Assert.Equal(lastSentEtag, processProgress.LastSentEtag);
             Assert.Equal(sourceChangeVector, processProgress.SourceChangeVector);
             Assert.Equal(destinationChangeVector, processProgress.DestinationChangeVector);
             Assert.True(processProgress.Completed);

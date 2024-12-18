@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { PeriodicBackupPanel } from "../ongoingTasks/panels/PeriodicBackupPanel";
 import appUrl from "common/appUrl";
 import { useServices } from "hooks/useServices";
-import { ongoingTasksReducer, ongoingTasksReducerInitializer } from "../ongoingTasks/OngoingTasksReducer";
+import { ongoingTasksReducer, ongoingTasksReducerInitializer } from "../ongoingTasks/partials/OngoingTasksReducer";
 import useInterval from "hooks/useInterval";
 import useTimeout from "hooks/useTimeout";
 import { OngoingTaskInfo, OngoingTaskPeriodicBackupInfo } from "components/models/tasks";

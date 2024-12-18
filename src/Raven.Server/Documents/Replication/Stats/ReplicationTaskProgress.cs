@@ -27,7 +27,9 @@ namespace Raven.Server.Documents.Replication.Stats
 
         public double AverageProcessedPerSecond { get; set; }
 
-        public long LastEtagSent { get; set; }
+        public long LastSentEtag { get; set; }
+        
+        public long LastDatabaseEtag { get; set; }
 
         public string DestinationChangeVector { get; set; }
 

@@ -58,6 +58,7 @@ import RichAlert from "components/common/RichAlert";
 import ReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.ReplicationTaskProgress;
 import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.InternalReplicationTaskProgress;
 import { OngoingTasksHeader } from "components/pages/database/tasks/ongoingTasks/partials/OngoingTasksHeader";
+import { InternalReplicationPanel } from "./panels/InternalReplicationPanel";
 
 export function OngoingTasksPage() {
     const db = useAppSelector(databaseSelectors.activeDatabase);

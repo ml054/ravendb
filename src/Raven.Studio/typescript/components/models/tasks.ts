@@ -40,6 +40,11 @@ export interface OngoingTaskNodeReplicationProgressDetails {
 
 export interface OngoingTaskNodeInternalReplicationProgressDetails extends OngoingTaskNodeReplicationProgressDetails {
     destinationNodeTag: string;
+    fromToString: string;
+    lastAcceptedChangeVectorFromDestination: string;
+    lastSentEtag: number;
+    lastDatabaseEtag: number;
+    sourceDatabaseChangeVector: string;
 }
 
 export interface OngoingTaskNodeInfoDetails {

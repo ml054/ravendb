@@ -12,7 +12,9 @@ import classNames from "classnames";
 import { ProgressCircle } from "components/common/ProgressCircle";
 import { ReplicationTaskProgressTooltip } from "components/pages/database/tasks/ongoingTasks/partials/ReplicationTaskProgressTooltip";
 
-interface ReplicationTaskDistributionProps {
+interface ExternalReplicationTaskDistributionProps {
+    task: OngoingTaskExternalReplicationInfo | OngoingTaskReplicationHubInfo; //TODO: sink?
+}
 
 interface ItemWithTooltipProps {
     nodeInfo: OngoingReplicationProgressAwareTaskNodeInfo<OngoingTaskAbstractReplicationNodeInfoDetails>;
@@ -52,14 +54,14 @@ function ItemWithTooltip(props: ItemWithTooltipProps) {
                 </div>
                 <div>{nodeInfo.details?.lastSentEtag ? nodeInfo.details.lastSentEtag.toLocaleString() : "-"}</div>
                 <div>{hasError ? <Icon icon="warning" color="danger" margin="m-0" /> : "-"}</div>
-                <ReplicationTaskProgress task={task} nodeInfo={nodeInfo} />
+                <ExternalReplicationTaskProgress task={task} nodeInfo={nodeInfo} />
             </DistributionItem>
-            {node && <ReplicationTaskProgressTooltip target={node} nodeInfo={nodeInfo} task={task} />}
+            {node && <ReplicationTaskProgressTooltip target={node} nodeInfo={nodeInfo} />}
         </div>
     );
 }
 
-export function ReplicationTaskDistribution(props: ReplicationTaskDistributionProps) {
+export function ExternalReplicationTaskDistribution(props: ExternalReplicationTaskDistributionProps) {
     const { task } = props;
     const sharded = task.nodesInfo.some((x) => x.location.shardNumber != null);
 
@@ -103,12 +105,12 @@ export function ReplicationTaskDistribution(props: ReplicationTaskDistributionPr
     );
 }
 
-interface ReplicationTaskProgressProps {
+interface ExternalReplicationTaskProgressProps {
     nodeInfo: OngoingReplicationProgressAwareTaskNodeInfo<OngoingTaskAbstractReplicationNodeInfoDetails>;
     task: OngoingTaskInfo;
 }
 
-export function ReplicationTaskProgress(props: ReplicationTaskProgressProps) {
+export function ExternalReplicationTaskProgress(props: ExternalReplicationTaskProgressProps) {
     const { nodeInfo, task } = props;
 
     if (!nodeInfo.progress) {
@@ -143,6 +145,8 @@ const taskNodeInfoKey = (
 ) => {
     switch (task.shared.taskType) {
         case "PullReplicationAsHub":
+            // since one hub can handle multiple sinks, we can't use (shard, nodeTag) for unique key
+            // instead we use handlerId (which is random guid)
             return nodeInfo.details.handlerId;
         default:
             return nodeInfo.location.shardNumber + "__" + nodeInfo.location.nodeTag;
