@@ -142,8 +142,9 @@ public sealed class OngoingTasks : AbstractOngoingTasks<SubscriptionConnectionsS
     }
 
     protected override (string Url, OngoingTaskConnectionStatus Status) GetReplicationTaskConnectionStatus<T>(DatabaseTopology databaseTopology, ClusterTopology clusterTopology, T replication, 
-        Dictionary<string, RavenConnectionString> connectionStrings, out ExternalReplicationState replicationState, out string responsibleNodeTag, out RavenConnectionString connection, out long lastDatabaseEtag)
+        Dictionary<string, RavenConnectionString> connectionStrings, out ExternalReplicationState replicationState, out string responsibleNodeTag, out RavenConnectionString connection, out long lastDatabaseEtag, out string error)
     {
+        error = null;
         connectionStrings.TryGetValue(replication.ConnectionStringName, out connection);
         replication.Database = connection?.Database;
         replication.ConnectionString = connection;
@@ -158,7 +159,7 @@ public sealed class OngoingTasks : AbstractOngoingTasks<SubscriptionConnectionsS
         {
             if (responsibleNodeTag == _server.NodeTag)
             {
-                result = _database.ReplicationLoader.GetExternalReplicationDestination(replication.TaskId, out var fromToString);
+                result = _database.ReplicationLoader.GetExternalReplicationDestination(replication.TaskId, out var fromToString, out error);
                 replicationState.FromToString = fromToString;
             }
             else
@@ -180,6 +181,13 @@ public sealed class OngoingTasks : AbstractOngoingTasks<SubscriptionConnectionsS
                         result = (incoming.ConnectionInfo.SourceUrl, OngoingTaskConnectionStatus.Active);
                         break;
                     }
+                }
+
+                if (result.Status == OngoingTaskConnectionStatus.NotActive &&
+                    _database.ReplicationLoader.OutgoingFailureInfo.TryGetValue(sinkReplication, out var info))
+                {
+                    info.Errors.TryPeek(out var exception);
+                    error = exception?.ToString();
                 }
             }
             else

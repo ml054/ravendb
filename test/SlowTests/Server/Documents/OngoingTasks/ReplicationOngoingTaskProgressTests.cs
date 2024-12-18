@@ -8,6 +8,7 @@ using FastTests;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Operations.ConnectionStrings;
 using Raven.Client.Documents.Operations.ETL;
+using Raven.Client.Documents.Operations.OngoingTasks;
 using Raven.Client.Documents.Operations.Replication;
 using Raven.Client.Documents.Replication;
 using Raven.Server;
@@ -280,6 +281,51 @@ namespace SlowTests.Server.Documents.OngoingTasks
             {
                 await VerifyInternalReplicationProgress(store, db, server, nodes, hasTombstones: true);
             }
+        }
+
+        [RavenTheory(RavenTestCategory.Replication | RavenTestCategory.Studio)]
+        [RavenData(DatabaseMode = RavenDatabaseMode.All, SearchEngineMode = RavenSearchEngineMode.All)]
+        public async Task ShouldGetErrorForExternalReplicationTask(Options options)
+        {
+            using var source = GetDocumentStore(options);
+
+            var sourceDb = await GetDocumentDatabaseInstanceForAsync(source, options.DatabaseMode, UserId);
+
+            var databaseWatcher = new ExternalReplication("DestinationDB", $"ConnectionString-{source.Identifier}");
+            var res = await AddWatcherToReplicationTopology(source, databaseWatcher, source.Urls);
+
+            await StoreData(source);
+
+            var op = new GetOngoingTaskInfoOperation(res.TaskId, OngoingTaskType.Replication);
+            var result = (OngoingTaskReplication)source.Maintenance.ForDatabase(sourceDb.Name).Send(op);
+
+            Assert.NotNull(result);
+            Assert.NotEmpty(result.Error);
+            Assert.Contains("DatabaseDoesNotExistException", result.Error);
+        }
+
+        [RavenTheory(RavenTestCategory.Replication | RavenTestCategory.Studio)]
+        [RavenData(DatabaseMode = RavenDatabaseMode.Single, SearchEngineMode = RavenSearchEngineMode.All)]
+        public async Task ShouldGetErrorForPullReplicationAsSinkTask(Options options)
+        {
+            using var hub = GetDocumentStore(options);
+            using var sink = GetDocumentStore(options);
+
+            await hub.Maintenance.SendAsync(new PutPullReplicationAsHubOperation("hub"));
+            var pull = new PullReplicationAsSink(hub.Database, $"ConnectionString-{hub.Database}", "hub") { Url = sink.Urls[0] };
+            var res = await AddWatcherToReplicationTopology(sink, pull);
+
+            await StoreData(hub);
+
+            var hubDatabase = await GetDatabase(hub.Database);
+            hubDatabase.Dispose();
+
+            await AssertWaitForValueAsync(async () =>
+            {
+                var result = await sink.Maintenance.SendAsync(new GetOngoingTaskInfoOperation(res.TaskId, OngoingTaskType.PullReplicationAsSink));
+                var pullAsSinkResult = result as OngoingTaskPullReplicationAsSink;
+                return pullAsSinkResult != null && string.IsNullOrEmpty(pullAsSinkResult.Error) == false;
+            }, true);
         }
 
         private async Task<IReplicationTaskProgress[]> GetReplicationProgress(DocumentStore store, string databaseName = null, RavenServer server = null)
