@@ -38,6 +38,10 @@ export interface OngoingTaskNodeReplicationProgressDetails {
     timeSeries: Progress;
 }
 
+export interface OngoingTaskNodeInternalReplicationProgressDetails extends OngoingTaskNodeReplicationProgressDetails {
+    destinationNodeTag: string;
+}
+
 export interface OngoingTaskNodeInfoDetails {
     taskConnectionStatus: Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskConnectionStatus;
     responsibleNode: string;
@@ -57,9 +61,15 @@ export interface OngoingEtlTaskNodeInfo<TNodeInfo extends OngoingTaskNodeInfoDet
 
 export interface OngoingReplicationProgressAwareTaskNodeInfo<
     TNodeInfo extends OngoingTaskNodeInfoHandlerAwareDetails = OngoingTaskNodeInfoHandlerAwareDetails,
+    TProgress extends OngoingTaskNodeReplicationProgressDetails = OngoingTaskNodeReplicationProgressDetails,
 > extends OngoingTaskNodeInfo<TNodeInfo> {
-    progress: OngoingTaskNodeReplicationProgressDetails[];
+    progress: TProgress[];
 }
+
+export type OngoingInternalReplicationNodeInfo = OngoingReplicationProgressAwareTaskNodeInfo<
+    never,
+    OngoingTaskNodeInternalReplicationProgressDetails
+>;
 
 export type OngoingSubscriptionTaskNodeInfo = OngoingTaskNodeInfo<OngoingTaskSubscriptionNodeInfoDetails>;
 

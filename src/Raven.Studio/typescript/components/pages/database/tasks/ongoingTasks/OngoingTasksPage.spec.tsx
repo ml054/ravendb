@@ -688,6 +688,9 @@ describe("OngoingTasksPage", function () {
             expect(await screen.findByText(/Sink Database/)).toBeInTheDocument();
             expect(await screen.findByText(/target-hub-db/)).toBeInTheDocument();
             expect(await screen.findByText(/Actual Sink URL/)).toBeInTheDocument();
+
+            expect(await screen.findByText(/Last DB Etag/)).toBeInTheDocument();
+            expect(await screen.findByText(/Last Sent Etag/)).toBeInTheDocument();
         });
     });
 
@@ -741,6 +744,9 @@ describe("OngoingTasksPage", function () {
             // edit, delete button should be present for non-server wide
             expect(screen.queryByTitle(selectors.deleteTaskTitle)).toBeInTheDocument();
             expect(screen.queryByTitle(selectors.editTaskTitle)).toBeInTheDocument();
+
+            expect(await screen.findByText(/Last DB Etag/)).toBeInTheDocument();
+            expect(await screen.findByText(/Last Sent Etag/)).toBeInTheDocument();
         });
 
         it("can render server wide", async () => {

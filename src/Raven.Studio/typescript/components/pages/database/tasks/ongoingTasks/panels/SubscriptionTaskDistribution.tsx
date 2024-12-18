@@ -55,7 +55,7 @@ export function SubscriptionTaskDistribution(props: OngoingEtlTaskDistributionPr
     const { task } = props;
     const sharded = task.nodesInfo.some((x) => x.location.shardNumber != null);
 
-    const visibleNodes = task.nodesInfo.filter((x) => x.location.nodeTag === task.shared.responsibleNodeTag);
+    const visibleNodes = task.nodesInfo.filter((x) => x.details && x.details.taskConnectionStatus !== "NotOnThisNode");
 
     const items = (
         <>

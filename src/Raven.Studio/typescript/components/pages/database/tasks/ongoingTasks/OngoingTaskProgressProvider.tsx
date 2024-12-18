@@ -6,11 +6,15 @@ import useTimeout from "hooks/useTimeout";
 import DatabaseUtils from "components/utils/DatabaseUtils";
 import { databaseSelectors } from "components/common/shell/databaseSliceSelectors";
 import { useAppSelector } from "components/store";
+import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.InternalReplicationTaskProgress;
 
 interface OngoingTaskProgressProviderProps {
     onEtlProgress: (progress: EtlTaskProgress[], location: databaseLocationSpecifier) => void;
     onReplicationProgress: (progress: ReplicationTaskProgress[], location: databaseLocationSpecifier) => void;
-    onInternalReplicationProgress: (progress: ReplicationTaskProgress[], location: databaseLocationSpecifier) => void;
+    onInternalReplicationProgress: (
+        progress: InternalReplicationTaskProgress[],
+        location: databaseLocationSpecifier
+    ) => void;
 }
 
 export function OngoingTaskProgressProvider(props: OngoingTaskProgressProviderProps): JSX.Element {
@@ -26,14 +30,33 @@ export function OngoingTaskProgressProvider(props: OngoingTaskProgressProviderPr
             const replicationProgressTask = tasksService.getReplicationProgress(db.name, location);
             const internalReplicationTask = tasksService.getInternalReplicationProgress(db.name, location);
 
-            const etlProgressResponse = await etlProgressTask;
-            onEtlProgress(etlProgressResponse.Results, location);
+            const errors: Error[] = [];
 
-            const replicationProgressResponse = await replicationProgressTask;
-            onReplicationProgress(replicationProgressResponse.Results, location);
+            try {
+                const etlProgressResponse = await etlProgressTask;
+                onEtlProgress(etlProgressResponse.Results, location);
+            } catch (e) {
+                errors.push(e);
+            }
 
-            const internalReplicationProgressResponse = await internalReplicationTask;
-            onInternalReplicationProgress(internalReplicationProgressResponse.Results, location);
+            try {
+                const replicationProgressResponse = await replicationProgressTask;
+                onReplicationProgress(replicationProgressResponse.Results, location);
+            } catch (e) {
+                errors.push(e);
+            }
+
+            try {
+                const internalReplicationProgressResponse = await internalReplicationTask;
+                onInternalReplicationProgress(internalReplicationProgressResponse.Results, location);
+            } catch (e) {
+                errors.push(e);
+            }
+
+            if (errors.length > 0) {
+                errors.forEach(console.error);
+                throw new Error("Unable to load progress");
+            }
         });
     };
 

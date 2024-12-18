@@ -1,7 +1,7 @@
 import commandBase = require("commands/commandBase");
 import database = require("models/resources/database");
 import endpoints = require("endpoints");
-import ReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.ReplicationTaskProgress;
+import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.InternalReplicationTaskProgress;
 
 class internalReplicationProgressCommand extends commandBase {
 
@@ -16,11 +16,11 @@ class internalReplicationProgressCommand extends commandBase {
         this.db = db;
     }
 
-    execute(): JQueryPromise<resultsDto<ReplicationTaskProgress>> {
+    execute(): JQueryPromise<resultsDto<InternalReplicationTaskProgress>> {
         const url = endpoints.databases.replication.outgoingInternalReplicationProgress;
         const args = this.location;
 
-        return this.query<resultsDto<ReplicationTaskProgress>>(url, args, this.db)
+        return this.query<resultsDto<InternalReplicationTaskProgress>>(url, args, this.db)
             .fail((response: JQueryXHR) => {
                 if (this.reportFailure) {
                     this.reportError(`Failed to fetch internal replication progress`, response.responseText);    

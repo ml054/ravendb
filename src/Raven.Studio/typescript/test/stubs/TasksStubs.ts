@@ -18,6 +18,9 @@ import OngoingTaskElasticSearchEtl = Raven.Client.Documents.Operations.OngoingTa
 import collectionsStats = require("models/database/documents/collectionsStats");
 import collection = require("models/database/documents/collection");
 import OngoingTaskQueueSink = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskQueueSink;
+import ReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.ReplicationTaskProgress;
+import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.InternalReplicationTaskProgress;
+import ReplicationProcessProgress = Raven.Server.Documents.Replication.Stats.ReplicationProcessProgress;
 
 export class TasksStubs {
     static getTasksList(): OngoingTasksResult {
@@ -58,6 +61,18 @@ export class TasksStubs {
                 TasksStubs.getRabbitProgress(),
                 TasksStubs.getAzureQueueStorageProgress(),
             ],
+        };
+    }
+
+    static getInternalReplicationTasksProgress(): resultsDto<InternalReplicationTaskProgress> {
+        return {
+            Results: [TasksStubs.getInternalReplicationProgress()],
+        };
+    }
+
+    static getExternalReplicationTasksProgress(): resultsDto<ReplicationTaskProgress> {
+        return {
+            Results: [TasksStubs.getExternalReplicationProgress()],
         };
     }
 
@@ -129,6 +144,53 @@ export class TasksStubs {
                     "A:8806-9igKNP9Qh0WWnuROUXOVjQ, A:2568-F9I6Egqwm0Kz+K0oFVIR9Q, A:13366-IG4VwBTOnkqoT/uwgm2OQg, A:2568-OSKWIRBEDEGoAxbEIiFJeQ",
                 IsEncrypted: false,
             },
+        };
+    }
+
+    static getInternalReplicationProgress(): InternalReplicationTaskProgress {
+        const taskName = TasksStubs.getExternalReplicationListItem().TaskName;
+        return {
+            TaskName: taskName,
+            ReplicationType: "External",
+            DestinationNodeTag: "C",
+            ProcessesProgress: [TasksStubs.getReplicationProcessProgress()],
+        };
+    }
+
+    static getExternalReplicationProgress(): ReplicationTaskProgress {
+        const taskName = TasksStubs.getExternalReplicationListItem().TaskName;
+        return {
+            TaskName: taskName,
+            ReplicationType: "External",
+            ProcessesProgress: [TasksStubs.getReplicationProcessProgress()],
+        };
+    }
+
+    private static getReplicationProcessProgress(): ReplicationProcessProgress {
+        return {
+            AverageProcessedPerSecond: 20,
+            NumberOfDocumentsToProcess: 524,
+            TotalNumberOfDocuments: 1024,
+            NumberOfCounterGroupsToProcess: 108,
+            TotalNumberOfCounterGroups: 200,
+            NumberOfDocumentTombstonesToProcess: 123,
+            TotalNumberOfDocumentTombstones: 223,
+            NumberOfTimeSeriesDeletedRangesToProcess: 0,
+            TotalNumberOfTimeSeriesDeletedRanges: 0,
+            TotalNumberOfTimeSeriesSegments: 0,
+            NumberOfTimeSeriesSegmentsToProcess: 0,
+            TotalNumberOfAttachmentTombstones: 10,
+            TotalNumberOfRevisionTombstones: 15,
+            NumberOfAttachmentsToProcess: 5,
+            TotalNumberOfAttachments: 10,
+            NumberOfRevisionsToProcess: 2,
+            TotalNumberOfRevisions: 7,
+            LastEtagSent: 107,
+            DestinationChangeVector: "B:6705-6HDhRgrh10Cyt4vBvkc5IQ, A:2568-F9I6Egqwm0Kz+K0oFVIR9Q",
+            SourceChangeVector: "B:6705-6HDhRgrh10Cyt4vBvkc5IQ, A:2568-F9I6Egqwm0Kz+K0oFVIR9Q",
+            FromToString: "from sink1 at C to [A/http://127.0.0.1:59690]",
+            HandlerId: "hub-id",
+            Completed: true,
         };
     }
 
@@ -405,6 +467,11 @@ export class TasksStubs {
             DestinationUrl: "http://target-hub-host:8080",
             DelayReplicationFor: null,
             PinToMentorNode: false,
+            FromToString: "from src at A to [dst @ http://localhost:8080]",
+            LastAcceptedChangeVectorFromDestination: "A:1-1DY5O5W9RUCDrntDONmNmw",
+            LastSentEtag: 1,
+            LastDatabaseEtag: 1,
+            SourceDatabaseChangeVector: "A:1-1DY5O5W9RUCDrntDONmNmw",
         };
     }
 

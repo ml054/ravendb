@@ -29,6 +29,7 @@ import {
     OngoingTaskExternalReplicationNodeInfoDetails,
     OngoingTaskReplicationHubNodeInfoDetails,
     OngoingTaskInternalReplicationNodeInfoDetails,
+    OngoingInternalReplicationNodeInfo,
 } from "components/models/tasks";
 import OngoingTasksResult = Raven.Server.Web.System.OngoingTasksResult;
 import OngoingTask = Raven.Client.Documents.Operations.OngoingTasks.OngoingTask;
@@ -54,6 +55,7 @@ import DatabaseUtils from "components/utils/DatabaseUtils";
 import { DatabaseSharedInfo } from "components/models/databases";
 import ReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.ReplicationTaskProgress;
 import ReplicationProcessProgress = Raven.Server.Documents.Replication.Stats.ReplicationProcessProgress;
+import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.InternalReplicationTaskProgress;
 
 interface ActionTasksLoaded {
     location: databaseLocationSpecifier;
@@ -88,7 +90,7 @@ interface ActionReplicationProgressLoaded {
 
 interface ActionInternalReplicationProgressLoaded {
     location: databaseLocationSpecifier;
-    progress: ReplicationTaskProgress[];
+    progress: InternalReplicationTaskProgress[];
     type: "InternalReplicationProgressLoaded";
 }
 
@@ -105,7 +107,7 @@ export interface OngoingTasksState {
     orchestrators: string[];
     replicationHubs: OngoingTaskHubDefinitionInfo[];
     subscriptionConnectionDetails: SubscriptionConnectionsDetailsWithId[];
-    internalReplication: OngoingTaskNodeInfo<OngoingTaskInternalReplicationNodeInfoDetails>[];
+    internalReplication: OngoingInternalReplicationNodeInfo[];
 }
 
 export type SubscriptionConnectionsDetailsWithId = SubscriptionConnectionsDetails & {
@@ -464,6 +466,11 @@ function mapNodeInfo(task: OngoingTask): OngoingTaskNodeInfoDetails {
             return {
                 ...commonProps,
                 handlerId: incoming.HandlerId,
+                fromToString: incoming.FromToString,
+                lastAcceptedChangeVectorFromDestination: incoming.LastAcceptedChangeVectorFromDestination,
+                lastSentEtag: incoming.LastSentEtag,
+                lastDatabaseEtag: incoming.LastDatabaseEtag,
+                sourceDatabaseChangeVector: incoming.SourceDatabaseChangeVector,
             } as OngoingTaskReplicationHubNodeInfoDetails;
         }
 
@@ -736,6 +743,7 @@ export const ongoingTasksReducer: Reducer<OngoingTasksState, OngoingTaskReducerA
         case "InternalReplicationProgressLoaded": {
             const incomingProgresses = action.progress;
             const incomingLocation = action.location;
+
             return produce(state, (draft) => {
                 const internalReplication = draft.internalReplication;
                 const perLocationDraft = internalReplication.find((x) =>
@@ -747,6 +755,16 @@ export const ongoingTasksReducer: Reducer<OngoingTasksState, OngoingTaskReducerA
                     return;
                 }
 
+                perLocationDraft.status = "success";
+
+                (perLocationDraft as Draft<OngoingInternalReplicationNodeInfo>).progress = incomingProgresses.map(
+                    (progress) => {
+                        return {
+                            ...mapReplicationProgress(progress.ProcessesProgress[0]),
+                            destinationNodeTag: progress.DestinationNodeTag,
+                        };
+                    }
+                );
             });
         }
     }
@@ -762,7 +780,7 @@ function matchProgresses(
     switch (task.shared.taskType) {
         case "PullReplicationAsHub": {
             const hubDraft = nodeInfo as OngoingReplicationProgressAwareTaskNodeInfo;
-            const handlerId = hubDraft.details.handlerId;
+            const handlerId = hubDraft.details?.handlerId;
 
             return progresses.flatMap((p) => p.ProcessesProgress.filter((pp) => pp.HandlerId === handlerId));
         }
@@ -782,6 +800,16 @@ export const ongoingTasksReducerInitializer = (db: DatabaseSharedInfo): OngoingT
     const locations = DatabaseUtils.getLocations(db);
     const orchestrators = db.isSharded ? db.nodes.map((x) => x.tag) : [];
 
+    const internalReplication: OngoingInternalReplicationNodeInfo[] = initNodesInfo(
+        "Replication",
+        locations,
+        orchestrators
+    ).map((nodeInfo) => ({
+        ...nodeInfo,
+        progress: [],
+        details: null as never,
+    }));
+
     return {
         tasks: [],
         subscriptions: [],
@@ -789,6 +817,6 @@ export const ongoingTasksReducerInitializer = (db: DatabaseSharedInfo): OngoingT
         locations,
         orchestrators,
         subscriptionConnectionDetails: [],
-        internalReplication: [],
+        internalReplication,
     };
 };

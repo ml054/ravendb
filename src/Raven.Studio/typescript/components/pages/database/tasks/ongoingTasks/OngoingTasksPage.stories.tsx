@@ -41,6 +41,15 @@ function commonInit() {
     licenseService.withLimitsUsage();
     tasksService.withGetSubscriptionTaskInfo();
     tasksService.withGetSubscriptionConnectionDetails();
+    tasksService.withGetExternalReplicationProgress((dto) => {
+        dto.Results = [];
+    });
+    tasksService.withGetEtlProgress((dto) => {
+        dto.Results = [];
+    });
+    tasksService.withGetInternalReplicationProgress((dto) => {
+        dto.Results = [];
+    });
 }
 
 export const EmptyView: StoryFn = () => {
@@ -67,6 +76,8 @@ export const FullView: StoryFn = () => {
 
     tasksService.withGetTasks();
     tasksService.withGetEtlProgress();
+    tasksService.withGetExternalReplicationProgress();
+    tasksService.withGetInternalReplicationProgress();
 
     return <OngoingTasksPage />;
 };
@@ -74,7 +85,6 @@ export const FullView: StoryFn = () => {
 export const ExternalReplicationTemplate = (args: {
     disabled?: boolean;
     completed?: boolean;
-    emptyScript?: boolean;
     customizeTask?: (x: OngoingTaskReplication) => void;
 }) => {
     commonInit();
@@ -92,7 +102,7 @@ export const ExternalReplicationTemplate = (args: {
         x.SubscriptionsCount = 0;
     });
 
-    mockEtlProgress(tasksService, args.completed, args.disabled, args.emptyScript);
+    mockExternalReplicationProgress(tasksService, args.completed);
 
     return <OngoingTasksPage />;
 };
@@ -103,6 +113,7 @@ export const ExternalReplicationDisabled = boundCopy(ExternalReplicationTemplate
 
 export const ExternalReplicationEnabled = boundCopy(ExternalReplicationTemplate, {
     disabled: false,
+    completed: true,
 });
 
 export const ExternalReplicationServerWide = boundCopy(ExternalReplicationTemplate, {
@@ -206,9 +217,9 @@ export const RavenEtlDisabled = boundCopy(RavenEtlTemplate, {
     disabled: true,
 });
 
-export const RavenEtlCompletedTOdo = boundCopy(RavenEtlTemplate, {
+export const RavenEtlCompleted = boundCopy(RavenEtlTemplate, {
     completed: true,
-    disabled: true,
+    disabled: false,
 });
 
 export const RavenEtlEmptyScript = boundCopy(RavenEtlTemplate, {
@@ -561,6 +572,8 @@ export const ReplicationHubTemplate = (args: {
         x.SubscriptionsCount = 0;
     });
 
+    mockExternalReplicationProgress(tasksService, true);
+
     return <OngoingTasksPage />;
 };
 
@@ -607,6 +620,27 @@ export const PeriodicBackupEnabledEncrypted = boundCopy(PeriodicBackupTemplate, 
     disabled: false,
     customizeTask: (x) => (x.IsEncrypted = true),
 });
+
+function mockExternalReplicationProgress(tasksService: MockTasksService, completed: boolean) {
+    if (completed) {
+        tasksService.withGetExternalReplicationProgress((dto) => {
+            dto.Results.forEach((x) => {
+                x.ProcessesProgress.forEach((progress) => {
+                    progress.Completed = true;
+                    progress.NumberOfAttachmentsToProcess = 0;
+                    progress.NumberOfCounterGroupsToProcess = 0;
+                    progress.NumberOfDocumentsToProcess = 0;
+                    progress.NumberOfDocumentTombstonesToProcess = 0;
+                    progress.NumberOfRevisionsToProcess = 0;
+                    progress.NumberOfTimeSeriesSegmentsToProcess = 0;
+                    progress.NumberOfTimeSeriesDeletedRangesToProcess = 0;
+                });
+            });
+        });
+    } else {
+        tasksService.withGetExternalReplicationProgress();
+    }
+}
 
 function mockEtlProgress(tasksService: MockTasksService, completed: boolean, disabled: boolean, emptyScript: boolean) {
     if (completed) {

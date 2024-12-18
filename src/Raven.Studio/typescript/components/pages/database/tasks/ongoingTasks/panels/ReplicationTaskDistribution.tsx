@@ -1,15 +1,150 @@
-import { OngoingTaskExternalReplicationInfo, OngoingTaskReplicationHubInfo } from "components/models/tasks";
+import {
+    OngoingReplicationProgressAwareTaskNodeInfo,
+    OngoingTaskAbstractReplicationNodeInfoDetails,
+    OngoingTaskExternalReplicationInfo,
+    OngoingTaskInfo,
+    OngoingTaskReplicationHubInfo,
+} from "components/models/tasks";
+import { DistributionItem, DistributionLegend, LocationDistribution } from "components/common/LocationDistribution";
+import { Icon } from "components/common/Icon";
+import React, { useState } from "react";
+import classNames from "classnames";
+import { ProgressCircle } from "components/common/ProgressCircle";
+import { ReplicationTaskProgressTooltip } from "components/pages/database/tasks/ongoingTasks/ReplicationTaskProgressTooltip";
 
 interface ReplicationTaskDistributionProps {
+
+interface ItemWithTooltipProps {
+    nodeInfo: OngoingReplicationProgressAwareTaskNodeInfo<OngoingTaskAbstractReplicationNodeInfoDetails>;
+    sharded: boolean;
     task: OngoingTaskExternalReplicationInfo | OngoingTaskReplicationHubInfo;
 }
-export function ReplicationTaskDistribution(props: ReplicationTaskDistributionProps) {
-    const { task } = props;
 
+function ItemWithTooltip(props: ItemWithTooltipProps) {
+    const { nodeInfo, sharded, task } = props;
+
+    const shard = (
+        <div className="top shard">
+            {nodeInfo.location.shardNumber != null && (
+                <>
+                    <Icon icon="shard" />
+                    {nodeInfo.location.shardNumber}
+                </>
+            )}
+        </div>
+    );
+
+    const key = taskNodeInfoKey(task, nodeInfo);
+    const hasError = !!nodeInfo.details?.error;
+    const [node, setNode] = useState<HTMLDivElement>();
     return (
-        <div>
-            ReplicationTaskDistribution
-            <pre>{JSON.stringify(props.task, null, 2)}</pre>
+        <div ref={setNode}>
+            <DistributionItem loading={nodeInfo.status === "loading" || nodeInfo.status === "idle"} key={key}>
+                {sharded && shard}
+                <div className={classNames("node", { top: !sharded })}>
+                    {!sharded && <Icon icon="node" />}
+
+                    {nodeInfo.location.nodeTag}
+                </div>
+                <div>{nodeInfo.status === "success" ? nodeInfo.details.taskConnectionStatus : ""}</div>
+                <div>
+                    {nodeInfo.details?.lastDatabaseEtag ? nodeInfo.details.lastDatabaseEtag.toLocaleString() : "-"}
+                </div>
+                <div>{nodeInfo.details?.lastSentEtag ? nodeInfo.details.lastSentEtag.toLocaleString() : "-"}</div>
+                <div>{hasError ? <Icon icon="warning" color="danger" margin="m-0" /> : "-"}</div>
+                <ReplicationTaskProgress task={task} nodeInfo={nodeInfo} />
+            </DistributionItem>
+            {node && <ReplicationTaskProgressTooltip target={node} nodeInfo={nodeInfo} task={task} />}
         </div>
     );
 }
+
+export function ReplicationTaskDistribution(props: ReplicationTaskDistributionProps) {
+    const { task } = props;
+    const sharded = task.nodesInfo.some((x) => x.location.shardNumber != null);
+
+    const visibleNodes = task.nodesInfo.filter((x) => x.details && x.details.taskConnectionStatus !== "NotOnThisNode");
+
+    const items = visibleNodes.map((nodeInfo) => {
+        const key = taskNodeInfoKey(task, nodeInfo);
+
+        return <ItemWithTooltip key={key} nodeInfo={nodeInfo} sharded={sharded} task={task} />;
+    });
+
+    return (
+        <div className="px-3 pb-2">
+            <LocationDistribution>
+                <DistributionLegend>
+                    <div className="top"></div>
+                    {sharded && (
+                        <div className="node">
+                            <Icon icon="node" /> Node
+                        </div>
+                    )}
+                    <div>
+                        <Icon icon="connected" /> Status
+                    </div>
+                    <div>
+                        <Icon icon="etag" /> Last DB Etag
+                    </div>
+                    <div>
+                        <Icon icon="etag" /> Last Sent Etag
+                    </div>
+                    <div>
+                        <Icon icon="warning" /> Error
+                    </div>
+                    <div>
+                        <Icon icon="changes" /> State
+                    </div>
+                </DistributionLegend>
+                {items}
+            </LocationDistribution>
+        </div>
+    );
+}
+
+interface ReplicationTaskProgressProps {
+    nodeInfo: OngoingReplicationProgressAwareTaskNodeInfo<OngoingTaskAbstractReplicationNodeInfoDetails>;
+    task: OngoingTaskInfo;
+}
+
+export function ReplicationTaskProgress(props: ReplicationTaskProgressProps) {
+    const { nodeInfo, task } = props;
+
+    if (!nodeInfo.progress) {
+        return <ProgressCircle state="running" />;
+    }
+
+    if (nodeInfo.progress.every((x) => x.completed) && task.shared.taskState === "Enabled") {
+        return (
+            <ProgressCircle state="success" icon="check">
+                up to date
+            </ProgressCircle>
+        );
+    }
+
+    // at least one transformation is not completed - let's calculate total progress
+    const totalItems = nodeInfo.progress.reduce((acc, current) => acc + current.global.total, 0);
+    const totalProcessed = nodeInfo.progress.reduce((acc, current) => acc + current.global.processed, 0);
+
+    const percentage = Math.floor((totalProcessed * 100) / totalItems) / 100;
+    const disabled = task.shared.taskState === "Disabled";
+
+    return (
+        <ProgressCircle state="running" icon={disabled ? "stop" : null} progress={percentage}>
+            {disabled ? "Disabled" : "Running"}
+        </ProgressCircle>
+    );
+}
+
+const taskNodeInfoKey = (
+    task: OngoingTaskInfo,
+    nodeInfo: OngoingReplicationProgressAwareTaskNodeInfo<OngoingTaskAbstractReplicationNodeInfoDetails>
+) => {
+    switch (task.shared.taskType) {
+        case "PullReplicationAsHub":
+            return nodeInfo.details.handlerId;
+        default:
+            return nodeInfo.location.shardNumber + "__" + nodeInfo.location.nodeTag;
+    }
+};

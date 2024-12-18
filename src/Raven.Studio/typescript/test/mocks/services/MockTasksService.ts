@@ -7,6 +7,8 @@ import GetPeriodicBackupStatusOperationResult = Raven.Client.Documents.Operation
 import collectionsStats = require("models/database/documents/collectionsStats");
 import { DatabasesStubs } from "test/stubs/DatabasesStubs";
 import { SharedStubs } from "test/stubs/SharedStubs";
+import ReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.ReplicationTaskProgress;
+import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.InternalReplicationTaskProgress;
 
 export default class MockTasksService extends AutoMockService<TasksService> {
     constructor() {
@@ -19,6 +21,22 @@ export default class MockTasksService extends AutoMockService<TasksService> {
 
     withGetEtlProgress(dto?: MockedValue<resultsDto<EtlTaskProgress>>) {
         return this.mockResolvedValue(this.mocks.getEtlProgress, dto, TasksStubs.getEtlTasksProgress());
+    }
+
+    withGetExternalReplicationProgress(dto?: MockedValue<resultsDto<ReplicationTaskProgress>>) {
+        return this.mockResolvedValue(
+            this.mocks.getReplicationProgress,
+            dto,
+            TasksStubs.getExternalReplicationTasksProgress()
+        );
+    }
+
+    withGetInternalReplicationProgress(dto?: MockedValue<resultsDto<InternalReplicationTaskProgress>>) {
+        return this.mockResolvedValue(
+            this.mocks.getInternalReplicationProgress,
+            dto,
+            TasksStubs.getInternalReplicationTasksProgress()
+        );
     }
 
     withGetManualBackup(dto?: MockedValue<GetPeriodicBackupStatusOperationResult>) {

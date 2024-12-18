@@ -66,6 +66,7 @@ import { accessManagerSelectors } from "components/common/shell/accessManagerSli
 import { compareSets } from "common/typeUtils";
 import RichAlert from "components/common/RichAlert";
 import ReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.ReplicationTaskProgress;
+import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.InternalReplicationTaskProgress;
 
 export function OngoingTasksPage() {
     const db = useAppSelector(databaseSelectors.activeDatabase);
@@ -150,7 +151,7 @@ export function OngoingTasksPage() {
     );
 
     const onInternalReplicationProgress = useCallback(
-        (progress: ReplicationTaskProgress[], location: databaseLocationSpecifier) => {
+        (progress: InternalReplicationTaskProgress[], location: databaseLocationSpecifier) => {
             dispatch({
                 type: "InternalReplicationProgressLoaded",
                 progress,
