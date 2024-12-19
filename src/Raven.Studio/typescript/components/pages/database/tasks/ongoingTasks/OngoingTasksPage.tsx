@@ -59,6 +59,8 @@ import ReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.Replic
 import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.InternalReplicationTaskProgress;
 import { OngoingTasksHeader } from "components/pages/database/tasks/ongoingTasks/partials/OngoingTasksHeader";
 import { InternalReplicationPanel } from "./panels/InternalReplicationPanel";
+import { DatabaseSharedInfo } from "components/models/databases";
+import DatabaseUtils from "components/utils/DatabaseUtils";
 
 export function OngoingTasksPage() {
     const db = useAppSelector(databaseSelectors.activeDatabase);
@@ -299,6 +301,8 @@ export function OngoingTasksPage() {
         subscriptionsDatabaseLimit
     );
 
+    const showInternalReplication = internalReplicationVisible(db);
+
     return (
         <div className="content-margin">
             {subscriptionsClusterLimitStatus !== "notReached" && (
@@ -367,12 +371,19 @@ export function OngoingTasksPage() {
             <Row className="gy-sm">
                 <div className="flex-vertical">
                     <div className="scroll flex-grow">
-                        {allTasksCount === 0 && (
+                        {allTasksCount === 0 && !showInternalReplication && (
                             <EmptySet>No tasks have been created for this Database Group.</EmptySet>
                         )}
 
+                        {showInternalReplication && (
+                            <InternalReplicationPanel
+                                onToggleDetails={startTrackingProgress}
+                                data={tasks.internalReplication}
+                            />
+                        )}
+
                         {externalReplications.length > 0 && (
-                            <div key="external-replications">
+                            <div key="external-replications" data-testid="external-replications">
                                 <HrHeader className="external-replication" count={externalReplications.length}>
                                     <Icon icon="external-replication" /> External Replication
                                 </HrHeader>
@@ -389,7 +400,7 @@ export function OngoingTasksPage() {
                         )}
 
                         {ravenEtls.length > 0 && (
-                            <div key="raven-etls">
+                            <div key="raven-etls" data-testid="raven-etls">
                                 <HrHeader className="ravendb-etl" count={ravenEtls.length}>
                                     <Icon icon="etl" />
                                     RavenDB ETL
@@ -408,7 +419,7 @@ export function OngoingTasksPage() {
                         )}
 
                         {sqlEtls.length > 0 && (
-                            <div key="sql-etls">
+                            <div key="sql-etls" data-testid="sql-etls">
                                 <HrHeader className="sql-etl" count={sqlEtls.length}>
                                     <Icon icon="sql-etl" />
                                     SQL ETL
@@ -427,7 +438,7 @@ export function OngoingTasksPage() {
                         )}
 
                         {olapEtls.length > 0 && (
-                            <div key="olap-etls">
+                            <div key="olap-etls" data-testid="olap-etls">
                                 <HrHeader className="olap-etl" count={olapEtls.length}>
                                     <Icon icon="olap-etl" />
                                     OLAP ETL
@@ -446,7 +457,7 @@ export function OngoingTasksPage() {
                         )}
 
                         {kafkaEtls.length > 0 && (
-                            <div key="kafka-etls">
+                            <div key="kafka-etls" data-testid="kafka-etls">
                                 <HrHeader className="kafka-etl" count={kafkaEtls.length}>
                                     <Icon icon="kafka-etl" />
                                     KAFKA ETL
@@ -465,7 +476,7 @@ export function OngoingTasksPage() {
                         )}
 
                         {rabbitMqEtls.length > 0 && (
-                            <div key="rabbitmq-etls">
+                            <div key="rabbitmq-etls" data-testid="rabbitmq-etls">
                                 <HrHeader className="rabbitmq-etl" count={rabbitMqEtls.length}>
                                     <Icon icon="rabbitmq-etl" />
                                     RABBITMQ ETL
@@ -484,7 +495,7 @@ export function OngoingTasksPage() {
                         )}
 
                         {azureQueueStorageEtls.length > 0 && (
-                            <div key="azure-queue-storage-etls">
+                            <div key="azure-queue-storage-etls" data-testid="azure-queue-storage-etls">
                                 <HrHeader className="azure-queue-storage-etl" count={azureQueueStorageEtls.length}>
                                     <Icon icon="azure-queue-storage-etl" />
                                     AZURE QUEUE STORAGE ETL
@@ -503,7 +514,7 @@ export function OngoingTasksPage() {
                         )}
 
                         {kafkaSinks.length > 0 && (
-                            <div key="kafka-sinks">
+                            <div key="kafka-sinks" data-testid="kafka-sinks">
                                 <HrHeader className="kafka-sink" count={kafkaSinks.length}>
                                     <Icon icon="kafka-sink" />
                                     KAFKA SINK
@@ -516,7 +527,7 @@ export function OngoingTasksPage() {
                         )}
 
                         {rabbitMqSinks.length > 0 && (
-                            <div key="rabbitmq-sinks">
+                            <div key="rabbitmq-sinks" data-testid="rabbitmq-sinks">
                                 <HrHeader className="rabbitmq-sink" count={rabbitMqSinks.length}>
                                     <Icon icon="rabbitmq-sink" />
                                     RABBITMQ SINK
@@ -529,7 +540,7 @@ export function OngoingTasksPage() {
                         )}
 
                         {elasticSearchEtls.length > 0 && (
-                            <div key="elastic-search-etls">
+                            <div key="elastic-search-etls" data-testid="elastic-search-etls">
                                 <HrHeader className="elastic-etl" count={elasticSearchEtls.length}>
                                     <Icon icon="elastic-search-etl" />
                                     Elasticsearch ETL
@@ -548,7 +559,7 @@ export function OngoingTasksPage() {
                         )}
 
                         {backups.length > 0 && (
-                            <div key="backups">
+                            <div key="backups" data-testid="backups">
                                 <HrHeader className="periodic-backup" count={backups.length}>
                                     <Icon icon="backup" />
                                     Periodic Backup
@@ -568,7 +579,7 @@ export function OngoingTasksPage() {
                         )}
 
                         {subscriptionsDatabaseCount > 0 && (
-                            <div key="subscriptions">
+                            <div key="subscriptions" data-testid="subscriptions">
                                 <HrHeader
                                     className="subscription"
                                     count={
@@ -622,7 +633,7 @@ export function OngoingTasksPage() {
                         )}
 
                         {hubDefinitions.length > 0 && (
-                            <div key="replication-hubs">
+                            <div key="replication-hubs" data-testid="replication-hubs">
                                 <HrHeader className="pull-replication-hub" count={hubDefinitions.length}>
                                     <Icon icon="pull-replication-hub" />
                                     Replication Hub
@@ -643,7 +654,7 @@ export function OngoingTasksPage() {
                         )}
 
                         {replicationSinks.length > 0 && (
-                            <div key="replication-sinks">
+                            <div key="replication-sinks" data-testid="replication-sinks">
                                 <HrHeader className="pull-replication-sink" count={replicationSinks.length}>
                                     <Icon icon="pull-replication-agent" />
                                     Replication Sink
@@ -737,4 +748,12 @@ function getFilteredTasks(state: OngoingTasksState, filter: OngoingTasksFilterCr
         subscriptions: state.subscriptions.filter((x) => filterOngoingTask(x.shared, filter)),
         hubDefinitions: state.replicationHubs.filter((x) => filterOngoingTask(x.shared, filter)),
     };
+}
+
+export function internalReplicationVisible(db: DatabaseSharedInfo): boolean {
+    if (db.isSharded) {
+        return db.shards.some((x) => x.nodes.length > 1);
+    } else {
+        return DatabaseUtils.getLocations(db).length > 1;
+    }
 }

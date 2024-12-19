@@ -4,6 +4,7 @@ import React from "react";
 import * as stories from "./OngoingTasksPage.stories";
 import { composeStories, composeStory } from "@storybook/react";
 import { boundCopy } from "components/utils/common";
+import { within } from "@testing-library/dom";
 
 const { EmptyView, FullView } = composeStories(stories);
 
@@ -36,18 +37,20 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByText(/RavenDB ETL/)).toBeInTheDocument();
-            expect(await screen.findByText(/Disabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Enabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("raven-etls"));
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            expect(await container.findByText(/RavenDB ETL/)).toBeInTheDocument();
+            expect(await container.findByText(/Disabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Enabled/)).not.toBeInTheDocument();
+
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            expect(await screen.findByText(/Topology Discovery URLs/)).toBeInTheDocument();
+            expect(await container.findByText(/Topology Discovery URLs/)).toBeInTheDocument();
 
             //wait for progress
-            await screen.findAllByText(/Disabled/i);
+            await container.findAllByText(/Disabled/i);
         });
 
         it("can render completed", async () => {
@@ -58,11 +61,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("raven-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText(/Up to date/i);
+            await container.findAllByText(/Up to date/i);
         });
 
         it("can render enabled and not completed", async () => {
@@ -74,11 +78,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("raven-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText("Running");
+            await container.findAllByText("Running");
         });
 
         it("can notify about empty script", async () => {
@@ -90,13 +95,15 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("raven-etls"));
+
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText(/Up to date/i);
+            await container.findAllByText(/Up to date/i);
 
-            expect(await screen.findByText(selectors.emptyScriptText)).toBeInTheDocument();
+            expect(await container.findByText(selectors.emptyScriptText)).toBeInTheDocument();
         });
     });
 
@@ -110,19 +117,20 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByText(/SQL ETL/)).toBeInTheDocument();
-            expect(await screen.findByText(/Disabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Enabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("sql-etls"));
+            expect(await container.findByText(/SQL ETL/)).toBeInTheDocument();
+            expect(await container.findByText(/Disabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Enabled/)).not.toBeInTheDocument();
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            const target = await screen.findByTitle("Destination <database>@<server>");
+            const target = await container.findByTitle("Destination <database>@<server>");
             expect(target).toBeInTheDocument();
 
             //wait for progress
-            await screen.findAllByText(/Disabled/i);
+            await container.findAllByText(/Disabled/i);
         });
 
         it("can render completed", async () => {
@@ -133,11 +141,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("sql-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText(/Up to date/i);
+            await container.findAllByText(/Up to date/i);
         });
 
         it("can render enabled and not completed", async () => {
@@ -149,11 +158,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("sql-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText("Running");
+            await container.findAllByText("Running");
         });
 
         it("can notify about empty script", async () => {
@@ -165,13 +175,14 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("sql-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText(/Up to date/i);
+            await container.findAllByText(/Up to date/i);
 
-            expect(await screen.findByText(selectors.emptyScriptText)).toBeInTheDocument();
+            expect(await container.findByText(selectors.emptyScriptText)).toBeInTheDocument();
         });
     });
 
@@ -185,20 +196,21 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByText(/OLAP ETL/)).toBeInTheDocument();
-            expect(await screen.findByText(/Disabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Enabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("olap-etls"));
+            expect(await container.findByText(/OLAP ETL/)).toBeInTheDocument();
+            expect(await container.findByText(/Disabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Enabled/)).not.toBeInTheDocument();
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            expect(await screen.findByText(/Destination/)).toBeInTheDocument();
+            expect(await container.findByText(/Destination/)).toBeInTheDocument();
 
-            expect(await screen.findByText(/Connection String/)).toBeInTheDocument();
+            expect(await container.findByText(/Connection String/)).toBeInTheDocument();
 
             //wait for progress
-            await screen.findAllByText(/Disabled/i);
+            await container.findAllByText(/Disabled/i);
         });
 
         it("can render completed", async () => {
@@ -209,11 +221,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("olap-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText(/Up to date/i);
+            await container.findAllByText(/Up to date/i);
         });
 
         it("can render enabled and not completed", async () => {
@@ -225,11 +238,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("olap-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText("Running");
+            await container.findAllByText("Running");
         });
 
         it("can notify about empty script", async () => {
@@ -241,13 +255,14 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("olap-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText(/Up to date/i);
+            await container.findAllByText(/Up to date/i);
 
-            expect(await screen.findByText(selectors.emptyScriptText)).toBeInTheDocument();
+            expect(await container.findByText(selectors.emptyScriptText)).toBeInTheDocument();
         });
     });
 
@@ -261,18 +276,19 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByText(/KAFKA ETL/)).toBeInTheDocument();
-            expect(await screen.findByText(/Disabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Enabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("kafka-etls"));
+            expect(await container.findByText(/KAFKA ETL/)).toBeInTheDocument();
+            expect(await container.findByText(/Disabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Enabled/)).not.toBeInTheDocument();
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            expect(await screen.findByText(/Connection String/)).toBeInTheDocument();
+            expect(await container.findByText(/Connection String/)).toBeInTheDocument();
 
             //wait for progress
-            await screen.findAllByText(/Disabled/i);
+            await container.findAllByText(/Disabled/i);
         });
 
         it("can render completed", async () => {
@@ -283,11 +299,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("kafka-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText(/Up to date/i);
+            await container.findAllByText(/Up to date/i);
         });
 
         it("can render enabled and not completed", async () => {
@@ -299,11 +316,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("kafka-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText("Running");
+            await container.findAllByText("Running");
         });
 
         it("can notify about empty script", async () => {
@@ -315,13 +333,14 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("kafka-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText(/Up to date/i);
+            await container.findAllByText(/Up to date/i);
 
-            expect(await screen.findByText(selectors.emptyScriptText)).toBeInTheDocument();
+            expect(await container.findByText(selectors.emptyScriptText)).toBeInTheDocument();
         });
     });
 
@@ -335,18 +354,19 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByText(/RabbitMQ ETL/i)).toBeInTheDocument();
-            expect(await screen.findByText(/Disabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Enabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("rabbitmq-etls"));
+            expect(await container.findByText(/RabbitMQ ETL/i)).toBeInTheDocument();
+            expect(await container.findByText(/Disabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Enabled/)).not.toBeInTheDocument();
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            expect(await screen.findByText(/Connection String/)).toBeInTheDocument();
+            expect(await container.findByText(/Connection String/)).toBeInTheDocument();
 
             //wait for progress
-            await screen.findAllByText(/Disabled/i);
+            await container.findAllByText(/Disabled/i);
         });
 
         it("can render completed", async () => {
@@ -357,11 +377,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("rabbitmq-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText(/Up to date/i);
+            await container.findAllByText(/Up to date/i);
         });
 
         it("can render enabled and not completed", async () => {
@@ -373,11 +394,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("rabbitmq-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText("Running");
+            await container.findAllByText("Running");
         });
 
         it("can notify about empty script", async () => {
@@ -389,13 +411,14 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("rabbitmq-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText(/Up to date/i);
+            await container.findAllByText(/Up to date/i);
 
-            expect(await screen.findByText(selectors.emptyScriptText)).toBeInTheDocument();
+            expect(await container.findByText(selectors.emptyScriptText)).toBeInTheDocument();
         });
     });
 
@@ -409,18 +432,20 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByText(/AZURE QUEUE STORAGE ETL/)).toBeInTheDocument();
-            expect(await screen.findByText(/Disabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Enabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("azure-queue-storage-etls"));
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            expect(await container.findByText(/AZURE QUEUE STORAGE ETL/)).toBeInTheDocument();
+            expect(await container.findByText(/Disabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Enabled/)).not.toBeInTheDocument();
+
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            expect(await screen.findByText(/Connection String/)).toBeInTheDocument();
+            expect(await container.findByText(/Connection String/)).toBeInTheDocument();
 
             //wait for progress
-            await screen.findAllByText(/Disabled/i);
+            await container.findAllByText(/Disabled/i);
         });
 
         it("can render completed", async () => {
@@ -431,11 +456,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("azure-queue-storage-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText(/Up to date/i);
+            await container.findAllByText(/Up to date/i);
         });
 
         it("can render enabled and not completed", async () => {
@@ -447,11 +473,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("azure-queue-storage-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText("Running");
+            await container.findAllByText("Running");
         });
 
         it("can notify about empty script", async () => {
@@ -463,13 +490,14 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("azure-queue-storage-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText(/Up to date/i);
+            await container.findAllByText(/Up to date/i);
 
-            expect(await screen.findByText(selectors.emptyScriptText)).toBeInTheDocument();
+            expect(await container.findByText(selectors.emptyScriptText)).toBeInTheDocument();
         });
     });
 
@@ -482,15 +510,17 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByText(/KAFKA SINK/)).toBeInTheDocument();
-            expect(await screen.findByText(/Enabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Disabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("kafka-sinks"));
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            expect(await container.findByText(/KAFKA SINK/)).toBeInTheDocument();
+            expect(await container.findByText(/Enabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Disabled/)).not.toBeInTheDocument();
+
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            expect(await screen.findByText(/Connection String/)).toBeInTheDocument();
+            expect(await container.findByText(/Connection String/)).toBeInTheDocument();
         });
 
         it("can render disabled", async () => {
@@ -501,11 +531,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
+            const container = within(await screen.findByTestId("kafka-sinks"));
 
-            expect(await screen.findByText(/Disabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Enabled/)).not.toBeInTheDocument();
+            expect(await container.findByText(/Disabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Enabled/)).not.toBeInTheDocument();
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
         });
     });
@@ -519,15 +550,16 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByText(/RABBITMQ SINK/)).toBeInTheDocument();
-            expect(await screen.findByText(/Enabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Disabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("rabbitmq-sinks"));
+            expect(await container.findByText(/RABBITMQ SINK/)).toBeInTheDocument();
+            expect(await container.findByText(/Enabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Disabled/)).not.toBeInTheDocument();
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            expect(await screen.findByText(/Connection String/)).toBeInTheDocument();
+            expect(await container.findByText(/Connection String/)).toBeInTheDocument();
         });
 
         it("can render disabled", async () => {
@@ -538,11 +570,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
+            const container = within(await screen.findByTestId("rabbitmq-sinks"));
 
-            expect(await screen.findByText(/Disabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Enabled/)).not.toBeInTheDocument();
+            expect(await container.findByText(/Disabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Enabled/)).not.toBeInTheDocument();
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
         });
     });
@@ -557,20 +590,21 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByText(/Elasticsearch ETL/)).toBeInTheDocument();
-            expect(await screen.findByText(/Disabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Enabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("elastic-search-etls"));
+            expect(await container.findByText(/Elasticsearch ETL/)).toBeInTheDocument();
+            expect(await container.findByText(/Disabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Enabled/)).not.toBeInTheDocument();
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            expect(await screen.findByText("http://elastic1:8081")).toBeInTheDocument();
+            expect(await container.findByText("http://elastic1:8081")).toBeInTheDocument();
 
-            expect(await screen.findByText(/Connection String/)).toBeInTheDocument();
+            expect(await container.findByText(/Connection String/)).toBeInTheDocument();
 
             //wait for progress
-            await screen.findAllByText(/Disabled/i);
+            await container.findAllByText(/Disabled/i);
         });
 
         it("can render completed", async () => {
@@ -581,11 +615,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("elastic-search-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText(/Up to date/i);
+            await container.findAllByText(/Up to date/i);
         });
 
         it("can render enabled and not completed", async () => {
@@ -597,11 +632,12 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("elastic-search-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText("Running");
+            await container.findAllByText("Running");
         });
 
         it("can notify about empty script", async () => {
@@ -613,13 +649,14 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("elastic-search-etls"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
 
             //wait for progress
-            await screen.findAllByText(/Up to date/i);
+            await container.findAllByText(/Up to date/i);
 
-            expect(await screen.findByText(selectors.emptyScriptText)).toBeInTheDocument();
+            expect(await container.findByText(selectors.emptyScriptText)).toBeInTheDocument();
         });
     });
 
@@ -632,18 +669,19 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByRole("heading", { name: /Replication Sink/ })).toBeInTheDocument();
-            expect(await screen.findByText(/Enabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Disabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("replication-sinks"));
+            expect(await container.findByRole("heading", { name: /Replication Sink/ })).toBeInTheDocument();
+            expect(await container.findByText(/Enabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Disabled/)).not.toBeInTheDocument();
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            expect(await screen.findByText(/Hub Database/)).toBeInTheDocument();
-            expect(await screen.findByText(/Connection String/)).toBeInTheDocument();
-            expect(await screen.findByText(/Actual Hub URL/)).toBeInTheDocument();
-            expect(await screen.findByText(/Hub Name/)).toBeInTheDocument();
+            expect(await container.findByText(/Hub Database/)).toBeInTheDocument();
+            expect(await container.findByText(/Connection String/)).toBeInTheDocument();
+            expect(await container.findByText(/Actual Hub URL/)).toBeInTheDocument();
+            expect(await container.findByText(/Hub Name/)).toBeInTheDocument();
         });
     });
 
@@ -657,15 +695,16 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByRole("heading", { name: /Replication Hub/ })).toBeInTheDocument();
-            expect(await screen.findByText(/Enabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Disabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("replication-hubs"));
+            expect(await container.findByRole("heading", { name: /Replication Hub/ })).toBeInTheDocument();
+            expect(await container.findByText(/Enabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Disabled/)).not.toBeInTheDocument();
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            expect(await screen.findByText(/No sinks connected/)).toBeInTheDocument();
+            expect(await container.findByText(/No sinks connected/)).toBeInTheDocument();
         });
 
         it("can render hub w/ connections", async () => {
@@ -676,21 +715,22 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByRole("heading", { name: /Replication Hub/ })).toBeInTheDocument();
-            expect(await screen.findByText(/Enabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Disabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("replication-hubs"));
+            expect(await container.findByRole("heading", { name: /Replication Hub/ })).toBeInTheDocument();
+            expect(await container.findByText(/Enabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Disabled/)).not.toBeInTheDocument();
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            expect(await screen.findByText(/Task Name/)).toBeInTheDocument();
-            expect(await screen.findByText(/Sink Database/)).toBeInTheDocument();
-            expect(await screen.findByText(/target-hub-db/)).toBeInTheDocument();
-            expect(await screen.findByText(/Actual Sink URL/)).toBeInTheDocument();
+            expect(await container.findByText(/Task Name/)).toBeInTheDocument();
+            expect(await container.findByText(/Sink Database/)).toBeInTheDocument();
+            expect(await container.findByText(/target-hub-db/)).toBeInTheDocument();
+            expect(await container.findByText(/Actual Sink URL/)).toBeInTheDocument();
 
-            expect(await screen.findByText(/Last DB Etag/)).toBeInTheDocument();
-            expect(await screen.findByText(/Last Sent Etag/)).toBeInTheDocument();
+            expect(await container.findByText(/Last DB Etag/)).toBeInTheDocument();
+            expect(await container.findByText(/Last Sent Etag/)).toBeInTheDocument();
         });
     });
 
@@ -703,19 +743,20 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByText(/Periodic Backup/)).toBeInTheDocument();
-            expect(await screen.findByText(/Enabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Disabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("backups"));
+            expect(await container.findByText(/Periodic Backup/)).toBeInTheDocument();
+            expect(await container.findByText(/Enabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Disabled/)).not.toBeInTheDocument();
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            expect(await screen.findByText(/Destinations/)).toBeInTheDocument();
-            expect(await screen.findByText(/Last Full Backup/)).toBeInTheDocument();
-            expect(await screen.findByText(/Last Incremental Backup/)).toBeInTheDocument();
-            expect(await screen.findByText(/Next Estimated Backup/)).toBeInTheDocument();
-            expect(await screen.findByText(/Retention Policy/)).toBeInTheDocument();
+            expect(await container.findByText(/Destinations/)).toBeInTheDocument();
+            expect(await container.findByText(/Last Full Backup/)).toBeInTheDocument();
+            expect(await container.findByText(/Last Incremental Backup/)).toBeInTheDocument();
+            expect(await container.findByText(/Next Estimated Backup/)).toBeInTheDocument();
+            expect(await container.findByText(/Retention Policy/)).toBeInTheDocument();
         });
     });
 
@@ -728,38 +769,40 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByRole("heading", { name: /External Replication/ })).toBeInTheDocument();
-            expect(await screen.findByText(/Enabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Disabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("external-replications"));
+            expect(await container.findByRole("heading", { name: /External Replication/ })).toBeInTheDocument();
+            expect(await container.findByText(/Enabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Disabled/)).not.toBeInTheDocument();
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            expect(await screen.findByText(/Connection String/)).toBeInTheDocument();
-            expect(await screen.findByText(/Destination Database/)).toBeInTheDocument();
-            expect(await screen.findByText(/Actual Destination URL/)).toBeInTheDocument();
-            expect(await screen.findByText(/Topology Discovery URLs/)).toBeInTheDocument();
+            expect(await container.findByText(/Connection String/)).toBeInTheDocument();
+            expect(await container.findByText(/Destination Database/)).toBeInTheDocument();
+            expect(await container.findByText(/Actual Destination URL/)).toBeInTheDocument();
+            expect(await container.findByText(/Topology Discovery URLs/)).toBeInTheDocument();
 
             // edit, delete button should be present for non-server wide
-            expect(screen.queryByTitle(selectors.deleteTaskTitle)).toBeInTheDocument();
-            expect(screen.queryByTitle(selectors.editTaskTitle)).toBeInTheDocument();
+            expect(container.queryByTitle(selectors.deleteTaskTitle)).toBeInTheDocument();
+            expect(container.queryByTitle(selectors.editTaskTitle)).toBeInTheDocument();
 
-            expect(await screen.findByText(/Last DB Etag/)).toBeInTheDocument();
-            expect(await screen.findByText(/Last Sent Etag/)).toBeInTheDocument();
+            expect(await container.findByText(/Last DB Etag/)).toBeInTheDocument();
+            expect(await container.findByText(/Last Sent Etag/)).toBeInTheDocument();
         });
 
         it("can render server wide", async () => {
             const Story = composeStory(stories.ExternalReplicationServerWide, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const container = within(await screen.findByTestId("external-replications"));
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
             // edit, delete button not present for server wide
-            expect(screen.queryByTitle(selectors.deleteTaskTitle)).not.toBeInTheDocument();
-            expect(screen.queryByTitle(selectors.editTaskTitle)).not.toBeInTheDocument();
+            expect(container.queryByTitle(selectors.deleteTaskTitle)).not.toBeInTheDocument();
+            expect(container.queryByTitle(selectors.editTaskTitle)).not.toBeInTheDocument();
         });
     });
 
@@ -772,17 +815,18 @@ describe("OngoingTasksPage", function () {
             const Story = composeStory(View, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
-            expect(await screen.findByRole("heading", { name: /Subscription/ })).toBeInTheDocument();
-            expect(await screen.findByText(/Enabled/)).toBeInTheDocument();
-            expect(screen.queryByText(/Disabled/)).not.toBeInTheDocument();
+            const container = within(await screen.findByTestId("subscriptions"));
+            expect(await container.findByRole("heading", { name: /Subscription/ })).toBeInTheDocument();
+            expect(await container.findByText(/Enabled/)).toBeInTheDocument();
+            expect(container.queryByText(/Disabled/)).not.toBeInTheDocument();
 
-            const detailsBtn = await screen.findByTitle(/Click for details/);
+            const detailsBtn = await container.findByTitle(/Click for details/);
 
             await fireClick(detailsBtn);
 
-            expect(await screen.findByText(/Last Batch Ack Time/)).toBeInTheDocument();
-            expect(await screen.findByText(/Last Client Connection Time/)).toBeInTheDocument();
-            expect(await screen.findByText(/Change vector for next batch/)).toBeInTheDocument();
+            expect(await container.findByText(/Last Batch Ack Time/)).toBeInTheDocument();
+            expect(await container.findByText(/Last Client Connection Time/)).toBeInTheDocument();
+            expect(await container.findByText(/Change vector for next batch/)).toBeInTheDocument();
         });
     });
 });
