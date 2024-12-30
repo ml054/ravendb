@@ -32,7 +32,6 @@ function ItemWithTooltip(props: ItemWithTooltipProps) {
     );
 
     const key = taskNodeInfoKey(nodeInfo);
-    const hasError = false;
     const [node, setNode] = useState<HTMLDivElement>();
 
     const firstProgress = nodeInfo.progress[0];
@@ -46,10 +45,20 @@ function ItemWithTooltip(props: ItemWithTooltipProps) {
                 </div>
                 <div>{firstProgress?.lastDatabaseEtag ? firstProgress.lastDatabaseEtag.toLocaleString() : "-"}</div>
                 <div>{firstProgress?.lastSentEtag ? firstProgress.lastSentEtag.toLocaleString() : "-"}</div>
-                <div>{hasError ? <Icon icon="warning" color="danger" margin="m-0" /> : "-"}</div>
                 <InternalReplicationTaskProgress nodeInfo={nodeInfo} />
             </DistributionItem>
-            {node && <ReplicationTaskProgressTooltip target={node} nodeInfo={nodeInfo} />}
+            {node && (
+                <ReplicationTaskProgressTooltip
+                    target={node}
+                    progress={nodeInfo.progress}
+                    status={nodeInfo.status}
+                    error={null}
+                    lastAcceptedChangeVectorFromDestination={
+                        nodeInfo.progress[0]?.lastAcceptedChangeVectorFromDestination
+                    }
+                    sourceDatabaseChangeVector={nodeInfo.progress[0]?.sourceDatabaseChangeVector}
+                />
+            )}
         </div>
     );
 }
@@ -81,16 +90,10 @@ export function InternalReplicationTaskDistribution(props: InternalReplicationTa
                         </div>
                     )}
                     <div>
-                        <Icon icon="connected" /> Status
-                    </div>
-                    <div>
                         <Icon icon="etag" /> Last DB Etag
                     </div>
                     <div>
                         <Icon icon="etag" /> Last Sent Etag
-                    </div>
-                    <div>
-                        <Icon icon="warning" /> Error
                     </div>
                     <div>
                         <Icon icon="changes" /> State

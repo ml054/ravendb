@@ -28,7 +28,11 @@ import { SubscriptionPanel } from "./panels/SubscriptionPanel";
 import { ReplicationSinkPanel } from "./panels/ReplicationSinkPanel";
 import { ReplicationHubDefinitionPanel } from "./panels/ReplicationHubDefinitionPanel";
 import useBoolean from "hooks/useBoolean";
-import { OngoingTaskProgressProvider } from "./partials/OngoingTaskProgressProvider";
+import {
+    EtlProgressProvider,
+    InternalReplicationProgressProvider,
+    ReplicationProgressProvider,
+} from "./partials/OngoingTaskProgressProviders";
 import { BaseOngoingTaskPanelProps, taskKey, useOngoingTasksOperations } from "../shared/shared";
 import EtlTaskProgress = Raven.Server.Documents.ETL.Stats.EtlTaskProgress;
 import "./OngoingTaskPage.scss";
@@ -59,7 +63,6 @@ import ReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.Replic
 import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.InternalReplicationTaskProgress;
 import { OngoingTasksHeader } from "components/pages/database/tasks/ongoingTasks/partials/OngoingTasksHeader";
 import { InternalReplicationPanel } from "./panels/InternalReplicationPanel";
-import { DatabaseSharedInfo } from "components/models/databases";
 import DatabaseUtils from "components/utils/DatabaseUtils";
 
 export function OngoingTasksPage() {
@@ -68,7 +71,10 @@ export function OngoingTasksPage() {
     const { tasksService } = useServices();
     const [tasks, dispatch] = useReducer(ongoingTasksReducer, db, ongoingTasksReducerInitializer);
 
-    const { value: progressEnabled, setTrue: startTrackingProgress } = useBoolean(false);
+    const { value: internalReplicationProgressEnabled, setTrue: startTrackingInternalReplicationProgress } =
+        useBoolean(false);
+    const { value: replicationProgressEnabled, setTrue: startTrackingReplicationProgress } = useBoolean(false);
+    const { value: etlProgressEnabled, setTrue: startTrackingEtlProgress } = useBoolean(false);
     const [definitionCache] = useState(() => new etlScriptDefinitionCache(db.name));
     const [filter, setFilter] = useState<OngoingTasksFilterCriteria>({
         searchText: "",
@@ -162,6 +168,7 @@ export function OngoingTasksPage() {
     const filteredTasks = getFilteredTasks(tasks, filter);
 
     const {
+        internalReplications,
         externalReplications,
         ravenEtls,
         sqlEtls,
@@ -183,8 +190,13 @@ export function OngoingTasksPage() {
         throttledUpdateLicenseLimitsUsage();
     }, [subscriptions.length]);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { replicationHubs: ignored, ...filteredWithoutReplicationHubs } = filteredTasks;
+    const {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        replicationHubs: ignored,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        internalReplications: ignored2,
+        ...filteredWithoutReplicationHubs
+    } = filteredTasks;
     const filteredDatabaseTaskIds = Object.values(filteredWithoutReplicationHubs)
         .flat()
         .filter((x) => !x.shared.serverWide)
@@ -203,8 +215,8 @@ export function OngoingTasksPage() {
     const allTasksCount =
         tasks.tasks.filter((x) => x.shared.taskType !== "PullReplicationAsHub").length +
         tasks.replicationHubs.length +
-        tasks.subscriptions.length;
-
+        tasks.subscriptions.length +
+        (DatabaseUtils.hasInternalReplication(db) ? 1 : 0);
     const refreshSubscriptionInfo = async (taskId: number, taskName: string) => {
         const loadTasks = db.nodes.map(async (nodeInfo) => {
             const nodeTag = nodeInfo.tag;
@@ -301,7 +313,7 @@ export function OngoingTasksPage() {
         subscriptionsDatabaseLimit
     );
 
-    const showInternalReplication = internalReplicationVisible(db);
+    const showInternalReplication = DatabaseUtils.hasInternalReplication(db);
 
     return (
         <div className="content-margin">
@@ -349,18 +361,22 @@ export function OngoingTasksPage() {
                 </RichAlert>
             )}
 
-            {progressEnabled && (
-                <OngoingTaskProgressProvider
-                    onEtlProgress={onEtlProgress}
-                    onReplicationProgress={onReplicationProgress}
+            {internalReplicationProgressEnabled && (
+                <InternalReplicationProgressProvider
+                    key="internalReplicationProgress"
                     onInternalReplicationProgress={onInternalReplicationProgress}
                 />
             )}
+            {replicationProgressEnabled && (
+                <ReplicationProgressProvider key="replicationProgress" onReplicationProgress={onReplicationProgress} />
+            )}
+            {etlProgressEnabled && <EtlProgressProvider key="etlProgressEnabled" onEtlProgress={onEtlProgress} />}
             {operationConfirm && <OngoingTaskOperationConfirm {...operationConfirm} toggle={cancelOperationConfirm} />}
             <OngoingTasksHeader
                 reload={reload}
                 allTasksCount={allTasksCount}
                 tasks={tasks}
+                hasInternalReplication={DatabaseUtils.hasInternalReplication(db)}
                 selectedTaskIds={selectedTaskIds}
                 subscriptionsDatabaseCount={subscriptionsDatabaseCount}
                 filter={filter}
@@ -375,9 +391,9 @@ export function OngoingTasksPage() {
                             <EmptySet>No tasks have been created for this Database Group.</EmptySet>
                         )}
 
-                        {showInternalReplication && (
+                        {showInternalReplication && internalReplications.length > 0 && (
                             <InternalReplicationPanel
-                                onToggleDetails={startTrackingProgress}
+                                onToggleDetails={startTrackingInternalReplicationProgress}
                                 data={tasks.internalReplication}
                             />
                         )}
@@ -393,7 +409,7 @@ export function OngoingTasksPage() {
                                         {...sharedPanelProps}
                                         key={taskKey(x.shared)}
                                         data={x}
-                                        onToggleDetails={startTrackingProgress}
+                                        onToggleDetails={startTrackingReplicationProgress}
                                     />
                                 ))}
                             </div>
@@ -411,7 +427,7 @@ export function OngoingTasksPage() {
                                         {...sharedPanelProps}
                                         key={taskKey(x.shared)}
                                         data={x}
-                                        onToggleDetails={startTrackingProgress}
+                                        onToggleDetails={startTrackingEtlProgress}
                                         showItemPreview={showItemPreview}
                                     />
                                 ))}
@@ -430,7 +446,7 @@ export function OngoingTasksPage() {
                                         {...sharedPanelProps}
                                         key={taskKey(x.shared)}
                                         data={x}
-                                        onToggleDetails={startTrackingProgress}
+                                        onToggleDetails={startTrackingEtlProgress}
                                         showItemPreview={showItemPreview}
                                     />
                                 ))}
@@ -449,7 +465,7 @@ export function OngoingTasksPage() {
                                         {...sharedPanelProps}
                                         key={taskKey(x.shared)}
                                         data={x}
-                                        onToggleDetails={startTrackingProgress}
+                                        onToggleDetails={startTrackingEtlProgress}
                                         showItemPreview={showItemPreview}
                                     />
                                 ))}
@@ -468,7 +484,7 @@ export function OngoingTasksPage() {
                                         {...sharedPanelProps}
                                         key={taskKey(x.shared)}
                                         data={x}
-                                        onToggleDetails={startTrackingProgress}
+                                        onToggleDetails={startTrackingEtlProgress}
                                         showItemPreview={showItemPreview}
                                     />
                                 ))}
@@ -487,7 +503,7 @@ export function OngoingTasksPage() {
                                         {...sharedPanelProps}
                                         key={taskKey(x.shared)}
                                         data={x}
-                                        onToggleDetails={startTrackingProgress}
+                                        onToggleDetails={startTrackingEtlProgress}
                                         showItemPreview={showItemPreview}
                                     />
                                 ))}
@@ -506,7 +522,7 @@ export function OngoingTasksPage() {
                                         {...sharedPanelProps}
                                         key={taskKey(x.shared)}
                                         data={x}
-                                        onToggleDetails={startTrackingProgress}
+                                        onToggleDetails={startTrackingEtlProgress}
                                         showItemPreview={showItemPreview}
                                     />
                                 ))}
@@ -551,7 +567,7 @@ export function OngoingTasksPage() {
                                         {...sharedPanelProps}
                                         key={taskKey(x.shared)}
                                         data={x}
-                                        onToggleDetails={startTrackingProgress}
+                                        onToggleDetails={startTrackingEtlProgress}
                                         showItemPreview={showItemPreview}
                                     />
                                 ))}
@@ -644,7 +660,7 @@ export function OngoingTasksPage() {
                                         {...sharedPanelProps}
                                         key={taskKey(def.shared)}
                                         data={def}
-                                        onToggleDetails={startTrackingProgress}
+                                        onToggleDetails={startTrackingReplicationProgress}
                                         connectedSinks={replicationHubs.filter(
                                             (x) => x.shared.taskId === def.shared.taskId
                                         )}
@@ -664,7 +680,7 @@ export function OngoingTasksPage() {
                                     <ReplicationSinkPanel
                                         {...sharedPanelProps}
                                         key={taskKey(x.shared)}
-                                        onToggleDetails={startTrackingProgress}
+                                        onToggleDetails={startTrackingReplicationProgress}
                                         data={x}
                                     />
                                 ))}
@@ -678,8 +694,12 @@ export function OngoingTasksPage() {
     );
 }
 
+function nameMatch(taskName: string, searchText: string): boolean {
+    return taskName.toLowerCase().includes(searchText.toLowerCase());
+}
+
 function filterOngoingTask(sharedInfo: OngoingTaskSharedInfo, filter: OngoingTasksFilterCriteria) {
-    const isTaskNameMatching = sharedInfo.taskName.toLowerCase().includes(filter.searchText.toLowerCase());
+    const isTaskNameMatching = nameMatch(sharedInfo.taskName, filter.searchText);
 
     if (!isTaskNameMatching) {
         return false;
@@ -717,7 +737,14 @@ function filterOngoingTask(sharedInfo: OngoingTaskSharedInfo, filter: OngoingTas
 function getFilteredTasks(state: OngoingTasksState, filter: OngoingTasksFilterCriteria) {
     const filteredTasks = state.tasks.filter((x) => filterOngoingTask(x.shared, filter));
 
+    const internalReplicationVisible =
+        (filter.types.length === 0 || filter.types.includes("Replication")) &&
+        nameMatch("Internal Replication", filter.searchText);
+
+    const filteredReplications = internalReplicationVisible ? state.internalReplication : [];
+
     return {
+        internalReplications: filteredReplications,
         externalReplications: filteredTasks.filter(
             (x) => x.shared.taskType === "Replication"
         ) as OngoingTaskExternalReplicationInfo[],
@@ -748,12 +775,4 @@ function getFilteredTasks(state: OngoingTasksState, filter: OngoingTasksFilterCr
         subscriptions: state.subscriptions.filter((x) => filterOngoingTask(x.shared, filter)),
         hubDefinitions: state.replicationHubs.filter((x) => filterOngoingTask(x.shared, filter)),
     };
-}
-
-export function internalReplicationVisible(db: DatabaseSharedInfo): boolean {
-    if (db.isSharded) {
-        return db.shards.some((x) => x.nodes.length > 1);
-    } else {
-        return DatabaseUtils.getLocations(db).length > 1;
-    }
 }

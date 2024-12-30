@@ -806,6 +806,23 @@ describe("OngoingTasksPage", function () {
         });
     });
 
+    describe("Internal Replication", function () {
+        it("can render", async () => {
+            const Story = composeStory(stories.InternalReplication, stories.default);
+
+            const { screen, fireClick } = rtlRender(<Story />);
+            const container = screen;
+            expect(await container.findByRole("heading", { name: /Internal Replication/ })).toBeInTheDocument();
+
+            const detailsBtn = await container.findByTitle(/Click for details/);
+
+            await fireClick(detailsBtn);
+
+            expect(await container.findByText(/Last DB Etag/)).toBeInTheDocument();
+            expect(await container.findByText(/Last Sent Etag/)).toBeInTheDocument();
+        });
+    });
+
     describe("Subscription", function () {
         it("can render enabled", async () => {
             const View = boundCopy(stories.SubscriptionTemplate, {

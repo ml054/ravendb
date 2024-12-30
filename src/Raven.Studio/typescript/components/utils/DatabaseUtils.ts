@@ -72,6 +72,14 @@ export default class DatabaseUtils {
         return "Partially Online";
     }
 
+    static hasInternalReplication(db: DatabaseSharedInfo): boolean {
+        if (db.isSharded) {
+            return db.shards.some((x) => x.nodes.length > 1);
+        } else {
+            return DatabaseUtils.getLocations(db).length > 1;
+        }
+    }
+
     static getLocations(db: DatabaseSharedInfo): databaseLocationSpecifier[] {
         if (db.isSharded) {
             const locations: databaseLocationSpecifier[] = db.shards.flatMap((shard) => {

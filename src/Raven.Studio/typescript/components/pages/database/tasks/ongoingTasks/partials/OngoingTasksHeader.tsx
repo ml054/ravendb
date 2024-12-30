@@ -20,9 +20,12 @@ import { InputItem } from "components/models/common";
 import { exhaustiveStringTuple } from "components/utils/common";
 import assertUnreachable from "components/utils/assertUnreachable";
 import { useOngoingTasksOperations } from "components/pages/database/tasks/shared/shared";
+import { DatabaseSharedInfo } from "components/models/databases";
+import DatabaseUtils from "components/utils/DatabaseUtils";
 
 interface OngoingTasksHeaderProps {
     tasks: OngoingTasksState;
+    hasInternalReplication: boolean;
     allTasksCount: number;
     selectedTaskIds: number[];
     subscriptionsDatabaseCount: number;
@@ -40,6 +43,7 @@ export function OngoingTasksHeader(props: OngoingTasksHeaderProps) {
         subscriptionsDatabaseCount,
         setFilter,
         filter,
+        hasInternalReplication,
         filteredDatabaseTaskIds,
         reload,
         setSelectedTaskIds,
@@ -145,7 +149,7 @@ export function OngoingTasksHeader(props: OngoingTasksHeaderProps) {
                     <OngoingTasksFilter
                         filter={filter}
                         setFilter={setFilter}
-                        filterByStatusOptions={getFilterByStatusOptions(tasks)}
+                        filterByStatusOptions={getFilterByStatusOptions(tasks, hasInternalReplication)}
                         tasksCount={allTasksCount}
                     />
                 </div>
@@ -165,7 +169,10 @@ export function OngoingTasksHeader(props: OngoingTasksHeaderProps) {
     );
 }
 
-function getFilterByStatusOptions(state: OngoingTasksState): InputItem<OngoingTaskFilterType>[] {
+function getFilterByStatusOptions(
+    state: OngoingTasksState,
+    hasInternalReplication: boolean
+): InputItem<OngoingTaskFilterType>[] {
     const backupCount = state.tasks.filter((x) => x.shared.taskType === "Backup").length;
     const subscriptionCount = state.subscriptions.length;
 
@@ -175,10 +182,12 @@ function getFilterByStatusOptions(state: OngoingTasksState): InputItem<OngoingTa
         (x) => x.shared.taskType === "KafkaQueueSink" || x.shared.taskType === "RabbitQueueSink"
     ).length;
 
+    const internalReplicationCount = hasInternalReplication ? 1 : 0;
     const replicationHubCount = state.replicationHubs.length;
     const replicationSinkCount = state.tasks.filter((x) => x.shared.taskType === "PullReplicationAsSink").length;
     const externalReplicationCount = state.tasks.filter((x) => x.shared.taskType === "Replication").length;
-    const replicationCount = externalReplicationCount + replicationHubCount + replicationSinkCount;
+    const replicationCount =
+        externalReplicationCount + replicationHubCount + replicationSinkCount + internalReplicationCount;
 
     return exhaustiveStringTuple<OngoingTaskFilterType>()("Replication", "ETL", "Sink", "Backup", "Subscription").map(
         (filterType) => {

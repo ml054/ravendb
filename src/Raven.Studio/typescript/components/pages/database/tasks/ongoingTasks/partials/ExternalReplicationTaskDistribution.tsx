@@ -56,7 +56,16 @@ function ItemWithTooltip(props: ItemWithTooltipProps) {
                 <div>{hasError ? <Icon icon="warning" color="danger" margin="m-0" /> : "-"}</div>
                 <ExternalReplicationTaskProgress task={task} nodeInfo={nodeInfo} />
             </DistributionItem>
-            {node && <ReplicationTaskProgressTooltip target={node} nodeInfo={nodeInfo} />}
+            {node && (
+                <ReplicationTaskProgressTooltip
+                    target={node}
+                    progress={nodeInfo.progress}
+                    status={nodeInfo.status}
+                    error={nodeInfo.details?.error}
+                    lastAcceptedChangeVectorFromDestination={nodeInfo.details?.lastAcceptedChangeVectorFromDestination}
+                    sourceDatabaseChangeVector={nodeInfo.details?.sourceDatabaseChangeVector}
+                />
+            )}
         </div>
     );
 }

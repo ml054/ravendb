@@ -88,6 +88,22 @@ export const FullView: StoryFn = () => {
     return <OngoingTasksPage />;
 };
 
+export const InternalReplication = () => {
+    commonInit();
+
+    const { tasksService } = mockServices;
+
+    tasksService.withGetTasks((x) => {
+        x.OngoingTasks = [];
+        x.PullReplications = [];
+        x.SubscriptionsCount = 0;
+    });
+
+    tasksService.withGetInternalReplicationProgress();
+
+    return <OngoingTasksPage />;
+};
+
 export const ExternalReplicationTemplate = (args: {
     disabled?: boolean;
     completed?: boolean;
