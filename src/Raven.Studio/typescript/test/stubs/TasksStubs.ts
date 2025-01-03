@@ -191,7 +191,7 @@ export class TasksStubs {
             SourceChangeVector: "B:6705-6HDhRgrh10Cyt4vBvkc5IQ, A:2568-F9I6Egqwm0Kz+K0oFVIR9Q",
             FromToString: "from sink1 at C to [A/http://127.0.0.1:59690]",
             HandlerId: "hub-id",
-            Completed: true,
+            Completed: false,
         };
     }
 

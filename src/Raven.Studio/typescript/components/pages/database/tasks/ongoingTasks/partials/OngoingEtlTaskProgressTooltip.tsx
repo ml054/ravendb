@@ -3,27 +3,38 @@ import { PopoverWithHover } from "components/common/PopoverWithHover";
 import { OngoingEtlTaskNodeInfo, OngoingTaskInfo } from "components/models/tasks";
 import { NamedProgress, NamedProgressItem } from "components/common/NamedProgress";
 import { Icon } from "components/common/Icon";
-import { Button, Modal, ModalBody } from "reactstrap";
-import useBoolean from "components/hooks/useBoolean";
-import Code from "components/common/Code";
+import { Button } from "reactstrap";
 import copyToClipboard from "common/copyToClipboard";
 import { NodeInfoFailure } from "components/pages/database/tasks/ongoingTasks/partials/NodeInfoFailure";
+import { ErrorModal } from "components/pages/database/tasks/ongoingTasks/partials/ErrorModal";
 
 interface OngoingTaskEtlProgressTooltipProps {
     target: HTMLElement;
     nodeInfo: OngoingEtlTaskNodeInfo;
     task: OngoingTaskInfo;
     showPreview: (transformationName: string) => void;
+    isErrorModalOpen: boolean;
+    toggleErrorModal: () => void;
 }
 
 export function OngoingEtlTaskProgressTooltip(props: OngoingTaskEtlProgressTooltipProps) {
-    const { target, nodeInfo, showPreview } = props;
+    const { target, nodeInfo, showPreview, toggleErrorModal, isErrorModalOpen } = props;
+
+    if (isErrorModalOpen) {
+        return <ErrorModal key="modal" toggleErrorModal={toggleErrorModal} error={nodeInfo.details.error} />;
+    }
 
     if (nodeInfo.status === "failure") {
-        return <NodeInfoFailure target={target} error={nodeInfo.details.error} />;
+        return <NodeInfoFailure target={target} openErrorModal={toggleErrorModal} />;
     }
 
     if (nodeInfo.status !== "success") {
+        return null;
+    }
+
+    const hasAnyDetailsToShow = nodeInfo?.etlProgress.length > 0 || nodeInfo.details.error;
+
+    if (!hasAnyDetailsToShow) {
         return null;
     }
 

@@ -64,6 +64,7 @@ import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stat
 import { OngoingTasksHeader } from "components/pages/database/tasks/ongoingTasks/partials/OngoingTasksHeader";
 import { InternalReplicationPanel } from "./panels/InternalReplicationPanel";
 import DatabaseUtils from "components/utils/DatabaseUtils";
+import recentError from "common/notifications/models/recentError";
 
 export function OngoingTasksPage() {
     const db = useAppSelector(databaseSelectors.activeDatabase);
@@ -96,7 +97,7 @@ export function OngoingTasksPage() {
                 dispatch({
                     type: "TasksLoadError",
                     location,
-                    error: e,
+                    error: recentError.tryExtractMessageAndException(e.responseText),
                 });
             }
         },
@@ -150,6 +151,17 @@ export function OngoingTasksPage() {
             dispatch({
                 type: "InternalReplicationProgressLoaded",
                 progress,
+                location,
+            });
+        },
+        [dispatch]
+    );
+
+    const onInternalReplicationError = useCallback(
+        (error: Error, location: databaseLocationSpecifier) => {
+            dispatch({
+                type: "InternalReplicationProgressError",
+                error,
                 location,
             });
         },
@@ -364,13 +376,14 @@ export function OngoingTasksPage() {
             {internalReplicationProgressEnabled && (
                 <InternalReplicationProgressProvider
                     key="internalReplicationProgress"
-                    onInternalReplicationProgress={onInternalReplicationProgress}
+                    onProgress={onInternalReplicationProgress}
+                    onError={onInternalReplicationError}
                 />
             )}
             {replicationProgressEnabled && (
-                <ReplicationProgressProvider key="replicationProgress" onReplicationProgress={onReplicationProgress} />
+                <ReplicationProgressProvider key="replicationProgress" onProgress={onReplicationProgress} />
             )}
-            {etlProgressEnabled && <EtlProgressProvider key="etlProgressEnabled" onEtlProgress={onEtlProgress} />}
+            {etlProgressEnabled && <EtlProgressProvider key="etlProgressEnabled" onProgress={onEtlProgress} />}
             {operationConfirm && <OngoingTaskOperationConfirm {...operationConfirm} toggle={cancelOperationConfirm} />}
             <OngoingTasksHeader
                 reload={reload}

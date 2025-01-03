@@ -11,9 +11,12 @@ import React, { useState } from "react";
 import classNames from "classnames";
 import { ProgressCircle } from "components/common/ProgressCircle";
 import { ReplicationTaskProgressTooltip } from "components/pages/database/tasks/ongoingTasks/partials/ReplicationTaskProgressTooltip";
+import useBoolean from "hooks/useBoolean";
+import { databaseLocationComparator, withPreventDefault } from "components/utils/common";
+import { ErrorModal } from "components/pages/database/tasks/ongoingTasks/partials/ErrorModal";
 
 interface ExternalReplicationTaskDistributionProps {
-    task: OngoingTaskExternalReplicationInfo | OngoingTaskReplicationHubInfo; //TODO: sink?
+    task: OngoingTaskExternalReplicationInfo | OngoingTaskReplicationHubInfo;
 }
 
 interface ItemWithTooltipProps {
@@ -36,9 +39,16 @@ function ItemWithTooltip(props: ItemWithTooltipProps) {
         </div>
     );
 
+    const [errorToDisplay, setErrorToDisplay] = useState<string>(null);
+
+    const toggleErrorModal = () => {
+        setErrorToDisplay((error) => (error ? null : nodeInfo.details?.error));
+    };
+
     const key = taskNodeInfoKey(task, nodeInfo);
     const hasError = !!nodeInfo.details?.error;
     const [node, setNode] = useState<HTMLDivElement>();
+
     return (
         <div ref={setNode}>
             <DistributionItem loading={nodeInfo.status === "loading" || nodeInfo.status === "idle"} key={key}>
@@ -53,19 +63,33 @@ function ItemWithTooltip(props: ItemWithTooltipProps) {
                     {nodeInfo.details?.lastDatabaseEtag ? nodeInfo.details.lastDatabaseEtag.toLocaleString() : "-"}
                 </div>
                 <div>{nodeInfo.details?.lastSentEtag ? nodeInfo.details.lastSentEtag.toLocaleString() : "-"}</div>
-                <div>{hasError ? <Icon icon="warning" color="danger" margin="m-0" /> : "-"}</div>
+                <div>
+                    {hasError ? (
+                        <a href="#" onClick={withPreventDefault(toggleErrorModal)}>
+                            <Icon icon="warning" color="danger" margin="m-0" />
+                        </a>
+                    ) : (
+                        "-"
+                    )}
+                </div>
                 <ExternalReplicationTaskProgress task={task} nodeInfo={nodeInfo} />
             </DistributionItem>
-            {node && (
-                <ReplicationTaskProgressTooltip
-                    target={node}
-                    progress={nodeInfo.progress}
-                    status={nodeInfo.status}
-                    error={nodeInfo.details?.error}
-                    lastAcceptedChangeVectorFromDestination={nodeInfo.details?.lastAcceptedChangeVectorFromDestination}
-                    sourceDatabaseChangeVector={nodeInfo.details?.sourceDatabaseChangeVector}
-                />
-            )}
+            {node &&
+                (errorToDisplay ? (
+                    <ErrorModal key="modal" toggleErrorModal={toggleErrorModal} error={errorToDisplay} />
+                ) : (
+                    <ReplicationTaskProgressTooltip
+                        hasError={!!nodeInfo.details?.error ?? false}
+                        toggleErrorModal={toggleErrorModal}
+                        target={node}
+                        progress={nodeInfo.progress}
+                        status={nodeInfo.status}
+                        lastAcceptedChangeVectorFromDestination={
+                            nodeInfo.details?.lastAcceptedChangeVectorFromDestination
+                        }
+                        sourceDatabaseChangeVector={nodeInfo.details?.sourceDatabaseChangeVector}
+                    />
+                ))}
         </div>
     );
 }

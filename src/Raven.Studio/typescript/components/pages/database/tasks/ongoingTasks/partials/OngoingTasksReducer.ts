@@ -28,7 +28,6 @@ import {
     OngoingTaskNodeReplicationProgressDetails,
     OngoingTaskExternalReplicationNodeInfoDetails,
     OngoingTaskReplicationHubNodeInfoDetails,
-    OngoingTaskInternalReplicationNodeInfoDetails,
     OngoingInternalReplicationNodeInfo,
 } from "components/models/tasks";
 import OngoingTasksResult = Raven.Server.Web.System.OngoingTasksResult;
@@ -44,7 +43,7 @@ import OngoingTaskPullReplicationAsSink = Raven.Client.Documents.Operations.Ongo
 import OngoingTaskPullReplicationAsHub = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskPullReplicationAsHub;
 import EtlTaskProgress = Raven.Server.Documents.ETL.Stats.EtlTaskProgress;
 import EtlProcessProgress = Raven.Server.Documents.ETL.Stats.EtlProcessProgress;
-import { produce, Draft } from "immer";
+import { produce, Draft, original } from "immer";
 import OngoingTaskSubscription = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskSubscription;
 import OngoingTaskQueueEtlListView = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskQueueEtl;
 import OngoingTaskQueueSinkListView = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskQueueSink;
@@ -56,6 +55,7 @@ import ReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.Replic
 import ReplicationProcessProgress = Raven.Server.Documents.Replication.Stats.ReplicationProcessProgress;
 import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.InternalReplicationTaskProgress;
 import TaskUtils from "components/utils/TaskUtils";
+import { sortBy } from "common/typeUtils";
 
 interface ActionTasksLoaded {
     location: databaseLocationSpecifier;
@@ -94,6 +94,12 @@ interface ActionInternalReplicationProgressLoaded {
     type: "InternalReplicationProgressLoaded";
 }
 
+interface ActionInternalReplicationProgressError {
+    location: databaseLocationSpecifier;
+    error: Error;
+    type: "InternalReplicationProgressError";
+}
+
 interface ActionTasksLoadError {
     type: "TasksLoadError";
     location: databaseLocationSpecifier;
@@ -120,6 +126,7 @@ type OngoingTaskReducerAction =
     | ActionEtlProgressLoaded
     | ActionReplicationProgressLoaded
     | ActionInternalReplicationProgressLoaded
+    | ActionInternalReplicationProgressError
     | ActionTasksLoadError
     | ActionTaskLoaded
     | ActionSubscriptionConnectionDetailsLoaded;
@@ -503,7 +510,11 @@ function initNodesInfo(
     }));
 }
 
-const mapTask = (incomingTask: OngoingTask, incomingLocation: databaseLocationSpecifier, state: OngoingTasksState) => {
+const mapTask = (
+    incomingTask: OngoingTask,
+    incomingLocation: databaseLocationSpecifier,
+    state: OngoingTasksState
+): OngoingTaskInfo => {
     const incomingTaskType = TaskUtils.ongoingTaskToStudioTaskType(incomingTask);
 
     const existingTasksSource = incomingTask.TaskType === "Subscription" ? state.subscriptions : state.tasks;
@@ -531,11 +542,17 @@ const mapTask = (incomingTask: OngoingTask, incomingLocation: databaseLocationSp
         Object.assign(newNodeInfo, restProps);
     }
 
+    const responsibleNode = incomingTask.ResponsibleNode?.NodeTag;
+    const responsibleLocation: databaseLocationSpecifier = responsibleNode
+        ? { shardNumber: incomingLocation.shardNumber, nodeTag: responsibleNode }
+        : null;
+
     return {
         shared: mapSharedInfo(incomingTask),
         nodesInfo: [
             ...nodesInfo.map((x) => (databaseLocationComparator(x.location, newNodeInfo.location) ? newNodeInfo : x)),
         ],
+        responsibleLocations: responsibleLocation ? [responsibleLocation] : [],
     };
 };
 
@@ -603,6 +620,14 @@ export const ongoingTasksReducer: Reducer<OngoingTasksState, OngoingTaskReducerA
                                 draft.tasks[draftTaskIdx].nodesInfo[draftNodeInfoIdx] = task.nodesInfo[nodeInfoIdx];
                                 draft.tasks[draftTaskIdx].shared = task.shared;
                             }
+
+                            let effectiveLocations = original(draft.tasks[draftTaskIdx].responsibleLocations);
+
+                            task.responsibleLocations.forEach((responsibleLocation) => {
+                                effectiveLocations = mergeResponsibleNodes(effectiveLocations, responsibleLocation);
+                            });
+
+                            draft.tasks[draftTaskIdx].responsibleLocations = effectiveLocations;
                         } else {
                             // The task is not in the state so we add it
                             draft.tasks.push(task);
@@ -661,9 +686,14 @@ export const ongoingTasksReducer: Reducer<OngoingTasksState, OngoingTaskReducerA
                         databaseLocationComparator(x.location, incomingLocation)
                     ) as Draft<OngoingEtlTaskNodeInfo>;
 
+                    if (!nodeInfo) {
+                        console.error("Unable to find nodeInfo for:", incomingLocation);
+                        return;
+                    }
+
                     nodeInfo.status = "failure";
                     nodeInfo.details = {
-                        error: error.responseJSON.Message,
+                        error: error.message + ":" + error.error,
                         responsibleNode: null,
                         taskConnectionStatus: null,
                     };
@@ -774,10 +804,50 @@ export const ongoingTasksReducer: Reducer<OngoingTasksState, OngoingTaskReducerA
                 );
             });
         }
+
+        case "InternalReplicationProgressError": {
+            const incomingError = action.error;
+            const incomingLocation = action.location;
+
+            return produce(state, (draft) => {
+                const internalReplication = draft.internalReplication;
+                const perLocationDraft = internalReplication.find((x) =>
+                    databaseLocationComparator(x.location, incomingLocation)
+                );
+
+                if (!perLocationDraft) {
+                    console.log("Unable to find draft for: ", incomingLocation);
+                    return;
+                }
+
+                perLocationDraft.status = "failure";
+            });
+        }
     }
 
     return state;
 };
+
+/**
+ * Since we are getting data from multiple nodes, we want to know actual responsible node
+ * The strategy is: last update wins.
+ *
+ * We keep this information separate for each shard.
+ */
+function mergeResponsibleNodes(
+    existing: databaseLocationSpecifier[],
+    incoming: databaseLocationSpecifier
+): databaseLocationSpecifier[] {
+    if (existing.find((x) => databaseLocationComparator(x, incoming))) {
+        return existing;
+    }
+
+    const toDelete = existing.find((x) => x.shardNumber === incoming.shardNumber);
+    const copy = existing.filter((x) => x !== toDelete);
+    copy.push(incoming);
+
+    return sortBy(copy, (x) => x.shardNumber);
+}
 
 function matchProgresses(
     task: OngoingTaskInfo,

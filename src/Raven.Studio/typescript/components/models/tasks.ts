@@ -230,6 +230,7 @@ export interface OngoingTaskInfo<
 > {
     shared: TSharded;
     nodesInfo: TNodesInfo[];
+    responsibleLocations: databaseLocationSpecifier[];
 }
 
 export type OngoingTaskElasticSearchEtlInfo = OngoingTaskInfo<

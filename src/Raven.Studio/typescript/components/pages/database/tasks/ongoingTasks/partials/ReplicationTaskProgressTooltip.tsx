@@ -5,22 +5,32 @@ import { NamedProgress, NamedProgressItem } from "components/common/NamedProgres
 import { ChangeVectorDetails } from "components/pages/database/tasks/ongoingTasks/partials/ChangeVectorDetails";
 import { NodeInfoFailure } from "components/pages/database/tasks/ongoingTasks/partials/NodeInfoFailure";
 import { loadStatus } from "components/models/common";
+import { Icon } from "components/common/Icon";
+import { Button } from "reactstrap";
 
 interface ReplicationTaskProgressTooltipProps {
     target: HTMLElement;
     status: loadStatus;
-    error: string;
+    hasError: boolean;
     progress: OngoingTaskNodeReplicationProgressDetails[];
     sourceDatabaseChangeVector: string;
     lastAcceptedChangeVectorFromDestination: string;
+    toggleErrorModal: () => void;
 }
 
 export function ReplicationTaskProgressTooltip(props: ReplicationTaskProgressTooltipProps) {
-    const { target, progress, status, error, sourceDatabaseChangeVector, lastAcceptedChangeVectorFromDestination } =
-        props;
+    const {
+        target,
+        progress,
+        status,
+        hasError,
+        sourceDatabaseChangeVector,
+        lastAcceptedChangeVectorFromDestination,
+        toggleErrorModal,
+    } = props;
 
     if (status === "failure") {
-        return <NodeInfoFailure target={target} error={error} />;
+        return <NodeInfoFailure target={target} openErrorModal={toggleErrorModal} />;
     }
 
     if (status !== "success") {
@@ -28,13 +38,11 @@ export function ReplicationTaskProgressTooltip(props: ReplicationTaskProgressToo
     }
 
     const hasAnyDetailsToShow =
-        progress?.length > 0 || sourceDatabaseChangeVector || lastAcceptedChangeVectorFromDestination;
+        progress?.length > 0 || sourceDatabaseChangeVector || lastAcceptedChangeVectorFromDestination || hasError;
 
     if (!hasAnyDetailsToShow) {
         return null;
     }
-
-    //TODO: format this tooltip
 
     return (
         <PopoverWithHover rounded="true" target={target} placement="top">
@@ -43,6 +51,13 @@ export function ReplicationTaskProgressTooltip(props: ReplicationTaskProgressToo
                     sourceDatabaseChangeVector={sourceDatabaseChangeVector}
                     lastAcceptedChangeVectorFromDestination={lastAcceptedChangeVectorFromDestination}
                 />
+                {hasError && (
+                    <div className="text-center">
+                        <Button color="danger" key="button" size="sm" onClick={toggleErrorModal}>
+                            Open error in modal <Icon icon="newtab" margin="ms-1" />
+                        </Button>
+                    </div>
+                )}
                 {progress &&
                     progress.map((singleProgress, index) => {
                         return (

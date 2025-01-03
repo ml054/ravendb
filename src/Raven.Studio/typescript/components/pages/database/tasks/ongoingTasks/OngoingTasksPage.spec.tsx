@@ -1,7 +1,8 @@
 ﻿import { rtlRender } from "test/rtlTestUtils";
 import React from "react";
 
-import * as stories from "./OngoingTasksPage.stories";
+import * as stories from "./stories/OngoingTasksPage.stories";
+import * as externalReplicationStories from "./stories/ExternalReplication.stories";
 import { composeStories, composeStory } from "@storybook/react";
 import { boundCopy } from "components/utils/common";
 import { within } from "@testing-library/dom";
@@ -29,14 +30,9 @@ describe("OngoingTasksPage", function () {
 
     describe("RavenETL", function () {
         it("can render disabled and not completed", async () => {
-            const View = boundCopy(stories.RavenEtlTemplate, {
-                disabled: true,
-                completed: false,
-            });
+            const Story = composeStory(stories.RavenEtl, stories.default);
 
-            const Story = composeStory(View, stories.default);
-
-            const { screen, fireClick } = rtlRender(<Story />);
+            const { screen, fireClick } = rtlRender(<Story disabled completed={false} />);
             const container = within(await screen.findByTestId("raven-etls"));
 
             expect(await container.findByText(/RavenDB ETL/)).toBeInTheDocument();
@@ -54,13 +50,9 @@ describe("OngoingTasksPage", function () {
         });
 
         it("can render completed", async () => {
-            const View = boundCopy(stories.RavenEtlTemplate, {
-                completed: true,
-            });
+            const Story = composeStory(stories.RavenEtl, stories.default);
 
-            const Story = composeStory(View, stories.default);
-
-            const { screen, fireClick } = rtlRender(<Story />);
+            const { screen, fireClick } = rtlRender(<Story completed />);
             const container = within(await screen.findByTestId("raven-etls"));
             const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
@@ -70,14 +62,9 @@ describe("OngoingTasksPage", function () {
         });
 
         it("can render enabled and not completed", async () => {
-            const View = boundCopy(stories.RavenEtlTemplate, {
-                completed: false,
-                disabled: false,
-            });
+            const Story = composeStory(stories.RavenEtl, stories.default);
 
-            const Story = composeStory(View, stories.default);
-
-            const { screen, fireClick } = rtlRender(<Story />);
+            const { screen, fireClick } = rtlRender(<Story completed={false} disabled={false} />);
             const container = within(await screen.findByTestId("raven-etls"));
             const detailsBtn = await container.findByTitle(/Click for details/);
             await fireClick(detailsBtn);
@@ -87,12 +74,7 @@ describe("OngoingTasksPage", function () {
         });
 
         it("can notify about empty script", async () => {
-            const View = boundCopy(stories.RavenEtlTemplate, {
-                completed: true,
-                emptyScript: true,
-            });
-
-            const Story = composeStory(View, stories.default);
+            const Story = composeStory(stories.RavenEtlEmptyScript, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
             const container = within(await screen.findByTestId("raven-etls"));
@@ -762,11 +744,7 @@ describe("OngoingTasksPage", function () {
 
     describe("External Replication", function () {
         it("can render enabled", async () => {
-            const View = boundCopy(stories.ExternalReplicationTemplate, {
-                disabled: false,
-            });
-
-            const Story = composeStory(View, stories.default);
+            const Story = composeStory(externalReplicationStories.Default, externalReplicationStories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
             const container = within(await screen.findByTestId("external-replications"));
@@ -792,7 +770,7 @@ describe("OngoingTasksPage", function () {
         });
 
         it("can render server wide", async () => {
-            const Story = composeStory(stories.ExternalReplicationServerWide, stories.default);
+            const Story = composeStory(externalReplicationStories.ServerWide, externalReplicationStories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
             const container = within(await screen.findByTestId("external-replications"));

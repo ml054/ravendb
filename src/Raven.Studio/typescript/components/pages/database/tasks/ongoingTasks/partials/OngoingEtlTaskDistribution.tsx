@@ -5,6 +5,8 @@ import { AnyEtlOngoingTaskInfo, OngoingEtlTaskNodeInfo, OngoingTaskInfo } from "
 import { ProgressCircle } from "components/common/ProgressCircle";
 import { OngoingEtlTaskProgressTooltip } from "../partials/OngoingEtlTaskProgressTooltip";
 import { Icon } from "components/common/Icon";
+import useBoolean from "hooks/useBoolean";
+import { withPreventDefault } from "components/utils/common";
 
 interface OngoingEtlTaskDistributionProps {
     task: AnyEtlOngoingTaskInfo;
@@ -32,6 +34,8 @@ function ItemWithTooltip(props: ItemWithTooltipProps) {
         </div>
     );
 
+    const { value: isErrorModalOpen, toggle: toggleErrorModal } = useBoolean(false);
+
     const key = taskNodeInfoKey(nodeInfo);
     const hasError = !!nodeInfo.details?.error;
     const [node, setNode] = useState<HTMLDivElement>();
@@ -46,7 +50,15 @@ function ItemWithTooltip(props: ItemWithTooltipProps) {
                     {nodeInfo.location.nodeTag}
                 </div>
                 <div>{nodeInfo.status === "success" ? nodeInfo.details.taskConnectionStatus : ""}</div>
-                <div>{hasError ? <Icon icon="warning" color="danger" margin="m-0" /> : "-"}</div>
+                <div>
+                    {hasError ? (
+                        <a href="#" onClick={withPreventDefault(toggleErrorModal)}>
+                            <Icon icon="warning" color="danger" margin="m-0" />
+                        </a>
+                    ) : (
+                        "-"
+                    )}
+                </div>
                 <OngoingEtlTaskProgress task={task} nodeInfo={nodeInfo} />
             </DistributionItem>
             {node && (
@@ -55,6 +67,8 @@ function ItemWithTooltip(props: ItemWithTooltipProps) {
                     nodeInfo={nodeInfo}
                     task={task}
                     showPreview={showPreview}
+                    isErrorModalOpen={isErrorModalOpen}
+                    toggleErrorModal={toggleErrorModal}
                 />
             )}
         </div>

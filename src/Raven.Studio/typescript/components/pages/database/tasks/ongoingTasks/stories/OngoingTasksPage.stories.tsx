@@ -1,6 +1,6 @@
 ﻿import React from "react";
-import { OngoingTasksPage } from "./OngoingTasksPage";
-import { Meta, StoryFn } from "@storybook/react";
+import { OngoingTasksPage } from "../OngoingTasksPage";
+import { Meta, StoryObj } from "@storybook/react";
 import { withStorybookContexts, withBootstrap5, withForceRerender } from "test/storybookTestUtils";
 import clusterTopologyManager from "common/shell/clusterTopologyManager";
 import { mockServices } from "test/mocks/services/MockServices";
@@ -8,7 +8,6 @@ import { TasksStubs } from "test/stubs/TasksStubs";
 import { boundCopy } from "components/utils/common";
 import OngoingTaskRavenEtlListView = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskRavenEtl;
 import OngoingTaskSqlEtlListView = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskSqlEtl;
-import MockTasksService from "../../../../../test/mocks/services/MockTasksService";
 import OngoingTaskOlapEtlListView = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskOlapEtl;
 import OngoingTaskElasticSearchEtlListView = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskElasticSearchEtl;
 import OngoingTaskQueueEtlListView = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskQueueEtl;
@@ -19,18 +18,37 @@ import OngoingTaskBackup = Raven.Client.Documents.Operations.OngoingTasks.Ongoin
 import OngoingTaskReplication = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskReplication;
 import OngoingTaskSubscription = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskSubscription;
 import { mockStore } from "test/mocks/store/MockStore";
+import { userEvent, within } from "@storybook/test";
+import { MockedValue } from "test/mocks/services/AutoMockService";
+import OngoingTasksResult = Raven.Server.Web.System.OngoingTasksResult;
+import MockTasksService from "test/mocks/services/MockTasksService";
+import assertUnreachable from "components/utils/assertUnreachable";
 
 export default {
     title: "Pages/Database/Tasks/Ongoing tasks",
     decorators: [withStorybookContexts, withBootstrap5, withForceRerender],
-    excludeStories: /Template$/,
+    excludeStories: /Template$/, //TODO:
 } satisfies Meta;
 
-function commonInit() {
+//TODO: add stories for reconnected/errored state?
+
+export function commonInit(databaseType: "sharded" | "cluster" | "singleNode" = "sharded") {
     const { accessManager, license, databases } = mockStore;
     const { tasksService, licenseService } = mockServices;
 
-    databases.withActiveDatabase_Sharded();
+    switch (databaseType) {
+        case "sharded":
+            databases.withActiveDatabase_Sharded();
+            break;
+        case "cluster":
+            databases.withActiveDatabase_NonSharded_Cluster();
+            break;
+        case "singleNode":
+            databases.withActiveDatabase_NonSharded_SingleNode();
+            break;
+        default:
+            assertUnreachable(databaseType);
+    }
 
     accessManager.with_securityClearance("ClusterAdmin");
 
@@ -52,98 +70,63 @@ function commonInit() {
     });
 }
 
-export const EmptyView: StoryFn = () => {
-    commonInit();
+export const EmptyView: StoryObj = {
+    render: () => {
+        commonInit();
 
-    const { databases } = mockStore;
-    databases.withActiveDatabase_NonSharded_SingleNode();
+        const { databases } = mockStore;
+        databases.withActiveDatabase_NonSharded_SingleNode();
 
-    const { tasksService } = mockServices;
+        const { tasksService } = mockServices;
 
-    tasksService.withGetTasks((dto) => {
-        dto.SubscriptionsCount = 0;
-        dto.OngoingTasks = [];
-        dto.PullReplications = [];
-    });
-    tasksService.withGetEtlProgress((dto) => {
-        dto.Results = [];
-    });
-    tasksService.withGetInternalReplicationProgress((dto) => {
-        dto.Results = [];
-    });
+        tasksService.withGetTasks((dto) => {
+            dto.SubscriptionsCount = 0;
+            dto.OngoingTasks = [];
+            dto.PullReplications = [];
+        });
+        tasksService.withGetEtlProgress((dto) => {
+            dto.Results = [];
+        });
+        tasksService.withGetInternalReplicationProgress((dto) => {
+            dto.Results = [];
+        });
 
-    return <OngoingTasksPage />;
-};
-
-export const FullView: StoryFn = () => {
-    commonInit();
-
-    const { tasksService } = mockServices;
-
-    tasksService.withGetTasks();
-    tasksService.withGetEtlProgress();
-    tasksService.withGetExternalReplicationProgress();
-    tasksService.withGetInternalReplicationProgress();
-
-    return <OngoingTasksPage />;
-};
-
-export const InternalReplication = () => {
-    commonInit();
-
-    const { tasksService } = mockServices;
-
-    tasksService.withGetTasks((x) => {
-        x.OngoingTasks = [];
-        x.PullReplications = [];
-        x.SubscriptionsCount = 0;
-    });
-
-    tasksService.withGetInternalReplicationProgress();
-
-    return <OngoingTasksPage />;
-};
-
-export const ExternalReplicationTemplate = (args: {
-    disabled?: boolean;
-    completed?: boolean;
-    customizeTask?: (x: OngoingTaskReplication) => void;
-}) => {
-    commonInit();
-
-    const { tasksService } = mockServices;
-
-    tasksService.withGetTasks((x) => {
-        const ongoingTask = TasksStubs.getExternalReplicationListItem();
-        if (args.disabled) {
-            ongoingTask.TaskState = "Disabled";
-        }
-        args.customizeTask?.(ongoingTask);
-        x.OngoingTasks = [ongoingTask];
-        x.PullReplications = [];
-        x.SubscriptionsCount = 0;
-    });
-
-    mockExternalReplicationProgress(tasksService, args.completed);
-
-    return <OngoingTasksPage />;
-};
-
-export const ExternalReplicationDisabled = boundCopy(ExternalReplicationTemplate, {
-    disabled: true,
-});
-
-export const ExternalReplicationEnabled = boundCopy(ExternalReplicationTemplate, {
-    disabled: false,
-    completed: true,
-});
-
-export const ExternalReplicationServerWide = boundCopy(ExternalReplicationTemplate, {
-    disabled: false,
-    customizeTask: (task) => {
-        task.TaskName = "Server Wide External Replication, ext1";
+        return <OngoingTasksPage />;
     },
-});
+};
+
+export const FullView: StoryObj = {
+    render: () => {
+        commonInit();
+
+        const { tasksService } = mockServices;
+
+        tasksService.withGetTasks();
+        tasksService.withGetEtlProgress();
+        tasksService.withGetExternalReplicationProgress();
+        tasksService.withGetInternalReplicationProgress();
+
+        return <OngoingTasksPage />;
+    },
+};
+
+export const InternalReplication: StoryObj = {
+    render: () => {
+        commonInit();
+
+        const { tasksService } = mockServices;
+
+        tasksService.withGetTasks((x) => {
+            x.OngoingTasks = [];
+            x.PullReplications = [];
+            x.SubscriptionsCount = 0;
+        });
+
+        tasksService.withGetInternalReplicationProgress();
+
+        return <OngoingTasksPage />;
+    },
+};
 
 export const SubscriptionTemplate = (args: {
     disabled?: boolean;
@@ -209,45 +192,71 @@ export const ShardedSubscription = boundCopy(SubscriptionTemplate, {
     },
 });
 
-export const RavenEtlTemplate = (args: {
+interface RavenEtlProps {
     disabled?: boolean;
     completed?: boolean;
     emptyScript?: boolean;
     customizeTask?: (x: OngoingTaskRavenEtlListView) => void;
-}) => {
-    commonInit();
+}
 
-    const { tasksService } = mockServices;
+export const RavenEtl: StoryObj<RavenEtlProps> = {
+    render: (args: RavenEtlProps) => {
+        commonInit();
 
-    tasksService.withGetTasks((x) => {
-        const ravenEtl = TasksStubs.getRavenEtl();
-        if (args.disabled) {
-            ravenEtl.TaskState = "Disabled";
-        }
-        args.customizeTask?.(ravenEtl);
-        x.OngoingTasks = [ravenEtl];
-        x.PullReplications = [];
-        x.SubscriptionsCount = 0;
-    });
+        const { tasksService } = mockServices;
 
-    mockEtlProgress(tasksService, args.completed, args.disabled, args.emptyScript);
+        tasksService.withGetTasks((x) => {
+            const ravenEtl = TasksStubs.getRavenEtl();
+            if (args.disabled) {
+                ravenEtl.TaskState = "Disabled";
+            }
+            args.customizeTask?.(ravenEtl);
+            x.OngoingTasks = [ravenEtl];
+            x.PullReplications = [];
+            x.SubscriptionsCount = 0;
+        });
 
-    return <OngoingTasksPage />;
+        mockEtlProgress(tasksService, args.completed, args.disabled, args.emptyScript);
+
+        return <OngoingTasksPage />;
+    },
+    args: {
+        completed: false,
+        disabled: false,
+        emptyScript: false,
+        customizeTask: undefined,
+    },
+    play: async ({ canvas }) => {
+        const container = within(await canvas.findByTestId("raven-etls"));
+        await userEvent.click(await container.findByTitle(/Click for details/));
+    },
 };
 
-export const RavenEtlDisabled = boundCopy(RavenEtlTemplate, {
-    disabled: true,
-});
+export const RavenEtlDisabled = {
+    ...RavenEtl,
+    args: {
+        ...RavenEtl.args,
+        disabled: true,
+    },
+};
 
-export const RavenEtlCompleted = boundCopy(RavenEtlTemplate, {
-    completed: true,
-    disabled: false,
-});
+export const RavenEtlCompleted = {
+    ...RavenEtl,
+    args: {
+        ...RavenEtl.args,
+        completed: true,
+        disabled: false,
+    },
+};
 
-export const RavenEtlEmptyScript = boundCopy(RavenEtlTemplate, {
-    completed: true,
-    emptyScript: true,
-});
+export const RavenEtlEmptyScript = {
+    ...RavenEtl,
+    args: {
+        ...RavenEtl.args,
+        completed: true,
+        emptyScript: true,
+    },
+};
 
 export const SqlTemplate = (args: {
     disabled?: boolean;
@@ -643,7 +652,7 @@ export const PeriodicBackupEnabledEncrypted = boundCopy(PeriodicBackupTemplate, 
     customizeTask: (x) => (x.IsEncrypted = true),
 });
 
-function mockExternalReplicationProgress(tasksService: MockTasksService, completed: boolean) {
+export function mockExternalReplicationProgress(tasksService: MockTasksService, completed: boolean) {
     if (completed) {
         tasksService.withGetExternalReplicationProgress((dto) => {
             dto.Results.forEach((x) => {
@@ -664,7 +673,12 @@ function mockExternalReplicationProgress(tasksService: MockTasksService, complet
     }
 }
 
-function mockEtlProgress(tasksService: MockTasksService, completed: boolean, disabled: boolean, emptyScript: boolean) {
+export function mockEtlProgress(
+    tasksService: MockTasksService,
+    completed: boolean,
+    disabled: boolean,
+    emptyScript: boolean
+) {
     if (completed) {
         tasksService.withGetEtlProgress((dto) => {
             dto.Results.forEach((x) => {

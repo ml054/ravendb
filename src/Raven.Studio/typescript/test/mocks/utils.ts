@@ -54,3 +54,9 @@ export function debugMocks() {
         console.warn("Following mocks were called but not implemented: \r\n" + info.join("\r\n"));
     }
 }
+
+export function mockJQueryError(message: string, error = "This is error content") {
+    return {
+        responseText: JSON.stringify({ Message: message, Error: error }),
+    };
+}

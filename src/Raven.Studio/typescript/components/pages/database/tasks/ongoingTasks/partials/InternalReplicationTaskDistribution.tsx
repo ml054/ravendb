@@ -10,6 +10,8 @@ import React, { useState } from "react";
 import classNames from "classnames";
 import { ProgressCircle } from "components/common/ProgressCircle";
 import { ReplicationTaskProgressTooltip } from "components/pages/database/tasks/ongoingTasks/partials/ReplicationTaskProgressTooltip";
+import { withPreventDefault } from "components/utils/common";
+import { ErrorModal } from "components/pages/database/tasks/ongoingTasks/partials/ErrorModal";
 
 interface ItemWithTooltipProps {
     nodeInfo: OngoingInternalReplicationNodeInfo;
@@ -31,34 +33,50 @@ function ItemWithTooltip(props: ItemWithTooltipProps) {
         </div>
     );
 
+    const { value: isErrorModalOpen, toggle: toggleErrorModal } = useBoolean(false);
+
     const key = taskNodeInfoKey(nodeInfo);
     const [node, setNode] = useState<HTMLDivElement>();
 
     const firstProgress = nodeInfo.progress[0];
+    const hasError = nodeInfo.status === "failure";
     return (
         <div ref={setNode}>
             <DistributionItem loading={nodeInfo.status === "loading" || nodeInfo.status === "idle"} key={key}>
                 {sharded && shard}
                 <div className={classNames("node", { top: !sharded })}>
                     {!sharded && <Icon icon="node" />}
-                    {nodeInfo.location.nodeTag} &gt; {progress.destinationNodeTag}
+                    {nodeInfo.location.nodeTag} &gt; {progress?.destinationNodeTag ?? "?"}
                 </div>
                 <div>{firstProgress?.lastDatabaseEtag ? firstProgress.lastDatabaseEtag.toLocaleString() : "-"}</div>
                 <div>{firstProgress?.lastSentEtag ? firstProgress.lastSentEtag.toLocaleString() : "-"}</div>
+                <div>
+                    {hasError ? (
+                        <a href="#" onClick={withPreventDefault(toggleErrorModal)}>
+                            <Icon icon="warning" color="danger" margin="m-0" />
+                        </a>
+                    ) : (
+                        "-"
+                    )}
+                </div>
                 <InternalReplicationTaskProgress nodeInfo={nodeInfo} />
             </DistributionItem>
-            {node && (
-                <ReplicationTaskProgressTooltip
-                    target={node}
-                    progress={nodeInfo.progress}
-                    status={nodeInfo.status}
-                    error={null}
-                    lastAcceptedChangeVectorFromDestination={
-                        nodeInfo.progress[0]?.lastAcceptedChangeVectorFromDestination
-                    }
-                    sourceDatabaseChangeVector={nodeInfo.progress[0]?.sourceDatabaseChangeVector}
-                />
-            )}
+            {node &&
+                (errorToDisplay ? (
+                    <ErrorModal key="modal" toggleErrorModal={toggleErrorModal} error={errorToDisplay} />
+                ) : (
+                    <ReplicationTaskProgressTooltip
+                        hasError={nodeInfo.status === "failure"}
+                        toggleErrorModal={toggleErrorModal}
+                        target={node}
+                        progress={nodeInfo.progress}
+                        status={nodeInfo.status}
+                        lastAcceptedChangeVectorFromDestination={
+                            nodeInfo.progress[0]?.lastAcceptedChangeVectorFromDestination
+                        }
+                        sourceDatabaseChangeVector={nodeInfo.progress[0]?.sourceDatabaseChangeVector}
+                    />
+                ))}
         </div>
     );
 }
@@ -73,6 +91,11 @@ export function InternalReplicationTaskDistribution(props: InternalReplicationTa
     const sharded = data.some((x) => x.location.shardNumber != null);
 
     const items = data.flatMap((nodeInfo) => {
+        if (!nodeInfo.progress.length) {
+            const key = taskNodeInfoKey(nodeInfo) + "->" + "?";
+            return <ItemWithTooltip key={key} nodeInfo={nodeInfo} sharded={sharded} progress={null} />;
+        }
+
         return nodeInfo.progress.map((progress) => {
             const key = taskNodeInfoKey(nodeInfo) + "->" + progress.destinationNodeTag;
             return <ItemWithTooltip key={key} nodeInfo={nodeInfo} progress={progress} sharded={sharded} />;
@@ -94,6 +117,9 @@ export function InternalReplicationTaskDistribution(props: InternalReplicationTa
                     </div>
                     <div>
                         <Icon icon="etag" /> Last Sent Etag
+                    </div>
+                    <div>
+                        <Icon icon="warning" /> Error
                     </div>
                     <div>
                         <Icon icon="changes" /> State

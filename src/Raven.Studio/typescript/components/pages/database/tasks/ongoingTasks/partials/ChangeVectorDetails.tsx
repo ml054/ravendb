@@ -1,6 +1,6 @@
 import copyToClipboard from "common/copyToClipboard";
 import changeVectorUtils from "common/changeVectorUtils";
-import { Button, Table } from "reactstrap";
+import { Button, Input, InputGroup, Label, Table } from "reactstrap";
 import { Icon } from "components/common/Icon";
 import React from "react";
 
@@ -23,65 +23,65 @@ export function ChangeVectorDetails(props: ChangeVectorDetailsProps) {
         ? changeVectorUtils.formatChangeVector(lastAcceptedChangeVectorFromDestination, true)
         : null;
 
+    if (!sourceDatabaseChangeVectorFormatted && !lastAcceptedChangeVectorFromDestination) {
+        return null;
+    }
+
     return (
         <div className="p-2">
-            <Table>
-                <tbody>
-                    {sourceDatabaseChangeVectorFormatted && (
-                        <tr>
-                            <td>Source database CV</td>
-                            <td>
-                                <div className="d-flex gap-1">
-                                    <div>
-                                        {sourceDatabaseChangeVectorFormatted.map((x) => x.shortFormat).join(", ")}
-                                    </div>
-                                    <Button
-                                        onClick={() =>
-                                            handleCopyToClipboard(
-                                                sourceDatabaseChangeVectorFormatted.map((x) => x.fullFormat).join(",")
-                                            )
-                                        }
-                                        color="primary"
-                                        size="sm"
-                                        title="Copy to clipboard"
-                                    >
-                                        <Icon icon="copy-to-clipboard" margin="m-0" />
-                                    </Button>
-                                </div>
-                            </td>
-                        </tr>
-                    )}
+            {sourceDatabaseChangeVectorFormatted && (
+                <div className="mb-3">
+                    <Label for="sourceDatabaseCv">Source database CV</Label>
+                    <InputGroup>
+                        <Input
+                            type="text"
+                            className="form-control"
+                            id="sourceDatabaseCv"
+                            readOnly
+                            value={sourceDatabaseChangeVectorFormatted.map((x) => x.fullFormat).join(", ")}
+                        />
+                        <Button
+                            onClick={() =>
+                                handleCopyToClipboard(
+                                    sourceDatabaseChangeVectorFormatted.map((x) => x.fullFormat).join(",")
+                                )
+                            }
+                            color="primary"
+                            size="sm"
+                            title="Copy to clipboard"
+                        >
+                            <Icon icon="copy-to-clipboard" margin="m-0" />
+                        </Button>
+                    </InputGroup>
+                </div>
+            )}
 
-                    {lastAcceptedChangeVectorFromDestinationFormatted && (
-                        <tr>
-                            <td>Last accepted CV (from destination)</td>
-                            <td>
-                                <div className="d-flex gap-1">
-                                    <div>
-                                        {lastAcceptedChangeVectorFromDestinationFormatted
-                                            .map((x) => x.shortFormat)
-                                            .join(", ")}
-                                    </div>
-                                    <Button
-                                        onClick={() =>
-                                            handleCopyToClipboard(
-                                                lastAcceptedChangeVectorFromDestinationFormatted
-                                                    .map((x) => x.fullFormat)
-                                                    .join(",")
-                                            )
-                                        }
-                                        color="primary"
-                                        size="sm"
-                                        title="Copy to clipboard"
-                                    >
-                                        <Icon icon="copy-to-clipboard" margin="m-0" />
-                                    </Button>
-                                </div>
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </Table>
+            {lastAcceptedChangeVectorFromDestinationFormatted && (
+                <div className="mb-3">
+                    <Label for="lastAcceptedCV">Last accepted CV (from destination)</Label>
+                    <InputGroup>
+                        <Input
+                            type="text"
+                            className="form-control"
+                            id="lastAcceptedCV"
+                            readOnly
+                            value={lastAcceptedChangeVectorFromDestinationFormatted.map((x) => x.fullFormat).join(", ")}
+                        />
+                        <Button
+                            onClick={() =>
+                                handleCopyToClipboard(
+                                    lastAcceptedChangeVectorFromDestinationFormatted.map((x) => x.fullFormat).join(", ")
+                                )
+                            }
+                            color="primary"
+                            size="sm"
+                            title="Copy to clipboard"
+                        >
+                            <Icon icon="copy-to-clipboard" margin="m-0" />
+                        </Button>
+                    </InputGroup>
+                </div>
+            )}
         </div>
     );
 }

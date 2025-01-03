@@ -10,16 +10,14 @@ import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stat
 import React from "react";
 
 interface InternalReplicationProgressProviderProps {
-    onInternalReplicationProgress: (
-        progress: InternalReplicationTaskProgress[],
-        location: databaseLocationSpecifier
-    ) => void;
+    onProgress: (progress: InternalReplicationTaskProgress[], location: databaseLocationSpecifier) => void;
+    onError: (error: Error, location: databaseLocationSpecifier) => void;
 }
 
 export function InternalReplicationProgressProvider(
     props: InternalReplicationProgressProviderProps
 ): React.JSX.Element {
-    const { onInternalReplicationProgress } = props;
+    const { onProgress, onError } = props;
     const { tasksService } = useServices();
 
     const db = useAppSelector(databaseSelectors.activeDatabase);
@@ -27,11 +25,15 @@ export function InternalReplicationProgressProvider(
 
     const loadProgress = () => {
         locations.forEach(async (location) => {
-            const internalReplicationProgressResponse = await tasksService.getInternalReplicationProgress(
-                db.name,
-                location
-            );
-            onInternalReplicationProgress(internalReplicationProgressResponse.Results, location);
+            try {
+                const internalReplicationProgressResponse = await tasksService.getInternalReplicationProgress(
+                    db.name,
+                    location
+                );
+                onProgress(internalReplicationProgressResponse.Results, location);
+            } catch (error) {
+                onError(error, location);
+            }
         });
     };
 
@@ -42,11 +44,11 @@ export function InternalReplicationProgressProvider(
 }
 
 interface ReplicationProgressProviderProps {
-    onReplicationProgress: (progress: ReplicationTaskProgress[], location: databaseLocationSpecifier) => void;
+    onProgress: (progress: ReplicationTaskProgress[], location: databaseLocationSpecifier) => void;
 }
 
 export function ReplicationProgressProvider(props: ReplicationProgressProviderProps): React.JSX.Element {
-    const { onReplicationProgress } = props;
+    const { onProgress } = props;
     const { tasksService } = useServices();
 
     const db = useAppSelector(databaseSelectors.activeDatabase);
@@ -55,7 +57,7 @@ export function ReplicationProgressProvider(props: ReplicationProgressProviderPr
     const loadProgress = () => {
         locations.forEach(async (location) => {
             const replicationProgressResponse = await tasksService.getReplicationProgress(db.name, location);
-            onReplicationProgress(replicationProgressResponse.Results, location);
+            onProgress(replicationProgressResponse.Results, location);
         });
     };
 
@@ -66,11 +68,11 @@ export function ReplicationProgressProvider(props: ReplicationProgressProviderPr
 }
 
 interface EtlProgressProviderProps {
-    onEtlProgress: (progress: EtlTaskProgress[], location: databaseLocationSpecifier) => void;
+    onProgress: (progress: EtlTaskProgress[], location: databaseLocationSpecifier) => void;
 }
 
 export function EtlProgressProvider(props: EtlProgressProviderProps): React.JSX.Element {
-    const { onEtlProgress } = props;
+    const { onProgress } = props;
     const { tasksService } = useServices();
 
     const db = useAppSelector(databaseSelectors.activeDatabase);
@@ -79,7 +81,7 @@ export function EtlProgressProvider(props: EtlProgressProviderProps): React.JSX.
     const loadProgress = () => {
         locations.forEach(async (location) => {
             const etlProgressResponse = await tasksService.getEtlProgress(db.name, location);
-            onEtlProgress(etlProgressResponse.Results, location);
+            onProgress(etlProgressResponse.Results, location);
         });
     };
 
