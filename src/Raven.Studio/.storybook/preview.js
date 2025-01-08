@@ -65,9 +65,10 @@ import { resetAllMocks } from "@storybook/test";
 
 export const decorators = [
     (Story) => {
-        resetAllMocks();
-
         const [store] = useState(() => {
+            // reset once - not in each render
+            resetAllMocks();
+            
             const storeConfiguration = createStoreConfiguration();
             setEffectiveTestStore(storeConfiguration);
             return storeConfiguration;

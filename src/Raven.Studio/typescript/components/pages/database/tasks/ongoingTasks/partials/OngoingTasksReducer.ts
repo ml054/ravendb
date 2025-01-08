@@ -96,14 +96,14 @@ interface ActionInternalReplicationProgressLoaded {
 
 interface ActionInternalReplicationProgressError {
     location: databaseLocationSpecifier;
-    error: Error;
+    error: string;
     type: "InternalReplicationProgressError";
 }
 
 interface ActionTasksLoadError {
     type: "TasksLoadError";
     location: databaseLocationSpecifier;
-    error: JQueryXHR;
+    error: string;
 }
 
 export interface OngoingTasksState {
@@ -672,6 +672,7 @@ export const ongoingTasksReducer: Reducer<OngoingTasksState, OngoingTaskReducerA
                             responsibleNodeTag: null,
                         },
                         nodesInfo: undefined,
+                        responsibleLocations: [],
                     };
                 });
             });
@@ -693,7 +694,7 @@ export const ongoingTasksReducer: Reducer<OngoingTasksState, OngoingTaskReducerA
 
                     nodeInfo.status = "failure";
                     nodeInfo.details = {
-                        error: error.message + ":" + error.error,
+                        error,
                         responsibleNode: null,
                         taskConnectionStatus: null,
                     };
@@ -787,6 +788,7 @@ export const ongoingTasksReducer: Reducer<OngoingTasksState, OngoingTaskReducerA
                 }
 
                 perLocationDraft.status = "success";
+                perLocationDraft.error = null;
 
                 (perLocationDraft as Draft<OngoingInternalReplicationNodeInfo>).progress = incomingProgresses.map(
                     (progress) => {
@@ -821,6 +823,8 @@ export const ongoingTasksReducer: Reducer<OngoingTasksState, OngoingTaskReducerA
                 }
 
                 perLocationDraft.status = "failure";
+                perLocationDraft.progress = [];
+                perLocationDraft.error = incomingError;
             });
         }
     }

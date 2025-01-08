@@ -33,7 +33,11 @@ function ItemWithTooltip(props: ItemWithTooltipProps) {
         </div>
     );
 
-    const { value: isErrorModalOpen, toggle: toggleErrorModal } = useBoolean(false);
+    const [errorToDisplay, setErrorToDisplay] = useState<string>(null);
+
+    const toggleErrorModal = () => {
+        setErrorToDisplay((error) => (error ? null : nodeInfo.error));
+    };
 
     const key = taskNodeInfoKey(nodeInfo);
     const [node, setNode] = useState<HTMLDivElement>();

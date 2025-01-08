@@ -94,10 +94,11 @@ export function OngoingTasksPage() {
                     tasks,
                 });
             } catch (e) {
+                const errorAndMessage = recentError.tryExtractMessageAndException(e.responseText);
                 dispatch({
                     type: "TasksLoadError",
                     location,
-                    error: recentError.tryExtractMessageAndException(e.responseText),
+                    error: errorAndMessage.message + (errorAndMessage.error ? ": " + errorAndMessage.error : ""),
                 });
             }
         },
@@ -158,7 +159,7 @@ export function OngoingTasksPage() {
     );
 
     const onInternalReplicationError = useCallback(
-        (error: Error, location: databaseLocationSpecifier) => {
+        (error: string, location: databaseLocationSpecifier) => {
             dispatch({
                 type: "InternalReplicationProgressError",
                 error,

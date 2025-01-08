@@ -1,4 +1,4 @@
-﻿import React from "react";
+﻿import React, { useState } from "react";
 import { DistributionItem, DistributionLegend, LocationDistribution } from "components/common/LocationDistribution";
 import classNames from "classnames";
 import {
@@ -9,6 +9,8 @@ import {
 } from "components/models/tasks";
 import { ProgressCircle } from "components/common/ProgressCircle";
 import { Icon } from "components/common/Icon";
+import { withPreventDefault } from "components/utils/common";
+import { ErrorModal } from "components/pages/database/tasks/ongoingTasks/partials/ErrorModal";
 
 interface OngoingEtlTaskDistributionProps {
     task: OngoingTaskSubscriptionInfo;
@@ -36,6 +38,12 @@ function ItemWithTooltip(props: ItemWithTooltipProps) {
 
     const hasError = !!nodeInfo.details?.error;
 
+    const [errorToDisplay, setErrorToDisplay] = useState<string>(null);
+
+    const toggleErrorModal = () => {
+        setErrorToDisplay((error) => (error ? null : nodeInfo.details?.error));
+    };
+
     return (
         <DistributionItem loading={nodeInfo.status === "loading" || nodeInfo.status === "idle"}>
             {sharded && shard}
@@ -45,8 +53,17 @@ function ItemWithTooltip(props: ItemWithTooltipProps) {
                 {nodeInfo.location.nodeTag}
             </div>
             <div>{nodeInfo.status === "success" ? nodeInfo.details.taskConnectionStatus : ""}</div>
-            <div>{hasError ? <Icon icon="warning" className="text-danger" /> : "-"}</div>
+            <div>
+                {hasError ? (
+                    <a href="#" onClick={withPreventDefault(toggleErrorModal)}>
+                        <Icon icon="warning" color="danger" margin="m-0" />
+                    </a>
+                ) : (
+                    "-"
+                )}
+            </div>
             <SubscriptionTaskProgress task={task} nodeInfo={nodeInfo} />
+            {errorToDisplay && <ErrorModal key="modal" toggleErrorModal={toggleErrorModal} error={errorToDisplay} />}
         </DistributionItem>
     );
 }

@@ -8,10 +8,11 @@ import { databaseSelectors } from "components/common/shell/databaseSliceSelector
 import { useAppSelector } from "components/store";
 import InternalReplicationTaskProgress = Raven.Server.Documents.Replication.Stats.InternalReplicationTaskProgress;
 import React from "react";
+import recentError from "common/notifications/models/recentError";
 
 interface InternalReplicationProgressProviderProps {
     onProgress: (progress: InternalReplicationTaskProgress[], location: databaseLocationSpecifier) => void;
-    onError: (error: Error, location: databaseLocationSpecifier) => void;
+    onError: (error: string, location: databaseLocationSpecifier) => void;
 }
 
 export function InternalReplicationProgressProvider(
@@ -32,7 +33,10 @@ export function InternalReplicationProgressProvider(
                 );
                 onProgress(internalReplicationProgressResponse.Results, location);
             } catch (error) {
-                onError(error, location);
+                const errorAndMessage = recentError.tryExtractMessageAndException(error.responseText);
+                const errorString =
+                    errorAndMessage.message + (errorAndMessage.error ? ": " + errorAndMessage.error : "");
+                onError(errorString, location);
             }
         });
     };

@@ -74,7 +74,7 @@ export interface OngoingReplicationProgressAwareTaskNodeInfo<
 export type OngoingInternalReplicationNodeInfo = OngoingReplicationProgressAwareTaskNodeInfo<
     never,
     OngoingTaskNodeInternalReplicationProgressDetails
->;
+> & { error?: string };
 
 export type OngoingSubscriptionTaskNodeInfo = OngoingTaskNodeInfo<OngoingTaskSubscriptionNodeInfoDetails>;
 

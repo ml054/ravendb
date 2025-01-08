@@ -92,8 +92,8 @@ export const Default: StoryObj<SubscriptionProps> = {
         databaseType: { control: "radio", options: ["sharded", "cluster", "singleNode"] },
     },
     play: async ({ canvas }) => {
-        const container = within(await canvas.findByTestId("sql-etls"));
-        await userEvent.click(await container.findByTitle(/Click for details/));
+        const container = within(await canvas.findByTestId("subscriptions"));
+        await userEvent.click((await container.findAllByTitle(/Click for details/))[0]);
     },
 };
 
