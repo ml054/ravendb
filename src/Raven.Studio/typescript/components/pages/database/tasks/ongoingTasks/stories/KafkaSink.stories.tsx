@@ -3,7 +3,7 @@ import { TasksStubs } from "test/stubs/TasksStubs";
 import { OngoingTasksPage } from "components/pages/database/tasks/ongoingTasks/OngoingTasksPage";
 import { userEvent, within } from "@storybook/test";
 import React from "react";
-import { commonInit, mockEtlProgress } from "components/pages/database/tasks/ongoingTasks/stories/common";
+import { commonInit } from "components/pages/database/tasks/ongoingTasks/stories/common";
 import { Meta, StoryObj } from "@storybook/react";
 import { withBootstrap5, withForceRerender, withStorybookContexts } from "test/storybookTestUtils";
 import OngoingTaskQueueSinkListView = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskQueueSink;

@@ -4,7 +4,7 @@ import { OngoingTasksPage } from "components/pages/database/tasks/ongoingTasks/O
 import React from "react";
 import { commonInit } from "components/pages/database/tasks/ongoingTasks/stories/common";
 import { withBootstrap5, withForceRerender, withStorybookContexts } from "test/storybookTestUtils";
-import { userEvent, within } from "@storybook/test";
+import { userEvent } from "@storybook/test";
 
 export default {
     title: "Pages/Database/Tasks/Ongoing tasks/Internal Replication",

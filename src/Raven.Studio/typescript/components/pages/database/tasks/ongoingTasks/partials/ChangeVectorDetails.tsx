@@ -1,6 +1,6 @@
 import copyToClipboard from "common/copyToClipboard";
 import changeVectorUtils from "common/changeVectorUtils";
-import { Button, Input, InputGroup, Label, Table } from "reactstrap";
+import { Button, Input, InputGroup, Label } from "reactstrap";
 import { Icon } from "components/common/Icon";
 import React from "react";
 

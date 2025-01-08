@@ -20,8 +20,6 @@ import { InputItem } from "components/models/common";
 import { exhaustiveStringTuple } from "components/utils/common";
 import assertUnreachable from "components/utils/assertUnreachable";
 import { useOngoingTasksOperations } from "components/pages/database/tasks/shared/shared";
-import { DatabaseSharedInfo } from "components/models/databases";
-import DatabaseUtils from "components/utils/DatabaseUtils";
 
 interface OngoingTasksHeaderProps {
     tasks: OngoingTasksState;
