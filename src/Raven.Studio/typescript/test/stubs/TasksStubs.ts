@@ -411,7 +411,7 @@ export class TasksStubs {
         };
     }
 
-    static getRabbitSink(): OngoingTaskQueueEtl {
+    static getRabbitSink(): OngoingTaskQueueSink {
         return {
             TaskName: "RabbitSinkTask",
             TaskId: 706,

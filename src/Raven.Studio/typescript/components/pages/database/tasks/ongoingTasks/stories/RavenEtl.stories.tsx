@@ -1,39 +1,37 @@
-import { Meta, StoryObj } from "@storybook/react";
 import { mockServices } from "test/mocks/services/MockServices";
-import { MockedValue } from "test/mocks/services/AutoMockService";
 import { TasksStubs } from "test/stubs/TasksStubs";
+import { OngoingTasksPage } from "components/pages/database/tasks/ongoingTasks/OngoingTasksPage";
 import { userEvent, within } from "@storybook/test";
 import React from "react";
-import {
-    commonInit,
-    mockExternalReplicationProgress,
-} from "components/pages/database/tasks/ongoingTasks/stories/common";
-import OngoingTaskReplication = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskReplication;
-import OngoingTasksResult = Raven.Server.Web.System.OngoingTasksResult;
-import { OngoingTasksPage } from "components/pages/database/tasks/ongoingTasks/OngoingTasksPage";
+import { commonInit, mockEtlProgress } from "components/pages/database/tasks/ongoingTasks/stories/common";
+import { Meta, StoryObj } from "@storybook/react";
 import { withBootstrap5, withForceRerender, withStorybookContexts } from "test/storybookTestUtils";
+import OngoingTaskRavenEtlListView = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskRavenEtl;
+import { MockedValue } from "test/mocks/services/AutoMockService";
+import OngoingTasksResult = Raven.Server.Web.System.OngoingTasksResult;
 
 export default {
-    title: "Pages/Database/Tasks/Ongoing tasks/External Replication",
+    title: "Pages/Database/Tasks/Ongoing tasks/Raven ETL",
     decorators: [withStorybookContexts, withBootstrap5, withForceRerender],
 } satisfies Meta;
 
-interface ExternalReplicationProps {
+interface RavenEtlProps {
     disabled: boolean;
     completed: boolean;
-    customizeTask: (x: OngoingTaskReplication) => void;
+    customizeTask: (x: OngoingTaskRavenEtlListView) => void;
+    emptyScript: boolean;
     runtimeError: boolean;
     loadError: boolean;
     databaseType: "sharded" | "cluster" | "singleNode";
 }
 
-export const Default: StoryObj<ExternalReplicationProps> = {
-    render: (args: ExternalReplicationProps) => {
+export const Default: StoryObj<RavenEtlProps> = {
+    render: (args: RavenEtlProps) => {
         commonInit(args.databaseType);
 
         const { tasksService } = mockServices;
-        const mockedValue: MockedValue<OngoingTasksResult> = (x: OngoingTasksResult) => {
-            const ongoingTask = TasksStubs.getExternalReplicationListItem();
+        const mockedValue: MockedValue<OngoingTasksResult> = (x) => {
+            const ongoingTask = TasksStubs.getRavenEtl();
             if (args.disabled) {
                 ongoingTask.TaskState = "Disabled";
                 ongoingTask.TaskConnectionStatus = "NotActive";
@@ -53,7 +51,7 @@ export const Default: StoryObj<ExternalReplicationProps> = {
             tasksService.withGetTasks(mockedValue);
         }
 
-        mockExternalReplicationProgress(tasksService, args.completed);
+        mockEtlProgress(tasksService, args.completed, args.disabled, args.emptyScript);
 
         return <OngoingTasksPage />;
     },
@@ -62,18 +60,20 @@ export const Default: StoryObj<ExternalReplicationProps> = {
         disabled: false,
         runtimeError: false,
         loadError: false,
+        emptyScript: false,
+        customizeTask: undefined,
         databaseType: "sharded",
     },
     argTypes: {
         databaseType: { control: "radio", options: ["sharded", "cluster", "singleNode"] },
     },
     play: async ({ canvas }) => {
-        const container = within(await canvas.findByTestId("external-replications"));
+        const container = within(await canvas.findByTestId("raven-etls"));
         await userEvent.click(await container.findByTitle(/Click for details/));
     },
 };
 
-export const NonSharded: StoryObj<ExternalReplicationProps> = {
+export const NotSharded: StoryObj<RavenEtlProps> = {
     ...Default,
     args: {
         ...Default.args,
@@ -81,7 +81,7 @@ export const NonSharded: StoryObj<ExternalReplicationProps> = {
     },
 };
 
-export const Disabled: StoryObj<ExternalReplicationProps> = {
+export const Disabled: StoryObj<RavenEtlProps> = {
     ...Default,
     args: {
         ...Default.args,
@@ -89,7 +89,7 @@ export const Disabled: StoryObj<ExternalReplicationProps> = {
     },
 };
 
-export const LoadError: StoryObj<ExternalReplicationProps> = {
+export const LoadError: StoryObj<RavenEtlProps> = {
     ...Default,
     args: {
         ...Default.args,
@@ -97,7 +97,7 @@ export const LoadError: StoryObj<ExternalReplicationProps> = {
     },
 };
 
-export const RuntimeError: StoryObj<ExternalReplicationProps> = {
+export const RuntimeError: StoryObj<RavenEtlProps> = {
     ...Default,
     args: {
         ...Default.args,
@@ -105,13 +105,11 @@ export const RuntimeError: StoryObj<ExternalReplicationProps> = {
     },
 };
 
-export const ServerWide: StoryObj<ExternalReplicationProps> = {
+export const EmptyScript: StoryObj<RavenEtlProps> = {
     ...Default,
     args: {
         ...Default.args,
-        disabled: false,
-        customizeTask: (task) => {
-            task.TaskName = "Server Wide External Replication, ext1";
-        },
+        completed: true,
+        emptyScript: true,
     },
 };

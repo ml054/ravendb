@@ -11,7 +11,6 @@ import React, { useState } from "react";
 import classNames from "classnames";
 import { ProgressCircle } from "components/common/ProgressCircle";
 import { ReplicationTaskProgressTooltip } from "components/pages/database/tasks/ongoingTasks/partials/ReplicationTaskProgressTooltip";
-import useBoolean from "hooks/useBoolean";
 import { databaseLocationComparator, withPreventDefault } from "components/utils/common";
 import { ErrorModal } from "components/pages/database/tasks/ongoingTasks/partials/ErrorModal";
 
@@ -98,7 +97,10 @@ export function ExternalReplicationTaskDistribution(props: ExternalReplicationTa
     const { task } = props;
     const sharded = task.nodesInfo.some((x) => x.location.shardNumber != null);
 
-    const visibleNodes = task.nodesInfo.filter((x) => x.details && x.details.taskConnectionStatus !== "NotOnThisNode");
+    const visibleNodes = task.nodesInfo.filter(
+        (nodeInfo) =>
+            nodeInfo.details && task.responsibleLocations.find((l) => databaseLocationComparator(l, nodeInfo.location))
+    );
 
     const items = visibleNodes.map((nodeInfo) => {
         const key = taskNodeInfoKey(task, nodeInfo);
@@ -146,8 +148,14 @@ interface ExternalReplicationTaskProgressProps {
 export function ExternalReplicationTaskProgress(props: ExternalReplicationTaskProgressProps) {
     const { nodeInfo, task } = props;
 
-    if (!nodeInfo.progress) {
-        return <ProgressCircle state="running" />;
+    const disabled = task.shared.taskState === "Disabled";
+
+    if (!nodeInfo.progress || nodeInfo.progress.length === 0) {
+        return (
+            <ProgressCircle icon={disabled ? "stop" : null} state="running">
+                {disabled ? "Disabled" : "?"}
+            </ProgressCircle>
+        );
     }
 
     if (nodeInfo.progress.every((x) => x.completed) && task.shared.taskState === "Enabled") {
@@ -162,8 +170,7 @@ export function ExternalReplicationTaskProgress(props: ExternalReplicationTaskPr
     const totalItems = nodeInfo.progress.reduce((acc, current) => acc + current.global.total, 0);
     const totalProcessed = nodeInfo.progress.reduce((acc, current) => acc + current.global.processed, 0);
 
-    const percentage = Math.floor((totalProcessed * 100) / totalItems) / 100;
-    const disabled = task.shared.taskState === "Disabled";
+    const percentage = totalItems === 0 ? 1 : Math.floor((totalProcessed * 100) / totalItems) / 100;
 
     return (
         <ProgressCircle state="running" icon={disabled ? "stop" : null} progress={percentage}>

@@ -1,39 +1,42 @@
-import { Meta, StoryObj } from "@storybook/react";
 import { mockServices } from "test/mocks/services/MockServices";
-import { MockedValue } from "test/mocks/services/AutoMockService";
 import { TasksStubs } from "test/stubs/TasksStubs";
-import { userEvent, within } from "@storybook/test";
+import { OngoingTasksPage } from "components/pages/database/tasks/ongoingTasks/OngoingTasksPage";
 import React from "react";
 import {
     commonInit,
     mockExternalReplicationProgress,
 } from "components/pages/database/tasks/ongoingTasks/stories/common";
-import OngoingTaskReplication = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskReplication;
-import OngoingTasksResult = Raven.Server.Web.System.OngoingTasksResult;
-import { OngoingTasksPage } from "components/pages/database/tasks/ongoingTasks/OngoingTasksPage";
 import { withBootstrap5, withForceRerender, withStorybookContexts } from "test/storybookTestUtils";
+import { Meta, StoryObj } from "@storybook/react";
+import { userEvent, within } from "@storybook/test";
+import OngoingTaskPullReplicationAsHub = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskPullReplicationAsHub;
+import { MockedValue } from "test/mocks/services/AutoMockService";
+import OngoingTasksResult = Raven.Server.Web.System.OngoingTasksResult;
 
 export default {
-    title: "Pages/Database/Tasks/Ongoing tasks/External Replication",
+    title: "Pages/Database/Tasks/Ongoing tasks/Replication Hub",
     decorators: [withStorybookContexts, withBootstrap5, withForceRerender],
 } satisfies Meta;
 
-interface ExternalReplicationProps {
+interface ReplicationHubProps {
     disabled: boolean;
     completed: boolean;
-    customizeTask: (x: OngoingTaskReplication) => void;
+    withOutConnections: boolean;
+    customizeTask: (x: OngoingTaskPullReplicationAsHub) => void;
+    emptyScript: boolean;
     runtimeError: boolean;
     loadError: boolean;
     databaseType: "sharded" | "cluster" | "singleNode";
 }
 
-export const Default: StoryObj<ExternalReplicationProps> = {
-    render: (args: ExternalReplicationProps) => {
+export const Default: StoryObj<ReplicationHubProps> = {
+    render: (args: ReplicationHubProps) => {
         commonInit(args.databaseType);
 
         const { tasksService } = mockServices;
-        const mockedValue: MockedValue<OngoingTasksResult> = (x: OngoingTasksResult) => {
-            const ongoingTask = TasksStubs.getExternalReplicationListItem();
+
+        const mockedValue: MockedValue<OngoingTasksResult> = (x) => {
+            const ongoingTask = TasksStubs.getReplicationHub();
             if (args.disabled) {
                 ongoingTask.TaskState = "Disabled";
                 ongoingTask.TaskConnectionStatus = "NotActive";
@@ -41,9 +44,14 @@ export const Default: StoryObj<ExternalReplicationProps> = {
             if (args.runtimeError) {
                 ongoingTask.Error = "This is some error";
             }
+            x.PullReplications.forEach((definition) => {
+                definition.Disabled = args.disabled;
+            });
             args.customizeTask?.(ongoingTask);
-            x.OngoingTasks = [ongoingTask];
-            x.PullReplications = [];
+            x.OngoingTasks = args.withOutConnections ? [] : [ongoingTask];
+            x.PullReplications = x.PullReplications.filter((x) =>
+                args.withOutConnections ? x.Name === "EmptyHub" : x.Name !== "EmptyHub"
+            );
             x.SubscriptionsCount = 0;
         };
 
@@ -62,26 +70,20 @@ export const Default: StoryObj<ExternalReplicationProps> = {
         disabled: false,
         runtimeError: false,
         loadError: false,
+        emptyScript: false,
+        customizeTask: undefined,
         databaseType: "sharded",
     },
     argTypes: {
         databaseType: { control: "radio", options: ["sharded", "cluster", "singleNode"] },
     },
     play: async ({ canvas }) => {
-        const container = within(await canvas.findByTestId("external-replications"));
+        const container = within(await canvas.findByTestId("replication-hubs"));
         await userEvent.click(await container.findByTitle(/Click for details/));
     },
 };
 
-export const NonSharded: StoryObj<ExternalReplicationProps> = {
-    ...Default,
-    args: {
-        ...Default.args,
-        databaseType: "cluster",
-    },
-};
-
-export const Disabled: StoryObj<ExternalReplicationProps> = {
+export const Disabled: StoryObj<ReplicationHubProps> = {
     ...Default,
     args: {
         ...Default.args,
@@ -89,29 +91,10 @@ export const Disabled: StoryObj<ExternalReplicationProps> = {
     },
 };
 
-export const LoadError: StoryObj<ExternalReplicationProps> = {
+export const NoConnections: StoryObj<ReplicationHubProps> = {
     ...Default,
     args: {
         ...Default.args,
-        loadError: true,
-    },
-};
-
-export const RuntimeError: StoryObj<ExternalReplicationProps> = {
-    ...Default,
-    args: {
-        ...Default.args,
-        runtimeError: true,
-    },
-};
-
-export const ServerWide: StoryObj<ExternalReplicationProps> = {
-    ...Default,
-    args: {
-        ...Default.args,
-        disabled: false,
-        customizeTask: (task) => {
-            task.TaskName = "Server Wide External Replication, ext1";
-        },
+        withOutConnections: true,
     },
 };

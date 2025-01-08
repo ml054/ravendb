@@ -1,38 +1,34 @@
 ﻿import React from "react";
 import { PopoverWithHover } from "components/common/PopoverWithHover";
-import { OngoingEtlTaskNodeInfo, OngoingTaskInfo } from "components/models/tasks";
+import { OngoingTaskNodeEtlProgressDetails } from "components/models/tasks";
 import { NamedProgress, NamedProgressItem } from "components/common/NamedProgress";
 import { Icon } from "components/common/Icon";
 import { Button } from "reactstrap";
 import copyToClipboard from "common/copyToClipboard";
 import { NodeInfoFailure } from "components/pages/database/tasks/ongoingTasks/partials/NodeInfoFailure";
-import { ErrorModal } from "components/pages/database/tasks/ongoingTasks/partials/ErrorModal";
+import { loadStatus } from "components/models/common";
 
 interface OngoingTaskEtlProgressTooltipProps {
     target: HTMLElement;
-    nodeInfo: OngoingEtlTaskNodeInfo;
-    task: OngoingTaskInfo;
+    status: loadStatus;
+    hasError: boolean;
+    progress: OngoingTaskNodeEtlProgressDetails[];
     showPreview: (transformationName: string) => void;
-    isErrorModalOpen: boolean;
     toggleErrorModal: () => void;
 }
 
 export function OngoingEtlTaskProgressTooltip(props: OngoingTaskEtlProgressTooltipProps) {
-    const { target, nodeInfo, showPreview, toggleErrorModal, isErrorModalOpen } = props;
+    const { target, showPreview, toggleErrorModal, status, hasError, progress } = props;
 
-    if (isErrorModalOpen) {
-        return <ErrorModal key="modal" toggleErrorModal={toggleErrorModal} error={nodeInfo.details.error} />;
-    }
-
-    if (nodeInfo.status === "failure") {
+    if (status === "failure") {
         return <NodeInfoFailure target={target} openErrorModal={toggleErrorModal} />;
     }
 
-    if (nodeInfo.status !== "success") {
+    if (status !== "success") {
         return null;
     }
 
-    const hasAnyDetailsToShow = nodeInfo?.etlProgress.length > 0 || nodeInfo.details.error;
+    const hasAnyDetailsToShow = progress?.length > 0 || hasError;
 
     if (!hasAnyDetailsToShow) {
         return null;
@@ -41,8 +37,15 @@ export function OngoingEtlTaskProgressTooltip(props: OngoingTaskEtlProgressToolt
     return (
         <PopoverWithHover rounded="true" target={target} placement="top">
             <div className="vstack gap-3 py-2">
-                {nodeInfo.etlProgress &&
-                    nodeInfo.etlProgress.map((transformationScriptProgress, index) => {
+                {hasError && (
+                    <div className="text-center">
+                        <Button color="danger" key="button" size="sm" onClick={toggleErrorModal}>
+                            Open error in modal <Icon icon="newtab" margin="ms-1" />
+                        </Button>
+                    </div>
+                )}
+                {progress &&
+                    progress.map((transformationScriptProgress, index) => {
                         const nameNode = (
                             <div className="d-flex align-items-center justify-content-center gap-1">
                                 {transformationScriptProgress.transformationName}
@@ -97,7 +100,7 @@ export function OngoingEtlTaskProgressTooltip(props: OngoingTaskEtlProgressToolt
                                         </NamedProgressItem>
                                     )}
                                 </NamedProgress>
-                                {index !== nodeInfo.etlProgress.length - 1 && <hr className="mt-2 mb-0" />}
+                                {index !== progress.length - 1 && <hr className="mt-2 mb-0" />}
                             </div>
                         );
                     })}

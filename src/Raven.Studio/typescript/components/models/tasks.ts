@@ -82,8 +82,8 @@ export interface OngoingTaskSharedInfo {
     taskName: string;
     taskId: number;
     taskType: StudioTaskType;
-    mentorNodeTag: string;
-    responsibleNodeTag: string;
+    mentorNodeTag: string; // available only for non-sharded databases
+    responsibleNodeTag: string; // available only for non-sharded databases
     taskState: OngoingTaskState;
     serverWide: boolean;
 }

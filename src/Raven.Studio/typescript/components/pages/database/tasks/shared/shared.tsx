@@ -3,11 +3,11 @@
     OngoingEtlTaskNodeInfo,
     OngoingTaskInfo,
     OngoingTaskSharedInfo,
-} from "../../../../models/tasks";
+} from "components/models/tasks";
 import useBoolean from "hooks/useBoolean";
 import React, { useCallback, useState } from "react";
 import router from "plugins/router";
-import { RichPanelDetailItem, RichPanelName } from "../../../../common/RichPanel";
+import { RichPanelDetailItem, RichPanelName } from "components/common/RichPanel";
 import {
     Button,
     ButtonGroup,
@@ -65,6 +65,14 @@ export function OngoingTaskResponsibleNode(props: { task: OngoingTaskInfo }) {
     const { task } = props;
     const preferredMentor = task.shared.mentorNodeTag;
     const currentNode = task.shared.responsibleNodeTag;
+
+    const db = useAppSelector(databaseSelectors.activeDatabase);
+
+    if (db?.isSharded) {
+        // for sharded databases there are multiple responsible nodes, so user
+        // can see it inside details only
+        return null;
+    }
 
     const usingNotPreferredNode = preferredMentor && currentNode ? preferredMentor !== currentNode : false;
 
