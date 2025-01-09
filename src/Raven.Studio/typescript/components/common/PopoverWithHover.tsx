@@ -77,7 +77,7 @@ export function PopoverWithHover(props: PopoverWithHoverProps) {
             showHandle.current = setTimeout(() => {
                 setOpen(true);
                 showHandle.current = null;
-            }, 200);
+            }, 180);
 
             maybeCancelHide();
         };

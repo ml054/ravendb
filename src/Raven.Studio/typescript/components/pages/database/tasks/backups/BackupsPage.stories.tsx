@@ -1,11 +1,9 @@
 ﻿import React from "react";
-import { Meta, StoryFn } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
 import { withBootstrap5, withForceRerender, withStorybookContexts } from "test/storybookTestUtils";
 import clusterTopologyManager from "common/shell/clusterTopologyManager";
 import { mockServices } from "test/mocks/services/MockServices";
 import { TasksStubs } from "test/stubs/TasksStubs";
-import { boundCopy } from "components/utils/common";
-import OngoingTaskBackup = Raven.Client.Documents.Operations.OngoingTasks.OngoingTaskBackup;
 import { BackupsPage } from "./BackupsPage";
 import { mockStore } from "test/mocks/store/MockStore";
 
@@ -13,7 +11,6 @@ export default {
     title: "Pages/Backups",
     component: BackupsPage,
     decorators: [withStorybookContexts, withForceRerender, withBootstrap5],
-    excludeStories: /Template$/,
 } satisfies Meta<typeof BackupsPage>;
 
 function commonInit() {
@@ -25,66 +22,82 @@ function commonInit() {
     clusterTopologyManager.default.localNodeTag = ko.pureComputed(() => "A");
 }
 
-export const EmptyView: StoryFn<typeof BackupsPage> = () => {
-    commonInit();
+interface BackupProps {
+    disabled: boolean;
+    encrypted: boolean;
+    empty: boolean;
+}
 
-    const { tasksService } = mockServices;
+export const Default: StoryObj<BackupProps> = {
+    render: (args) => {
+        commonInit();
 
-    tasksService.withGetTasks((dto) => {
-        dto.SubscriptionsCount = 0;
-        dto.OngoingTasks = [];
-        dto.PullReplications = [];
-    });
-    tasksService.withGetEtlProgress((dto) => {
-        dto.Results = [];
-    });
+        const { tasksService } = mockServices;
+        if (args.empty) {
+            tasksService.withGetTasks((dto) => {
+                dto.SubscriptionsCount = 0;
+                dto.OngoingTasks = [];
+                dto.PullReplications = [];
+            });
+            tasksService.withGetEtlProgress((dto) => {
+                dto.Results = [];
+            });
 
-    tasksService.withGetManualBackup((x) => (x.Status = null));
-
-    return <BackupsPage />;
-};
-
-export const FullView: StoryFn<typeof BackupsPage> = () => {
-    commonInit();
-
-    const { tasksService } = mockServices;
-
-    tasksService.withGetTasks();
-    tasksService.withGetEtlProgress();
-    tasksService.withGetManualBackup();
-
-    return <BackupsPage />;
-};
-
-export const PeriodicBackupTemplate = (args: {
-    disabled?: boolean;
-    customizeTask?: (x: OngoingTaskBackup) => void;
-}) => {
-    commonInit();
-
-    const { tasksService } = mockServices;
-
-    tasksService.withGetTasks((x) => {
-        const ongoingTask = TasksStubs.getPeriodicBackupListItem();
-        if (args.disabled) {
-            ongoingTask.TaskState = "Disabled";
+            tasksService.withGetManualBackup((x) => (x.Status = null));
+        } else {
+            tasksService.withGetTasks((x) => {
+                const ongoingTask = TasksStubs.getPeriodicBackupListItem();
+                if (args.disabled) {
+                    ongoingTask.TaskState = "Disabled";
+                }
+                if (args.encrypted) {
+                    ongoingTask.IsEncrypted = true;
+                }
+                x.OngoingTasks = [ongoingTask];
+                x.PullReplications = [];
+                x.SubscriptionsCount = 0;
+            });
+            tasksService.withGetEtlProgress();
+            tasksService.withGetManualBackup();
         }
-        args.customizeTask?.(ongoingTask);
-        x.OngoingTasks = [ongoingTask];
-        x.PullReplications = [];
-        x.SubscriptionsCount = 0;
-    });
 
-    tasksService.withGetManualBackup();
-
-    return <BackupsPage />;
+        return <BackupsPage />;
+    },
+    args: {
+        disabled: false,
+        empty: false,
+        encrypted: false,
+    },
 };
 
-export const PeriodicBackupDisabled = boundCopy(PeriodicBackupTemplate, {
-    disabled: true,
-});
+export const FullView: StoryObj<BackupProps> = {
+    ...Default,
+    args: {
+        ...Default.args,
+        empty: false,
+    },
+};
 
-export const PeriodicBackupEnabledEncrypted = boundCopy(PeriodicBackupTemplate, {
-    disabled: false,
-    customizeTask: (x) => (x.IsEncrypted = true),
-});
+export const EmptyView: StoryObj<BackupProps> = {
+    ...Default,
+    args: {
+        ...Default.args,
+        empty: true,
+    },
+};
+
+export const Disabled: StoryObj<BackupProps> = {
+    ...Default,
+    args: {
+        ...Default.args,
+        disabled: true,
+    },
+};
+
+export const Encrypted: StoryObj<BackupProps> = {
+    ...Default,
+    args: {
+        ...Default.args,
+        encrypted: true,
+    },
+};

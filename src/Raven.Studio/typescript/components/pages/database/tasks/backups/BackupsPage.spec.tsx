@@ -3,7 +3,6 @@ import React from "react";
 
 import * as stories from "./BackupsPage.stories";
 import { composeStories, composeStory } from "@storybook/react";
-import { boundCopy } from "components/utils/common";
 
 const { EmptyView, FullView } = composeStories(stories);
 
@@ -34,11 +33,7 @@ describe("BackupsPage", function () {
 
     describe("Periodic Backup", function () {
         it("can render enabled", async () => {
-            const View = boundCopy(stories.PeriodicBackupTemplate, {
-                disabled: false,
-            });
-
-            const Story = composeStory(View, stories.default);
+            const Story = composeStory(stories.Default, stories.default);
 
             const { screen, fireClick } = rtlRender(<Story />);
             expect(await screen.findByText(/Enabled/)).toBeInTheDocument();
