@@ -61,6 +61,8 @@ function getTypeLabel(type: StudioEtlType): string {
             return "SQL";
         case "AzureQueueStorage":
             return "Azure Queue Storage";
+        case "AmazonSqs":
+            return "Amazon SQS";
         default:
             return type;
     }
@@ -72,6 +74,8 @@ function getIcon(type: StudioEtlType): IconName {
             return "raven";
         case "Sql":
             return "table";
+        case "Snowflake":
+            return "snowflake";
         case "Olap":
             return "olap";
         case "ElasticSearch":
@@ -81,7 +85,9 @@ function getIcon(type: StudioEtlType): IconName {
         case "RabbitMQ":
             return "rabbitmq";
         case "AzureQueueStorage":
-            return "azure-queue-storage";
+            return "azure";
+        case "AmazonSqs":
+            return "amazon-sqs";
         default:
             return null;
     }

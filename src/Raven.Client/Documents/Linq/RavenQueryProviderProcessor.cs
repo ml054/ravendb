@@ -9,6 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -24,6 +25,7 @@ using Raven.Client.Documents.Queries.MoreLikeThis;
 using Raven.Client.Documents.Queries.Spatial;
 using Raven.Client.Documents.Queries.Suggestions;
 using Raven.Client.Documents.Queries.TimeSeries;
+using Raven.Client.Documents.Queries.Vector;
 using Raven.Client.Documents.Session;
 using Raven.Client.Documents.Session.Loaders;
 using Raven.Client.Documents.Session.Tokens;
@@ -1596,6 +1598,105 @@ The recommended method is to use full text search (mark the field as Analyzed an
                     break;
                 case nameof(LinqExtensions.Skip):
                     VisitQueryableMethodCall(expression);
+                    break;
+                
+                // Root, field factory, value factory, similarity, number of neighbors, isExact 
+                // e.g. Query<Dto>.VectorSearch(x => x.WithText("TextField"), factory => factory.ByText("SomeText"), minimumSimilarity (nullable): 0.7, numberOfCandidates: (nullable) 16, isExact: true (default: Raven.Client.Constants.VectorSearch.DefaultIsExact))
+                case nameof(LinqExtensions.VectorSearch):
+                    _insideWhereOrSearchCounter++;
+                    
+                    VisitExpression(expression.Arguments[0]);
+
+                    if (_chainedWhere)
+                    {
+                        DocumentQuery.AndAlso();
+                        DocumentQuery.OpenSubclause();
+                    }
+                    
+                    if (_chainedWhere == false && _insideWhereOrSearchCounter > 1)
+                        DocumentQuery.OpenSubclause();
+
+                    LinqPathProvider.GetValueFromExpressionWithoutConversion(expression.Arguments[3], out var minimumSimilarityObject);
+
+                    if (minimumSimilarityObject != null)
+                    {
+                        if (minimumSimilarityObject is not float minimumSimilarity || minimumSimilarity is < -1.0f or > 1.0f)
+                            throw new InvalidDataException($"The minimum similarity parameter should be a float in the range [-1, 1]. However, it was '{minimumSimilarityObject.GetType().FullName}' with the value '{minimumSimilarityObject.ToString()}'.");
+                    }
+                    
+                    LinqPathProvider.GetValueFromExpressionWithoutConversion(expression.Arguments[4], out var numberOfCandidatesObject);
+
+                    if (numberOfCandidatesObject != null)
+                    {
+                        if (numberOfCandidatesObject is not int numberOfCandidates || numberOfCandidates <= 0)
+                            throw new InvalidDataException("Number of candidates has to be positive.");
+                    }
+
+                    LinqPathProvider.GetValueFromExpressionWithoutConversion(expression.Arguments[5], out var isExactObject);
+
+                    if (isExactObject is not bool isExact)
+                        throw new NotSupportedException($"{nameof(isExact)} has to be boolean.");
+                    
+                    LinqPathProvider.GetValueFromExpressionWithoutConversion(expression.Arguments[1], out var fieldFactoryObject);
+                    
+                    var fieldBuilder = new VectorEmbeddingFieldFactory<T>();
+                    var valueBuilder = new VectorFieldValueFactory();
+
+                    switch (fieldFactoryObject)
+                    {
+                        case Func<IVectorFieldFactory<T>, IVectorEmbeddingTextField> textFieldFactory:
+                        {
+                            LinqPathProvider.GetValueFromExpressionWithoutConversion(expression.Arguments[2], out var textFieldValueFactoryObject);
+                        
+                            textFieldFactory.Invoke(fieldBuilder);
+
+                            if (textFieldValueFactoryObject is not Action<IVectorEmbeddingTextFieldValueFactory> textValueFactory)
+                                throw new InvalidOperationException($"Excepted {nameof(Action<IVectorEmbeddingTextFieldValueFactory>)} object as the embedding field value factory, however it was '{textFieldFactory.GetType().FullName}'. ");
+                            
+                            textValueFactory.Invoke(valueBuilder);
+                            
+                            break;
+                        }
+                        case Func<IVectorFieldFactory<T>, IVectorEmbeddingField> embeddingFieldFactory:
+                        {
+                            LinqPathProvider.GetValueFromExpressionWithoutConversion(expression.Arguments[2], out var embeddingFieldValueFactoryObject);
+
+                            embeddingFieldFactory.Invoke(fieldBuilder);
+
+                            if (embeddingFieldValueFactoryObject is not Action<IVectorEmbeddingFieldValueFactory> embeddingValueFactory)
+                                throw new InvalidOperationException($"Excepted {nameof(Action<IVectorEmbeddingFieldValueFactory>)} object as the embedding field value factory, however it was '{embeddingFieldValueFactoryObject.GetType().FullName}'. ");
+
+                            embeddingValueFactory.Invoke(valueBuilder);
+                            
+                            break;
+                        }
+                        case Func<IVectorFieldFactory<T>, IVectorField> fieldFactory:
+                        {
+                            LinqPathProvider.GetValueFromExpressionWithoutConversion(expression.Arguments[2], out var embeddingFieldValueFactoryObject);
+
+                            fieldFactory.Invoke(fieldBuilder);
+
+                            if (embeddingFieldValueFactoryObject is not Action<IVectorFieldValueFactory> fieldValueFactory)
+                                throw new InvalidOperationException($"Excepted {nameof(Action<IVectorFieldValueFactory>)} object as the embedding field value factory, however it was '{embeddingFieldValueFactoryObject.GetType().FullName}'. ");
+
+                            fieldValueFactory.Invoke(valueBuilder);
+                            
+                            break;
+                        }
+                        default:
+                            throw new InvalidOperationException($"Unknown field factory type: {fieldFactoryObject.GetType().FullName}.");
+                    }
+                    
+                    
+                    DocumentQuery.VectorSearch(fieldBuilder, valueBuilder, minimumSimilarityObject as float?, numberOfCandidatesObject as int?, isExact);
+                    
+                    if (_chainedWhere == false && _insideWhereOrSearchCounter > 1)
+                        DocumentQuery.CloseSubclause();
+                    if (_chainedWhere)
+                        DocumentQuery.CloseSubclause();
+                    _chainedWhere = true;
+                    _insideWhereOrSearchCounter--;
+                    
                     break;
                 default:
                     throw new NotSupportedException("Method not supported: " + expression.Method.Name);

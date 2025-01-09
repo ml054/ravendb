@@ -32,7 +32,6 @@ import viewModelBase = require("viewmodels/viewModelBase");
 import eventsCollector = require("common/eventsCollector");
 import collectionsTracker = require("common/helpers/database/collectionsTracker");
 import footer = require("common/shell/footer");
-import feedback = require("viewmodels/shell/feedback");
 import chooseTheme = require("viewmodels/shell/chooseTheme");
 import continueTest = require("common/shell/continueTest");
 import globalSettings = require("common/settings/globalSettings");
@@ -61,6 +60,7 @@ import getStudioBootstrapCommand from "commands/resources/getStudioBootstrapComm
 import serverSettings from "common/settings/serverSettings";
 import getLatestVersionInfoCommand = require("commands/version/getLatestVersionInfoCommand");
 import StudioSearchWithDatabaseSwitcher from "components/shell/studioSearchWithDatabaseSelector/StudioSearchWithDatabaseSwitcher";
+import { HelpAndResourcesWidget } from "components/common/helpAndResources/HelpAndResourcesWidget";
 
 class shell extends viewModelBase {
 
@@ -131,6 +131,7 @@ class shell extends viewModelBase {
     isUpgradeModalVisible = ko.observable<boolean>(false);
 
     studioSearchWithDatabaseSwitcherView: ReactInKnockout<typeof StudioSearchWithDatabaseSwitcher>;
+    helpAndResourcesWidgetView: ReactInKnockout<typeof HelpAndResourcesWidget>;
     
     constructor() {
         super();
@@ -271,6 +272,8 @@ class shell extends viewModelBase {
                     return "";
             }
         });
+        
+        this.helpAndResourcesWidgetView = ko.pureComputed(() => ({ component: HelpAndResourcesWidget }));
     }
     
     // Override canActivate: we can always load this page, regardless of any system db prompt.
@@ -526,6 +529,10 @@ class shell extends viewModelBase {
         return appUrl.forDocuments(coll.name, this.activeDatabase());
     }
 
+    urlForAllRevisions() {
+        return appUrl.forAllRevisions(this.activeDatabase());
+    }
+
     urlForRevisionsBin() {
         return appUrl.forRevisionsBin(this.activeDatabase());
     }
@@ -628,11 +635,6 @@ class shell extends viewModelBase {
         studioSettings.default.registerOnSettingChangedHandler(
             name => name === "sendUsageStats",
             (name, track: simpleStudioSetting<boolean>) => eventsCollector.default.enabled = track.getValue() && eventsCollector.gaDefined());
-    }
-
-    static openFeedbackForm() {
-        const dialog = new feedback(shell.clientVersion(), buildInfo.serverBuildVersion().FullVersion);
-        app.showBootstrapDialog(dialog);
     }
     
     static chooseTheme() {

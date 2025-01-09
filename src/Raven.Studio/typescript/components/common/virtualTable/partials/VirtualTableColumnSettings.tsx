@@ -1,6 +1,6 @@
 import { Column, SortDirection } from "@tanstack/react-table";
 import classNames from "classnames";
-import { HStack } from "components/common/HStack";
+import { HStack } from "components/common/utilities/HStack";
 import { Icon } from "components/common/Icon";
 import { useState, useMemo } from "react";
 import { Button, UncontrolledDropdown, DropdownToggle, DropdownMenu, Label, Input } from "reactstrap";

@@ -13,12 +13,14 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using Raven.Client.Documents.Conventions;
 using Raven.Client.Documents.Linq;
 using Raven.Client.Documents.Queries;
 using Raven.Client.Documents.Queries.MoreLikeThis;
 using Raven.Client.Documents.Queries.TimeSeries;
+using Raven.Client.Documents.Queries.Vector;
 using Raven.Client.Documents.Session.Operations;
 using Raven.Client.Documents.Session.Operations.Lazy;
 using Raven.Client.Documents.Session.Tokens;
@@ -1511,6 +1513,57 @@ Use session.Query<T>() instead of session.Advanced.DocumentQuery<T>. The session
                 ? _conventions.FindPropertyNameForDynamicIndex(typeof(T), IndexName, "", result.Path)
                 : _conventions.FindPropertyNameForIndex(typeof(T), IndexName, "", result.Path);
             return propertyName;
+        }
+
+        internal void VectorSearch(VectorEmbeddingFieldFactory<T> embeddingFieldFactory, VectorFieldValueFactory embeddingValueFactory,
+            float? minimumSimilarity, int? numberOfCandidates, bool isExact)
+        {
+            var fieldName = embeddingFieldFactory.FieldName;
+            var sourceQuantizationType = embeddingFieldFactory.SourceQuantizationType;
+            var targetQuantizationType = embeddingFieldFactory.DestinationQuantizationType;
+            var isSourceBase64Encoded = embeddingFieldFactory.IsBase64Encoded;
+            
+            string queryParameterName;
+            var isVectorBase64Encoded = false;
+            
+            if (embeddingValueFactory.Text != null)
+            {
+                queryParameterName = AddQueryParameter(embeddingValueFactory.Text);
+            }
+
+            else if (embeddingValueFactory.Embedding != null)
+            {
+                // for well-known types we can convert the array into Base64
+                queryParameterName = AddQueryParameter(embeddingValueFactory.Embedding switch
+                {
+                    float[] fa => Convert.ToBase64String(MemoryMarshal.Cast<float, byte>(fa)
+#if !NETCOREAPP3_1_OR_GREATER
+                        .ToArray() // For newer frameworks we use Span overload in Convert.
+#endif
+                    ),
+                    byte[] ba => Convert.ToBase64String(ba),
+                    sbyte[] sb => Convert.ToBase64String(MemoryMarshal.Cast<sbyte, byte>(sb)
+#if !NETCOREAPP3_1_OR_GREATER
+                        .ToArray()
+#endif
+                    ),
+                    _  => embeddingValueFactory.Embedding,
+                });
+            }
+            else
+            {
+                queryParameterName = AddQueryParameter(embeddingValueFactory.Base64Embedding);
+                isVectorBase64Encoded = true;
+            }
+            
+            var vectorSearchToken = new VectorSearchToken(fieldName, queryParameterName, sourceQuantizationType, targetQuantizationType, isSourceBase64Encoded, isVectorBase64Encoded, minimumSimilarity, numberOfCandidates, isExact);
+
+            WhereTokens.AddLast(vectorSearchToken);
+        }
+
+        public void VectorSearch(IVectorFieldFactory<T> fieldFactory, IVectorFieldValueFactory valueFactory, float? minimumSimilarity, int? numberOfCandidates, bool isExact)
+        {
+            VectorSearch((VectorEmbeddingFieldFactory<T>)fieldFactory, (VectorFieldValueFactory)valueFactory, minimumSimilarity, numberOfCandidates, isExact);
         }
 
         public void Distinct()

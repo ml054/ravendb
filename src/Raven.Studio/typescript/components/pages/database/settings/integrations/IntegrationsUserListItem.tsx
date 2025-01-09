@@ -10,7 +10,7 @@ import {
 import { Button, Collapse, Form, InputGroup, Label } from "reactstrap";
 import { Icon } from "components/common/Icon";
 import { FormInput } from "components/common/Form";
-import { HStack } from "components/common/HStack";
+import { HStack } from "components/common/utilities/HStack";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { accessManagerSelectors } from "components/common/shell/accessManagerSliceSelectors";
 import { useAppSelector } from "components/store";

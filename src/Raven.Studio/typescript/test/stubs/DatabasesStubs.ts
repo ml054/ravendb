@@ -13,6 +13,7 @@ import RevisionsCollectionConfiguration = Raven.Client.Documents.Operations.Revi
 import SorterDefinition = Raven.Client.Documents.Queries.Sorting.SorterDefinition;
 import AnalyzerDefinition = Raven.Client.Documents.Indexes.Analysis.AnalyzerDefinition;
 import document from "models/database/documents/document";
+import { RevisionsPreviewResultItem } from "commands/database/documents/getRevisionsPreviewCommand";
 
 export class DatabasesStubs {
     private static genericDatabaseInfo(name: string): StudioDatabaseInfo {
@@ -454,6 +455,7 @@ export class DatabasesStubs {
             QueueConnectionStrings: {},
             RavenConnectionStrings: {},
             SqlConnectionStrings: {},
+            SnowflakeConnectionStrings: {},
         };
     }
 
@@ -473,6 +475,13 @@ export class DatabasesStubs {
                     Name: "sql-name",
                     ConnectionString: "some-connection-string",
                     FactoryName: "System.Data.SqlClient",
+                },
+            },
+            SnowflakeConnectionStrings: {
+                "snowflake-name": {
+                    Type: "Snowflake",
+                    Name: "snowflake-name",
+                    ConnectionString: "some-snowflake-connection-string",
                 },
             },
             OlapConnectionStrings: {
@@ -516,6 +525,7 @@ export class DatabasesStubs {
                     },
                     RabbitMqConnectionSettings: null,
                     AzureQueueStorageConnectionSettings: null,
+                    AmazonSqsConnectionSettings: null,
                 },
                 "rabbitmq-name": {
                     Type: "Queue",
@@ -526,6 +536,7 @@ export class DatabasesStubs {
                         ConnectionString: "some-connection-string",
                     },
                     AzureQueueStorageConnectionSettings: null,
+                    AmazonSqsConnectionSettings: null,
                 },
                 "azure-queue-storage-name": {
                     Type: "Queue",
@@ -537,6 +548,23 @@ export class DatabasesStubs {
                         ConnectionString: "some-connection-string",
                         EntraId: null,
                         Passwordless: null,
+                    },
+                    AmazonSqsConnectionSettings: null,
+                },
+                "azure-sqs-name": {
+                    Type: "Queue",
+                    Name: "azure-sqs-name",
+                    BrokerType: "AmazonSqs",
+                    KafkaConnectionSettings: null,
+                    RabbitMqConnectionSettings: null,
+                    AzureQueueStorageConnectionSettings: null,
+                    AmazonSqsConnectionSettings: {
+                        Basic: {
+                            AccessKey: "AKIA123",
+                            SecretKey: "this is secret",
+                            RegionName: "us-west-2",
+                        },
+                        Passwordless: false,
                     },
                 },
             },
@@ -648,11 +676,13 @@ return docs[0];`,
             HubPullReplications: [],
             RavenConnectionStrings: {},
             SqlConnectionStrings: {},
+            SnowflakeConnectionStrings: {},
             OlapConnectionStrings: {},
             ElasticSearchConnectionStrings: {},
             QueueConnectionStrings: {},
             RavenEtls: [],
             SqlEtls: [],
+            SnowflakeEtls: [],
             ElasticSearchEtls: [],
             OlapEtls: [],
             QueueEtls: [],
@@ -962,5 +992,31 @@ return docs[0];`,
             Object.assign(object, identity);
         }
         return object;
+    }
+
+    static revisionsPreview(): pagedResultWithToken<RevisionsPreviewResultItem> {
+        return {
+            items: [
+                {
+                    ChangeVector: "A:2568-F9I6Egqwm0Kz+K0oFVIR9Q",
+                    Collection: "Docs",
+                    Id: "doc/1-A",
+                    Etag: "2568",
+                    Flags: "HasRevisions, DeleteRevision",
+                    LastModified: "2018-07-27T12:11:53.0447651Z",
+                    ShardNumber: null,
+                },
+                {
+                    ChangeVector: "A:2569-F9I6Egqwm0Kz+K0oFVIR9Q",
+                    Collection: "Docs",
+                    Id: "doc/2-A",
+                    Etag: "2569",
+                    Flags: "HasRevisions",
+                    LastModified: "2018-07-27T12:11:53.0451613Z",
+                    ShardNumber: null,
+                },
+            ],
+            totalResultCount: 2,
+        };
     }
 }

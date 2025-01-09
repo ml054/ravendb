@@ -1,9 +1,9 @@
-﻿import React, { ForwardedRef, forwardRef, HTMLAttributes, LegacyRef, ReactNode } from "react";
+﻿import React, { ComponentProps, ForwardedRef, HTMLAttributes, ReactNode } from "react";
 import "./RichPanel.scss";
 import classNames from "classnames";
 import { Badge, Card, CardHeader } from "reactstrap";
 
-interface RichPanelProps {
+interface RichPanelProps extends ComponentProps<typeof Card> {
     className?: string;
     children: ReactNode | ReactNode[];
     innerRef?: any;
@@ -12,12 +12,13 @@ interface RichPanelProps {
 }
 
 export function RichPanel(props: RichPanelProps) {
-    const { children, className, innerRef, hover, id } = props;
+    const { children, className, innerRef, hover, id, ...rest } = props;
     return (
         <Card
             className={classNames("rich-panel-item", className, { "rich-panel-hover": hover })}
             ref={innerRef}
             id={id}
+            {...rest}
         >
             {children}
         </Card>

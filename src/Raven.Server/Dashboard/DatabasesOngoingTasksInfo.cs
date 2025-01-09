@@ -36,6 +36,8 @@ namespace Raven.Server.Dashboard
         public long RabbitMqEtlCount { get; set; }
         
         public long AzureQueueStorageEtlCount { get; set; }
+        
+        public long AmazonSqsEtlCount { get; set; }
 
         public long PeriodicBackupCount { get; set; }
 
@@ -60,6 +62,7 @@ namespace Raven.Server.Dashboard
                 [nameof(KafkaEtlCount)] = KafkaEtlCount,
                 [nameof(RabbitMqEtlCount)] = RabbitMqEtlCount,
                 [nameof(AzureQueueStorageEtlCount)] = AzureQueueStorageEtlCount,
+                [nameof(AmazonSqsEtlCount)] = AmazonSqsEtlCount,
                 [nameof(PeriodicBackupCount)] = PeriodicBackupCount,
                 [nameof(SubscriptionCount)] = SubscriptionCount,
                 [nameof(KafkaSinkCount)] = KafkaSinkCount,

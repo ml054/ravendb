@@ -11,6 +11,12 @@ import deleteServerWideCustomSorterCommand = require("commands/serverWide/sorter
 import testPeriodicBackupCredentialsCommand = require("commands/serverWide/testPeriodicBackupCredentialsCommand");
 import saveServerWideCustomSorterCommand = require("commands/serverWide/sorters/saveServerWideCustomSorterCommand");
 import saveServerWideCustomAnalyzerCommand from "commands/serverWide/analyzers/saveServerWideCustomAnalyzerCommand";
+import getAdminLogsConfigurationCommand = require("commands/maintenance/getAdminLogsConfigurationCommand");
+import getTrafficWatchConfigurationCommand = require("commands/maintenance/getTrafficWatchConfigurationCommand");
+import getAdminLogsEventListenerConfigurationCommand = require("commands/maintenance/getAdminLogsEventListenerConfigurationCommand");
+import saveAdminLogsConfigurationCommand = require("commands/maintenance/saveAdminLogsConfigurationCommand");
+import saveAdminLogsEventListenerConfigurationCommand = require("commands/maintenance/saveAdminLogsEventListenerConfigurationCommand");
+import saveTrafficWatchConfigurationCommand = require("commands/maintenance/saveTrafficWatchConfigurationCommand");
 
 export default class ManageServerService {
     async getGlobalClientConfiguration(): Promise<ClientConfiguration> {
@@ -62,5 +68,31 @@ export default class ManageServerService {
         config: Raven.Client.Documents.Operations.Backups.BackupSettings
     ) {
         return new testPeriodicBackupCredentialsCommand(type, config).execute();
+    }
+
+    async getAdminLogsConfiguration() {
+        return new getAdminLogsConfigurationCommand().execute();
+    }
+
+    async saveAdminLogsConfiguration(...args: ConstructorParameters<typeof saveAdminLogsConfigurationCommand>) {
+        return new saveAdminLogsConfigurationCommand(...args).execute();
+    }
+
+    async getTrafficWatchConfiguration() {
+        return new getTrafficWatchConfigurationCommand().execute();
+    }
+
+    async saveTrafficWatchConfiguration(...args: ConstructorParameters<typeof saveTrafficWatchConfigurationCommand>) {
+        return new saveTrafficWatchConfigurationCommand(...args).execute();
+    }
+
+    async getEventListenerConfiguration() {
+        return new getAdminLogsEventListenerConfigurationCommand().execute();
+    }
+
+    async saveEventListenerConfiguration(
+        ...args: ConstructorParameters<typeof saveAdminLogsEventListenerConfigurationCommand>
+    ) {
+        return new saveAdminLogsEventListenerConfigurationCommand(...args).execute();
     }
 }

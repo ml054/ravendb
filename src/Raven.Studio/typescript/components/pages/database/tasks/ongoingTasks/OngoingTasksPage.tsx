@@ -3,6 +3,7 @@ import { useServices } from "hooks/useServices";
 import { OngoingTasksState, ongoingTasksReducer, ongoingTasksReducerInitializer } from "./partials/OngoingTasksReducer";
 import { ExternalReplicationPanel } from "./panels/ExternalReplicationPanel";
 import {
+    OngoingTaskAmazonSqsEtlInfo,
     OngoingTaskAzureQueueStorageEtlInfo,
     OngoingTaskElasticSearchEtlInfo,
     OngoingTaskExternalReplicationInfo,
@@ -17,6 +18,7 @@ import {
     OngoingTaskReplicationHubInfo,
     OngoingTaskReplicationSinkInfo,
     OngoingTaskSharedInfo,
+    OngoingTaskSnowflakeEtlInfo,
     OngoingTaskSqlEtlInfo,
 } from "components/models/tasks";
 import { RavenEtlPanel } from "./panels/RavenEtlPanel";
@@ -65,6 +67,8 @@ import { OngoingTasksHeader } from "components/pages/database/tasks/ongoingTasks
 import { InternalReplicationPanel } from "./panels/InternalReplicationPanel";
 import DatabaseUtils from "components/utils/DatabaseUtils";
 import recentError from "common/notifications/models/recentError";
+import { SnowflakeEtlPanel } from "components/pages/database/tasks/ongoingTasks/panels/SnowflakeEtlPanel";
+import { AmazonSqsEtlPanel } from "components/pages/database/tasks/ongoingTasks/panels/AmazonSqsEtlPanel";
 
 export function OngoingTasksPage() {
     const db = useAppSelector(databaseSelectors.activeDatabase);
@@ -185,10 +189,12 @@ export function OngoingTasksPage() {
         externalReplications,
         ravenEtls,
         sqlEtls,
+        snowflakeEtls,
         olapEtls,
         kafkaEtls,
         rabbitMqEtls,
         azureQueueStorageEtls,
+        amazonSqsEtls,
         kafkaSinks,
         rabbitMqSinks,
         elasticSearchEtls,
@@ -428,7 +434,6 @@ export function OngoingTasksPage() {
                                 ))}
                             </div>
                         )}
-
                         {ravenEtls.length > 0 && (
                             <div key="raven-etls" data-testid="raven-etls">
                                 <HrHeader className="ravendb-etl" count={ravenEtls.length}>
@@ -447,7 +452,6 @@ export function OngoingTasksPage() {
                                 ))}
                             </div>
                         )}
-
                         {sqlEtls.length > 0 && (
                             <div key="sql-etls" data-testid="sql-etls">
                                 <HrHeader className="sql-etl" count={sqlEtls.length}>
@@ -466,7 +470,24 @@ export function OngoingTasksPage() {
                                 ))}
                             </div>
                         )}
+                        {snowflakeEtls.length > 0 && (
+                            <div key="snowflake-etls">
+                                <HrHeader className="snowflake-etl" count={snowflakeEtls.length}>
+                                    <Icon icon="snowflake-etl" />
+                                    Snowflake ETL
+                                </HrHeader>
 
+                                {snowflakeEtls.map((x) => (
+                                    <SnowflakeEtlPanel
+                                        {...sharedPanelProps}
+                                        key={taskKey(x.shared)}
+                                        data={x}
+                                        onToggleDetails={startTrackingProgress}
+                                        showItemPreview={showItemPreview}
+                                    />
+                                ))}
+                            </div>
+                        )}
                         {olapEtls.length > 0 && (
                             <div key="olap-etls" data-testid="olap-etls">
                                 <HrHeader className="olap-etl" count={olapEtls.length}>
@@ -485,7 +506,6 @@ export function OngoingTasksPage() {
                                 ))}
                             </div>
                         )}
-
                         {kafkaEtls.length > 0 && (
                             <div key="kafka-etls" data-testid="kafka-etls">
                                 <HrHeader className="kafka-etl" count={kafkaEtls.length}>
@@ -504,7 +524,6 @@ export function OngoingTasksPage() {
                                 ))}
                             </div>
                         )}
-
                         {rabbitMqEtls.length > 0 && (
                             <div key="rabbitmq-etls" data-testid="rabbitmq-etls">
                                 <HrHeader className="rabbitmq-etl" count={rabbitMqEtls.length}>
@@ -523,7 +542,6 @@ export function OngoingTasksPage() {
                                 ))}
                             </div>
                         )}
-
                         {azureQueueStorageEtls.length > 0 && (
                             <div key="azure-queue-storage-etls" data-testid="azure-queue-storage-etls">
                                 <HrHeader className="azure-queue-storage-etl" count={azureQueueStorageEtls.length}>
@@ -542,7 +560,24 @@ export function OngoingTasksPage() {
                                 ))}
                             </div>
                         )}
+                        {amazonSqsEtls.length > 0 && (
+                            <div key="amazon-sqs-etls">
+                                <HrHeader className="amazon-sqs-etl" count={amazonSqsEtls.length}>
+                                    <Icon icon="amazon-sqs-etl" />
+                                    AMAZON SQS ETL
+                                </HrHeader>
 
+                                {amazonSqsEtls.map((x) => (
+                                    <AmazonSqsEtlPanel
+                                        {...sharedPanelProps}
+                                        key={taskKey(x.shared)}
+                                        data={x}
+                                        onToggleDetails={startTrackingProgress}
+                                        showItemPreview={showItemPreview}
+                                    />
+                                ))}
+                            </div>
+                        )}
                         {kafkaSinks.length > 0 && (
                             <div key="kafka-sinks" data-testid="kafka-sinks">
                                 <HrHeader className="kafka-sink" count={kafkaSinks.length}>
@@ -555,7 +590,6 @@ export function OngoingTasksPage() {
                                 ))}
                             </div>
                         )}
-
                         {rabbitMqSinks.length > 0 && (
                             <div key="rabbitmq-sinks" data-testid="rabbitmq-sinks">
                                 <HrHeader className="rabbitmq-sink" count={rabbitMqSinks.length}>
@@ -568,7 +602,6 @@ export function OngoingTasksPage() {
                                 ))}
                             </div>
                         )}
-
                         {elasticSearchEtls.length > 0 && (
                             <div key="elastic-search-etls" data-testid="elastic-search-etls">
                                 <HrHeader className="elastic-etl" count={elasticSearchEtls.length}>
@@ -587,7 +620,6 @@ export function OngoingTasksPage() {
                                 ))}
                             </div>
                         )}
-
                         {backups.length > 0 && (
                             <div key="backups" data-testid="backups">
                                 <HrHeader className="periodic-backup" count={backups.length}>
@@ -607,7 +639,6 @@ export function OngoingTasksPage() {
                                 ))}
                             </div>
                         )}
-
                         {subscriptionsDatabaseCount > 0 && (
                             <div key="subscriptions" data-testid="subscriptions">
                                 <HrHeader
@@ -661,7 +692,6 @@ export function OngoingTasksPage() {
                                 })}
                             </div>
                         )}
-
                         {hubDefinitions.length > 0 && (
                             <div key="replication-hubs" data-testid="replication-hubs">
                                 <HrHeader className="pull-replication-hub" count={hubDefinitions.length}>
@@ -682,7 +712,6 @@ export function OngoingTasksPage() {
                                 ))}
                             </div>
                         )}
-
                         {replicationSinks.length > 0 && (
                             <div key="replication-sinks" data-testid="replication-sinks">
                                 <HrHeader className="pull-replication-sink" count={replicationSinks.length}>
@@ -764,6 +793,9 @@ function getFilteredTasks(state: OngoingTasksState, filter: OngoingTasksFilterCr
         ) as OngoingTaskExternalReplicationInfo[],
         ravenEtls: filteredTasks.filter((x) => x.shared.taskType === "RavenEtl") as OngoingTaskRavenEtlInfo[],
         sqlEtls: filteredTasks.filter((x) => x.shared.taskType === "SqlEtl") as OngoingTaskSqlEtlInfo[],
+        snowflakeEtls: filteredTasks.filter(
+            (x) => x.shared.taskType === "SnowflakeEtl"
+        ) as OngoingTaskSnowflakeEtlInfo[],
         olapEtls: filteredTasks.filter((x) => x.shared.taskType === "OlapEtl") as OngoingTaskOlapEtlInfo[],
         kafkaEtls: filteredTasks.filter((x) => x.shared.taskType === "KafkaQueueEtl") as OngoingTaskKafkaEtlInfo[],
         rabbitMqEtls: filteredTasks.filter(
@@ -772,6 +804,9 @@ function getFilteredTasks(state: OngoingTasksState, filter: OngoingTasksFilterCr
         azureQueueStorageEtls: filteredTasks.filter(
             (x) => x.shared.taskType === "AzureQueueStorageQueueEtl"
         ) as OngoingTaskAzureQueueStorageEtlInfo[],
+        amazonSqsEtls: filteredTasks.filter(
+            (x) => x.shared.taskType === "AmazonSqsQueueEtl"
+        ) as OngoingTaskAmazonSqsEtlInfo[],
         kafkaSinks: filteredTasks.filter((x) => x.shared.taskType === "KafkaQueueSink") as OngoingTaskKafkaSinkInfo[],
         rabbitMqSinks: filteredTasks.filter(
             (x) => x.shared.taskType === "RabbitQueueSink"

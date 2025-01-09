@@ -3,9 +3,11 @@ using System.Diagnostics;
 using System.Threading;
 using Lucene.Net.Search;
 using Nito.AsyncEx;
+using Raven.Server.Logging;
 using Sparrow;
 using Sparrow.Logging;
 using Sparrow.LowMemory;
+using Sparrow.Server.Logging;
 using Sparrow.Utils;
 
 namespace Raven.Server.Indexing;
@@ -13,7 +15,7 @@ namespace Raven.Server.Indexing;
 public sealed class LuceneCleaner : ILowMemoryHandler
 {
     private readonly AsyncReaderWriterLock _runningQueryLock = new();
-    private static readonly Logger Logger = LoggingSource.Instance.GetLogger<LuceneCleaner>("Memory");
+    private static readonly RavenLogger Logger = RavenLogManager.Instance.GetLoggerForServer<LuceneCleaner>();
 
     public LuceneCleaner()
     {

@@ -38,6 +38,7 @@ using Raven.Server.Config.Categories;
 using Raven.Server.Documents;
 using Raven.Server.Integrations.PostgreSQL.Commands;
 using Raven.Server.Json;
+using Raven.Server.Logging;
 using Raven.Server.NotificationCenter.Notifications;
 using Raven.Server.NotificationCenter.Notifications.Details;
 using Raven.Server.Rachis;
@@ -74,7 +75,7 @@ namespace Raven.Server.ServerWide
 {
     public sealed partial class ClusterStateMachine : RachisStateMachine
     {
-        private readonly Logger _clusterAuditLog = LoggingSource.AuditLog.GetLogger("ClusterStateMachine", "Audit");
+        private readonly RavenAuditLogger _clusterAuditLog = RavenLogManager.Instance.GetAuditLoggerForServer();
 
         private const string LocalNodeStateTreeName = "LocalNodeState";
         private static readonly StringSegment DatabaseName = new StringSegment("DatabaseName");
@@ -454,23 +455,27 @@ namespace Raven.Server.ServerWide
                     case nameof(AddElasticSearchEtlCommand):
                     case nameof(AddQueueEtlCommand):
                     case nameof(AddQueueSinkCommand):
+                    case nameof(AddSnowflakeEtlCommand):
                     case nameof(UpdateRavenEtlCommand):
                     case nameof(UpdateSqlEtlCommand):
                     case nameof(UpdateOlapEtlCommand):
                     case nameof(UpdateElasticSearchEtlCommand):
                     case nameof(UpdateQueueEtlCommand):
                     case nameof(UpdateQueueSinkCommand):
+                    case nameof(UpdateSnowflakeEtlCommand):
                     case nameof(DeleteOngoingTaskCommand):
                     case nameof(PutRavenConnectionStringCommand):
                     case nameof(PutSqlConnectionStringCommand):
                     case nameof(PutOlapConnectionStringCommand):
                     case nameof(PutElasticSearchConnectionStringCommand):
                     case nameof(PutQueueConnectionStringCommand):
+                    case nameof(PutSnowflakeConnectionStringCommand):
                     case nameof(RemoveRavenConnectionStringCommand):
                     case nameof(RemoveSqlConnectionStringCommand):
                     case nameof(RemoveOlapConnectionStringCommand):
                     case nameof(RemoveElasticSearchConnectionStringCommand):
                     case nameof(RemoveQueueConnectionStringCommand):
+                    case nameof(RemoveSnowflakeConnectionStringCommand):
                     case nameof(UpdatePullReplicationAsHubCommand):
                     case nameof(UpdatePullReplicationAsSinkCommand):
                     case nameof(EditDatabaseClientConfigurationCommand):
@@ -535,8 +540,8 @@ namespace Raven.Server.ServerWide
                         break;
 
                     case nameof(RecheckStatusOfServerCertificateCommand):
-                        if (_parent.Log.IsOperationsEnabled)
-                            _parent.Log.Operations($"Received {nameof(RecheckStatusOfServerCertificateCommand)}, index = {index}.");
+                        if (_parent.Log.IsDebugEnabled)
+                            _parent.Log.Debug($"Received {nameof(RecheckStatusOfServerCertificateCommand)}, index = {index}.");
                         NotifyValueChanged(context, type, index); // just need to notify listeners
                         break;
 
@@ -545,8 +550,8 @@ namespace Raven.Server.ServerWide
                         break;
 
                     case nameof(RecheckStatusOfServerCertificateReplacementCommand):
-                        if (_parent.Log.IsOperationsEnabled)
-                            _parent.Log.Operations($"Received {nameof(RecheckStatusOfServerCertificateReplacementCommand)}, index = {index}.");
+                        if (_parent.Log.IsDebugEnabled)
+                            _parent.Log.Debug($"Received {nameof(RecheckStatusOfServerCertificateReplacementCommand)}, index = {index}.");
                         NotifyValueChanged(context, type, index); // just need to notify listeners
                         break;
 
@@ -690,13 +695,13 @@ namespace Raven.Server.ServerWide
             }
             catch (Exception e) when (ExpectedException(e))
             {
-                if (_parent.Log.IsInfoEnabled)
+                if (_parent.Log.IsDebugEnabled)
                 {
                     var error = $"Failed to execute command of type '{type}'";
                     if (cmd.TryGet(DatabaseName, out string databaseName))
                         error += $"on database '{databaseName}'";
 
-                    _parent.Log.Info(error, e);
+                    _parent.Log.Debug(error, e);
                 }
 
                 _parent.LogHistory.UpdateHistoryLog(context, index, _parent.CurrentTerm, cmd, null, e);
@@ -712,8 +717,8 @@ namespace Raven.Server.ServerWide
                     error += $"on database '{databaseName}'";
                 error += ", execution will be retried later.";
 
-                if (_parent.Log.IsOperationsEnabled)
-                    _parent.Log.Operations(error, e);
+                if (_parent.Log.IsErrorEnabled)
+                    _parent.Log.Error(error, e);
 
                 AddUnrecoverableNotification(error, e);
                 NotifyLeaderAboutFatalError(index, leader, e);
@@ -1081,8 +1086,8 @@ namespace Raven.Server.ServerWide
 
         private void ConfirmReceiptServerCertificate(ClusterOperationContext context, BlittableJsonReaderObject cmd, long index, ServerStore serverStore)
         {
-            if (_parent.Log.IsOperationsEnabled)
-                _parent.Log.Operations($"Received {nameof(ConfirmReceiptServerCertificateCommand)}, index = {index}.");
+            if (_parent.Log.IsDebugEnabled)
+                _parent.Log.Debug($"Received {nameof(ConfirmReceiptServerCertificateCommand)}, index = {index}.");
             try
             {
                 var items = context.Transaction.InnerTransaction.OpenTable(ItemsSchema, Items);
@@ -1113,8 +1118,8 @@ namespace Raven.Server.ServerWide
 
                     UpdateValue(index, items, key, key, certInstallation);
 
-                    if (_parent.Log.IsOperationsEnabled)
-                        _parent.Log.Operations("Confirming to replace the server certificate.");
+                    if (_parent.Log.IsDebugEnabled)
+                        _parent.Log.Debug("Confirming to replace the server certificate.");
 
                     // this will trigger the handling of the certificate update
                     NotifyValueChanged(context, nameof(ConfirmReceiptServerCertificateCommand), index);
@@ -1122,8 +1127,8 @@ namespace Raven.Server.ServerWide
             }
             catch (Exception e)
             {
-                if (_parent.Log.IsOperationsEnabled)
-                    _parent.Log.Operations($"{nameof(ConfirmReceiptServerCertificate)} failed (index = {index}).", e);
+                if (_parent.Log.IsErrorEnabled)
+                    _parent.Log.Error($"{nameof(ConfirmReceiptServerCertificate)} failed (index = {index}).", e);
 
                 serverStore.NotificationCenter.Add(AlertRaised.Create(
                     null,
@@ -1139,8 +1144,8 @@ namespace Raven.Server.ServerWide
 
         private void InstallUpdatedServerCertificate(ClusterOperationContext context, BlittableJsonReaderObject cmd, long index, ServerStore serverStore)
         {
-            if (_parent.Log.IsOperationsEnabled)
-                _parent.Log.Operations($"Received {nameof(InstallUpdatedServerCertificateCommand)}.");
+            if (_parent.Log.IsDebugEnabled)
+                _parent.Log.Debug($"Received {nameof(InstallUpdatedServerCertificateCommand)}.");
             Exception exception = null;
             try
             {
@@ -1177,8 +1182,8 @@ namespace Raven.Server.ServerWide
             catch (Exception e)
             {
                 exception = e;
-                if (_parent.Log.IsOperationsEnabled)
-                    _parent.Log.Operations($"{nameof(InstallUpdatedServerCertificateCommand)} failed (index = {index}).", e);
+                if (_parent.Log.IsErrorEnabled)
+                    _parent.Log.Error($"{nameof(InstallUpdatedServerCertificateCommand)} failed (index = {index}).", e);
 
                 serverStore.NotificationCenter.Add(AlertRaised.Create(
                     null,
@@ -1198,8 +1203,8 @@ namespace Raven.Server.ServerWide
 
         private void ConfirmServerCertificateReplaced(ClusterOperationContext context, BlittableJsonReaderObject cmd, long index, ServerStore serverStore)
         {
-            if (_parent.Log.IsOperationsEnabled)
-                _parent.Log.Operations($"Received {nameof(ConfirmServerCertificateReplacedCommand)}, index = {index}.");
+            if (_parent.Log.IsDebugEnabled)
+                _parent.Log.Error($"Received {nameof(ConfirmServerCertificateReplacedCommand)}, index = {index}.");
             try
             {
                 var items = context.Transaction.InnerTransaction.OpenTable(ItemsSchema, Items);
@@ -1248,8 +1253,8 @@ namespace Raven.Server.ServerWide
 
                     UpdateValue(index, items, key, key, certInstallation);
 
-                    if (_parent.Log.IsOperationsEnabled)
-                        _parent.Log.Operations($"Confirming that certificate replacement has happened. Old certificate thumbprint: '{oldThumbprint}'. New certificate thumbprint: '{thumbprint}'.");
+                    if (_parent.Log.IsInfoEnabled)
+                        _parent.Log.Info($"Confirming that certificate replacement has happened. Old certificate thumbprint: '{oldThumbprint}'. New certificate thumbprint: '{thumbprint}'.");
 
                     // this will trigger the deletion of the new and old server certs from the cluster
                     NotifyValueChanged(context, nameof(ConfirmServerCertificateReplacedCommand), index);
@@ -1257,8 +1262,8 @@ namespace Raven.Server.ServerWide
             }
             catch (Exception e)
             {
-                if (_parent.Log.IsOperationsEnabled)
-                    _parent.Log.Operations($"{nameof(ConfirmServerCertificateReplaced)} failed (index = {index}).", e);
+                if (_parent.Log.IsErrorEnabled)
+                    _parent.Log.Error($"{nameof(ConfirmServerCertificateReplaced)} failed (index = {index}).", e);
 
                 serverStore.NotificationCenter.Add(AlertRaised.Create(
                     null,
@@ -1749,6 +1754,7 @@ namespace Raven.Server.ServerWide
             nameof(DatabaseRecord.OlapEtls),
             nameof(DatabaseRecord.ElasticSearchEtls),
             nameof(DatabaseRecord.QueueEtls),
+            nameof(DatabaseRecord.SnowflakeEtls),
             nameof(DatabaseRecord.QueueSinks)
         };
 
@@ -2298,8 +2304,8 @@ namespace Raven.Server.ServerWide
                 certs.DeleteByKey(thumbprintSlice);
             }
 
-            if (_clusterAuditLog.IsInfoEnabled)
-                _clusterAuditLog.Info($"Deleted certificate '{thumbprint}' from the cluster.");
+            if (_clusterAuditLog.IsAuditEnabled)
+                _clusterAuditLog.Audit($"Deleted certificate '{thumbprint}' from the cluster.");
         }
 
         private void DeleteMultipleValues(ClusterOperationContext context, string type, BlittableJsonReaderObject cmd, long index, Leader leader)
@@ -2475,8 +2481,8 @@ namespace Raven.Server.ServerWide
                 using (Slice.From(context.Allocator, command.Name.ToLowerInvariant(), out var thumbprintSlice))
                 using (var cert = context.ReadObject(command.ValueToJson(), "inner-val"))
                 {
-                    if (_clusterAuditLog.IsInfoEnabled)
-                        _clusterAuditLog.Info($"Registering new certificate '{command.Value.Thumbprint}' in the cluster. Security Clearance: {command.Value.SecurityClearance}. " +
+                    if (_clusterAuditLog.IsAuditEnabled)
+                        _clusterAuditLog.Audit($"Registering new certificate '{command.Value.Thumbprint}' in the cluster. Security Clearance: {command.Value.SecurityClearance}. " +
                                               $"Permissions:{Environment.NewLine}{string.Join(Environment.NewLine, command.Value.Permissions.Select(kvp => kvp.Key + ": " + kvp.Value.ToString()))}");
 
                     UpdateCertificate(certs, thumbprintSlice, hashSlice, cert);
@@ -2529,8 +2535,8 @@ namespace Raven.Server.ServerWide
                 out var publicKeySlice))
             using (var obj = context.ReadObject(command.PrepareForStorage(), "inner-val"))
             {
-                if (_clusterAuditLog.IsInfoEnabled)
-                    _clusterAuditLog.Info(
+                if (_clusterAuditLog.IsAuditEnabled)
+                    _clusterAuditLog.Audit(
                         $"Registering new replication certificate {command.Name} = '{command.CertificateThumbprint}' for replication in {command.Database} using {command.HubName} " +
                         $"Allowed read paths: {string.Join(", ", command.AllowedHubToSinkPaths)}, Allowed write paths: {string.Join(", ", command.AllowedSinkToHubPaths)}.");
 
@@ -2582,8 +2588,8 @@ namespace Raven.Server.ServerWide
                     if (certs.DeleteByKey(keySlice) == false)
                         return;
 
-                    if (_clusterAuditLog.IsInfoEnabled)
-                        _clusterAuditLog.Info($"Removed replication certificate '{command.CertificateThumbprint}' for replication in {command.Database} using {command.HubName}.");
+                    if (_clusterAuditLog.IsAuditEnabled)
+                        _clusterAuditLog.Audit($"Removed replication certificate '{command.CertificateThumbprint}' for replication in {command.Database} using {command.HubName}.");
                 }
             }
             finally
@@ -2610,8 +2616,8 @@ namespace Raven.Server.ServerWide
             }
             finally
             {
-                if (_clusterAuditLog.IsInfoEnabled)
-                    _clusterAuditLog.Info($"After allowing a connection based on Public Key Pinning Hash, deleting the following old certificates from the cluster: {string.Join(", ", thumbprintsToDelete)}");
+                if (_clusterAuditLog.IsAuditEnabled)
+                    _clusterAuditLog.Audit($"After allowing a connection based on Public Key Pinning Hash, deleting the following old certificates from the cluster: {string.Join(", ", thumbprintsToDelete)}");
                 NotifyValueChanged(context, type, index);
             }
         }
@@ -2753,7 +2759,7 @@ namespace Raven.Server.ServerWide
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void LogCommand(string type, long index, Exception exception, CommandBase commandBase = null)
         {
-            if (_parent.Log.IsInfoEnabled)
+            if (_parent.Log.IsDebugEnabled)
             {
                 LogCommandInternal(type, index, exception, commandBase);
             }
@@ -2769,7 +2775,7 @@ namespace Raven.Server.ServerWide
                 msg += $" AdditionalDebugInformation: {additionalDebugInfo}.";
             }
 
-            _parent.Log.Info(msg);
+            _parent.Log.Debug(msg);
         }
 
         private static void UpdateIndexForBackup(DatabaseRecord databaseRecord, string type, long index)
@@ -2780,6 +2786,7 @@ namespace Raven.Server.ServerWide
                 case nameof(AddOlapEtlCommand):
                 case nameof(AddQueueEtlCommand):
                 case nameof(AddQueueSinkCommand):
+                case nameof(AddSnowflakeEtlCommand):
                 case nameof(AddRavenEtlCommand):
                 case nameof(AddSqlEtlCommand):
                 case nameof(DeleteIndexCommand):
@@ -2804,11 +2811,13 @@ namespace Raven.Server.ServerWide
                 case nameof(PutIndexHistoryCommand):
                 case nameof(PutOlapConnectionStringCommand):
                 case nameof(PutQueueConnectionStringCommand):
+                case nameof(PutSnowflakeConnectionStringCommand):
                 case nameof(PutRavenConnectionStringCommand):
                 case nameof(PutSqlConnectionStringCommand):
                 case nameof(RemoveElasticSearchConnectionStringCommand):
                 case nameof(RemoveOlapConnectionStringCommand):
                 case nameof(RemoveQueueConnectionStringCommand):
+                case nameof(RemoveSnowflakeConnectionStringCommand):
                 case nameof(RemoveRavenConnectionStringCommand):
                 case nameof(RemoveSqlConnectionStringCommand):
                 case nameof(SetIndexLockCommand):
@@ -2820,6 +2829,7 @@ namespace Raven.Server.ServerWide
                 case nameof(UpdatePeriodicBackupCommand):
                 case nameof(UpdateQueueEtlCommand):
                 case nameof(UpdateQueueSinkCommand):
+                case nameof(UpdateSnowflakeEtlCommand):
                 case nameof(UpdateRavenEtlCommand):
                 case nameof(UpdateSqlEtlCommand):
                 case nameof(StartBucketMigrationCommand):
@@ -2998,15 +3008,15 @@ namespace Raven.Server.ServerWide
             if (toShrink.Count == 0 && toDelete.Count == 0)
                 return;
 
-            if (_parent.Log.IsOperationsEnabled)
+            if (_parent.Log.IsInfoEnabled)
             {
-                _parent.Log.Operations($"Squeezing databases, new tag is {newTag}, old tag is {oldTag}.");
+                _parent.Log.Info($"Squeezing databases, new tag is {newTag}, old tag is {oldTag}.");
 
                 if (toShrink.Count > 0)
-                    _parent.Log.Operations($"Databases to shrink: {string.Join(',', toShrink.Select(r => r.DatabaseName))}");
+                    _parent.Log.Info($"Databases to shrink: {string.Join(',', toShrink.Select(r => r.DatabaseName))}");
 
                 if (toDelete.Count > 0)
-                    _parent.Log.Operations($"Databases to delete: {string.Join(',', toDelete)}");
+                    _parent.Log.Info($"Databases to delete: {string.Join(',', toDelete)}");
             }
 
             var items = context.Transaction.InnerTransaction.OpenTable(ItemsSchema, Items);

@@ -21,6 +21,7 @@ using Raven.Server.Documents.TcpHandlers;
 using Raven.Server.Documents.TimeSeries;
 using Raven.Server.Documents.TransactionMerger.Commands;
 using Raven.Server.Exceptions;
+using Raven.Server.Logging;
 using Raven.Server.NotificationCenter.Notifications;
 using Raven.Server.ServerWide.Context;
 using Raven.Server.Utils;
@@ -223,9 +224,9 @@ namespace Raven.Server.Documents.Replication.Incoming
                 var status = ChangeVectorUtils.GetConflictStatus(changeVector, lastChangeVector);
                 if (status == ConflictStatus.Update || _lastDocumentEtag > lastEtag)
                 {
-                    if (Logger.IsInfoEnabled)
+                    if (Logger.IsDebugEnabled)
                     {
-                        Logger.Info(
+                        Logger.Debug(
                             $"Try to update the current database change vector ({lastChangeVector}) with {changeVector} in status {status}" +
                             $"with etag: {_lastDocumentEtag} (new) > {lastEtag} (old)");
                     }
@@ -234,9 +235,9 @@ namespace Raven.Server.Documents.Replication.Incoming
 
                     if (_prevChangeVectorUpdate != null && _prevChangeVectorUpdate.IsCompleted == false)
                     {
-                        if (Logger.IsInfoEnabled)
+                        if (Logger.IsDebugEnabled)
                         {
-                            Logger.Info(
+                            Logger.Debug(
                                 $"The previous task of updating the database change vector was not completed and has the status of {_prevChangeVectorUpdate.Status}, " +
                                 "nevertheless we create an additional task.");
                         }
@@ -276,9 +277,9 @@ namespace Raven.Server.Documents.Replication.Incoming
                 databaseChangeVector = DocumentsStorage.GetDatabaseChangeVector(documentsContext);
                 currentLastEtagMatchingChangeVector = _database.DocumentsStorage.ReadLastEtag(documentsContext.Transaction.InnerTransaction);
             }
-            if (Logger.IsInfoEnabled)
+            if (Logger.IsDebugEnabled)
             {
-                Logger.Info($"Sending heartbeat ok => {FromToString} with last document etag = {lastDocumentEtag}, " +
+                Logger.Debug($"Sending heartbeat ok => {FromToString} with last document etag = {lastDocumentEtag}, " +
                             $"last document change vector: {databaseChangeVector}");
             }
 
@@ -873,7 +874,7 @@ namespace Raven.Server.Documents.Replication.Incoming
                 ReplicatedItems = replicationItems,
                 ReplicatedAttachmentStreams = replicatedAttachmentStreams,
                 SupportedFeatures = SupportedFeatures,
-                Logger = LoggingSource.Instance.GetLogger<IncomingReplicationHandler>(database.Name)
+                Logger = database.Loggers.GetLogger<MergedDocumentReplicationCommandDto>()
             };
 
             return new IncomingReplicationHandler.MergedDocumentReplicationCommand(dataForReplicationCommand, LastEtag);

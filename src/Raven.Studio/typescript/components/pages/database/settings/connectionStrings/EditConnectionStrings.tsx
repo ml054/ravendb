@@ -22,6 +22,8 @@ import { useAppSelector } from "components/store";
 import LicenseRestrictedBadge, { LicenseBadgeText } from "components/common/LicenseRestrictedBadge";
 import { components, OptionProps } from "react-select";
 import AzureQueueStorageConnectionString from "components/pages/database/settings/connectionStrings/editForms/AzureQueueStorageConnectionString";
+import SnowflakeConnectionString from "components/pages/database/settings/connectionStrings/editForms/SnowflakeConnectionString";
+import AmazonSqsConnectionString from "components/pages/database/settings/connectionStrings/editForms/AmazonSqsConnectionString";
 
 export interface EditConnectionStringsProps {
     initialConnection?: Connection;
@@ -135,6 +137,8 @@ function getEditConnectionStringComponent(type: StudioEtlType): (props: EditConn
             return RavenConnectionString;
         case "Sql":
             return SqlConnectionString;
+        case "Snowflake":
+            return SnowflakeConnectionString;
         case "Olap":
             return OlapConnectionString;
         case "ElasticSearch":
@@ -145,6 +149,8 @@ function getEditConnectionStringComponent(type: StudioEtlType): (props: EditConn
             return RabbitMqConnectionString;
         case "AzureQueueStorage":
             return AzureQueueStorageConnectionString;
+        case "AmazonSqs":
+            return AmazonSqsConnectionString;
         default:
             return null;
     }
@@ -202,7 +208,21 @@ function getAvailableConnectionStringsOptions(features: ConnectionStringsLicense
         {
             value: "AzureQueueStorage",
             label: "Azure Queue Storage",
-            icon: "azure-queue-storage-etl",
+            icon: "azure-queue-storage",
+            licenseRequired: "Enterprise",
+            isDisabled: !features.hasQueueEtl,
+        },
+        {
+            value: "Snowflake",
+            label: "Snowflake",
+            icon: "snowflake",
+            licenseRequired: "Enterprise",
+            isDisabled: !features.hasSnowflakeEtl,
+        },
+        {
+            value: "AmazonSqs",
+            label: "Amazon SQS",
+            icon: "amazon-sqs",
             licenseRequired: "Enterprise",
             isDisabled: !features.hasQueueEtl,
         },

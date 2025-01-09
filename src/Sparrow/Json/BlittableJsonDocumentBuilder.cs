@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Buffers.Text;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Sparrow.Exceptions;
@@ -14,6 +16,7 @@ namespace Sparrow.Json
         private readonly JsonOperationContext _context;
         private UsageMode _mode;
         private readonly IJsonParser _reader;
+
         public IBlittableDocumentModifier _modifier;
         private readonly BlittableWriter<UnmanagedWriteBuffer> _writer;
         private readonly JsonParserState _state;
@@ -23,6 +26,8 @@ namespace Sparrow.Json
 
         private WriteToken _writeToken;
         private string _debugTag;
+
+        private bool _isVectorProperty;
 
         public BlittableJsonDocumentBuilder(JsonOperationContext context, JsonParserState state, IJsonParser reader,
             BlittableWriter<UnmanagedWriteBuffer> writer = null,
@@ -133,7 +138,7 @@ namespace Sparrow.Json
             base.Dispose();
         }
 
-        private bool ReadInternal<TWriteStrategy>() where TWriteStrategy : IWriteStrategy
+        private unsafe bool ReadInternal<TWriteStrategy>() where TWriteStrategy : IWriteStrategy
         {
             var continuationState = _continuationState;
             var currentState = continuationState.Pop();
@@ -193,15 +198,21 @@ namespace Sparrow.Json
                         goto ErrorExpectedStartOfObject;
 
                     case ContinuationState.ReadArray:
-                        if (state.CurrentTokenType == JsonParserToken.StartArray)
+                        if (state.CurrentTokenType != JsonParserToken.StartArray)
+                            goto ErrorExpectedStartOfArray;
+
+                        currentState.Types = _tokensCache.Allocate();
+                        currentState.Positions = _positionsCache.Allocate();
+                        
+                        if (_isVectorProperty == false)
                         {
-                            currentState.Types = _tokensCache.Allocate();
-                            currentState.Positions = _positionsCache.Allocate();
                             currentState.State = ContinuationState.ReadArrayValue;
-                            continue;
+                            goto case ContinuationState.ReadArrayValue;
                         }
 
-                        goto ErrorExpectedStartOfArray;
+                        _isVectorProperty = false;
+                        currentState.State = ContinuationState.ReadBufferedArrayValue;
+                        goto case ContinuationState.ReadBufferedArrayValue;
 
                     case ContinuationState.ReadArrayValue:
                         if (reader.Read() == false)
@@ -261,6 +272,10 @@ namespace Sparrow.Json
 
                         var property = CreateLazyStringValueFromParserState();
                         currentState.CurrentProperty = _context.CachedProperties.GetProperty(property);
+
+                        if (currentState.CurrentProperty.EqualsPropertyNameToBytes(Global.Constants.Naming.VectorPropertyNameAsSpan))
+                            _isVectorProperty = true;
+
                         currentState.MaxPropertyId = Math.Max(currentState.MaxPropertyId, currentState.CurrentProperty.PropertyId);
                         currentState.State = ContinuationState.ReadPropertyValue;
                         continue;
@@ -294,6 +309,128 @@ namespace Sparrow.Json
 
                         currentState.State = ContinuationState.ReadPropertyName;
                         continue;
+                    case ContinuationState.ReadBufferedArrayValue:
+
+                        if (reader.Read() == false)
+                        {
+                            continuationState.Push(currentState);
+                            return false;
+                        }
+
+                        if (state.CurrentTokenType == JsonParserToken.EndArray)
+                        {
+                            if (_state._bufferedSequence?.Count > 0)
+                            {
+                                currentState.State = ContinuationState.CompleteBufferedArray;
+                                goto case ContinuationState.CompleteBufferedArray;
+                            }
+
+                            currentState.State = ContinuationState.CompleteArray;
+                            goto case ContinuationState.CompleteArray;
+                        }
+
+                        bool processed = false;
+
+                        // We try to read integers and doubles, if the value is a decimal (which can happen)
+                        // then we bail out because we cannot handle it as a vector (as least for now). 
+                        JsonParserToken current = _state.CurrentTokenType;
+
+                        switch (current)
+                        {
+                            case JsonParserToken.Integer:
+                                _state.AddBuffered(_state.Long);
+                                processed = true;
+                                break;
+                            case JsonParserToken.Float:
+                                var numberString = new ReadOnlySpan<byte>(_state.StringBuffer, _state.StringSize);
+                                if (Utf8Parser.TryParse(numberString, out decimal value, out int bytesConsumed) == false)
+                                {
+                                    //We suspect the underlying value might be a double with large values or exponents, so let's verify it again before moving to classic array.
+                                    if (Utf8Parser.TryParse(numberString, out double dValue, out bytesConsumed) == false)
+                                    {
+                                        break;
+                                    }
+                                    
+                                    _state.AddBuffered(dValue);
+                                    processed = true;
+                                    break;
+                                }
+
+                                Debug.Assert(bytesConsumed == _state.StringSize);
+#if NET7_0_OR_GREATER
+                                // This will only be executed on the server, so no problem on this regard as vector
+                                // representations are not supported on older systems.
+                                if (decimal.IsInteger(value) && decimal.Abs(value) < long.MaxValue)
+                                {
+                                    _state.AddBuffered(decimal.ToInt64(value));
+                                }
+                                else
+                                {
+                                    if ((_mode & UsageMode.ValidateDouble) == UsageMode.ValidateDouble)
+                                        _reader.ValidateFloat();
+
+                                    _state.AddBuffered(decimal.ToDouble(value));
+                                }
+                                processed = true;
+                                break;
+
+#else
+                                throw new NotSupportedException("Vector representations are only supported for .NET versions greater than 7.0");
+#endif
+                        }
+
+                        if (processed)
+                            goto case ContinuationState.ReadBufferedArrayValue; // Successfully read a buffered value, continue buffering
+
+                        // Process the buffered sequence
+                        if (_state._bufferedSequence is { Count: > 0 })
+                        {
+                            // Write out buffered values
+                            foreach ((var token, long asLong) in _state._bufferedSequence)
+                            {
+                                int position;
+                                BlittableJsonToken tokenToWrite;
+
+                                switch (token)
+                                {
+                                    case JsonParserToken.Integer:
+                                        position = _writer.WriteValue(asLong);
+                                        tokenToWrite = BlittableJsonToken.Integer;
+                                        break;
+                                    case JsonParserToken.Float:
+                                        long asRef = asLong;
+                                        position = _writer.WriteValue(Unsafe.As<long, double>(ref asRef));
+                                        tokenToWrite = BlittableJsonToken.LazyNumber;
+                                        break;
+                                    default:
+                                        throw new NotSupportedException($"Unsupported token type: {token}");
+                                }
+
+                                currentState.Types.Add(tokenToWrite);
+                                currentState.Positions.Add(position);
+                            }
+
+                            // Clear the buffered sequence
+                            _state.ClearBuffered();
+                        }
+
+                        // Now handle the current value that couldn't be buffered.
+
+                        // The change of the current state must happen before as ReadJsonValue may return a new instance.
+                        currentState.State = ContinuationState.CompleteArrayValue;
+                        ReadJsonValue<TWriteStrategy>();
+
+                        // Allow the loop to continue to the next iteration
+                        continue;
+
+                    case ContinuationState.CompleteBufferedArray:
+                        int startPos = WriteBufferedVector();
+                        _writeToken = new WriteToken(startPos, BlittableJsonToken.Vector);
+
+                        state.ClearBuffered();
+                        currentState = _continuationState.Pop();
+                        continue;
+
                     case ContinuationState.ReadValue:
                         ReadJsonValue<TWriteStrategy>();
                         currentState = _continuationState.Pop();
@@ -313,6 +450,63 @@ namespace Sparrow.Json
         ErrorExpectedStartOfArray:
             ThrowExpectedStartOfArray();
             return false; // Will never execute.
+        }
+
+        private struct VectorProcessor<T> where T : unmanaged
+        {
+            internal static unsafe int ProcessVector(byte* buffer, int size, JsonParserState state, BlittableWriter<UnmanagedWriteBuffer> writer)
+            {
+                Span<T> st = new(buffer, size);
+                int count = state.FillVector(st);
+                return writer.WriteVector<T>(st.Slice(0, count));
+            }
+        }
+
+        private unsafe int WriteBufferedVector()
+        {
+            int count = _state._bufferedSequence.Count;
+            int size = count * sizeof(long);
+            using var _ = _context.GetMemoryBuffer(size, out var buffer);
+
+            var type = _state.GetBufferedOptimalType();
+            switch (type)
+            {
+                case BlittableVectorType.Double:
+                    return VectorProcessor<double>.ProcessVector(buffer.Address, count, _state, _writer);
+
+                case BlittableVectorType.Float:
+                    return VectorProcessor<float>.ProcessVector(buffer.Address, count, _state, _writer);
+
+#if NET6_0_OR_GREATER
+                case BlittableVectorType.Half:
+                    return VectorProcessor<Half>.ProcessVector(buffer.Address, count, _state, _writer);
+#endif
+                case BlittableVectorType.Byte:
+                    return VectorProcessor<byte>.ProcessVector(buffer.Address, count, _state, _writer);
+
+                case BlittableVectorType.SByte:
+                    return VectorProcessor<sbyte>.ProcessVector(buffer.Address, count, _state, _writer);
+
+                case BlittableVectorType.Int16:
+                    return VectorProcessor<short>.ProcessVector(buffer.Address, count, _state, _writer);
+
+                case BlittableVectorType.UInt16:
+                    return VectorProcessor<ushort>.ProcessVector(buffer.Address, count, _state, _writer);
+
+                case BlittableVectorType.Int32:
+                    return VectorProcessor<int>.ProcessVector(buffer.Address, count, _state, _writer);
+
+                case BlittableVectorType.UInt32:
+                    return VectorProcessor<uint>.ProcessVector(buffer.Address, count, _state, _writer);
+
+                case BlittableVectorType.Int64:
+                    return VectorProcessor<long>.ProcessVector(buffer.Address, count, _state, _writer);
+
+                case BlittableVectorType.UInt64:
+                    return VectorProcessor<ulong>.ProcessVector(buffer.Address, count, _state, _writer);
+            }
+
+            throw new NotSupportedException($"The type {type} is not supported.");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

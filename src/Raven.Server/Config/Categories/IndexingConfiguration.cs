@@ -410,15 +410,17 @@ namespace Raven.Server.Config.Categories
         public int? MaxNumberOfConcurrentlyRunningIndexes { get; set; }
 
         [Description("Location of NuGet packages cache")]
-        [DefaultValue("Packages/NuGet")]
+        [DefaultValue("Packages/NuGet/Indexing")]
         [IndexUpdateType(IndexUpdateType.Reset)]
         [ConfigurationEntry("Indexing.NuGetPackagesPath", ConfigurationEntryScope.ServerWideOnly)]
+        [ConfigurationEntry("Indexing.NuGet.PackagesPath", ConfigurationEntryScope.ServerWideOnly)]
         public PathSetting NuGetPackagesPath { get; set; }
 
         [Description("Default NuGet source URL")]
         [DefaultValue("https://api.nuget.org/v3/index.json")]
         [IndexUpdateType(IndexUpdateType.Reset)]
         [ConfigurationEntry("Indexing.NuGetPackageSourceUrl", ConfigurationEntryScope.ServerWideOnly)]
+        [ConfigurationEntry("Indexing.NuGet.PackageSourceUrl", ConfigurationEntryScope.ServerWideOnly)]
         public string NuGetPackageSourceUrl { get; set; }
 
         [Description("Allow installation of NuGet prerelease packages")]
@@ -426,7 +428,9 @@ namespace Raven.Server.Config.Categories
         [IndexUpdateType(IndexUpdateType.Reset)]
         [ConfigurationEntry("Indexing.NuGetAllowPreReleasePackages", ConfigurationEntryScope.ServerWideOnly)]
         [ConfigurationEntry("Indexing.NuGetAllowPreleasePackages", ConfigurationEntryScope.ServerWideOnly)]
-        public bool NuGetAllowPreleasePackages { get; set; }
+        [ConfigurationEntry("Indexing.NuGet.AllowPreReleasePackages", ConfigurationEntryScope.ServerWideOnly)]
+        [ConfigurationEntry("Indexing.NuGet.AllowPreleasePackages", ConfigurationEntryScope.ServerWideOnly)]
+        public bool NuGetAllowPreReleasePackages { get; set; }
         
         [Description("Number of index history revisions to keep per index")]
         [DefaultValue(10)]
@@ -586,6 +590,36 @@ namespace Raven.Server.Config.Categories
         [ConfigurationEntry("Indexing.Corax.Static.ComplexFieldIndexingBehavior", ConfigurationEntryScope.ServerWideOrPerDatabaseOrPerIndex)]
         public CoraxComplexFieldIndexingBehavior CoraxStaticIndexComplexFieldIndexingBehavior { get; protected set; }
 
+        [Description("Default minimum similarity for vector search (0.0f - 1.0f, default is 0.75f)")]
+        [DefaultValue(0.75f)]
+        [IndexUpdateType(IndexUpdateType.None)]
+        [ConfigurationEntry("Indexing.Corax.VectorSearch.DefaultMinimumSimilarity", ConfigurationEntryScope.ServerWideOrPerDatabaseOrPerIndex)]
+        public float CoraxVectorSearchDefaultMinimumSimilarity { get; protected set; }
+        
+        [Description("Default number of edges for vector indexing.")]
+        [DefaultValue(12)]
+        [IndexUpdateType(IndexUpdateType.Reset)]
+        [ConfigurationEntry("Indexing.Corax.VectorSearch.DefaultNumberOfEdges", ConfigurationEntryScope.ServerWideOrPerDatabaseOrPerIndex)]
+        public int CoraxVectorDefaultNumberOfEdges { get; protected set; }
+        
+        [Description("Default number of candidates for vector indexing.")]
+        [DefaultValue(16)]
+        [IndexUpdateType(IndexUpdateType.Reset)]
+        [ConfigurationEntry("Indexing.Corax.VectorSearch.DefaultNumberOfCandidatesForIndexing", ConfigurationEntryScope.ServerWideOrPerDatabaseOrPerIndex)]
+        public int CoraxVectorDefaultNumberOfCandidatesForIndexing { get; protected set; }
+        
+        [Description("Default number of candidates for vector querying.")]
+        [DefaultValue(16)]
+        [IndexUpdateType(IndexUpdateType.None)]
+        [ConfigurationEntry("Indexing.Corax.VectorSearch.DefaultNumberOfCandidatesForQuerying", ConfigurationEntryScope.ServerWideOrPerDatabaseOrPerIndex)]
+        public int CoraxVectorDefaultNumberOfCandidatesForQuerying { get; protected set; }
+        
+        [Description("Order by score automatically when vector.search is inside query.")]
+        [DefaultValue(true)]
+        [IndexUpdateType(IndexUpdateType.Refresh)]
+        [ConfigurationEntry("Indexing.Corax.VectorSearch.OrderByScoreAutomatically", ConfigurationEntryScope.ServerWideOrPerDatabaseOrPerIndex)]
+        public bool CoraxVectorSearchOrderByScoreAutomatically { get; set; }
+        
         protected override void ValidateProperty(PropertyInfo property)
         {
             base.ValidateProperty(property);
