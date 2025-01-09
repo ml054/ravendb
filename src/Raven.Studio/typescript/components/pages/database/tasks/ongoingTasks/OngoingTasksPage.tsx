@@ -471,7 +471,7 @@ export function OngoingTasksPage() {
                             </div>
                         )}
                         {snowflakeEtls.length > 0 && (
-                            <div key="snowflake-etls">
+                            <div key="snowflake-etls" data-testid="snowflake-etls">
                                 <HrHeader className="snowflake-etl" count={snowflakeEtls.length}>
                                     <Icon icon="snowflake-etl" />
                                     Snowflake ETL
@@ -482,7 +482,7 @@ export function OngoingTasksPage() {
                                         {...sharedPanelProps}
                                         key={taskKey(x.shared)}
                                         data={x}
-                                        onToggleDetails={startTrackingProgress}
+                                        onToggleDetails={startTrackingEtlProgress}
                                         showItemPreview={showItemPreview}
                                     />
                                 ))}
@@ -561,7 +561,7 @@ export function OngoingTasksPage() {
                             </div>
                         )}
                         {amazonSqsEtls.length > 0 && (
-                            <div key="amazon-sqs-etls">
+                            <div key="amazon-sqs-etls" data-testid="amazon-sqs-etls">
                                 <HrHeader className="amazon-sqs-etl" count={amazonSqsEtls.length}>
                                     <Icon icon="amazon-sqs-etl" />
                                     AMAZON SQS ETL
@@ -572,7 +572,7 @@ export function OngoingTasksPage() {
                                         {...sharedPanelProps}
                                         key={taskKey(x.shared)}
                                         data={x}
-                                        onToggleDetails={startTrackingProgress}
+                                        onToggleDetails={startTrackingEtlProgress}
                                         showItemPreview={showItemPreview}
                                     />
                                 ))}

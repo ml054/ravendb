@@ -20,7 +20,7 @@ import {
     RichPanelInfo,
     RichPanelSelect,
 } from "components/common/RichPanel";
-import { OngoingEtlTaskDistribution } from "./OngoingEtlTaskDistribution";
+import { OngoingEtlTaskDistribution } from "../partials/OngoingEtlTaskDistribution";
 import { Collapse, Input } from "reactstrap";
 import { useAppSelector } from "components/store";
 import { databaseSelectors } from "components/common/shell/databaseSliceSelectors";
