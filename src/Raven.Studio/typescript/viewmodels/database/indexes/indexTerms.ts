@@ -9,8 +9,8 @@ import copyToClipboard = require("common/copyToClipboard");
 import app = require("durandal/app");
 import generalUtils = require("common/generalUtils");
 import recentError = require("common/notifications/models/recentError");
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database from "models/resources/database";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import database = require("models/resources/database");
 
 type termsForField = {
     name: string;

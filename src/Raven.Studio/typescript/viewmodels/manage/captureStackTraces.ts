@@ -7,7 +7,7 @@ import copyToClipboard = require("common/copyToClipboard");
 import fileDownloader = require("common/fileDownloader");
 import fileImporter = require("common/fileImporter");
 import genUtils = require("common/generalUtils");
-import icomoonHelpers from "common/helpers/view/icomoonHelpers";
+import icomoonHelpers = require("common/helpers/view/icomoonHelpers");
 import ThreadInfo = Raven.Server.Dashboard.ThreadInfo;
 
 type stackFrame = {

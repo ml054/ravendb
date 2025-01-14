@@ -26,7 +26,7 @@ import ShardedBackupResult = Raven.Client.Documents.Operations.Backups.ShardedBa
 import ShardNodeSmugglerResult = Raven.Client.Documents.Smuggler.ShardNodeSmugglerResult;
 import ShardNodeBackupResult = Raven.Client.Documents.Operations.Backups.ShardNodeBackupResult;
 import BackupResult = Raven.Client.Documents.Operations.Backups.BackupResult;
-import { timeAwareEWMA } from "viewmodels/common/timeAwareEWMA";
+import timeAwareEWMA = require("viewmodels/common/timeAwareEWMA");
 
 type smugglerListItemStatus = "processed" | "skipped" | "processing" | "pending" | "processedWithErrors";
 
@@ -48,7 +48,7 @@ type uploadListItem = {
 }
 
 interface ProcessingItem {
-    ewma: timeAwareEWMA;
+    ewma: timeAwareEWMA.timeAwareEWMA;
     lastItemsCount: number;
 }
 
@@ -546,7 +546,7 @@ class smugglerDatabaseDetails extends abstractOperationDetails {
                 if (!this.processingItems[name]) {
                     this.processingItems[name] = {
                         // 2 seconds halfLife with average incoming data 1-3 seconds seems reasonable
-                        ewma: new timeAwareEWMA(2_000),
+                        ewma: new timeAwareEWMA.timeAwareEWMA(2_000),
                         lastItemsCount: 0
                     }
                 }

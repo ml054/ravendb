@@ -1,4 +1,4 @@
-﻿import endpoints from "endpoints";
+﻿import endpoints = require("endpoints");
 
 class twoFactorHelper {
     static handledTwoFactorNeed = false;

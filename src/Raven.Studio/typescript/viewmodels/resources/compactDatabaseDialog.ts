@@ -6,14 +6,14 @@ import compactDatabaseCommand = require("commands/resources/compactDatabaseComma
 import genUtils = require("common/generalUtils");
 import dialog = require("plugins/dialog");
 import clusterTopologyManager = require("common/shell/clusterTopologyManager");
-import { DatabaseSharedInfo } from "components/models/databases";
-import DatabaseUtils from "components/utils/DatabaseUtils";
+import databases = require("components/models/databases");
+import DatabaseUtils = require("components/utils/DatabaseUtils");
 
 class compactDatabaseDialog extends dialogViewModelBase {
 
     view = require("views/resources/compactDatabaseDialog.html");
     
-    database: DatabaseSharedInfo;
+    database: databases.DatabaseSharedInfo;
     
     shard = ko.observable<number>();
     
@@ -43,10 +43,10 @@ class compactDatabaseDialog extends dialogViewModelBase {
         shard: this.shard,
     });
     
-    constructor(db: DatabaseSharedInfo, initialShardNumber?: number) {
+    constructor(db: databases.DatabaseSharedInfo, initialShardNumber?: number) {
         super();
         
-        this.shards = db.isSharded ? db.shards.filter(x => x.currentNode.isRelevant).map(x => DatabaseUtils.shardNumber(x.name)) : [];
+        this.shards = db.isSharded ? db.shards.filter(x => x.currentNode.isRelevant).map(x => DatabaseUtils.default.shardNumber(x.name)) : [];
         this.shard(initialShardNumber ?? undefined);
         
         this.database = db;

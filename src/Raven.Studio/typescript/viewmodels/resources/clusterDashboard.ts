@@ -23,7 +23,7 @@ import clusterOverviewWidget = require("viewmodels/resources/widgets/clusterOver
 import storageKeyProvider = require("common/storage/storageKeyProvider");
 import Packery = require("packery");
 import Draggabilly = require("draggabilly");
-import gcInfoWidget from "viewmodels/resources/widgets/gcInfoWidget";
+import gcInfoWidget = require("viewmodels/resources/widgets/gcInfoWidget");
 
 interface savedWidgetsLayout {
     widgets: savedWidget[];

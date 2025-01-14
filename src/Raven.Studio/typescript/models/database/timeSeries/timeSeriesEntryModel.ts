@@ -1,7 +1,7 @@
 import timeSeriesValue = require("models/database/timeSeries/timeSeriesValue");
 import generalUtils = require("common/generalUtils");
 import moment = require("moment");
-import { sortBy } from "common/typeUtils";
+import typeUtils = require("common/typeUtils");
 
 class rollupDataModel {
     first: timeSeriesValue;
@@ -106,7 +106,7 @@ class timeSeriesEntryModel {
                 };
             })
             
-            const detailsSorted = sortBy(details, x => x.nodeTag);
+            const detailsSorted = typeUtils.sortBy(details, x => x.nodeTag);
             this.nodesDetails(detailsSorted);
         }
         

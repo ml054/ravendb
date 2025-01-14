@@ -19,7 +19,6 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, Input, InputGroup, InputGroupText, Label } from "reactstrap";
-import { Checkbox } from "components/common/Checkbox";
 
 export default {
     title: "Bits/Form",

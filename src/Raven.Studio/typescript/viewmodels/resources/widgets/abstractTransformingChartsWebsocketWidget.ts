@@ -3,8 +3,8 @@ import historyAwareNodeStats = require("models/resources/widgets/historyAwareNod
 import clusterDashboard = require("viewmodels/resources/clusterDashboard");
 import clusterDashboardWebSocketClient = require("common/clusterDashboardWebSocketClient");
 import moment = require("moment");
-import { lineChart } from "models/resources/clusterDashboard/lineChart";
-import { clusterDashboardChart } from "models/resources/clusterDashboard/clusterDashboardChart";
+import lineChart = require("models/resources/clusterDashboard/lineChart");
+import clusterDashboardChart = require("models/resources/clusterDashboard/clusterDashboardChart");
 
 abstract class abstractTransformingChartsWebsocketWidget<
     TPayload extends Raven.Server.Dashboard.Cluster.AbstractClusterDashboardNotification,
@@ -17,7 +17,7 @@ abstract class abstractTransformingChartsWebsocketWidget<
 
     protected readonly throttledShowHistory: (date: ClusterWidgetAlignedDate) => void;
 
-    protected charts: clusterDashboardChart<TChartData>[] = [];
+    protected charts: clusterDashboardChart.clusterDashboardChart<TChartData>[] = [];
 
     nodeStats = ko.observableArray<TNodeStats>([]);
 
@@ -40,14 +40,14 @@ abstract class abstractTransformingChartsWebsocketWidget<
 
     protected static tooltipContent(date: ClusterWidgetUnalignedDate | null) {
         if (date) {
-            const dateFormatted = moment(date).format(lineChart.timeFormat);
+            const dateFormatted = moment(date).format(lineChart.lineChart.timeFormat);
             return `<div class="tooltip-inner"><div class="tooltip-li">Time: <div class="value">${dateFormatted}</div></div></div>`;
         } else {
             return null;
         }
     }
 
-    protected abstract initCharts(): clusterDashboardChart<TChartData>[];
+    protected abstract initCharts(): clusterDashboardChart.clusterDashboardChart<TChartData>[];
 
     onMouseMove(date: Date | null) {
         this.charts.forEach(chart => chart.highlightTime(date));
@@ -132,7 +132,7 @@ abstract class abstractTransformingChartsWebsocketWidget<
     }
     
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected canAppendToChart(chart: clusterDashboardChart<TChartData>, nodeTag: string, item: TChartData) {
+    protected canAppendToChart(chart: clusterDashboardChart.clusterDashboardChart<TChartData>, nodeTag: string, item: TChartData) {
         return true;
     }
     

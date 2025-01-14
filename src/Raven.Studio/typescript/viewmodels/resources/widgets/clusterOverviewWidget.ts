@@ -5,9 +5,9 @@ import clusterTopologyManager = require("common/shell/clusterTopologyManager");
 import generalUtils = require("common/generalUtils");
 import appUrl = require("common/appUrl");
 import moment = require("moment");
-import assertUnreachable from "components/utils/assertUnreachable";
-import IconName from "../../../../typings/server/icons";
-import clusterNode from "models/database/cluster/clusterNode";
+import assertUnreachable = require("components/utils/assertUnreachable");
+import IconName = require("../../../../typings/server/icons");
+import clusterNode = require("models/database/cluster/clusterNode");
 import OSType = Raven.Client.ServerWide.Operations.OSType;
 
 class nodeStatsItem {
@@ -96,7 +96,7 @@ class nodeStatsItem {
             case "Watcher":
                 return "cluster-watcher";
             default:
-                assertUnreachable(type);
+                assertUnreachable.default(type);
         }
     }
 }

@@ -1,5 +1,5 @@
 import generalUtils = require("common/generalUtils");
-import { Collection } from "components/common/shell/collectionsTrackerSlice";
+import collectionsTrackerSlice = require("components/common/shell/collectionsTrackerSlice");
 
 class collection {
     static readonly allDocumentsCollectionName = "All Documents";
@@ -54,7 +54,7 @@ class collection {
         return new collection(collection.allDocumentsCollectionName, documentsCount);
     }
 
-    toCollectionState(): Collection {
+    toCollectionState(): collectionsTrackerSlice.Collection {
         return {
             name: this.name,
             countPrefix: this.countPrefix(),

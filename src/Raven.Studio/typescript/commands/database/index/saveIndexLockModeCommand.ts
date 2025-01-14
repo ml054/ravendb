@@ -1,17 +1,17 @@
 import commandBase = require("commands/commandBase");
 import database = require("models/resources/database");
 import endpoints = require("endpoints");
-import { IndexSharedInfo } from "components/models/indexes";
+import indexes = require("components/models/indexes");
 
 class saveIndexLockModeCommand extends commandBase {
 
-    private indexes: Array<IndexSharedInfo>;
+    private indexes: Array<indexes.IndexSharedInfo>;
 
     private lockMode: Raven.Client.Documents.Indexes.IndexLockMode;
 
     private db: database | string;
 
-    constructor(indexes: Array<IndexSharedInfo>, lockMode: Raven.Client.Documents.Indexes.IndexLockMode, db: database | string) {
+    constructor(indexes: Array<indexes.IndexSharedInfo>, lockMode: Raven.Client.Documents.Indexes.IndexLockMode, db: database | string) {
         super();
         this.db = db;
         this.lockMode = lockMode;

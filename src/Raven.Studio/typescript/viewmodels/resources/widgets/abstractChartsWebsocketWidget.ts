@@ -1,6 +1,5 @@
 import historyAwareNodeStats = require("models/resources/widgets/historyAwareNodeStats");
-import abstractTransformingChartsWebsocketWidget
-    from "viewmodels/resources/widgets/abstractTransformingChartsWebsocketWidget";
+import abstractTransformingChartsWebsocketWidget = require("viewmodels/resources/widgets/abstractTransformingChartsWebsocketWidget");
 
 abstract class abstractChartsWebsocketWidget<
     TPayload extends Raven.Server.Dashboard.Cluster.AbstractClusterDashboardNotification, 

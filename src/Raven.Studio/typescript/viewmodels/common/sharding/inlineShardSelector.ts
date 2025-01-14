@@ -1,7 +1,7 @@
-﻿import shard from "models/resources/shard";
-import clusterTopologyManager from "common/shell/clusterTopologyManager";
-import database from "models/resources/database";
-import shardedDatabase from "models/resources/shardedDatabase";
+﻿import shard = require("models/resources/shard");
+import clusterTopologyManager = require("common/shell/clusterTopologyManager");
+import database = require("models/resources/database");
+import shardedDatabase = require("models/resources/shardedDatabase");
 
 class inlineShardSelector {
 

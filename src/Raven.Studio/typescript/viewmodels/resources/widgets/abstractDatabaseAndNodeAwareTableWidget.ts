@@ -6,7 +6,7 @@ import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
 import appUrl = require("common/appUrl");
 import generalUtils = require("common/generalUtils");
 import databasesManager = require("common/shell/databasesManager");
-import CreateDatabase from "components/pages/resources/databases/partials/create/CreateDatabase";
+import CreateDatabase = require("components/pages/resources/databases/partials/create/CreateDatabase");
 
 interface statsBase<TItem> {
     disconnected: KnockoutObservable<boolean>;

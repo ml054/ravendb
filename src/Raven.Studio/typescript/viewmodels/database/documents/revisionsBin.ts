@@ -12,8 +12,8 @@ import hyperlinkColumn = require("widgets/virtualGrid/columns/hyperlinkColumn");
 import checkedColumn = require("widgets/virtualGrid/columns/checkedColumn");
 import textColumn = require("widgets/virtualGrid/columns/textColumn");
 import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
-import { highlight, languages } from "prismjs";
-import shardViewModelBase from "viewmodels/shardViewModelBase";
+import prismjs = require("prismjs");
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
 import database = require("models/resources/database");
 
 class revisionsBin extends shardViewModelBase {
@@ -136,7 +136,7 @@ class revisionsBin extends shardViewModelBase {
                     const value = column.getCellValue(doc);
                     if (value !== undefined) {
                         const json = JSON.stringify(value, null, 4);
-                        const html = highlight(json, languages.javascript, "js");
+                        const html = prismjs.highlight(json, prismjs.languages.javascript, "js");
                         onValue(html, json);
                     }
                 }

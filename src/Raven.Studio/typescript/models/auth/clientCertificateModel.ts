@@ -1,8 +1,8 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
 import getClientCertificateCommand = require("commands/auth/getClientCertificateCommand");
-import moment from "moment";
-import serverSettings from "common/settings/serverSettings";
+import moment = require("moment");
+import serverSettings = require("common/settings/serverSettings");
 
 type clientCertificateExpiration = "unknown" | "valid" | "aboutToExpire" | "expired";
 

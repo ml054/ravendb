@@ -2,7 +2,7 @@
 import database = require("models/resources/database");
 import connectionStringModel = require("models/database/settings/connectionStringModel");
 import saveConnectionStringCommand_OLD = require("commands/database/settings/saveConnectionStringCommand_OLD");
-import testRabbitMqServerConnectionCommand from "commands/database/cluster/testRabbitMqServerConnectionCommand";
+import testRabbitMqServerConnectionCommand = require("commands/database/cluster/testRabbitMqServerConnectionCommand");
 import jsonUtil = require("common/jsonUtil");
 
 class connectionStringRabbitMqModel extends connectionStringModel {

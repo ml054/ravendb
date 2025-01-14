@@ -1,4 +1,4 @@
-﻿import virtualNotification from "common/notifications/models/virtualNotification";
+﻿import virtualNotification = require("common/notifications/models/virtualNotification");
 
 
 abstract class groupedVirtualNotification<T extends { id: string }> extends virtualNotification {

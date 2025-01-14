@@ -7,7 +7,7 @@ import textColumn = require("widgets/virtualGrid/columns/textColumn");
 import generalUtils = require("common/generalUtils");
 import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
 import actionColumn = require("widgets/virtualGrid/columns/actionColumn");
-import { highlight, languages } from "prismjs";
+import prismjs = require("prismjs");
 import threadStackTrace = require("viewmodels/manage/threadStackTrace");
 import threadsInfoWebSocketClient = require("common/threadsInfoWebSocketClient");
 import eventsCollector = require("common/eventsCollector");
@@ -137,7 +137,7 @@ class debugAdvancedThreadsRuntime extends viewModelBase {
                         UserProcessorTime: entry.UserProcessorTime
                     };
                     const json = JSON.stringify(timings, null, 4);
-                    const html = highlight(json, languages.javascript, "js");
+                    const html = prismjs.highlight(json, prismjs.languages.javascript, "js");
                     onValue(html, json);
                 } else if (column.header === "Start Time") {
                     onValue(moment.utc(entry.StartingTime), entry.StartingTime);

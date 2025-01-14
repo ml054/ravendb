@@ -1,11 +1,11 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
 import d3 = require("d3");
 import graphHelper = require("common/helpers/graph/graphHelper");
-import { d3adaptor, ID3StyleLayoutAdaptor, Link, Layout } from "webcola";
+import webcola = require("webcola");
 import ongoingTaskModel = require("models/database/tasks/ongoingTaskModel");
-import icomoonHelpers from "common/helpers/view/icomoonHelpers";
-import TaskUtils from "components/utils/TaskUtils";
-import { sortBy } from "common/typeUtils";
+import icomoonHelpers = require("common/helpers/view/icomoonHelpers");
+import TaskUtils = require("components/utils/TaskUtils");
+import typeUtils = require("common/typeUtils");
 
 abstract class layoutable {
     x: number;
@@ -80,7 +80,7 @@ class taskNode extends layoutable {
     }
 
     updateWith(dto: Raven.Client.Documents.Operations.OngoingTasks.OngoingTask, responsibleNode: databaseNode) {
-        this.type = TaskUtils.ongoingTaskToStudioTaskType(dto);
+        this.type = TaskUtils.default.ongoingTaskToStudioTaskType(dto);
         
         this.uniqueId = databaseGroupGraph.getUniqueTaskId(dto);
         this.taskId = dto.TaskId;
@@ -114,7 +114,7 @@ class databaseGroupGraph {
     private height: number;
     private svg: d3.Selection<void>;
     private zoom: d3.behavior.Zoom<void>;
-    private d3cola: ID3StyleLayoutAdaptor & Layout;
+    private d3cola: webcola.ID3StyleLayoutAdaptor & webcola.Layout;
     private colaInitialized = false;
     private graphInitialized = false;
     private previousDbNodesCount = -1;
@@ -178,7 +178,7 @@ class databaseGroupGraph {
         this.dbNodesContainer = tranform.append("g")
             .attr("class", "db-nodes");
 
-        this.d3cola = d3adaptor();
+        this.d3cola = webcola.d3adaptor();
 
         this.d3cola.on('tick', () => {
             this.updateElementDecorators();
@@ -205,7 +205,7 @@ class databaseGroupGraph {
         return Math.max(databaseGroupGraph.minDatabaseGroupDrawRadius, Math.floor(databaseGroupGraph.minDistanceBetweenCirclesInDatabaseGroup * nodesCount / (2 * Math.PI)));
     }
 
-    private layout(dbNodes: Array<databaseNode>, tasks: Array<taskNode>, links: Array<Link<databaseNode | taskNode>>, canUpdatePositions: boolean) {
+    private layout(dbNodes: Array<databaseNode>, tasks: Array<taskNode>, links: Array<webcola.Link<databaseNode | taskNode>>, canUpdatePositions: boolean) {
 
         dbNodes.forEach((n, idx) => {
             n.width = 2 * databaseGroupGraph.circleRadius;
@@ -453,8 +453,8 @@ class databaseGroupGraph {
     }
 
     // link used in forge graph simulation
-    private findLinksForCola(dbNodes: Array<databaseNode>, tasks: Array<taskNode>): Array<Link<databaseNode | taskNode>> {
-        const links: Array<Link<databaseNode | taskNode>> = [];
+    private findLinksForCola(dbNodes: Array<databaseNode>, tasks: Array<taskNode>): Array<webcola.Link<databaseNode | taskNode>> {
+        const links: Array<webcola.Link<databaseNode | taskNode>> = [];
 
         for (let i = 0; i < dbNodes.length; i++) {
             links.push({
@@ -476,8 +476,8 @@ class databaseGroupGraph {
     }
 
     // link displayed on scroon
-    private findVisibleLinks(dbNodes: Array<databaseNode>, tasks: Array<taskNode>): Array<Link<databaseNode | taskNode>> {
-        const links: Array<Link<databaseNode | taskNode>> = [];
+    private findVisibleLinks(dbNodes: Array<databaseNode>, tasks: Array<taskNode>): Array<webcola.Link<databaseNode | taskNode>> {
+        const links: Array<webcola.Link<databaseNode | taskNode>> = [];
 
         // find member - member connections
 
@@ -613,7 +613,7 @@ class databaseGroupGraph {
             .attr("transform", x => `translate(${x.x - x.width / 2},${x.y - x.height / 2})`);
     }
 
-    private updateEdges(selection: d3.Selection<Link<taskNode | databaseNode>>) {
+    private updateEdges(selection: d3.Selection<webcola.Link<taskNode | databaseNode>>) {
         selection.attr("class", x => "edge " + ((x.target instanceof taskNode) ? x.target.state : " "));
 
         
@@ -685,7 +685,7 @@ class databaseGroupGraph {
 
         _.pullAll(this.data.databaseNodes, dbsToDelete);
 
-        sortBy(this.data.databaseNodes, x => x.tag);
+        typeUtils.sortBy(this.data.databaseNodes, x => x.tag);
 
         // clear current status
         this.data.databaseNodes.forEach(node => {
@@ -768,7 +768,7 @@ class databaseGroupGraph {
         $("#databaseGroupGraphContainer").fullScreen(false);
     }
     
-    private getLinksEncoded(links: Array<Link<databaseNode | taskNode>>) {
+    private getLinksEncoded(links: Array<webcola.Link<databaseNode | taskNode>>) {
         const result: string[] = [];
         links.forEach(link => {
             const linkEndpoints = [link.source.getId(), link.target.getId()];

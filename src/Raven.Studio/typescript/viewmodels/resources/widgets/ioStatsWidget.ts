@@ -6,7 +6,7 @@ import IoStatsResult = Raven.Client.ServerWide.Operations.IoStatsResult;
 import app = require("durandal/app");
 import ioStatsWidgetSettings = require("./settings/ioStatsWidgetSettings");
 import d3 = require("d3");
-import { lineChart, chartData } from "models/resources/clusterDashboard/lineChart";
+import lineChart = require("models/resources/clusterDashboard/lineChart");
 
 interface ioStatsWidgetConfig {
     splitIops?: boolean;
@@ -17,13 +17,13 @@ class ioStatsWidget extends abstractChartsWebsocketWidget<Raven.Server.Dashboard
 
     view = require("views/resources/widgets/ioStatsWidget.html");
     
-    iopsChart: lineChart<Raven.Server.Dashboard.Cluster.Notifications.IoStatsPayload>;
-    iopsReadChart: lineChart<Raven.Server.Dashboard.Cluster.Notifications.IoStatsPayload>;
-    iopsWriteChart: lineChart<Raven.Server.Dashboard.Cluster.Notifications.IoStatsPayload>;
-    throughputChart: lineChart<Raven.Server.Dashboard.Cluster.Notifications.IoStatsPayload>;
-    throughputReadChart: lineChart<Raven.Server.Dashboard.Cluster.Notifications.IoStatsPayload>;
-    throughputWriteChart: lineChart<Raven.Server.Dashboard.Cluster.Notifications.IoStatsPayload>;
-    diskQueueChart: lineChart<Raven.Server.Dashboard.Cluster.Notifications.IoStatsPayload>;
+    iopsChart: lineChart.lineChart<Raven.Server.Dashboard.Cluster.Notifications.IoStatsPayload>;
+    iopsReadChart: lineChart.lineChart<Raven.Server.Dashboard.Cluster.Notifications.IoStatsPayload>;
+    iopsWriteChart: lineChart.lineChart<Raven.Server.Dashboard.Cluster.Notifications.IoStatsPayload>;
+    throughputChart: lineChart.lineChart<Raven.Server.Dashboard.Cluster.Notifications.IoStatsPayload>;
+    throughputReadChart: lineChart.lineChart<Raven.Server.Dashboard.Cluster.Notifications.IoStatsPayload>;
+    throughputWriteChart: lineChart.lineChart<Raven.Server.Dashboard.Cluster.Notifications.IoStatsPayload>;
+    diskQueueChart: lineChart.lineChart<Raven.Server.Dashboard.Cluster.Notifications.IoStatsPayload>;
 
     splitIops = ko.observable<boolean>(false);
     splitThroughput = ko.observable<boolean>(false);
@@ -68,14 +68,14 @@ class ioStatsWidget extends abstractChartsWebsocketWidget<Raven.Server.Dashboard
         
         let maxKnownIops = 0;
         
-        const iopsCommonYProvider = (allCharts: chartData[]) => {
+        const iopsCommonYProvider = (allCharts: lineChart.chartData[]) => {
             maxKnownIops = Math.max(maxKnownIops, d3.max(allCharts.map(data => d3.max(data.ranges.filter(range => range.values.length).map(range => d3.max(range.values.map(values => values.y)))))));
             return maxKnownIops;
         }
         
         let maxKnownThroughput = 0;
 
-        const throughputCommonYProvider = (allCharts: chartData[]) => {
+        const throughputCommonYProvider = (allCharts: lineChart.chartData[]) => {
             maxKnownThroughput = Math.max(maxKnownThroughput, d3.max(allCharts.map(data => d3.max(data.ranges.filter(range => range.values.length).map(range => d3.max(range.values.map(values => values.y)))))));
             return maxKnownThroughput;
         }
@@ -87,37 +87,37 @@ class ioStatsWidget extends abstractChartsWebsocketWidget<Raven.Server.Dashboard
             return data.Items.map(extractor).reduce((p, c) => p + c, 0);
         };
         
-        this.iopsChart = new lineChart(this.container.querySelector(".disk-iops-line-chart"),
+        this.iopsChart = new lineChart.lineChart(this.container.querySelector(".disk-iops-line-chart"),
             data => sumUp(data, x => x.IoReadOperations + x.IoWriteOperations),
             chartsOpts);
-        this.iopsReadChart = new lineChart(this.container.querySelector(".disk-iops-read-line-chart"),
+        this.iopsReadChart = new lineChart.lineChart(this.container.querySelector(".disk-iops-read-line-chart"),
             data => sumUp(data, x => x.IoReadOperations),
             {
                 ...chartsOpts,
                 yMaxProvider: iopsCommonYProvider
             });
-        this.iopsWriteChart = new lineChart(this.container.querySelector(".disk-iops-write-line-chart"),
+        this.iopsWriteChart = new lineChart.lineChart(this.container.querySelector(".disk-iops-write-line-chart"),
             data => sumUp(data, x => x.IoWriteOperations),
             {
                 ...chartsOpts,
                 yMaxProvider: iopsCommonYProvider
             });
-        this.throughputChart = new lineChart(this.container.querySelector(".disk-throughput-line-chart"),
+        this.throughputChart = new lineChart.lineChart(this.container.querySelector(".disk-throughput-line-chart"),
             data => sumUp(data, x => x.ReadThroughputInKb + x.WriteThroughputInKb),
             chartsOpts);
-        this.throughputReadChart = new lineChart(this.container.querySelector(".disk-throughput-read-line-chart"),
+        this.throughputReadChart = new lineChart.lineChart(this.container.querySelector(".disk-throughput-read-line-chart"),
             data => sumUp(data, x => x.ReadThroughputInKb),
             {
                 ...chartsOpts,
                 yMaxProvider: throughputCommonYProvider
             });
-        this.throughputWriteChart = new lineChart(this.container.querySelector(".disk-throughput-write-line-chart"),
+        this.throughputWriteChart = new lineChart.lineChart(this.container.querySelector(".disk-throughput-write-line-chart"),
             data => sumUp(data, x => x.WriteThroughputInKb),
             {
                 ...chartsOpts,
                 yMaxProvider: throughputCommonYProvider
             });
-        this.diskQueueChart = new lineChart(this.container.querySelector(".disk-queue-line-chart"),
+        this.diskQueueChart = new lineChart.lineChart(this.container.querySelector(".disk-queue-line-chart"),
             data => sumUp(data, x => x.QueueLength ?? 0),
             chartsOpts);
         

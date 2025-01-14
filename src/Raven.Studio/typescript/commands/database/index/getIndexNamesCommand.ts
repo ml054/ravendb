@@ -1,7 +1,7 @@
 import commandBase = require("commands/commandBase");
 import database = require("models/resources/database");
 import endpoints = require("endpoints");
-import { shardingTodo } from "common/developmentHelper";
+import developmentHelper = require("common/developmentHelper");
 
 class getIndexNamesCommand extends commandBase {
 
@@ -13,7 +13,7 @@ class getIndexNamesCommand extends commandBase {
         super();
         this.location = location;
         this.db = db;
-        shardingTodo("Danielle"); // TODO - location param should not be optional
+        developmentHelper.shardingTodo("Danielle"); // TODO - location param should not be optional
     }
 
     execute(): JQueryPromise<string[]> {

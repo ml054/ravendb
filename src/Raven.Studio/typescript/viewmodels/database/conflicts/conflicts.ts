@@ -18,8 +18,8 @@ import changeVectorUtils = require("common/changeVectorUtils");
 import generalUtils = require("common/generalUtils");
 import copyToClipboard = require("common/copyToClipboard");
 import moment = require("moment");
-import { highlight, languages } from "prismjs";
-import shardViewModelBase from "viewmodels/shardViewModelBase";
+import prismjs = require("prismjs");
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
 import database = require("models/resources/database");
 
 class conflictItem {
@@ -37,7 +37,7 @@ class conflictItem {
         if (dto.Doc) {
             const json = JSON.stringify(dto.Doc, null, 4);
             this.originalValue(json);
-            this.formattedValue(highlight(json, languages.javascript, "js"));
+            this.formattedValue(prismjs.highlight(json, prismjs.languages.javascript, "js"));
             this.deletedMarker(false);
             this.changeVector(changeVectorUtils.formatChangeVector(dto.ChangeVector, useLongChangeVectorFormat));
         } else {
@@ -162,7 +162,7 @@ class conflicts extends shardViewModelBase {
                         const value = column.getCellValue(item);
                         if (value !== undefined) {
                             const json = JSON.stringify(value, null, 4);
-                            const html = highlight(json, languages.javascript, "js");
+                            const html = prismjs.highlight(json, prismjs.languages.javascript, "js");
                             onValue(html, json);
                         }
                     }

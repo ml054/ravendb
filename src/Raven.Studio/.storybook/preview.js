@@ -63,24 +63,10 @@ import { Provider } from "react-redux";
 
 import { resetAllMocks } from "@storybook/test";
 
-export const decorators = [
-    (Story) => {
-        resetAllMocks();
+import { StoreDecorator } from "./storeDecorator"
 
-        const [store] = useState(() => {
-            const storeConfiguration = createStoreConfiguration();
-            setEffectiveTestStore(storeConfiguration);
-            return storeConfiguration;
-        });
-        
-        return (
-            <Provider store={store}>
-                <div className="h-100">
-                    {Story()}
-                </div>
-            </Provider>
-        )
-    }
+export const decorators = [
+    StoreDecorator
 ]
 
 export const parameters = {

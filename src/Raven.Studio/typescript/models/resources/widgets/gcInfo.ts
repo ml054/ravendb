@@ -1,5 +1,5 @@
 import historyAwareNodeStats = require("models/resources/widgets/historyAwareNodeStats");
-import genUtils from "common/generalUtils";
+import genUtils = require("common/generalUtils");
 import GcMemoryInfo = Raven.Server.Dashboard.Cluster.Notifications.GcInfoPayload.GcMemoryInfo;
 
 class gcInfo extends historyAwareNodeStats<GcInfoNormalizedData> {

@@ -3,10 +3,10 @@
 import database = require("models/resources/database");
 import remoteMetadataProvider = require("./autoComplete/remoteMetadataProvider");
 import cachedMetadataProvider = require("./autoComplete/cachedMetadataProvider");
-import { LanguageService } from "components/models/aceEditor";
-import { DatabaseSharedInfo } from "components/models/databases";
+import aceEditor = require("components/models/aceEditor");
+import databases = require("components/models/databases");
 
-class rqlLanguageService implements LanguageService {
+class rqlLanguageService implements aceEditor.LanguageService {
     
     private nextMessageId = 1;
     private worker: Worker;
@@ -17,7 +17,7 @@ class rqlLanguageService implements LanguageService {
     private readonly queryType: rqlQueryType;
     
     constructor(
-        db: database | DatabaseSharedInfo, 
+        db: database | databases.DatabaseSharedInfo, 
         indexes: () => string[],
         queryType: rqlQueryType) {
         this.worker = new Worker("/studio/assets/rql_worker.js");

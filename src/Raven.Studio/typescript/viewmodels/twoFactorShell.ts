@@ -1,9 +1,9 @@
-﻿import viewModelBase from "viewmodels/viewModelBase";
-import validateTwoFactorSecretCommand from "commands/auth/validateTwoFactorSecretCommand";
-import getTwoFactorServerConfigurationCommand from "commands/auth/getTwoFactorServerConfigurationCommand";
-import requestExecution from "common/notifications/requestExecution";
-import protractedCommandsDetector from "common/notifications/protractedCommandsDetector";
-import getClientCertificateCommand from "commands/auth/getClientCertificateCommand";
+﻿import viewModelBase = require("viewmodels/viewModelBase");
+import validateTwoFactorSecretCommand = require("commands/auth/validateTwoFactorSecretCommand");
+import getTwoFactorServerConfigurationCommand = require("commands/auth/getTwoFactorServerConfigurationCommand");
+import requestExecution = require("common/notifications/requestExecution");
+import protractedCommandsDetector = require("common/notifications/protractedCommandsDetector");
+import getClientCertificateCommand = require("commands/auth/getClientCertificateCommand");
 
 type LimitType = "browser" | "noLimit";
 

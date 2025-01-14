@@ -16,8 +16,8 @@ import getDatabaseCommand = require("commands/resources/getDatabaseCommand");
 import collectionsTracker = require("common/helpers/database/collectionsTracker");
 import viewHelpers = require("common/helpers/view/viewHelpers");
 import generalUtils = require("common/generalUtils");
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import validateSmugglerOptionsCommand from "commands/database/studio/validateSmugglerOptionsCommand";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import validateSmugglerOptionsCommand = require("commands/database/studio/validateSmugglerOptionsCommand");
 
 class importDatabaseFromFile extends shardViewModelBase {
 

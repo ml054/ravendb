@@ -63,6 +63,8 @@ describe("DatabasesPage", function () {
     it("can render load error on all nodes", async () => {
         const { screen } = rtlRender(<WithLoadErrorOnAllNodes />);
 
+        await screen.findByText(/Manage group/i);
+
         // general info section is hidden
         expect(screen.queryByClassName("icon-documents")).not.toBeInTheDocument();
     });

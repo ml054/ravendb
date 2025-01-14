@@ -10,7 +10,7 @@ import storageKeyProvider = require("common/storage/storageKeyProvider");
 import generalUtils = require("common/generalUtils");
 import Sortable from "sortablejs";
 
-class columnItem {
+export class columnItem {
 
     visible = ko.observable<boolean>(false);
 
@@ -131,7 +131,7 @@ class customColumnForm {
     }
 }
 
-class columnsSelector<T extends object> {
+export default class columnsSelector<T extends object> {
 
     view = require("views/partial/columnsSelector.html");
     
@@ -488,5 +488,3 @@ class columnsSelector<T extends object> {
         return undefined;
     }
 }
-
-export = columnsSelector;

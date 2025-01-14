@@ -4,7 +4,7 @@ import database = require("models/resources/database");
 import d3 = require("d3");
 import abstractWebSocketClient = require("common/abstractWebSocketClient");
 import endpoints = require("endpoints");
-import appUrl from "common/appUrl";
+import appUrl = require("common/appUrl");
 
 class liveSubscriptionStatsWebSocketClient extends abstractWebSocketClient<resultsDto<Raven.Server.Documents.Subscriptions.SubscriptionTaskPerformanceStats>> {
 

@@ -6,7 +6,7 @@ import databaseDiskUsage = require("models/resources/widgets/databaseDiskUsage")
 import textColumn = require("widgets/virtualGrid/columns/textColumn");
 import appUrl = require("common/appUrl");
 import perNodeStatItems = require("models/resources/widgets/perNodeStatItems");
-import DatabaseUtils from "components/utils/DatabaseUtils";
+import DatabaseUtils = require("components/utils/DatabaseUtils");
 import generalUtils = require("common/generalUtils");
 
 class databaseStorageWidget extends abstractDatabaseAndNodeAwareTableWidget<Raven.Server.Dashboard.Cluster.Notifications.DatabaseStorageUsagePayload, perNodeStatItems<databaseDiskUsage>, databaseDiskUsage> {
@@ -37,7 +37,7 @@ class databaseStorageWidget extends abstractDatabaseAndNodeAwareTableWidget<Rave
     protected prepareColumns(): virtualColumn[] {
         const grid = this.gridController();
         return [
-            new textColumn<databaseDiskUsage>(grid, x => x.hideDatabaseName && !grid.sortEnabled() ? "" : DatabaseUtils.formatName(x.database), "Database", "35%"),
+            new textColumn<databaseDiskUsage>(grid, x => x.hideDatabaseName && !grid.sortEnabled() ? "" : DatabaseUtils.default.formatName(x.database), "Database", "35%"),
             new nodeTagColumn<databaseDiskUsage>(grid, item => this.prepareUrl(item, "Storage Report View")),
             new textColumn<databaseDiskUsage>(grid, x => x.noData ? "-" : generalUtils.formatBytesToSize(x.size), "Data", "15%", {
                 headerTitle: "Data files storage usage",

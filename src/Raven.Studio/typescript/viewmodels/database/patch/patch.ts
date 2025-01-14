@@ -21,9 +21,9 @@ import queryCommand = require("commands/database/query/queryCommand");
 import queryCriteria = require("models/database/query/queryCriteria");
 import rqlLanguageService = require("common/rqlLanguageService");
 import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import getIndexNamesCommand from "commands/database/index/getIndexNamesCommand";
-import clusterTopologyManager from "common/shell/clusterTopologyManager";
-import shardViewModelBase from "viewmodels/shardViewModelBase";
+import getIndexNamesCommand = require("commands/database/index/getIndexNamesCommand");
+import clusterTopologyManager = require("common/shell/clusterTopologyManager");
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
 
 class patchList {
 

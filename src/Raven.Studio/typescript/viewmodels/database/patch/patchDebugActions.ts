@@ -1,4 +1,4 @@
-﻿import { highlight, languages } from "prismjs";
+﻿import prismjs = require("prismjs");
 
 
 class patchDebugActions {
@@ -31,7 +31,7 @@ class patchDebugActions {
                 return "";
             } else {
                 const json = JSON.stringify(value, null, 4);
-                return highlight(json, languages.javascript, "js");
+                return prismjs.highlight(json, prismjs.languages.javascript, "js");
             }
         });
     }

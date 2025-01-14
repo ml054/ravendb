@@ -1,7 +1,7 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 import composition = require("durandal/composition");
-import 'eonasdan-bootstrap-datetimepicker';
-import moment from "moment";
+require('eonasdan-bootstrap-datetimepicker');
+import moment = require("moment");
 
 class datePickerBindingHandler {
 

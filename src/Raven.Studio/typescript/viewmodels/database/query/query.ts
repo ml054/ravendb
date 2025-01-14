@@ -41,12 +41,12 @@ import spatialPolygonModel = require("models/database/query/spatialPolygonModel"
 import rqlLanguageService = require("common/rqlLanguageService");
 import hyperlinkColumn = require("widgets/virtualGrid/columns/hyperlinkColumn");
 import moment = require("moment");
-import { highlight, languages } from "prismjs";
-import shardViewModelBase from "viewmodels/shardViewModelBase";
+import prismjs = require("prismjs");
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
 import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
-import killQueryCommand from "commands/database/query/killQueryCommand";
-import getEssentialDatabaseStatsCommand from "commands/resources/getEssentialDatabaseStatsCommand";
-import queryPlan from "viewmodels/database/query/queryPlan";
+import killQueryCommand = require("commands/database/query/killQueryCommand");
+import getEssentialDatabaseStatsCommand = require("commands/resources/getEssentialDatabaseStatsCommand");
+import queryPlan = require("viewmodels/database/query/queryPlan");
 
 type queryResultTab = "results" | "explanations" | "queryPlan" | "timings" | "revisions";
 
@@ -210,7 +210,7 @@ class query extends shardViewModelBase {
     
     private indexEntriesStateWasTrue = false; // Used to save current query settings when switching to a 'dynamic' index
 
-    columnsSelector = new columnsSelector<document>();
+    columnsSelector = new columnsSelector.default<document>();
 
     queryFetcher = ko.observable<fetcherType>();
     explanationsFetcher = ko.observable<fetcherType>();
@@ -741,7 +741,7 @@ class query extends shardViewModelBase {
             const showPreview = (value: any) => {
                 if (value !== undefined) {
                     const json = JSON.stringify(value, null, 4);
-                    const html = highlight(json, languages.javascript, "js");
+                    const html = prismjs.highlight(json, prismjs.languages.javascript, "js");
                     onValue(html, json);
                 }
             };

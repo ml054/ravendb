@@ -11,18 +11,18 @@ import getConnectionStringInfoCommand = require("commands/database/settings/getC
 import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
 import jsonUtil = require("common/jsonUtil");
 import popoverUtils = require("common/popoverUtils");
-import ongoingTaskQueueSinkScriptModel from "models/database/tasks/ongoingTaskQueueSinkScriptModel";
-import saveQueueSinkCommand from "commands/database/tasks/saveQueueSinkCommand";
-import ongoingTaskKafkaSinkEditModel from "models/database/tasks/ongoingTaskKafkaSinkEditModel";
-import viewHelpers from "common/helpers/view/viewHelpers";
-import database from "models/resources/database";
-import testQueueSinkCommand from "commands/database/tasks/testQueueSinkCommand";
-import getOngoingTaskInfoCommand from "commands/database/tasks/getOngoingTaskInfoCommand";
-import queueSinkSyntax from "viewmodels/database/tasks/queueSinkSyntax";
-import patchDebugActions from "viewmodels/database/patch/patchDebugActions";
-import licenseModel from "models/auth/licenseModel";
-import { EditKafkaSinkTaskInfoHub } from "./EditKafkaSinkTaskInfoHub";
-import { sortBy } from "common/typeUtils";
+import ongoingTaskQueueSinkScriptModel = require("models/database/tasks/ongoingTaskQueueSinkScriptModel");
+import saveQueueSinkCommand = require("commands/database/tasks/saveQueueSinkCommand");
+import ongoingTaskKafkaSinkEditModel = require("models/database/tasks/ongoingTaskKafkaSinkEditModel");
+import viewHelpers = require("common/helpers/view/viewHelpers");
+import database = require("models/resources/database");
+import testQueueSinkCommand = require("commands/database/tasks/testQueueSinkCommand");
+import getOngoingTaskInfoCommand = require("commands/database/tasks/getOngoingTaskInfoCommand");
+import queueSinkSyntax = require("viewmodels/database/tasks/queueSinkSyntax");
+import patchDebugActions = require("viewmodels/database/patch/patchDebugActions");
+import licenseModel = require("models/auth/licenseModel");
+import EditKafkaSinkTaskInfoHub = require("./EditKafkaSinkTaskInfoHub");
+import typeUtils = require("common/typeUtils");
 
 class kafkaTaskTestMode {
     db: KnockoutObservable<database>;
@@ -112,7 +112,7 @@ class editKafkaSinkTask extends viewModelBase {
     enableTestArea = ko.observable<boolean>(false);
     test: kafkaTaskTestMode;
     
-    infoHubView: ReactInKnockout<typeof EditKafkaSinkTaskInfoHub>;
+    infoHubView: ReactInKnockout<typeof EditKafkaSinkTaskInfoHub.EditKafkaSinkTaskInfoHub>;
     
     editedKafkaSink = ko.observable<ongoingTaskKafkaSinkEditModel>();
 
@@ -152,7 +152,7 @@ class editKafkaSinkTask extends viewModelBase {
             "setState");
         
         this.infoHubView = ko.pureComputed(() => ({
-            component: EditKafkaSinkTaskInfoHub
+            component: EditKafkaSinkTaskInfoHub.EditKafkaSinkTaskInfoHub
         }));
     }
 
@@ -217,7 +217,7 @@ class editKafkaSinkTask extends viewModelBase {
             .done((result: Raven.Client.Documents.Operations.ConnectionStrings.GetConnectionStringsResult) => {
                 const queueConnectionStrings = Object.values(result.QueueConnectionStrings);
                 const kafkaStrings = queueConnectionStrings.filter(x => x.BrokerType === "Kafka");
-                this.kafkaConnectionStringsDetails(sortBy(kafkaStrings, x => x.Name.toUpperCase()));
+                this.kafkaConnectionStringsDetails(typeUtils.sortBy(kafkaStrings, x => x.Name.toUpperCase()));
             });
     }
 

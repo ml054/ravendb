@@ -23,11 +23,11 @@ import getDocumentWithMetadataCommand = require("commands/database/documents/get
 import testElasticSearchEtlCommand = require("commands/database/tasks/testElasticSearchEtlCommand");
 import ongoingTaskElasticSearchTransformationModel = require("models/database/tasks/ongoingTaskElasticSearchEtlTransformationModel");
 import discoveryUrl = require("models/database/settings/discoveryUrl");
-import { highlight, languages } from "prismjs";
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import licenseModel from "models/auth/licenseModel";
-import { EditElasticSearchEtlInfoHub } from "viewmodels/database/tasks/EditElasticSearchEtlInfoHub";
-import { sortBy } from "common/typeUtils";
+import prismjs = require("prismjs");
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import licenseModel = require("models/auth/licenseModel");
+import EditElasticSearchEtlInfoHub = require("viewmodels/database/tasks/EditElasticSearchEtlInfoHub");
+import typeUtils = require("common/typeUtils");
 class elasticSearchTaskTestMode {
 
     documentId = ko.observable<string>();
@@ -112,7 +112,7 @@ class elasticSearchTaskTestMode {
                             const metaDto = docDto["@metadata"];
                             documentMetadata.filterMetadata(metaDto);
                             const text = JSON.stringify(docDto, null, 4);
-                            this.loadedDocument(highlight(text, languages.javascript, "js"));
+                            this.loadedDocument(prismjs.highlight(text, prismjs.languages.javascript, "js"));
                             this.loadedDocumentId(doc.getId());
 
                             $('.test-container a[href="#documentPreview"]').tab('show');
@@ -210,7 +210,7 @@ class editElasticSearchEtlTask extends shardViewModelBase {
     newConnectionString = ko.observable<connectionStringElasticSearchEtlModel>();
     
     hasElasticSearchEtl = licenseModel.getStatusValue("HasElasticSearchEtl");
-    infoHubView: ReactInKnockout<typeof EditElasticSearchEtlInfoHub>;
+    infoHubView: ReactInKnockout<typeof EditElasticSearchEtlInfoHub.EditElasticSearchEtlInfoHub>;
 
     constructor(db: database) {
         super(db);
@@ -229,7 +229,7 @@ class editElasticSearchEtlTask extends shardViewModelBase {
 
         aceEditorBindingHandler.install();
         this.infoHubView = ko.pureComputed(() => ({
-            component: EditElasticSearchEtlInfoHub
+            component: EditElasticSearchEtlInfoHub.EditElasticSearchEtlInfoHub
         }))
     }
 
@@ -293,7 +293,7 @@ class editElasticSearchEtlTask extends shardViewModelBase {
             .execute()
             .done((result: Raven.Client.Documents.Operations.ConnectionStrings.GetConnectionStringsResult) => {
                 const connectionStringsNames = Object.keys(result.ElasticSearchConnectionStrings);
-                this.elasticSearchEtlConnectionStringsNames(sortBy(connectionStringsNames, x => x.toUpperCase()));
+                this.elasticSearchEtlConnectionStringsNames(typeUtils.sortBy(connectionStringsNames, x => x.toUpperCase()));
             });
     }
 

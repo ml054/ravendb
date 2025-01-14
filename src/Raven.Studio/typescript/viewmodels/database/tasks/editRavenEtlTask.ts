@@ -21,11 +21,11 @@ import getDocumentWithMetadataCommand = require("commands/database/documents/get
 import document = require("models/database/documents/document");
 import testRavenEtlCommand = require("commands/database/tasks/testRavenEtlCommand");
 import discoveryUrl = require("models/database/settings/discoveryUrl");
-import { highlight, languages } from "prismjs";
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import licenseModel from "models/auth/licenseModel";
-import { EditRavenEtlInfoHub } from "viewmodels/database/tasks/EditRavenEtlInfoHub";
-import { sortBy } from "common/typeUtils";
+import prismjs = require("prismjs");
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import licenseModel = require("models/auth/licenseModel");
+import EditRavenEtlInfoHub = require("viewmodels/database/tasks/EditRavenEtlInfoHub");
+import typeUtils = require("common/typeUtils");
 
 type resultItem = {
     header: string;
@@ -115,7 +115,7 @@ class ravenTaskTestMode {
                             const metaDto = docDto["@metadata"];
                             documentMetadata.filterMetadata(metaDto);
                             const text = JSON.stringify(docDto, null, 4);
-                            this.loadedDocument(highlight(text, languages.javascript, "js"));
+                            this.loadedDocument(prismjs.highlight(text, prismjs.languages.javascript, "js"));
                             this.loadedDocumentId(doc.getId());
 
                             $('.test-container a[href="#documentPreview"]').tab('show');
@@ -147,7 +147,7 @@ class ravenTaskTestMode {
                     this.testResults(simulationResult.Commands.map((command: Raven.Client.Documents.Commands.Batches.ICommandData): resultItem => {
 
                         const json = JSON.stringify(command, null, 4);
-                        const html = highlight(json, languages.javascript, "js");
+                        const html = prismjs.highlight(json, prismjs.languages.javascript, "js");
                         
                         return {
                             header: command.Type + " " + command.Id,
@@ -212,7 +212,7 @@ class editRavenEtlTask extends shardViewModelBase {
     certificatesUrl = appUrl.forCertificates();
 
     hasRavenEtl = licenseModel.getStatusValue("HasRavenEtl");
-    infoHubView: ReactInKnockout<typeof EditRavenEtlInfoHub>;
+    infoHubView: ReactInKnockout<typeof EditRavenEtlInfoHub.EditRavenEtlInfoHub>;
 
     constructor(db: database) {
         super(db);
@@ -222,7 +222,7 @@ class editRavenEtlTask extends shardViewModelBase {
                                    "cancelEditedTransformation", "saveEditedTransformation", "syntaxHelp",
                                    "toggleTestArea", "toggleAdvancedArea", "setState");
         this.infoHubView = ko.pureComputed(() => ({
-            component: EditRavenEtlInfoHub
+            component: EditRavenEtlInfoHub.EditRavenEtlInfoHub
         }))
     }
 
@@ -279,7 +279,7 @@ class editRavenEtlTask extends shardViewModelBase {
             .execute()
             .done((result: Raven.Client.Documents.Operations.ConnectionStrings.GetConnectionStringsResult) => {
                 const connectionStrings = Object.values(result.RavenConnectionStrings);
-                this.ravenEtlConnectionStringsDetails(sortBy(connectionStrings, x => x.Name.toUpperCase()));
+                this.ravenEtlConnectionStringsDetails(typeUtils.sortBy(connectionStrings, x => x.Name.toUpperCase()));
             });
     }
 

@@ -4,7 +4,7 @@ import textColumn = require("widgets/virtualGrid/columns/textColumn");
 import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
 import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
 import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
-import { highlight, languages } from "prismjs";
+import prismjs = require("prismjs");
 
 class visualizerTreeExplorer extends dialogViewModelBase {
 
@@ -42,7 +42,7 @@ class visualizerTreeExplorer extends dialogViewModelBase {
                     const value = column.getCellValue(details);
                     if (value !== undefined) {
                         const json = JSON.stringify(value, null, 4);
-                        const html = highlight(json, languages.javascript, "js");
+                        const html = prismjs.highlight(json, prismjs.languages.javascript, "js");
                         onValue(html, json);
                     }
                 });

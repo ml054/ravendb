@@ -9,11 +9,11 @@ import getConnectionStringsCommand = require("commands/database/settings/getConn
 import connectionStringRavenEtlModel = require("models/database/settings/connectionStringRavenEtlModel");
 import jsonUtil = require("common/jsonUtil");
 import discoveryUrl = require("models/database/settings/discoveryUrl");
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database from "models/resources/database";
-import licenseModel from "models/auth/licenseModel";
-import { EditExternalReplicationInfoHub } from "viewmodels/database/tasks/EditExternalReplicationInfoHub";
-import { sortBy } from "common/typeUtils";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import database = require("models/resources/database");
+import licenseModel = require("models/auth/licenseModel");
+import EditExternalReplicationInfoHub = require("viewmodels/database/tasks/EditExternalReplicationInfoHub");
+import typeUtils = require("common/typeUtils");
 class editExternalReplicationTask extends shardViewModelBase {
 
     view = require("views/database/tasks/editExternalReplicationTask.html");
@@ -48,7 +48,7 @@ class editExternalReplicationTask extends shardViewModelBase {
     newConnectionString = ko.observable<connectionStringRavenEtlModel>();
     
     hasExternalReplication = licenseModel.getStatusValue("HasExternalReplication");
-    infoHubView: ReactInKnockout<typeof EditExternalReplicationInfoHub>
+    infoHubView: ReactInKnockout<typeof EditExternalReplicationInfoHub.EditExternalReplicationInfoHub>
 
     constructor(db: database) {
         super(db);
@@ -56,7 +56,7 @@ class editExternalReplicationTask extends shardViewModelBase {
         this.bindToCurrentInstance("useConnectionString", "onTestConnectionRaven", "setState");
 
         this.infoHubView = ko.pureComputed(() => ({
-            component: EditExternalReplicationInfoHub
+            component: EditExternalReplicationInfoHub.EditExternalReplicationInfoHub
         }))
     }
 
@@ -106,7 +106,7 @@ class editExternalReplicationTask extends shardViewModelBase {
             .execute()
             .done((result: Raven.Client.Documents.Operations.ConnectionStrings.GetConnectionStringsResult) => {
                 const connectionStrings = (<any>Object).values(result.RavenConnectionStrings);
-                this.ravenEtlConnectionStringsDetails(sortBy(connectionStrings, x => x.Name.toUpperCase()));
+                this.ravenEtlConnectionStringsDetails(typeUtils.sortBy(connectionStrings, x => x.Name.toUpperCase()));
             });
     }
 

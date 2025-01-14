@@ -2,7 +2,7 @@
 import database = require("models/resources/database");
 import moment = require("moment");
 import pluralizeHelpers = require("common/helpers/text/pluralizeHelpers");
-import groupedVirtualNotification from "common/notifications/models/groupedVirtualNotification";
+import groupedVirtualNotification = require("common/notifications/models/groupedVirtualNotification");
 
 class virtualUpdateByQuery extends groupedVirtualNotification<queryBasedVirtualBulkOperationItem> {
 

@@ -1,21 +1,21 @@
 import viewModelBase = require("viewmodels/viewModelBase");
-import getClusterLogCommand from "commands/database/cluster/getClusterLogCommand";
-import virtualGridController from "widgets/virtualGrid/virtualGridController";
-import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
-import textColumn from "widgets/virtualGrid/columns/textColumn";
+import getClusterLogCommand = require("commands/database/cluster/getClusterLogCommand");
+import virtualGridController = require("widgets/virtualGrid/virtualGridController");
+import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
+import textColumn = require("widgets/virtualGrid/columns/textColumn");
 import generalUtils = require("common/generalUtils");
 import moment = require("moment");
-import actionColumn from "widgets/virtualGrid/columns/actionColumn";
+import actionColumn = require("widgets/virtualGrid/columns/actionColumn");
 import FollowerDebugView = Raven.Server.Rachis.FollowerDebugView;
-import appUrl from "common/appUrl";
-import removeEntryFromLogCommand from "commands/database/cluster/removeEntryFromLogCommand";
-import getClusterLogEntryCommand from "commands/database/cluster/getClusterLogEntryCommand";
-import showDataDialog from "viewmodels/common/showDataDialog";
-import app from "durandal/app";
-import debugAdvancedClusterSnapshotInstallation from "viewmodels/manage/debugAdvancedClusterSnapshotInstallation";
-import notificationCenter from "common/notifications/notificationCenter";
-import messagePublisher from "common/messagePublisher";
-import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import appUrl = require("common/appUrl");
+import removeEntryFromLogCommand = require("commands/database/cluster/removeEntryFromLogCommand");
+import getClusterLogEntryCommand = require("commands/database/cluster/getClusterLogEntryCommand");
+import showDataDialog = require("viewmodels/common/showDataDialog");
+import app = require("durandal/app");
+import debugAdvancedClusterSnapshotInstallation = require("viewmodels/manage/debugAdvancedClusterSnapshotInstallation");
+import notificationCenter = require("common/notifications/notificationCenter");
+import messagePublisher = require("common/messagePublisher");
+import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
 
 type LogEntryStatus = "Commited" | "Appended";
 

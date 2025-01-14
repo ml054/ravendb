@@ -1,8 +1,8 @@
 import dbLiveIOStatsWebSocketClient = require("common/dbLiveIOStatsWebSocketClient");
 import ioStatsGraph = require("models/database/status/ioStatsGraph");
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database from "models/resources/database";
-import DatabaseUtils from "components/utils/DatabaseUtils";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import database = require("models/resources/database");
+import DatabaseUtils = require("components/utils/DatabaseUtils");
 
 class ioStats extends shardViewModelBase {
     
@@ -14,7 +14,7 @@ class ioStats extends shardViewModelBase {
     constructor(db: database, location: databaseLocationSpecifier) {
         super(db, location);
 
-        const detailedDatabaseName = DatabaseUtils.formatNameForFile(db.name, location);
+        const detailedDatabaseName = DatabaseUtils.default.formatNameForFile(db.name, location);
 
         this.graph = new ioStatsGraph(
             () => `database-${detailedDatabaseName}`,

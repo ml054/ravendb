@@ -50,15 +50,15 @@ import studioSetting = require("common/settings/studioSetting");
 import detectBrowser = require("viewmodels/common/detectBrowser");
 import genUtils = require("common/generalUtils");
 import leafMenuItem = require("common/shell/menu/leafMenuItem");
-import connectionStatus from "models/resources/connectionStatus";
-import shard from "models/resources/shard";
-import moment from "moment";
-import databasesManager from "common/shell/databasesManager";
-import { globalDispatch } from "components/storeCompat";
-import { accessManagerActions } from "components/common/shell/accessManagerSlice";
-import UpgradeModal from "./shell/UpgradeModal";
-import getStudioBootstrapCommand from "commands/resources/getStudioBootstrapCommand";
-import serverSettings from "common/settings/serverSettings";
+import connectionStatus = require("models/resources/connectionStatus");
+import shard = require("models/resources/shard");
+import moment = require("moment");
+import databasesManager = require("common/shell/databasesManager");
+import storeCompat = require("components/storeCompat");
+import accessManagerSlice = require("components/common/shell/accessManagerSlice");
+import UpgradeModal = require("./shell/UpgradeModal");
+import getStudioBootstrapCommand = require("commands/resources/getStudioBootstrapCommand");
+import serverSettings = require("common/settings/serverSettings");
 import getLatestVersionInfoCommand = require("commands/version/getLatestVersionInfoCommand");
 import StudioSearchWithDatabaseSwitcher from "components/shell/studioSearchWithDatabaseSelector/StudioSearchWithDatabaseSwitcher";
 
@@ -355,7 +355,7 @@ class shell extends viewModelBase {
                             databasesAccess[`${key}`] = `Database${access}` as databaseAccessLevel;
                         }
                         accessManager.databasesAccess = databasesAccess;
-                        globalDispatch(accessManagerActions.onDatabaseAccessLoaded(databasesAccess));
+                        storeCompat.globalDispatch(accessManagerSlice.accessManagerActions.onDatabaseAccessLoaded(databasesAccess));
                         this.accessManager.secureServer(true);
                         
                     } else {

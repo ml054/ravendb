@@ -1,7 +1,7 @@
 import confirmViewModelBase = require("viewmodels/confirmViewModelBase");
 import router = require("plugins/router");
 import appUrl = require("common/appUrl");
-import { DatabaseSharedInfo } from "components/models/databases";
+import databases = require("components/models/databases");
 
 class deleteDatabaseConfirm extends confirmViewModelBase<deleteDatabaseConfirmResult> {
 
@@ -10,9 +10,9 @@ class deleteDatabaseConfirm extends confirmViewModelBase<deleteDatabaseConfirmRe
     private isKeepingFiles = ko.observable<boolean>(true);
     private encryptedCount: number;
 
-    private readonly databasesToDelete: DatabaseSharedInfo[];
+    private readonly databasesToDelete: databases.DatabaseSharedInfo[];
 
-    constructor(databasesToDelete: DatabaseSharedInfo[]) {
+    constructor(databasesToDelete: databases.DatabaseSharedInfo[]) {
         super();
         this.databasesToDelete = databasesToDelete;
 

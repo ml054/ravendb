@@ -2,7 +2,7 @@ import eventsCollector = require("common/eventsCollector");
 import appUrl = require("common/appUrl");
 import router = require("plugins/router");
 import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import licenseModel from "models/auth/licenseModel"; 
+import licenseModel = require("models/auth/licenseModel"); 
 
 class createServerWideTask extends dialogViewModelBase {
 

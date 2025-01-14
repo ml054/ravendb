@@ -6,7 +6,7 @@ import textColumn = require("widgets/virtualGrid/columns/textColumn");
 import alert = require("common/notifications/models/alert");
 import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
 import abstractAlertDetails = require("viewmodels/common/notificationCenter/detailViewer/alerts/abstractAlertDetails");
-import genUtils from "common/generalUtils";
+import genUtils = require("common/generalUtils");
 
 class queueSinkErrorDetails extends abstractAlertDetails {
     

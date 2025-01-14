@@ -1,7 +1,7 @@
 import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
 import database = require("models/resources/database");
 import getIndexStalenessReasonsCommand = require("commands/database/index/getIndexStalenessReasonsCommand");
-import genUtils from "common/generalUtils";
+import genUtils = require("common/generalUtils");
 
 class indexStalenessReasons extends dialogViewModelBase {
 

@@ -2,14 +2,13 @@ import viewModelBase = require("viewmodels/viewModelBase");
 import spatialMarkersLayerModel = require("models/database/query/spatialMarkersLayerModel");
 import document = require("models/database/documents/document");
 import documentMetadata = require("models/database/documents/documentMetadata");
-import { Control, IconOptions, MarkerClusterGroup, Map, TileLayer } from "leaflet";
 import genUtils = require("common/generalUtils");
 import spatialCircleModel = require("models/database/query/spatialCircleModel");
 import spatialPolygonModel = require("models/database/query/spatialPolygonModel");
-import { highlight, languages } from "prismjs";
+import prismjs = require("prismjs");
 
 import L = require("leaflet");
-import "leaflet.markercluster";
+require("leaflet.markercluster");
 
 const markerIcon = require("Content/img/leaflet/marker-icon.svg");
 
@@ -17,7 +16,7 @@ class spatialQueryMap extends viewModelBase {
 
     view = require("views/database/query/spatialQueryMap.html");
     
-    private map: Map;
+    private map: L.Map;
     
     markersLayers = ko.observableArray<spatialMarkersLayerModel>([]);
     circlesLayer = ko.observableArray<spatialCircleModel>([]);
@@ -49,7 +48,7 @@ class spatialQueryMap extends viewModelBase {
             documentMetadata.filterMetadata(metaDto);
 
             let text = JSON.stringify(docDto, null, 4);
-            text = highlight(text, languages.javascript, "js");
+            text = prismjs.highlight(text, prismjs.languages.javascript, "js");
 
             return `<div>
                           <h4>Document: ${genUtils.escapeHtml(doc.getId())}</h4>
@@ -57,8 +56,8 @@ class spatialQueryMap extends viewModelBase {
                     </div>`;
         }
         
-        const dataLayers: Control.LayersObject = {};
-        const markersGroups: MarkerClusterGroup[] = [];
+        const dataLayers: L.Control.LayersObject = {};
+        const markersGroups: L.MarkerClusterGroup[] = [];
 
         const ravenMarker = L.icon({
             iconUrl: markerIcon,
@@ -66,7 +65,7 @@ class spatialQueryMap extends viewModelBase {
             iconAnchor: [17, 22],
             popupAnchor: [5, -22],
             tooltipAnchor: [0, -17]
-        } as IconOptions);
+        } as L.IconOptions);
 
         this.markersLayers().forEach(markersLayer => {
             const markers = markersLayer.geoPoints().map(point => {
@@ -127,14 +126,14 @@ class spatialQueryMap extends viewModelBase {
         this.map.fitBounds(mapBounds, {padding: [50, 50]});
     }
     
-    private getStreetMapTileLayer(): TileLayer {
+    private getStreetMapTileLayer(): L.TileLayer {
         const osmLink = `<a href="http://openstreetmap.org">OpenStreetMap</a>`;
         const osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         const osmAttrib = `&copy; ${osmLink} Contributors`;
         return L.tileLayer(osmUrl, {attribution: osmAttrib});
     }
     
-    private getTopographyMapTileLayer(): TileLayer {
+    private getTopographyMapTileLayer(): L.TileLayer {
         const otmLink = `<a href="http://opentopomap.org/">OpenTopoMap</a>`;
         const otmUrl = `http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png`;
         const otmAttrib = `&copy; ${otmLink} Contributors`;

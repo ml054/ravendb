@@ -1,7 +1,7 @@
 ﻿/// <reference path="../../../../typings/tsd.d.ts"/>
 import ongoingTaskEditModel = require("models/database/tasks/ongoingTaskEditModel");
 import jsonUtil = require("common/jsonUtil");
-import ongoingTaskQueueSinkScriptModel from "models/database/tasks/ongoingTaskQueueSinkScriptModel";
+import ongoingTaskQueueSinkScriptModel = require("models/database/tasks/ongoingTaskQueueSinkScriptModel");
 
 abstract class ongoingTaskQueueSinkEditModel extends ongoingTaskEditModel {
     

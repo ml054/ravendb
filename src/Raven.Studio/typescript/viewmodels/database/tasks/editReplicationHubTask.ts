@@ -24,11 +24,11 @@ import genUtils = require("common/generalUtils");
 import certificateUtils = require("common/certificateUtils");
 import viewHelpers = require("common/helpers/view/viewHelpers");
 import accessManager = require("common/shell/accessManager");
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database from "models/resources/database";
-import DatabaseUtils from "components/utils/DatabaseUtils";
-import licenseModel from "models/auth/licenseModel";
-import { EditReplicationHubInfoHub } from "viewmodels/database/tasks/EditReplicationHubInfoHub";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import database = require("models/resources/database");
+import DatabaseUtils = require("components/utils/DatabaseUtils");
+import licenseModel = require("models/auth/licenseModel");
+import EditReplicationHubInfoHub = require("viewmodels/database/tasks/EditReplicationHubInfoHub");
 
 class editReplicationHubTask extends shardViewModelBase {
 
@@ -56,7 +56,7 @@ class editReplicationHubTask extends shardViewModelBase {
 
     hasPullReplicationAsHub = licenseModel.getStatusValue("HasPullReplicationAsHub");
 
-    infoHubView: ReactInKnockout<typeof EditReplicationHubInfoHub>;
+    infoHubView: ReactInKnockout<typeof EditReplicationHubInfoHub.EditReplicationHubInfoHub>;
 
     allReplicationAccessItems = ko.observableArray<replicationAccessHubModel>([]);
     visibleReplicationAccessItems: KnockoutComputed<Array<replicationAccessHubModel>>;
@@ -78,7 +78,7 @@ class editReplicationHubTask extends shardViewModelBase {
                                    "cloneReplicationAccessItem","deleteReplicationAccessItem",
                                    "saveReplicationHubTask", "saveReplicationAccessItem", "loadMoreAccessItems", "setState");
         this.infoHubView = ko.pureComputed(() => ({
-            component: EditReplicationHubInfoHub
+            component: EditReplicationHubInfoHub.EditReplicationHubInfoHub
         }))
     }
 
@@ -553,7 +553,7 @@ class editReplicationHubTask extends shardViewModelBase {
 
         let fileName = includeAccessInfo ? "hubAccessConfiguration" : "hubConfiguration";
         const accessName = includeAccessInfo ? this.editedReplicationAccessItem().replicationAccessName() + "-" : "";
-        const detailedDatabaseName = DatabaseUtils.formatNameForFile(databaseName, this.location);
+        const detailedDatabaseName = DatabaseUtils.default.formatNameForFile(databaseName, this.location);
         
         fileName = `${fileName}-${hubTaskItem.taskName()}-${accessName}${detailedDatabaseName}.json`;
         

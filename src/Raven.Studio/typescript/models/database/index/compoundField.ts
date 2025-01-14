@@ -1,4 +1,4 @@
-﻿import jsonUtil from "common/jsonUtil";
+﻿import jsonUtil = require("common/jsonUtil");
 
 class compoundField {
     field1 = ko.observable<string>();

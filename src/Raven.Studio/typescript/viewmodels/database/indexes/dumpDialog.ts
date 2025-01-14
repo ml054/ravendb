@@ -2,8 +2,8 @@ import dialog = require("plugins/dialog");
 import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
 import dumpIndexCommand = require("commands/database/index/dumpIndexCommand");
 import getFolderPathOptionsCommand = require("commands/resources/getFolderPathOptionsCommand");
-import database from "models/resources/database";
-import { SingleDatabaseLocationSelector } from "components/common/SingleDatabaseLocationSelector";
+import database = require("models/resources/database");
+import SingleDatabaseLocationSelector = require("components/common/SingleDatabaseLocationSelector");
 
 class dumpDialog extends dialogViewModelBase {
     
@@ -19,7 +19,7 @@ class dumpDialog extends dialogViewModelBase {
     
     validationGroup: KnockoutValidationGroup;
 
-    locationSelectorOptions: ReactInKnockout<typeof SingleDatabaseLocationSelector>;
+    locationSelectorOptions: ReactInKnockout<typeof SingleDatabaseLocationSelector.SingleDatabaseLocationSelector>;
     
     constructor(indexName: string, private db: database) {
         super();
@@ -45,12 +45,12 @@ class dumpDialog extends dialogViewModelBase {
         }
 
         this.locationSelectorOptions = ko.pureComputed(() => ({
-            component: SingleDatabaseLocationSelector,
+            component: SingleDatabaseLocationSelector.SingleDatabaseLocationSelector,
             props: {
                 locations,
                 selectedLocation: this.location(),
                 setSelectedLocation: l => this.location(l)
-            } as Parameters<typeof SingleDatabaseLocationSelector>[0]
+            } as Parameters<typeof SingleDatabaseLocationSelector.SingleDatabaseLocationSelector>[0]
         }));
     }
 

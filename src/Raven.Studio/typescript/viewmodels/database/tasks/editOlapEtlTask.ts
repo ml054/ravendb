@@ -29,11 +29,11 @@ import virtualGridController = require("widgets/virtualGrid/virtualGridControlle
 import textColumn = require("widgets/virtualGrid/columns/textColumn");
 import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
 import virtualGrid = require("widgets/virtualGrid/virtualGrid");
-import { highlight, languages } from "prismjs";
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import licenseModel from "models/auth/licenseModel";
-import { EditOlapEtlInfoHub } from "viewmodels/database/tasks/EditOlapEtlInfoHub";
-import { sortBy } from "common/typeUtils";
+import prismjs = require("prismjs");
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import licenseModel = require("models/auth/licenseModel");
+import EditOlapEtlInfoHub = require("viewmodels/database/tasks/EditOlapEtlInfoHub");
+import typeUtils = require("common/typeUtils");
 
 class partitionTable {
     key: string;
@@ -168,7 +168,7 @@ class olapTaskTestMode {
                             const metaDto = docDto["@metadata"];
                             documentMetadata.filterMetadata(metaDto);
                             const text = JSON.stringify(docDto, null, 4);
-                            this.loadedDocument(highlight(text, languages.javascript, "js"));
+                            this.loadedDocument(prismjs.highlight(text, prismjs.languages.javascript, "js"));
                             this.loadedDocumentId(doc.getId());
 
                             $('.test-container a[href="#documentPreview"]').tab('show');
@@ -269,7 +269,7 @@ class editOlapEtlTask extends shardViewModelBase {
     serverConfiguration = ko.observable<periodicBackupServerLimitsResponse>(); // needed for olap local destination in connection string
 
     hasOlapEtl = licenseModel.getStatusValue("HasOlapEtl");
-    infoHubView: ReactInKnockout<typeof EditOlapEtlInfoHub>;
+    infoHubView: ReactInKnockout<typeof EditOlapEtlInfoHub.EditOlapEtlInfoHub>;
     
     constructor(db: database) {
         super(db);
@@ -288,7 +288,7 @@ class editOlapEtlTask extends shardViewModelBase {
 
         aceEditorBindingHandler.install();
         this.infoHubView = ko.pureComputed(() => ({
-            component: EditOlapEtlInfoHub
+            component: EditOlapEtlInfoHub.EditOlapEtlInfoHub
         }))
     }
 
@@ -372,7 +372,7 @@ class editOlapEtlTask extends shardViewModelBase {
             .execute()
             .done((result: Raven.Client.Documents.Operations.ConnectionStrings.GetConnectionStringsResult) => {
                 const connectionStringsNames = Object.keys(result.OlapConnectionStrings);
-                this.olapEtlConnectionStringsNames(sortBy(connectionStringsNames, x => x.toUpperCase()));
+                this.olapEtlConnectionStringsNames(typeUtils.sortBy(connectionStringsNames, x => x.toUpperCase()));
             });
     }
 

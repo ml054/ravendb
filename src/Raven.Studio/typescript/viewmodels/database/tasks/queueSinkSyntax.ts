@@ -1,7 +1,7 @@
 import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
 import copyToClipboard = require("common/copyToClipboard");
 import viewModelBase = require("viewmodels/viewModelBase");
-import { highlight, languages } from "prismjs";
+import prismjs = require("prismjs");
 
 class queueSinkSyntax extends dialogViewModelBase {
     
@@ -39,12 +39,12 @@ put(this.Id.toString(), item)`;
         {
             title: "Assign collection and put document",
             text: queueSinkSyntax.assignCollectionCode,
-            html: highlight(queueSinkSyntax.assignCollectionCode, languages.javascript, "js")
+            html: prismjs.highlight(queueSinkSyntax.assignCollectionCode, prismjs.languages.javascript, "js")
         },
         {
             title: "Map and put document",
             text: queueSinkSyntax.mapAndPutCode,
-            html: highlight(queueSinkSyntax.mapAndPutCode, languages.javascript, "js")
+            html: prismjs.highlight(queueSinkSyntax.mapAndPutCode, prismjs.languages.javascript, "js")
         }
     ];
 }

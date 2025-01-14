@@ -18,11 +18,11 @@ import prefixPathModel = require("models/database/tasks/prefixPathModel");
 import endpoints = require("endpoints");
 import getCertificatesCommand = require("commands/auth/getCertificatesCommand");
 import accessManager = require("common/shell/accessManager");
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database from "models/resources/database";
-import licenseModel from "models/auth/licenseModel";
-import { EditReplicationSinkInfoHub } from "viewmodels/database/tasks/EditReplicationSinkInfoHub";
-import { sortBy } from "common/typeUtils";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import database = require("models/resources/database");
+import licenseModel = require("models/auth/licenseModel");
+import EditReplicationSinkInfoHub = require("viewmodels/database/tasks/EditReplicationSinkInfoHub");
+import typeUtils = require("common/typeUtils");
 
 class editReplicationSinkTask extends shardViewModelBase {
 
@@ -58,14 +58,14 @@ class editReplicationSinkTask extends shardViewModelBase {
     private readonly serverCertificateName = "Server Certificate";
     
     hasPullReplicationAsSink = licenseModel.getStatusValue("HasPullReplicationAsSink");
-    infoHubView: ReactInKnockout<typeof EditReplicationSinkInfoHub>
+    infoHubView: ReactInKnockout<typeof EditReplicationSinkInfoHub.EditReplicationSinkInfoHub>
 
     constructor(db: database) {
         super(db);
         this.bindToCurrentInstance("useConnectionString", "onTestConnectionRaven", "onConfigurationFileSelected",
                                    "certFileSelected", "removeCertificate", "downloadServerCertificate", "setState");
         this.infoHubView = ko.pureComputed(() => ({
-            component: EditReplicationSinkInfoHub
+            component: EditReplicationSinkInfoHub.EditReplicationSinkInfoHub
         }))
     }
 
@@ -146,7 +146,7 @@ class editReplicationSinkTask extends shardViewModelBase {
             .execute()
             .done((result: Raven.Client.Documents.Operations.ConnectionStrings.GetConnectionStringsResult) => {
                 const connectionStrings = (<any>Object).values(result.RavenConnectionStrings);
-                this.ravenEtlConnectionStringsDetails(sortBy(connectionStrings, x => x.Name.toUpperCase()));
+                this.ravenEtlConnectionStringsDetails(typeUtils.sortBy(connectionStrings, x => x.Name.toUpperCase()));
             });
     }
 

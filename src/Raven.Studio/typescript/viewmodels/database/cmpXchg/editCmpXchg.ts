@@ -14,8 +14,8 @@ import editorWarningsConfirm = require("viewmodels/database/documents/editorWarn
 import eventsCollector = require("common/eventsCollector");
 import popoverUtils = require("common/popoverUtils");
 import genUtils = require("common/generalUtils");
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database from "models/resources/database";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import database = require("models/resources/database");
 
 type contentType = "Value" | "Metadata";
 

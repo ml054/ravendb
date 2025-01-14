@@ -6,7 +6,7 @@ import getCertificatesCommand = require("commands/auth/getCertificatesCommand");
 import accessManager = require("common/shell/accessManager");
 import clusterDashboard = require("viewmodels/resources/clusterDashboard");
 import moment = require("moment");
-import serverSettings from "common/settings/serverSettings";
+import serverSettings = require("common/settings/serverSettings");
 
 interface serverCertificateInfo {
     dateFormatted: string;

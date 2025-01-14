@@ -7,7 +7,7 @@ import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
 import appUrl = require("common/appUrl");
 import perNodeStatItems = require("models/resources/widgets/perNodeStatItems");
 import widget = require("viewmodels/resources/widgets/widget");
-import DatabaseUtils from "components/utils/DatabaseUtils";
+import DatabaseUtils = require("components/utils/DatabaseUtils");
 
 class databaseIndexingWidget extends abstractDatabaseAndNodeAwareTableWidget<Raven.Server.Dashboard.Cluster.Notifications.DatabaseIndexingSpeedPayload, perNodeStatItems<indexingSpeedItem>, indexingSpeedItem> {
 
@@ -37,7 +37,7 @@ class databaseIndexingWidget extends abstractDatabaseAndNodeAwareTableWidget<Rav
     protected prepareColumns(): virtualColumn[] {
         const grid = this.gridController();
         return [
-            new textColumn<indexingSpeedItem>(grid, x => x.hideDatabaseName && !grid.sortEnabled() ? "" : DatabaseUtils.formatName(x.database), "Database", "35%"),
+            new textColumn<indexingSpeedItem>(grid, x => x.hideDatabaseName && !grid.sortEnabled() ? "" : DatabaseUtils.default.formatName(x.database), "Database", "35%"),
             new nodeTagColumn<indexingSpeedItem>(grid, item => this.prepareUrl(item, "Indexing Performance View")),
             new textColumn<indexingSpeedItem>(grid, x => widget.formatNumber(x.indexedPerSecond), "Indexed/s", "15%", {
                 headerTitle: "Indexed items per second",

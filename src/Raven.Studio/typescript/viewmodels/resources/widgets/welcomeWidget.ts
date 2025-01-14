@@ -2,7 +2,7 @@ import widget = require("viewmodels/resources/widgets/widget");
 import appUrl = require("common/appUrl");
 import viewModelBase = require("viewmodels/viewModelBase");
 import clusterDashboard = require("viewmodels/resources/clusterDashboard");
-import CreateDatabase from "components/pages/resources/databases/partials/create/CreateDatabase";
+import CreateDatabase = require("components/pages/resources/databases/partials/create/CreateDatabase");
 
 class welcomeWidget extends widget {
 

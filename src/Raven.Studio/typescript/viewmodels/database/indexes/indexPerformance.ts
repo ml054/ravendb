@@ -12,10 +12,10 @@ import getIndexesStatsCommand = require("commands/database/index/getIndexesStats
 import colorsManager = require("common/colorsManager");
 import fileImporter = require("common/fileImporter");
 import moment = require("moment");
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database from "models/resources/database";
-import DatabaseUtils from "components/utils/DatabaseUtils";
-import { sumBy } from "common/typeUtils";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import database = require("models/resources/database");
+import DatabaseUtils = require("components/utils/DatabaseUtils");
+import typeUtils = require("common/typeUtils");
 
 type rTreeLeaf = {
     minX: number;
@@ -539,7 +539,7 @@ class indexPerformance extends shardViewModelBase {
     }
     
     private checkBufferUsage() {
-        const dataCount = sumBy(this.data, x => x.Performance.length);
+        const dataCount = typeUtils.sumBy(this.data, x => x.Performance.length);
         const usage = Math.min(100, dataCount * 100.0 / indexPerformance.bufferSize);
         this.bufferUsage(usage.toFixed(1));
         
@@ -1481,7 +1481,7 @@ class indexPerformance extends shardViewModelBase {
         if (this.isImport()) {
             exportFileName = this.importFileName().substring(0, this.importFileName().lastIndexOf('.'));
         } else {
-            const detailedDatabaseName = DatabaseUtils.formatNameForFile(this.db.name, this.location);
+            const detailedDatabaseName = DatabaseUtils.default.formatNameForFile(this.db.name, this.location);
             
             exportFileName = `indexPerf of ${detailedDatabaseName} ${moment().format("YYYY-MM-DD HH-mm")}`; 
         }

@@ -30,10 +30,10 @@ import recentQueriesStorage = require("common/storage/savedQueriesStorage");
 import queryUtil = require("common/queryUtil");
 import endpoints = require("endpoints");
 import moment = require("moment");
-import shardViewModelBase from "viewmodels/shardViewModelBase";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
 import database = require("models/resources/database");
-import { highlight, languages } from "prismjs";
-import getDocumentsPreviewCommand from "commands/database/documents/getDocumentsPreviewCommand";
+import prismjs = require("prismjs");
+import getDocumentsPreviewCommand = require("commands/database/documents/getDocumentsPreviewCommand");
 
 class documents extends shardViewModelBase {
     
@@ -63,7 +63,7 @@ class documents extends shardViewModelBase {
     private collectionToSelectName: string;
     private gridController = ko.observable<virtualGridController<document>>();
     private columnPreview = new columnPreviewPlugin<document>();
-    columnsSelector = new columnsSelector<document>();
+    columnsSelector = new columnsSelector.default<document>();
 
     spinners = {
         delete: ko.observable<boolean>(false),
@@ -281,11 +281,11 @@ class documents extends shardViewModelBase {
                     fullDocumentsProvider.resolvePropertyValue(doc, column, (v: any) => {
                         if (v !== undefined) {
                             const json = JSON.stringify(v, null, 4);
-                            const html = highlight(json, languages.javascript, "js");
+                            const html = prismjs.highlight(json, prismjs.languages.javascript, "js");
                             onValue(html, json);
                         }
                     }, error => {
-                        const html = highlight("Unable to generate column preview: " + error.toString(), languages.javascript, "js");
+                        const html = prismjs.highlight("Unable to generate column preview: " + error.toString(), prismjs.languages.javascript, "js");
                         onValue(html);
                     });
                 }

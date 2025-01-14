@@ -13,7 +13,7 @@ import protractedCommandsDetector = require("common/notifications/protractedComm
 import buildInfo = require("models/resources/buildInfo");
 import chooseTheme = require("viewmodels/shell/chooseTheme");
 import app = require("durandal/app");
-import serverSetup from "models/wizard/serverSetup";
+import serverSetup = require("models/wizard/serverSetup");
 
 class setupShell extends viewModelBase {
 

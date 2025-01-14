@@ -1,10 +1,10 @@
 ﻿import viewModelBase = require("viewmodels/viewModelBase");
 import shardSelector = require("viewmodels/common/sharding/shardSelector");
-import nonShardedDatabase from "models/resources/nonShardedDatabase";
-import shardedDatabase from "models/resources/shardedDatabase";
-import shard from "models/resources/shard";
-import database from "models/resources/database";
-import genUtils from "common/generalUtils";
+import nonShardedDatabase = require("models/resources/nonShardedDatabase");
+import shardedDatabase = require("models/resources/shardedDatabase");
+import shard = require("models/resources/shard");
+import database = require("models/resources/database");
+import genUtils = require("common/generalUtils");
 
 class shardingContext extends viewModelBase {
 

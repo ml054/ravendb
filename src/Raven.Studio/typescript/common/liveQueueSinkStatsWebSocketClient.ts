@@ -4,8 +4,8 @@ import database = require("models/resources/database");
 import d3 = require("d3");
 import abstractWebSocketClient = require("common/abstractWebSocketClient");
 import endpoints = require("endpoints");
-import appUrl from "common/appUrl";
-import TaskUtils from "components/utils/TaskUtils";
+import appUrl = require("common/appUrl");
+import TaskUtils = require("components/utils/TaskUtils");
 
 class liveQueueSinkStatsWebSocketClient extends abstractWebSocketClient<resultsDto<Raven.Server.Documents.QueueSink.Stats.Performance.QueueSinkTaskPerformanceStats>> {
 
@@ -114,7 +114,7 @@ class liveQueueSinkStatsWebSocketClient extends abstractWebSocketClient<resultsD
                 });
                 
                 perTaskStatsFromEndpoint.Performance.forEach(perf => {
-                    liveQueueSinkStatsWebSocketClient.fillCache(perf, TaskUtils.queueTypeToStudioType(brokerType));
+                    liveQueueSinkStatsWebSocketClient.fillCache(perf, TaskUtils.default.queueTypeToStudioType(brokerType));
 
                     if (this.dateCutOff && this.dateCutOff.getTime() >= (perf as QueueSinkPerformanceBaseWithCache).StartedAsDate.getTime()) {
                         return;

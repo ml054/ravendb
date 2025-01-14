@@ -1,5 +1,5 @@
 import endpoints = require("endpoints");
-import commandBase from "commands/commandBase";
+import commandBase = require("commands/commandBase");
 
 class getClusterLogEntryCommand extends commandBase {
     

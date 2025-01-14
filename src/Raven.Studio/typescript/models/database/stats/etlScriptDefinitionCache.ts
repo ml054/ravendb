@@ -3,7 +3,7 @@ import database = require("models/resources/database");
 import getOngoingTaskInfoCommand = require("commands/database/tasks/getOngoingTaskInfoCommand");
 import app = require("durandal/app");
 import etlScriptDefinitionPreview = require("viewmodels/database/status/etlScriptDefinitionPreview");
-import genUtils from "common/generalUtils";
+import genUtils = require("common/generalUtils");
 import EtlType = Raven.Client.Documents.Operations.ETL.EtlType;
 
 class etlScriptDefinitionCache {

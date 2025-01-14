@@ -1,10 +1,10 @@
-import dialogViewModelBase from "viewmodels/dialogViewModelBase";
-import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
-import virtualGridController from "widgets/virtualGrid/virtualGridController";
-import textColumn from "widgets/virtualGrid/columns/textColumn";
+import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
+import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
+import virtualGridController = require("widgets/virtualGrid/virtualGridController");
+import textColumn = require("widgets/virtualGrid/columns/textColumn");
 import generalUtils = require("common/generalUtils");
 import moment = require("moment");
-import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
 
 class debugAdvancedClusterSnapshotInstallation extends dialogViewModelBase {
     

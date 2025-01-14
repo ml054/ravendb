@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/tsd.d.ts" />
 
-import versionProvider from "common/versionProvider";
+import versionProvider = require("common/versionProvider");
 
 class storageKeyProvider {
 

@@ -4,7 +4,7 @@ import dialog = require("plugins/dialog");
 import awesomeMultiselect = require("common/awesomeMultiselect");
 import databasesManager = require("common/shell/databasesManager");
 import TrafficWatchChangeType = Raven.Client.Documents.Changes.TrafficWatchChangeType;
-import licenseModel from "models/auth/licenseModel";
+import licenseModel = require("models/auth/licenseModel");
 
 class adminLogsTrafficWatchDialog extends dialogViewModelBase {
     

@@ -1,5 +1,5 @@
-import database from "models/resources/database";
-import shardedDatabase from "models/resources/shardedDatabase";
+import database = require("models/resources/database");
+import shardedDatabase = require("models/resources/shardedDatabase");
 import NodesTopology = Raven.Client.ServerWide.Operations.NodesTopology;
 import StudioDatabaseInfo = Raven.Server.Web.System.Processors.Studio.StudioDatabasesHandlerForGetDatabases.StudioDatabaseInfo;
 

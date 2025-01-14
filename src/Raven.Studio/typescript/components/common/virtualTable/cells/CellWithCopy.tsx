@@ -27,7 +27,7 @@ export function CellWithCopy({ value, children }: CellWithCopyProps) {
     return (
         <>
             <div ref={setValuePopover}>{children}</div>
-            <PopoverWithHover target={valuePopover}>
+            <PopoverWithHover target={valuePopover} placement="bottom-start" placementPrefix={null}>
                 <div className="p-2">
                     <pre
                         style={{ maxHeight: "300px" }}

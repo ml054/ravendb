@@ -6,10 +6,10 @@ import textColumn = require("widgets/virtualGrid/columns/textColumn");
 import alert = require("common/notifications/models/alert");
 import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
 import abstractAlertDetails = require("viewmodels/common/notificationCenter/detailViewer/alerts/abstractAlertDetails");
-import genUtils from "common/generalUtils";
-import hyperlinkColumn from "widgets/virtualGrid/columns/hyperlinkColumn";
-import appUrl from "common/appUrl";
-import activeDatabaseTracker from "common/shell/activeDatabaseTracker";
+import genUtils = require("common/generalUtils");
+import hyperlinkColumn = require("widgets/virtualGrid/columns/hyperlinkColumn");
+import appUrl = require("common/appUrl");
+import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
 
 interface WarningItem {
     source: string;

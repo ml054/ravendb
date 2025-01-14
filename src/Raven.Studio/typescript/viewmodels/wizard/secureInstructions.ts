@@ -1,6 +1,6 @@
 import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
 import dialog = require("plugins/dialog");
-import versionProvider from "common/versionProvider";
+import versionProvider = require("common/versionProvider");
 
 class secureInstructions extends dialogViewModelBase {
 

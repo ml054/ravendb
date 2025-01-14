@@ -1,9 +1,9 @@
 ﻿/// <reference path="../../typings/tsd.d.ts" />
 import pluralizeHelpers = require("common/helpers/text/pluralizeHelpers");
 import moment = require("moment");
-import { MouseEvent } from "react";
-import { isBoolean } from "common/typeUtils";
-import { SelectionState } from "components/models/common";
+import React = require("react");
+import typeUtils = require("common/typeUtils");
+import modelsCommon = require("components/models/common");
 
 type AtLeastOne<T> = [T, ...T[]];
 
@@ -566,7 +566,7 @@ class genUtils {
                            internalCallback: (result: { isValid: boolean, message: string } | boolean) => void) => {
                                             func(val, params, (currentValue, result) => {
                                                    if (currentValue === val) {
-                                                       if (isBoolean(result)) {
+                                                       if (typeUtils.isBoolean(result)) {
                                                            internalCallback(result);
                                                        } else if (result) {
                                                            internalCallback({ isValid: false, message: result});
@@ -615,7 +615,7 @@ class genUtils {
         return code;
     }
     
-    static canConsumeDelegatedEvent(event: MouseEvent<HTMLElement>) {
+    static canConsumeDelegatedEvent(event: React.MouseEvent<HTMLElement>) {
         const target = event.target as HTMLElement;
         const currentTarget = event.currentTarget as HTMLElement;
         
@@ -753,7 +753,7 @@ class genUtils {
         return Array.from(result.values());
     }
 
-    static getSelectionState<T extends string | number>(filteredNames: T[], selectedNames: T[]): SelectionState {
+    static getSelectionState<T extends string | number>(filteredNames: T[], selectedNames: T[]): modelsCommon.SelectionState {
 
         const selectedFromFilteredCount = selectedNames.reduce((count, selectedName) => {
             if (filteredNames.includes(selectedName)) {

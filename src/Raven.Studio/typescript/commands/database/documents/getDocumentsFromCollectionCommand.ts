@@ -2,7 +2,7 @@ import commandBase = require("commands/commandBase");
 import collection = require("models/database/documents/collection");
 import document = require("models/database/documents/document");
 import endpoints = require("endpoints");
-import database from "models/resources/database";
+import database = require("models/resources/database");
 
 class getDocumentsFromCollectionCommand extends commandBase {
 

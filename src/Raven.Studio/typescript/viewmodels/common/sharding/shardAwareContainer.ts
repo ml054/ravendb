@@ -2,7 +2,7 @@ import viewModelBase = require("viewmodels/viewModelBase");
 import activator = require("durandal/activator");
 import database = require("models/resources/database");
 import shardViewModelBase = require("viewmodels/shardViewModelBase");
-import shardingContext from "viewmodels/common/sharding/shardingContext";
+import shardingContext = require("viewmodels/common/sharding/shardingContext");
 import router = require("plugins/router");
 
 class shardAwareContainer extends viewModelBase {

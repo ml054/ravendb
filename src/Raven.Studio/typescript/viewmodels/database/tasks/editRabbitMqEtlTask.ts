@@ -23,10 +23,10 @@ import getDocumentWithMetadataCommand = require("commands/database/documents/get
 import testQueueEtlCommand = require("commands/database/tasks/testQueueEtlCommand");
 import document = require("models/database/documents/document");
 import popoverUtils = require("common/popoverUtils");
-import { highlight, languages } from "prismjs";
-import licenseModel from "models/auth/licenseModel";
-import { EditRabbitMqEtlInfoHub } from "viewmodels/database/tasks/EditRabbitMqEtlInfoHub";
-import { sortBy } from "common/typeUtils";
+import prismjs = require("prismjs");
+import licenseModel = require("models/auth/licenseModel");
+import EditRabbitMqEtlInfoHub = require("viewmodels/database/tasks/EditRabbitMqEtlInfoHub");
+import typeUtils = require("common/typeUtils");
 
 class rabbitMqTaskTestMode {
     documentId = ko.observable<string>();
@@ -111,7 +111,7 @@ class rabbitMqTaskTestMode {
                             const metaDto = docDto["@metadata"];
                             documentMetadata.filterMetadata(metaDto);
                             const text = JSON.stringify(docDto, null, 4);
-                            this.loadedDocument(highlight(text, languages.javascript, "js"));
+                            this.loadedDocument(prismjs.highlight(text, prismjs.languages.javascript, "js"));
                             this.loadedDocumentId(doc.getId());
 
                             $('.test-container a[href="#documentPreview"]').tab('show');
@@ -202,7 +202,7 @@ class editRabbitMqEtlTask extends viewModelBase {
     });
     
     hasQueueEtl = licenseModel.getStatusValue("HasQueueEtl");
-    infoHubView: ReactInKnockout<typeof EditRabbitMqEtlInfoHub>;
+    infoHubView: ReactInKnockout<typeof EditRabbitMqEtlInfoHub.EditRabbitMqEtlInfoHub>;
     
     constructor() {
         super();
@@ -212,7 +212,7 @@ class editRabbitMqEtlTask extends viewModelBase {
                                    "cancelEditedTransformation", "saveEditedTransformation", "syntaxHelp",
                                    "toggleTestArea", "toggleAdvancedArea", "setState");
         this.infoHubView = ko.pureComputed(() => ({
-            component: EditRabbitMqEtlInfoHub
+            component: EditRabbitMqEtlInfoHub.EditRabbitMqEtlInfoHub
         }))
     }
 
@@ -279,7 +279,7 @@ class editRabbitMqEtlTask extends viewModelBase {
             .done((result: Raven.Client.Documents.Operations.ConnectionStrings.GetConnectionStringsResult) => {
                 const queueConnectionStrings = Object.values(result.QueueConnectionStrings);
                 const rabbitMqStrings = queueConnectionStrings.filter(x => x.BrokerType === "RabbitMq");
-                this.rabbitMqEtlConnectionStringsDetails(sortBy(rabbitMqStrings, x => x.Name.toUpperCase()));
+                this.rabbitMqEtlConnectionStringsDetails(typeUtils.sortBy(rabbitMqStrings, x => x.Name.toUpperCase()));
             });
     }
 

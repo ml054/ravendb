@@ -5,7 +5,7 @@ import d3 = require("d3");
 import abstractWebSocketClient = require("common/abstractWebSocketClient");
 import endpoints = require("endpoints");
 import moment = require("moment");
-import appUrl from "common/appUrl";
+import appUrl = require("common/appUrl");
 
 class liveIndexPerformanceWebSocketClient extends abstractWebSocketClient<resultsDto<Raven.Client.Documents.Indexes.IndexPerformanceStats>> {
 

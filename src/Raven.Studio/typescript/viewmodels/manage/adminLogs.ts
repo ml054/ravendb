@@ -26,7 +26,7 @@ import enableAdminLogsMicrosoftCommand = require("commands/maintenance/enableAdm
 import disableAdminLogsMicrosoftCommand = require("commands/maintenance/disableAdminLogsMicrosoftCommand");
 import saveAdminLogsMicrosoftConfigurationCommand = require("commands/maintenance/saveAdminLogsMicrosoftConfigurationCommand");
 import configureMicrosoftLogsDialog = require("./configureMicrosoftLogsDialog");
-import messagePublisher from "common/messagePublisher";
+import messagePublisher = require("common/messagePublisher");
 import getAdminLogsEventListenerConfigurationCommand = require("commands/maintenance/getAdminLogsEventListenerConfigurationCommand");
 import saveAdminLogsEventListenerConfigurationCommand = require("commands/maintenance/saveAdminLogsEventListenerConfigurationCommand");
 import configureEventListenerDialog = require("viewmodels/manage/configureEventListenerDialog");

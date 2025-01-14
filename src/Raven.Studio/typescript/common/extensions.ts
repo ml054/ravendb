@@ -4,12 +4,12 @@ import listView = require("widgets/listView/listView");
 import genUtils = require("common/generalUtils");
 import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
 import accessManager = require("common/shell/accessManager");
-import { createElement } from "react";
-import { createRoot, Root } from "react-dom/client";
-import store from "components/store";
-import { Provider as ReduxProvider, ProviderProps as ReduxProviderProps } from "react-redux";
-import { DirtyFlagProvider } from "components/hooks/useDirtyFlag";
-import { ConfirmDialogProvider } from "components/common/ConfirmDialog";
+import react = require("react");
+import reactDomClient = require("react-dom/client");
+import store = require("components/store");
+import Redux = require("react-redux");
+import useDirtyFlag = require("components/hooks/useDirtyFlag");
+import ConfirmDialog = require("components/common/ConfirmDialog");
 
 class extensions {
     static install() {
@@ -218,7 +218,7 @@ class extensions {
         ko.bindingHandlers.react = {
             init: function (element) {
                 ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-                    const root: Root = $(element).data("root");
+                    const root: reactDomClient.Root = $(element).data("root");
                     root.unmount();
                 });
 
@@ -238,10 +238,10 @@ class extensions {
 
                 if (options && options.component) {
                     const root = $(element).data("root");
-                    const component = createElement(options.component, options.props);
-                    const dirtyFlagWrapper = createElement(DirtyFlagProvider, options.dirtyFlag, component);
-                    const reduxWrapper = createElement(ReduxProvider, { store: store } as ReduxProviderProps, dirtyFlagWrapper);
-                    const confirmDialogProvider = createElement(ConfirmDialogProvider, null, reduxWrapper);
+                    const component = react.createElement(options.component, options.props);
+                    const dirtyFlagWrapper = react.createElement(useDirtyFlag.DirtyFlagProvider, options.dirtyFlag, component);
+                    const reduxWrapper = react.createElement(Redux.Provider, { store: store.default } as Redux.ProviderProps, dirtyFlagWrapper);
+                    const confirmDialogProvider = react.createElement(ConfirmDialog.ConfirmDialogProvider, null, reduxWrapper);
 
                     root.render(confirmDialogProvider);
                 }

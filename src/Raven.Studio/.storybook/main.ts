@@ -17,32 +17,18 @@ customHooksToMock.forEach((name: string) => {
 });
 
 const config: StorybookConfig = {
-    babel: async (options) => {
-        options.plugins ??= [];
-        options.plugins.push((require as any).resolve("./import_plugin.js"));
-
-        return {
-            ...options,
-            presets: [
-                ...(options.presets ?? []),
-                [
-                    "@babel/preset-react",
-                    {
-                        runtime: "automatic",
-                    },
-                    "preset-react-jsx-transform",
-                ],
-            ],
-            sourceType: "unambiguous",
-        };
+    docs: {
+        docsMode: false,
     },
-
+    typescript: {
+        reactDocgen: false,
+    },
     stories: ["../typescript/**/*.stories.tsx"],
     addons: [
         "@storybook/addon-links",
         "@storybook/addon-essentials",
         "@storybook/addon-interactions",
-        "@storybook/addon-webpack5-compiler-babel",
+        "@storybook/addon-webpack5-compiler-swc",
         "@storybook/addon-a11y",
     ],
 
@@ -59,6 +45,8 @@ const config: StorybookConfig = {
                 ...webpackConfig.resolve.alias,
             };
         }
+        config.watchOptions ??= {};
+        config.watchOptions.ignored = /(node_modules|storybook-config-entry|storybook-stories)/;
 
         config.plugins?.unshift(webpackConfig.plugins.find((x) => x.constructor.name === "ProvidePlugin"));
 

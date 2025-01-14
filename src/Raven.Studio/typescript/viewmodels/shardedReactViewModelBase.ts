@@ -1,7 +1,7 @@
-﻿import shardViewModelBase from "viewmodels/shardViewModelBase";
-import React from "react";
-import database from "models/resources/database";
-import { getReactDirtyFlag } from "common/reactViewModelUtils";
+﻿import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import React = require("react");
+import database = require("models/resources/database");
+import reactViewModelUtils = require("common/reactViewModelUtils");
 
 abstract class shardedReactViewModelBase extends shardViewModelBase {
 
@@ -26,7 +26,7 @@ abstract class shardedReactViewModelBase extends shardViewModelBase {
     activate(args: any, parameters?: any) {
         super.activate(args, parameters);
 
-        const reactDirtyFlag = getReactDirtyFlag(this.dirtyFlag, this.customDiscardStayResult);
+        const reactDirtyFlag = reactViewModelUtils.getReactDirtyFlag(this.dirtyFlag, this.customDiscardStayResult);
         const reactProps = {
             ...args,
             db: this.db,

@@ -3,8 +3,8 @@
 import messagePublisher = require("common/messagePublisher");
 import appUrl = require("common/appUrl");
 import protractedCommandsDetector = require("common/notifications/protractedCommandsDetector");
-import twoFactorHelper from "common/twoFactorHelper";
-import database from "models/resources/database";
+import twoFactorHelper = require("common/twoFactorHelper");
+import database = require("models/resources/database");
 
 /// Commands encapsulate a read or write operation to the database and support progress notifications and common AJAX related functionality.
 class commandBase {

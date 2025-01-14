@@ -1,9 +1,9 @@
 ﻿import intermediateMenuItem = require("common/shell/menu/intermediateMenuItem");
 import leafMenuItem = require("common/shell/menu/leafMenuItem");
 import footer = require("common/shell/footer");
-import { bridgeToReact } from "common/reactUtils";
-import { IndexesPage } from "components/pages/database/indexes/list/IndexesPage";
-import { IndexCleanup } from "components/pages/database/indexes/cleanup/IndexCleanup";
+import reactUtils = require("common/reactUtils");
+import IndexesPage = require("components/pages/database/indexes/list/IndexesPage");
+import IndexCleanup = require("components/pages/database/indexes/cleanup/IndexCleanup");
 export = getIndexesMenuItem;
 
 function getIndexesMenuItem(appUrls: computedAppUrls) {
@@ -22,7 +22,7 @@ function getIndexesMenuItem(appUrls: computedAppUrls) {
             nav: true,
             shardingMode: "allShards",
             route: "databases/indexes",
-            moduleId: bridgeToReact(IndexesPage, "shardedView"),
+            moduleId: reactUtils.bridgeToReact(IndexesPage.IndexesPage, "shardedView"),
             css: 'icon-list-of-indexes',
             dynamicHash: appUrls.indexes(null, false, false),
             search: {
@@ -77,7 +77,7 @@ function getIndexesMenuItem(appUrls: computedAppUrls) {
         }),
         new leafMenuItem({
             route: 'databases/indexes/cleanup',
-            moduleId: bridgeToReact(IndexCleanup, "nonShardedView"),
+            moduleId: reactUtils.bridgeToReact(IndexCleanup.IndexCleanup, "nonShardedView"),
             shardingMode: "allShards",
             title: 'Index Cleanup',
             nav: true,

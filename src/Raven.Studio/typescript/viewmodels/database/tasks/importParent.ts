@@ -1,8 +1,8 @@
 import appUrl = require("common/appUrl");
 
 import durandalRouter = require("plugins/router");
-import shardingContext from "viewmodels/common/sharding/shardingContext";
-import viewModelBase from "viewmodels/viewModelBase";
+import shardingContext = require("viewmodels/common/sharding/shardingContext");
+import viewModelBase = require("viewmodels/viewModelBase");
 
 class importParent extends viewModelBase {
 

@@ -2,7 +2,7 @@
 import activeDatabaseTracker = require("common/shell/activeDatabaseTracker");
 import pluralizeHelpers = require("common/helpers/text/pluralizeHelpers");
 import dialog = require("plugins/dialog");
-import { jwerty } from "jwerty";
+import jwerty = require("jwerty");
 
 type dialogViewModelBaseOptions = {
     elementToFocusOnDismissal?: string;
@@ -46,7 +46,7 @@ abstract class dialogViewModelBase {
     }
 
     attached() {
-        jwerty.key("enter", () => this.enterKeyPressed());
+        jwerty.jwerty.key("enter", () => this.enterKeyPressed());
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

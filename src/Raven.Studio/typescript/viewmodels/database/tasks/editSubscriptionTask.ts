@@ -18,14 +18,14 @@ import subscriptionRqlSyntax = require("viewmodels/database/tasks/subscriptionRq
 import eventsCollector = require("common/eventsCollector");
 import generalUtils = require("common/generalUtils");
 import rqlLanguageService = require("common/rqlLanguageService");
-import { highlight, languages } from "prismjs";
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database from "models/resources/database";
-import licenseModel from "models/auth/licenseModel";
-import { EditSubscriptionTaskInfoHub } from "./EditSubscriptionTaskInfoHub";
-import assertUnreachable from "components/utils/assertUnreachable";
+import prismjs = require("prismjs");
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import database = require("models/resources/database");
+import licenseModel = require("models/auth/licenseModel");
+import EditSubscriptionTaskInfoHub = require("./EditSubscriptionTaskInfoHub");
+import assertUnreachable = require("components/utils/assertUnreachable");
 import popoverUtils = require("common/popoverUtils");
-import { LicenseLimitReachStatus, getLicenseLimitReachStatus } from "components/utils/licenseLimitsUtils";
+import licenseLimitsUtils = require("components/utils/licenseLimitsUtils");
 import getDatabaseLicenseLimitsUsage = require("commands/licensing/getDatabaseLicenseLimitsUsage");
 import getClusterLicenseLimitsUsage = require("commands/licensing/getClusterLicenseLimitsUsage");
 
@@ -51,14 +51,14 @@ class editSubscriptionTask extends shardViewModelBase {
     taskResponsibleNodeSectionView = require("views/partial/taskResponsibleNodeSection.html");
     pinResponsibleNodeTextScriptView = require("views/partial/pinResponsibleNodeTextScript.html");
 
-    infoHubView: ReactInKnockout<typeof EditSubscriptionTaskInfoHub>;
+    infoHubView: ReactInKnockout<typeof EditSubscriptionTaskInfoHub.EditSubscriptionTaskInfoHub>;
 
     editedSubscription = ko.observable<ongoingTaskSubscriptionEdit>();
     isAddingNewSubscriptionTask = ko.observable<boolean>(true);
 
     cloneButtonTitle: KnockoutComputed<string>;
-    clusterLimitStatus: KnockoutComputed<LicenseLimitReachStatus>;
-    databaseLimitStatus: KnockoutComputed<LicenseLimitReachStatus>;     
+    clusterLimitStatus: KnockoutComputed<licenseLimitsUtils.LicenseLimitReachStatus>;
+    databaseLimitStatus: KnockoutComputed<licenseLimitsUtils.LicenseLimitReachStatus>;     
     databaseLicenseLimitsUsage = ko.observable<Raven.Server.Commercial.DatabaseLicenseLimitsUsage>();
     clusterLicenseLimitsUsage = ko.observable<Raven.Server.Commercial.LicenseLimitsUsage>();
 
@@ -73,7 +73,7 @@ class editSubscriptionTask extends shardViewModelBase {
     testTimeLimit = ko.observable<number>();
 
     private gridController = ko.observable<virtualGridController<any>>();
-    columnsSelector = new columnsSelector<documentObject>();
+    columnsSelector = new columnsSelector.default<documentObject>();
     resultsFetcher = ko.observable<fetcherType>();
     effectiveFetcher = ko.observable<fetcherType>();
     private columnPreview = new columnPreviewPlugin<documentObject>();
@@ -102,15 +102,15 @@ class editSubscriptionTask extends shardViewModelBase {
         this.canUseChangeVectorAsStartingPoint = ko.pureComputed(() => !this.db.isSharded());
 
         this.infoHubView = ko.pureComputed(() => ({
-            component: EditSubscriptionTaskInfoHub
+            component: EditSubscriptionTaskInfoHub.EditSubscriptionTaskInfoHub
         }));
 
         this.databaseLimitStatus = ko.pureComputed(() => {
-            return getLicenseLimitReachStatus(this.databaseLicenseLimitsUsage()?.NumberOfSubscriptions, this.maxNumberOfSubscriptionsPerDatabase);
+            return licenseLimitsUtils.getLicenseLimitReachStatus(this.databaseLicenseLimitsUsage()?.NumberOfSubscriptions, this.maxNumberOfSubscriptionsPerDatabase);
         });
         
         this.clusterLimitStatus = ko.pureComputed(() => {
-            return getLicenseLimitReachStatus(this.clusterLicenseLimitsUsage()?.NumberOfSubscriptionsInCluster, this.maxNumberOfSubscriptionsPerCluster);
+            return licenseLimitsUtils.getLicenseLimitReachStatus(this.clusterLicenseLimitsUsage()?.NumberOfSubscriptionsInCluster, this.maxNumberOfSubscriptionsPerCluster);
         });
 
         this.cloneButtonTitle = ko.pureComputed(() => {
@@ -341,7 +341,7 @@ class editSubscriptionTask extends shardViewModelBase {
                             onValue(formattedValue, value);
                         } else {
                             const json = JSON.stringify(value, null, 4);
-                            const html = highlight(json, languages.javascript, "js");
+                            const html = prismjs.highlight(json, prismjs.languages.javascript, "js");
                             onValue(html, json);
                         }
                     }
@@ -428,7 +428,7 @@ class editSubscriptionTask extends shardViewModelBase {
             case "ExcludeArchived":
                 return "Exclude Archived";
             default:
-                assertUnreachable(mode);
+                assertUnreachable.default(mode);
         }
     }
     

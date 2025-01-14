@@ -1,7 +1,7 @@
 import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import addShardToDatabaseGroupCommand from "commands/database/dbGroup/addShardToDatabaseGroupCommand";
-import getClusterTopologyCommand from "commands/database/cluster/getClusterTopologyCommand";
-import clusterNode from "models/database/cluster/clusterNode";
+import addShardToDatabaseGroupCommand = require("commands/database/dbGroup/addShardToDatabaseGroupCommand");
+import getClusterTopologyCommand = require("commands/database/cluster/getClusterTopologyCommand");
+import clusterNode = require("models/database/cluster/clusterNode");
 
 class addNewShardToDatabaseGroup extends dialogViewModelBase {
     

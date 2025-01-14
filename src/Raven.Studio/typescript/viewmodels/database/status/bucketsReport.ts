@@ -2,14 +2,14 @@ import getBucketsCommand = require("commands/database/debug/getBucketsCommand");
 import protractedCommandsDetector = require("common/notifications/protractedCommandsDetector");
 import generalUtils = require("common/generalUtils");
 import d3 = require("d3");
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database from "models/resources/database";
-import bucketReportItem from "models/database/status/bucketReportItem";
-import virtualGridController from "widgets/virtualGrid/virtualGridController";
-import textColumn from "widgets/virtualGrid/columns/textColumn";
-import getBucketCommand from "commands/database/debug/getBucketCommand";
-import startReshardingCommand from "commands/database/dbGroup/startReshardingCommand";
-import notificationCenter from "common/notifications/notificationCenter";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import database = require("models/resources/database");
+import bucketReportItem = require("models/database/status/bucketReportItem");
+import virtualGridController = require("widgets/virtualGrid/virtualGridController");
+import textColumn = require("widgets/virtualGrid/columns/textColumn");
+import getBucketCommand = require("commands/database/debug/getBucketCommand");
+import startReshardingCommand = require("commands/database/dbGroup/startReshardingCommand");
+import notificationCenter = require("common/notifications/notificationCenter");
 
 type positionAndSizes = {
     dx: number,

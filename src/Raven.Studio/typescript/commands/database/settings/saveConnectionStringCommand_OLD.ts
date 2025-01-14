@@ -5,8 +5,8 @@ import connectionStringRavenEtlModel = require("models/database/settings/connect
 import connectionStringSqlEtlModel = require("models/database/settings/connectionStringSqlEtlModel");
 import connectionStringOlapEtlModel = require("models/database/settings/connectionStringOlapEtlModel");
 import connectionStringElasticSearchEtlModel = require("models/database/settings/connectionStringElasticSearchEtlModel");
-import connectionStringKafkaModel from "models/database/settings/connectionStringKafkaModel";
-import connectionStringRabbitMqModel from "models/database/settings/connectionStringRabbitMqModel";
+import connectionStringKafkaModel = require("models/database/settings/connectionStringKafkaModel");
+import connectionStringRabbitMqModel = require("models/database/settings/connectionStringRabbitMqModel");
 import connectionStringAzureQueueStorageModel from "models/database/settings/connectionStringAzureQueueStorageModel";
 
 class saveConnectionStringCommand_OLD extends commandBase {

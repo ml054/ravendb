@@ -1,6 +1,6 @@
 import clusterDashboard = require("viewmodels/resources/clusterDashboard");
 import abstractChartsWebsocketWidget = require("viewmodels/resources/widgets/abstractChartsWebsocketWidget");
-import { lineChart } from "models/resources/clusterDashboard/lineChart";
+import lineChart = require("models/resources/clusterDashboard/lineChart");
 import serverTraffic = require("models/resources/widgets/serverTraffic");
 
 interface trafficState {
@@ -15,10 +15,10 @@ class trafficWidget extends abstractChartsWebsocketWidget<Raven.Server.Dashboard
     showWritesDetails = ko.observable<boolean>(false);
     showDataWrittenDetails = ko.observable<boolean>(false);
     
-    requestsChart: lineChart<Raven.Server.Dashboard.Cluster.Notifications.TrafficWatchPayload>;
-    avgRequestTimeChart: lineChart<Raven.Server.Dashboard.Cluster.Notifications.TrafficWatchPayload>;
-    writesChart: lineChart<Raven.Server.Dashboard.Cluster.Notifications.TrafficWatchPayload>;
-    dataWrittenChart: lineChart<Raven.Server.Dashboard.Cluster.Notifications.TrafficWatchPayload>;
+    requestsChart: lineChart.lineChart<Raven.Server.Dashboard.Cluster.Notifications.TrafficWatchPayload>;
+    avgRequestTimeChart: lineChart.lineChart<Raven.Server.Dashboard.Cluster.Notifications.TrafficWatchPayload>;
+    writesChart: lineChart.lineChart<Raven.Server.Dashboard.Cluster.Notifications.TrafficWatchPayload>;
+    dataWrittenChart: lineChart.lineChart<Raven.Server.Dashboard.Cluster.Notifications.TrafficWatchPayload>;
     
     constructor(controller: clusterDashboard) {
         super(controller);
@@ -49,7 +49,7 @@ class trafficWidget extends abstractChartsWebsocketWidget<Raven.Server.Dashboard
     
     initCharts() {
         const requestsContainer = this.container.querySelector(".requests-chart");
-        this.requestsChart = new lineChart(requestsContainer, x => x.RequestsPerSecond, {
+        this.requestsChart = new lineChart.lineChart(requestsContainer, x => x.RequestsPerSecond, {
             grid: true,
             fillData: true,
             tooltipProvider: date => trafficWidget.tooltipContent(date),
@@ -57,7 +57,7 @@ class trafficWidget extends abstractChartsWebsocketWidget<Raven.Server.Dashboard
         });
 
         const avgRequestTimeContainer = this.container.querySelector(".avg-request-time-chart");
-        this.avgRequestTimeChart = new lineChart(avgRequestTimeContainer, x => x.AverageRequestDuration, {
+        this.avgRequestTimeChart = new lineChart.lineChart(avgRequestTimeContainer, x => x.AverageRequestDuration, {
             grid: true,
             fillData: true,
             tooltipProvider: date => trafficWidget.tooltipContent(date),
@@ -65,7 +65,7 @@ class trafficWidget extends abstractChartsWebsocketWidget<Raven.Server.Dashboard
         });
         
         const writesChartContainer = this.container.querySelector(".writes-chart");
-        this.writesChart = new lineChart(writesChartContainer,
+        this.writesChart = new lineChart.lineChart(writesChartContainer,
             x => x.DocumentWritesPerSecond + x.AttachmentWritesPerSecond + x.CounterWritesPerSecond + x.TimeSeriesWritesPerSecond,
             {
                 grid: true,
@@ -75,7 +75,7 @@ class trafficWidget extends abstractChartsWebsocketWidget<Raven.Server.Dashboard
             });
         
         const dataWrittenContainer = this.container.querySelector(".data-written-chart");
-        this.dataWrittenChart = new lineChart(dataWrittenContainer,
+        this.dataWrittenChart = new lineChart.lineChart(dataWrittenContainer,
             x => x.DocumentsWriteBytesPerSecond + x.AttachmentsWriteBytesPerSecond + x.CountersWriteBytesPerSecond + x.TimeSeriesWriteBytesPerSecond,
             {
                 grid: true,

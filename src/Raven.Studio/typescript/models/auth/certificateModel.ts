@@ -2,7 +2,7 @@
 
 import certificatePermissionModel = require("models/auth/certificatePermissionModel");
 import moment = require("moment");
-import { sortBy } from "common/typeUtils";
+import typeUtils = require("common/typeUtils");
 
 type TwoFactorAction = "leave" | "set" | "delete";
 
@@ -161,7 +161,7 @@ class certificateModel {
         const dbAccessArray = Object.entries(dbAccessInfo ?? []).map(([dbName, accessLevel]) => 
             ({ accessLevel: `Database${accessLevel}` as databaseAccessLevel,  dbName: dbName }));
         
-        return sortBy(dbAccessArray, x => x.dbName.toLowerCase());
+        return typeUtils.sortBy(dbAccessArray, x => x.dbName.toLowerCase());
     }
 
     private initValidation() {

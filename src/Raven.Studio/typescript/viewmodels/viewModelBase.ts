@@ -11,7 +11,7 @@ import eventsCollector = require("common/eventsCollector");
 import viewHelpers = require("common/helpers/view/viewHelpers");
 import accessManager = require("common/shell/accessManager");
 import messagePublisher = require("common/messagePublisher");
-import { jwerty } from "jwerty";
+import jwerty = require("jwerty");
 
 /*
  * Base view model class that provides basic view model services, such as tracking the active database and providing a means to add keyboard shortcuts.
@@ -259,7 +259,7 @@ abstract class viewModelBase {
      * Also defines shortcut for ace editor, if ace editor was received
      */
     createKeyboardShortcut(keys: string, handler: () => void, elementSelector: string) {
-        jwerty.key(keys, e => {
+        jwerty.jwerty.key(keys, e => {
             e.preventDefault();
             handler();
         }, this, elementSelector);

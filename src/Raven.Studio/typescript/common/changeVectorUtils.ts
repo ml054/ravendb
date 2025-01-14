@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../typings/tsd.d.ts" />
 
-import { sortBy } from "common/typeUtils";
+import typeUtils = require("common/typeUtils");
 
 class changeVectorUtils {
 
@@ -20,7 +20,7 @@ class changeVectorUtils {
         let tokens = input.split(",")
                           .map(cvEntry => changeVectorUtils.parseChangeVectorEntry(cvEntry));
         
-        tokens = sortBy(tokens, x => x.tag);
+        tokens = typeUtils.sortBy(tokens, x => x.tag);
 
         return tokens;
     }

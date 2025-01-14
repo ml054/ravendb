@@ -1,7 +1,7 @@
 import commandBase = require("commands/commandBase");
 import endpoints = require("endpoints");
 
-import { getBinaryContent } from "jszip-utils";
+import jszipUtils = require("jszip-utils");
 import jszip = require("jszip");
 
 class captureClusterStackTracesCommand extends commandBase {
@@ -13,8 +13,8 @@ class captureClusterStackTracesCommand extends commandBase {
         const url = endpoints.global.serverWideDebugInfoPackage.adminDebugClusterInfoPackage + this.urlEncodeArgs(args);
         
         const task = $.Deferred<Array<clusterWideStackTraceResponseItem>>();
-        
-        getBinaryContent(url, (error, data) => {
+
+        jszipUtils.getBinaryContent(url, (error, data) => {
             if (error) {
                 task.reject(error);
             } else {

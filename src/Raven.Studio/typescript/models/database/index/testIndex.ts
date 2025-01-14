@@ -1,19 +1,19 @@
-﻿import indexDefinition from "models/database/index/indexDefinition";
-import testIndexCommand from "commands/database/index/testIndexCommand";
-import database from "models/resources/database";
-import virtualGridController from "widgets/virtualGrid/virtualGridController";
+﻿import indexDefinition = require("models/database/index/indexDefinition");
+import testIndexCommand = require("commands/database/index/testIndexCommand");
+import database = require("models/resources/database");
+import virtualGridController = require("widgets/virtualGrid/virtualGridController");
 import documentObject = require("models/database/documents/document");
-import columnPreviewPlugin from "widgets/virtualGrid/columnPreviewPlugin";
+import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
 import columnsSelector = require("viewmodels/partial/columnsSelector");
-import eventsCollector from "common/eventsCollector";
+import eventsCollector = require("common/eventsCollector");
 import documentBasedColumnsProvider = require("widgets/virtualGrid/columns/providers/documentBasedColumnsProvider");
-import textColumn from "widgets/virtualGrid/columns/textColumn";
-import virtualColumn from "widgets/virtualGrid/columns/virtualColumn";
+import textColumn = require("widgets/virtualGrid/columns/textColumn");
+import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
 import TestIndexResult = Raven.Server.Documents.Indexes.Test.TestIndexResult;
-import assertUnreachable from "components/utils/assertUnreachable";
-import { highlight, languages } from "prismjs";
-import rqlLanguageService from "common/rqlLanguageService";
-import aceEditorBindingHandler from "common/bindingHelpers/aceEditorBindingHandler";
+import assertUnreachable = require("components/utils/assertUnreachable");
+import prismjs = require("prismjs");
+import rqlLanguageService = require("common/rqlLanguageService");
+import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
 
 type testTabName = "queryResults" | "indexEntries" | "mapResults" | "reduceResults";
 type fetcherType = (skip: number, take: number) => JQueryPromise<pagedResult<documentObject>>;
@@ -33,7 +33,7 @@ class testIndex {
     query = ko.observable<string>(unnamedIndexQuery);
 
     gridController = ko.observable<virtualGridController<any>>();
-    columnsSelector = new columnsSelector<documentObject>();
+    columnsSelector = new columnsSelector.default<documentObject>();
     fetchTask: JQueryPromise<TestIndexResult>;
     resultsFetcher = ko.observable<fetcherType>();
     effectiveFetcher = ko.observable<fetcherType>();
@@ -126,7 +126,7 @@ class testIndex {
                 return;
             }
             default:
-                assertUnreachable(tabToUse);
+                assertUnreachable.default(tabToUse);
         }
     }
 
@@ -164,7 +164,7 @@ class testIndex {
                     const value = column.getCellValue(doc);
                     if (value !== undefined) {
                         const json = JSON.stringify(value, null, 4);
-                        const html = highlight(json, languages.javascript, "js");
+                        const html = prismjs.highlight(json, prismjs.languages.javascript, "js");
                         onValue(html, json);
                     }
                 }

@@ -3,7 +3,7 @@ import appUrl = require("common/appUrl");
 import serverWideTaskListModel = require("models/database/tasks/serverWide/serverWideTaskListModel"); 
 import generalUtils = require("common/generalUtils");
 import getAllServerWideTasksCommand = require("commands/serverWide/tasks/getAllServerWideTasksCommand");
-import connectionStatus from "models/resources/connectionStatus";
+import connectionStatus = require("models/resources/connectionStatus");
 
 //TODO: remove
 class serverWideBackupListModel extends serverWideTaskListModel {

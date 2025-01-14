@@ -1,13 +1,12 @@
 import clusterDashboard = require("viewmodels/resources/clusterDashboard");
 import gcInfo = require("models/resources/widgets/gcInfo");
-import abstractTransformingChartsWebsocketWidget
-    from "viewmodels/resources/widgets/abstractTransformingChartsWebsocketWidget";
-import { lineChart } from "models/resources/clusterDashboard/lineChart";
+import abstractTransformingChartsWebsocketWidget = require("viewmodels/resources/widgets/abstractTransformingChartsWebsocketWidget");
+import lineChart = require("models/resources/clusterDashboard/lineChart");
 import moment = require("moment");
-import { clusterDashboardChart } from "models/resources/clusterDashboard/clusterDashboardChart";
-import { bubbleChart } from "models/resources/clusterDashboard/bubbleChart";
-import { generationsLineChart } from "models/resources/clusterDashboard/generationsLineChart";
-import { sortBy } from "common/typeUtils";
+import clusterDashboardChart = require("models/resources/clusterDashboard/clusterDashboardChart");
+import bubbleChart = require("models/resources/clusterDashboard/bubbleChart");
+import generationsLineChart = require("models/resources/clusterDashboard/generationsLineChart");
+import typeUtils = require("common/typeUtils");
 
 interface gcInfoState {
     showGenerationsDetails: boolean;
@@ -25,8 +24,8 @@ class gcInfoWidget extends abstractTransformingChartsWebsocketWidget<
 
     showGenerationsDetails = ko.observable<boolean>(false);
     
-    generationsSizeCharts: lineChart<GcInfoChartData>[] = [];
-    pausesChart: bubbleChart<GcInfoChartData>;
+    generationsSizeCharts: lineChart.lineChart<GcInfoChartData>[] = [];
+    pausesChart: bubbleChart.bubbleChart<GcInfoChartData>;
     
     generationsMaxY = 0;
     
@@ -97,7 +96,7 @@ class gcInfoWidget extends abstractTransformingChartsWebsocketWidget<
         
         // since we query for GC info in intervals there might be multiple GCs in same polling period
         // sort by GC index to draw graphs properly
-        return sortBy(output, x => x.memoryInfo.Index);
+        return typeUtils.sortBy(output, x => x.memoryInfo.Index);
     }
     
     transformChartData(key: string, item: GcInfoNormalizedData): GcInfoChartData[] {
@@ -196,9 +195,9 @@ class gcInfoWidget extends abstractTransformingChartsWebsocketWidget<
         }
     }
 
-    protected canAppendToChart(chart: clusterDashboardChart<GcInfoChartData>, nodeTag: string, item: GcInfoChartData): boolean {
+    protected canAppendToChart(chart: clusterDashboardChart.clusterDashboardChart<GcInfoChartData>, nodeTag: string, item: GcInfoChartData): boolean {
         if (item.Key.startsWith(gcInfoWidget.pausesPrefix)) {
-            return chart instanceof bubbleChart;
+            return chart instanceof bubbleChart.bubbleChart;
         }
         
         const chartIdx = this.charts.findIndex(x => x === chart);
@@ -215,7 +214,7 @@ class gcInfoWidget extends abstractTransformingChartsWebsocketWidget<
             
             generationsSizeChartsContainer.appendChild(div);
             
-            return new generationsLineChart<GcInfoChartData>(div,
+            return new generationsLineChart.generationsLineChart<GcInfoChartData>(div,
                 x => x.value,
                 {
                     grid: true,
@@ -235,7 +234,7 @@ class gcInfoWidget extends abstractTransformingChartsWebsocketWidget<
         this.generationsSizeCharts = charts;
 
         const pausesChartContainer = this.container.querySelector(".gc-pause-bubble-chart");
-        this.pausesChart = new bubbleChart<GcInfoChartData, {  gcType: string }>(pausesChartContainer, x => x.value, {
+        this.pausesChart = new bubbleChart.bubbleChart<GcInfoChartData, {  gcType: string }>(pausesChartContainer, x => x.value, {
             grid: true,
             topPaddingProvider: () => 8,
             onMouseMove: (date, yValue) => {
@@ -281,14 +280,14 @@ class gcInfoWidget extends abstractTransformingChartsWebsocketWidget<
                 }
             });
             
-            const sortedPoints = sortBy(points, x => x.distance);
+            const sortedPoints = typeUtils.sortBy(points, x => x.distance);
             const closestPoint = sortedPoints[0];
                         
             const alignedDate = (closestPoint && closestPoint.distance < 50) ? closestPoint.date : null;
             return { date: alignedDate, tag: nodeStats.tag, distance: alignedDate ? Math.abs(date.getTime() - alignedDate.getTime()) : Number.MAX_SAFE_INTEGER };
         });
 
-        const sortedPerNodeData = sortBy(perNodeData, x => x.distance);
+        const sortedPerNodeData = typeUtils.sortBy(perNodeData, x => x.distance);
         return sortedPerNodeData[0];
     }
     

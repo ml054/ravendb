@@ -15,9 +15,8 @@ import models = require("models/database/settings/databaseSettingsModels");
 import popoverUtils = require("common/popoverUtils");
 import genUtils = require("common/generalUtils");
 import messagePublisher = require("common/messagePublisher");
-import { settingsEntry } from "models/database/settings/databaseSettingsModels";
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import { sortBy } from "common/typeUtils";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import typeUtils = require("common/typeUtils");
 
 type viewModeType = "summaryMode" | "editMode";
 
@@ -341,7 +340,7 @@ class databaseSettings extends shardViewModelBase {
                                 onValue("Unauthorized to access value!", "");
                                 return;
                             } else if (details.isSecured()) {
-                                onValue(settingsEntry.passwordBullets, "");
+                                onValue(models.settingsEntry.passwordBullets, "");
                                 return;
                         }
                         }
@@ -376,7 +375,7 @@ class databaseSettings extends shardViewModelBase {
                     return models.settingsEntry.getEntry(rawEntry);
                 });
 
-                this.allEntries(sortBy(settingsEntries, x => x.keyName()));
+                this.allEntries(typeUtils.sortBy(settingsEntries, x => x.keyName()));
             });
     }
     
@@ -398,7 +397,7 @@ class databaseSettings extends shardViewModelBase {
                 return { key: entry.keyName(), value: entry.effectiveValue() };
             });
 
-        const settingsToSaveSorted = sortBy(settingsToSave, x => x.key);
+        const settingsToSaveSorted = typeUtils.sortBy(settingsToSave, x => x.key);
       
         const settingsToSaveObject = settingsToSaveSorted.reduce((acc, item) => {
             acc[item.key] = item.value;

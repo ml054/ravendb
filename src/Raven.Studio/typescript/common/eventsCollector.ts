@@ -1,4 +1,4 @@
-﻿import router from "plugins/router";
+﻿import router = require("plugins/router");
 
 require("google.analytics");
 

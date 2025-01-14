@@ -3,7 +3,7 @@ import database = require("models/resources/database");
 import activeDatabase = require("common/shell/activeDatabaseTracker");
 import router = require("plugins/router");
 import messagePublisher = require("common/messagePublisher");
-import { DatabaseSharedInfo } from "components/models/databases";
+import databases = require("components/models/databases");
 
 class appUrl {
 
@@ -788,7 +788,7 @@ class appUrl {
         });
     }
     
-    static toExternalDatabaseUrl(db: DatabaseSharedInfo, url: string) {
+    static toExternalDatabaseUrl(db: databases.DatabaseSharedInfo, url: string) {
         // we have to redirect to different node, let's find first member where selected database exists
         const firstNode = db.nodes[0];
         if (!firstNode) {

@@ -2,7 +2,7 @@ import commandBase = require("commands/commandBase");
 import database = require("models/resources/database");
 import appUrl = require("common/appUrl");
 import endpoints = require("endpoints");
-import genUtils from "common/generalUtils";
+import genUtils = require("common/generalUtils");
 
 class getDatabaseStatsCommand extends commandBase {
     private readonly db: database | string;

@@ -26,6 +26,7 @@ module.exports = {
     "@typescript-eslint/no-unused-vars": "warn",
     "react/react-in-jsx-scope": "off",
     "local-rules/no-reactstrap-alert": "warn",
+    "local-rules/mixed-imports": "warn",
     "curly": "warn",
     "react/jsx-curly-brace-presence": [
       'warn',

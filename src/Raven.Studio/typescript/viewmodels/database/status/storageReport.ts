@@ -7,8 +7,8 @@ import protractedCommandsDetector = require("common/notifications/protractedComm
 import generalUtils = require("common/generalUtils");
 import storageReportItem = require("models/database/status/storageReportItem");
 import d3 = require("d3");
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database from "models/resources/database";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import database = require("models/resources/database");
 
 type positionAndSizes = {
     dx: number,

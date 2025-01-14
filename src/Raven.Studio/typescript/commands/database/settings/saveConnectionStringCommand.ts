@@ -1,13 +1,13 @@
 import commandBase = require("commands/commandBase");
 import database = require("models/resources/database");
 import endpoints = require("endpoints");
-import { ConnectionStringDto } from "components/pages/database/settings/connectionStrings/connectionStringsTypes";
+import connectionStringsTypes = require("components/pages/database/settings/connectionStrings/connectionStringsTypes");
 
 class saveConnectionStringCommand extends commandBase {
     private readonly db: database | string;
-    private readonly connectionString: ConnectionStringDto;
+    private readonly connectionString: connectionStringsTypes.ConnectionStringDto;
 
-    constructor(db: database | string, connectionString: ConnectionStringDto) {
+    constructor(db: database | string, connectionString: connectionStringsTypes.ConnectionStringDto) {
         super();
         this.db = db;
         this.connectionString = connectionString;

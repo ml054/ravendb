@@ -9,7 +9,7 @@ import actionColumn = require("widgets/virtualGrid/columns/actionColumn");
 import killQueryCommand = require("commands/database/query/killQueryCommand");
 import messagePublisher = require("common/messagePublisher");
 import generalUtils = require("common/generalUtils");
-import { highlight, languages } from "prismjs";
+import prismjs = require("prismjs");
 
 type ExecutingQueryInfoWithCache = {
     DatabaseName: string;
@@ -128,7 +128,7 @@ class runningQueries extends viewModelBase {
 
                 if (value !== undefined) {
                     const json = JSON.stringify(value, null, 4);
-                    const html = highlight(json, languages.javascript, "js");
+                    const html = prismjs.highlight(json, prismjs.languages.javascript, "js");
                     onValue(html, json);
                 }
             });

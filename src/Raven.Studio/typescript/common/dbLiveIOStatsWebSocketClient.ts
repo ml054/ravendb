@@ -2,7 +2,7 @@
 import database = require("models/resources/database");
 import endpoints = require("endpoints");
 import liveIOStatsWebSocketClient = require("common/liveIOStatsWebSocketClient");
-import appUrl from "common/appUrl";
+import appUrl = require("common/appUrl");
 
 class dbLiveIOStatsWebSocketClient extends liveIOStatsWebSocketClient {
 

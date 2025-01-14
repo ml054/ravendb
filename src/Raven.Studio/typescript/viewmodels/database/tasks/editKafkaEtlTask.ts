@@ -23,10 +23,10 @@ import database = require("models/resources/database");
 import documentMetadata = require("models/database/documents/documentMetadata");
 import viewHelpers = require("common/helpers/view/viewHelpers");
 import document = require("models/database/documents/document");
-import { highlight, languages } from "prismjs";
-import licenseModel from "models/auth/licenseModel";
-import { EditKafkaEtlInfoHub } from "viewmodels/database/tasks/EditKafkaEtlInfoHub";
-import { sortBy } from "common/typeUtils";
+import prismjs = require("prismjs");
+import licenseModel = require("models/auth/licenseModel");
+import EditKafkaEtlInfoHub = require("viewmodels/database/tasks/EditKafkaEtlInfoHub");
+import typeUtils = require("common/typeUtils");
 
 class kafkaTaskTestMode {
     documentId = ko.observable<string>();
@@ -111,7 +111,7 @@ class kafkaTaskTestMode {
                             const metaDto = docDto["@metadata"];
                             documentMetadata.filterMetadata(metaDto);
                             const text = JSON.stringify(docDto, null, 4);
-                            this.loadedDocument(highlight(text, languages.javascript, "js"));
+                            this.loadedDocument(prismjs.highlight(text, prismjs.languages.javascript, "js"));
                             this.loadedDocumentId(doc.getId());
 
                             $('.test-container a[href="#documentPreview"]').tab('show');
@@ -208,7 +208,7 @@ class editKafkaEtlTask extends viewModelBase {
     });
 
     hasQueueEtl = licenseModel.getStatusValue("HasQueueEtl");
-    infoHubView: ReactInKnockout<typeof EditKafkaEtlInfoHub>;
+    infoHubView: ReactInKnockout<typeof EditKafkaEtlInfoHub.EditKafkaEtlInfoHub>;
 
     constructor() {
         super();
@@ -218,7 +218,7 @@ class editKafkaEtlTask extends viewModelBase {
                                    "cancelEditedTransformation", "saveEditedTransformation", "syntaxHelp",
                                    "toggleTestArea", "toggleAdvancedArea", "setState");
         this.infoHubView = ko.pureComputed(() => ({
-            component: EditKafkaEtlInfoHub
+            component: EditKafkaEtlInfoHub.EditKafkaEtlInfoHub
         }))
     }
 
@@ -284,7 +284,7 @@ class editKafkaEtlTask extends viewModelBase {
             .done((result: Raven.Client.Documents.Operations.ConnectionStrings.GetConnectionStringsResult) => {
                 const queueConnectionStrings = Object.values(result.QueueConnectionStrings);
                 const kafkaStrings = queueConnectionStrings.filter(x => x.BrokerType === "Kafka");
-                this.kafkaEtlConnectionStringsDetails(sortBy(kafkaStrings, x => x.Name.toUpperCase()));
+                this.kafkaEtlConnectionStringsDetails(typeUtils.sortBy(kafkaStrings, x => x.Name.toUpperCase()));
             });
     }
 

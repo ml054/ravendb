@@ -16,15 +16,15 @@ import sinkScriptDefinitionCache = require("models/database/stats/sinkScriptDefi
 import subscriptionQueryDefinitionCache = require("models/database/stats/subscriptionQueryDefinitionCache");
 import fileImporter = require("common/fileImporter");
 import moment = require("moment");
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import database from "models/resources/database";
-import TaskUtils from "components/utils/TaskUtils";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import database = require("models/resources/database");
+import TaskUtils = require("components/utils/TaskUtils");
 import EtlType = Raven.Client.Documents.Operations.ETL.EtlType;
-import DatabaseUtils from "components/utils/DatabaseUtils";
-import liveQueueSinkStatsWebSocketClient from "common/liveQueueSinkStatsWebSocketClient";
-import showDataDialog from "viewmodels/common/showDataDialog";
-import app from "durandal/app";
-import { sumBy } from "common/typeUtils";
+import DatabaseUtils = require("components/utils/DatabaseUtils");
+import liveQueueSinkStatsWebSocketClient = require("common/liveQueueSinkStatsWebSocketClient");
+import showDataDialog = require("viewmodels/common/showDataDialog");
+import app = require("durandal/app");
+import typeUtils = require("common/typeUtils");
 
 type treeActionType = "toggleTrack" | "trackItem" | "gapItem" | "previewEtlScript" | "previewSinkScript" |
                       "subscriptionErrorItem" | "subscriptionPendingItem" | "subscriptionConnectionItem" | "previewSubscriptionQuery";
@@ -800,10 +800,10 @@ class ongoingTasksStats extends shardViewModelBase {
     }
 
     private checkBufferUsage() {
-        const replicationDataCount = sumBy(this.replicationData, x => x.Performance.length);
-        const etlDataCount = sumBy(this.etlData, t => sumBy(t.Stats, s => s.Performance.length));
-        const queueSinkDataCount = sumBy(this.queueSinkData, t => sumBy(t.Stats, s => s.Performance.length));
-        const subscriptionDataCount = sumBy(this.subscriptionData, x => x.BatchPerformance.length + x.ConnectionPerformance.length);
+        const replicationDataCount = typeUtils.sumBy(this.replicationData, x => x.Performance.length);
+        const etlDataCount = typeUtils.sumBy(this.etlData, t => typeUtils.sumBy(t.Stats, s => s.Performance.length));
+        const queueSinkDataCount = typeUtils.sumBy(this.queueSinkData, t => typeUtils.sumBy(t.Stats, s => s.Performance.length));
+        const subscriptionDataCount = typeUtils.sumBy(this.subscriptionData, x => x.BatchPerformance.length + x.ConnectionPerformance.length);
         
         const dataCount = replicationDataCount + etlDataCount + queueSinkDataCount + subscriptionDataCount;
 
@@ -1047,7 +1047,7 @@ class ongoingTasksStats extends shardViewModelBase {
             
             trackInfos.push({
                 name: etlTask.TaskName,
-                type: TaskUtils.etlTypeToStudioType(etlTask.EtlType, etlTask.EtlSubType),
+                type: TaskUtils.default.etlTypeToStudioType(etlTask.EtlType, etlTask.EtlSubType),
                 openedHeight: openedHeight,
                 closedHeight: closedHeight
             });
@@ -1071,7 +1071,7 @@ class ongoingTasksStats extends shardViewModelBase {
 
             trackInfos.push({
                 name: queueTask.TaskName,
-                type: TaskUtils.queueTypeToStudioType(queueTask.BrokerType),
+                type: TaskUtils.default.queueTypeToStudioType(queueTask.BrokerType),
                 openedHeight: openedHeight,
                 closedHeight: closedHeight
             });
@@ -1134,7 +1134,7 @@ class ongoingTasksStats extends shardViewModelBase {
     }
     
     private calcMaxYOffset(): void {
-        const heightSum = sumBy(this.filteredTrackNames(), track => {
+        const heightSum = typeUtils.sumBy(this.filteredTrackNames(), track => {
             const isOpened = _.includes(this.expandedTracks(), track);
             const trackInfo = this.tracksInfo().find(x => x.name === track);
             return isOpened ? trackInfo.openedHeight : trackInfo.closedHeight;
@@ -2507,7 +2507,7 @@ class ongoingTasksStats extends shardViewModelBase {
             etlTaskData.Stats.forEach(etlStats => {
                 etlStats.Performance.forEach(perfStat => {
                     liveEtlStatsWebSocketClient.fillCache(perfStat,
-                        TaskUtils.etlTypeToStudioType(etlTaskData.EtlType, etlTaskData.EtlSubType));
+                        TaskUtils.default.etlTypeToStudioType(etlTaskData.EtlType, etlTaskData.EtlSubType));
                 });
             })
         });
@@ -2515,7 +2515,7 @@ class ongoingTasksStats extends shardViewModelBase {
         this.queueSinkData.forEach(queueSinkData => {
             queueSinkData.Stats.forEach(sinkData => {
                 sinkData.Performance.forEach(perfStat => {
-                    liveQueueSinkStatsWebSocketClient.fillCache(perfStat, TaskUtils.queueTypeToStudioType(queueSinkData.BrokerType));
+                    liveQueueSinkStatsWebSocketClient.fillCache(perfStat, TaskUtils.default.queueTypeToStudioType(queueSinkData.BrokerType));
                 });
             });
         });
@@ -2602,7 +2602,7 @@ class ongoingTasksStats extends shardViewModelBase {
         if (this.isImport()) {
             exportFileName = this.importFileName().substring(0, this.importFileName().lastIndexOf('.'));
         } else {
-            const detailedDatabaseName = DatabaseUtils.formatNameForFile(this.db.name, this.location);
+            const detailedDatabaseName = DatabaseUtils.default.formatNameForFile(this.db.name, this.location);
 
             exportFileName = `OngoingTasksStats of ${detailedDatabaseName} ${moment().format("YYYY-MM-DD HH-mm")}`;
         }

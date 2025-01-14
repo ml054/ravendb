@@ -1,7 +1,7 @@
 import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
 import dialog = require("plugins/dialog");
 import aceEditorBindingHandler = require("common/bindingHelpers/aceEditorBindingHandler");
-import licenseModel from "models/auth/licenseModel";
+import licenseModel = require("models/auth/licenseModel");
 
 class configureMicrosoftLogsDialog extends dialogViewModelBase {
     

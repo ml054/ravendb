@@ -3,7 +3,7 @@
 import virtualColumn = require("widgets/virtualGrid/columns/virtualColumn");
 import virtualGridController = require("widgets/virtualGrid/virtualGridController");
 import generalUtils = require("common/generalUtils");
-import { isBoolean } from "common/typeUtils";
+import typeUtils = require("common/typeUtils");
 
 type preparedValue = {
     rawText: string;
@@ -132,7 +132,7 @@ class textColumn<T extends object> implements virtualColumn {
             };
         }
 
-        if (isBoolean(cellValue)) {
+        if (typeUtils.isBoolean(cellValue)) {
             const value = !!cellValue;
             return {
                 rawText: value ? 'true' : 'false',

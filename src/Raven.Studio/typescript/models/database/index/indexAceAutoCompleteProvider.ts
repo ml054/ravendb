@@ -4,7 +4,7 @@ import document = require("models/database/documents/document");
 import indexDefinition = require("models/database/index/indexDefinition");
 import getCollectionsStatsCommand = require("commands/database/documents/getCollectionsStatsCommand");
 import collectionsStats = require("models/database/documents/collectionsStats");
-import getDocumentsPreviewCommand from "commands/database/documents/getDocumentsPreviewCommand";
+import getDocumentsPreviewCommand = require("commands/database/documents/getDocumentsPreviewCommand");
 
 class indexAceAutoCompleteProvider {
     constructor(private activeDatabase: database, private editedIndex: KnockoutObservable<indexDefinition>) {

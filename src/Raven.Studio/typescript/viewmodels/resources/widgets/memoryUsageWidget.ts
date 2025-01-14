@@ -1,7 +1,7 @@
 import clusterDashboard = require("viewmodels/resources/clusterDashboard");
 import abstractChartsWebsocketWidget = require("viewmodels/resources/widgets/abstractChartsWebsocketWidget");
 
-import { lineChart } from "models/resources/clusterDashboard/lineChart";
+import lineChart = require("models/resources/clusterDashboard/lineChart");
 import memoryUsage = require("models/resources/widgets/memoryUsage");
 
 
@@ -17,8 +17,8 @@ class memoryUsageWidget extends abstractChartsWebsocketWidget<Raven.Server.Dashb
     showProcessDetails = ko.observable<boolean>(false);
     showMachineDetails = ko.observable<boolean>(false);
     
-    ravenChart: lineChart<Raven.Server.Dashboard.Cluster.Notifications.MemoryUsagePayload>;
-    serverChart: lineChart<Raven.Server.Dashboard.Cluster.Notifications.MemoryUsagePayload>;
+    ravenChart: lineChart.lineChart<Raven.Server.Dashboard.Cluster.Notifications.MemoryUsagePayload>;
+    serverChart: lineChart.lineChart<Raven.Server.Dashboard.Cluster.Notifications.MemoryUsagePayload>;
     
     constructor(controller: clusterDashboard) {
         super(controller);
@@ -59,14 +59,14 @@ class memoryUsageWidget extends abstractChartsWebsocketWidget<Raven.Server.Dashb
     
     initCharts() {
         const ravenChartContainer = this.container.querySelector(".ravendb-line-chart");
-        this.ravenChart = new lineChart(ravenChartContainer, x=> x.WorkingSet, {
+        this.ravenChart = new lineChart.lineChart(ravenChartContainer, x=> x.WorkingSet, {
             grid: true,
             fillData: true,
             tooltipProvider: date => memoryUsageWidget.tooltipContent(date),
             onMouseMove: date => this.onMouseMove(date)
         });
         const serverChartContainer = this.container.querySelector(".machine-line-chart");
-        this.serverChart = new lineChart(serverChartContainer, x=> x.PhysicalMemory - x.AvailableMemory, {
+        this.serverChart = new lineChart.lineChart(serverChartContainer, x=> x.PhysicalMemory - x.AvailableMemory, {
             grid: true, 
             fillData: true,
             tooltipProvider: date => memoryUsageWidget.tooltipContent(date),

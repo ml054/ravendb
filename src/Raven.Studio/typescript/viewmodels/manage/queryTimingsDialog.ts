@@ -1,6 +1,6 @@
 import dialog = require("plugins/dialog");
 import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import timingsChart from "common/timingsChart";
+import timingsChart = require("common/timingsChart");
 
 class queryTimingsDialog extends dialogViewModelBase {
 

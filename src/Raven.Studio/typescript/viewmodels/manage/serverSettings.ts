@@ -8,8 +8,7 @@ import models = require("models/database/settings/databaseSettingsModels");
 import genUtils = require("common/generalUtils");
 import messagePublisher = require("common/messagePublisher");
 import getServerSettingsCommand = require("commands/maintenance/getServerSettingsCommand");
-import { settingsEntry } from "models/database/settings/databaseSettingsModels";
-import { sortBy } from "common/typeUtils";
+import typeUtils = require("common/typeUtils");
 
 class serverSettings extends viewModelBase {
 
@@ -150,7 +149,7 @@ class serverSettings extends viewModelBase {
                                 onValue("Unauthorized to access value!", "");
                                 return;
                             } else if (details.isSecured()) {
-                                onValue(settingsEntry.passwordBullets, "");
+                                onValue(models.settingsEntry.passwordBullets, "");
                                 return;
                             }
                         }
@@ -177,7 +176,7 @@ class serverSettings extends viewModelBase {
             .done((result: Raven.Server.Config.SettingsResult) => {
                 const settingsEntries = result.Settings.map(x => models.settingsEntry.getEntry(x));
 
-                this.allEntries(sortBy(settingsEntries, x => x.keyName()));
+                this.allEntries(typeUtils.sortBy(settingsEntries, x => x.keyName()));
             });
     }
     

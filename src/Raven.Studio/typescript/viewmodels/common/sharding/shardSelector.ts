@@ -1,6 +1,6 @@
-﻿import shard from "models/resources/shard";
-import dialogViewModelBase from "viewmodels/dialogViewModelBase";
-import inlineShardSelector from "viewmodels/common/sharding/inlineShardSelector";
+﻿import shard = require("models/resources/shard");
+import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
+import inlineShardSelector = require("viewmodels/common/sharding/inlineShardSelector");
 
 class shardSelector extends dialogViewModelBase {
     

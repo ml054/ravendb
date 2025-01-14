@@ -1,6 +1,6 @@
 import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
 import copyToClipboard = require("common/copyToClipboard");
-import { highlight, languages } from "prismjs";
+import prismjs = require("prismjs");
 
 class conflictResolutionScriptSyntax extends dialogViewModelBase {
 
@@ -33,7 +33,7 @@ return docs[0];
     }
     
     scriptHtml = ko.pureComputed(() => {
-        return highlight(conflictResolutionScriptSyntax.sampleScript, languages.javascript, "js");
+        return prismjs.highlight(conflictResolutionScriptSyntax.sampleScript, prismjs.languages.javascript, "js");
     });
 
 }

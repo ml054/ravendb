@@ -1,4 +1,4 @@
-import changesContext from "common/changesContext";
+import changesContext = require("common/changesContext");
 
 class connectionStatus {
 

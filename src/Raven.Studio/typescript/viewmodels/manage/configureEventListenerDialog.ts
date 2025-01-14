@@ -1,6 +1,6 @@
 import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
 import dialog = require("plugins/dialog");
-import licenseModel from "models/auth/licenseModel";
+import licenseModel = require("models/auth/licenseModel");
 import awesomeMultiselect = require("common/awesomeMultiselect");
 import genUtils = require("common/generalUtils");
 

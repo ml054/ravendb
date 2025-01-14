@@ -16,8 +16,8 @@ import popoverUtils = require("common/popoverUtils");
 import defaultAceCompleter = require("common/defaultAceCompleter");
 import setupEncryptionKey = require("viewmodels/resources/setupEncryptionKey");
 import viewHelpers = require("common/helpers/view/viewHelpers");
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import DatabaseUtils from "components/utils/DatabaseUtils";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import DatabaseUtils = require("components/utils/DatabaseUtils");
 
 class exportDatabase extends shardViewModelBase {
 
@@ -117,7 +117,7 @@ class exportDatabase extends shardViewModelBase {
 
     private setupDefaultExportFilename(): void {
         const date = moment().format("YYYY-MM-DD HH-mm");
-        const detailedDatabaseName = DatabaseUtils.formatNameForFile(this.db.name, this.location);
+        const detailedDatabaseName = DatabaseUtils.default.formatNameForFile(this.db.name, this.location);
         
         this.model.exportFileName(`Dump of ${detailedDatabaseName} ${date}`);
     }

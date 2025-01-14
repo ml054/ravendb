@@ -1,6 +1,6 @@
 import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
 import clusterTopologyManager = require("common/shell/clusterTopologyManager");
-import addOrchestratorToDatabaseGroupCommand from "commands/database/dbGroup/addOrchestratorToDatabaseGroupCommand";
+import addOrchestratorToDatabaseGroupCommand = require("commands/database/dbGroup/addOrchestratorToDatabaseGroupCommand");
 
 interface nodeInfo {
     tag: string;

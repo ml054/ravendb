@@ -1,6 +1,6 @@
-﻿import React from "react";
-import viewModelBase from "viewmodels/viewModelBase";
-import { getReactDirtyFlag } from "common/reactViewModelUtils";
+﻿import React = require("react");
+import viewModelBase = require("viewmodels/viewModelBase");
+import reactViewModelUtils = require("common/reactViewModelUtils");
 
 abstract class reactViewModelBase extends viewModelBase {
 
@@ -25,7 +25,7 @@ abstract class reactViewModelBase extends viewModelBase {
     activate(args: any, parameters?: any) {
         super.activate(args, parameters);
 
-        const reactDirtyFlag = getReactDirtyFlag(this.dirtyFlag, this.customDiscardStayResult);
+        const reactDirtyFlag = reactViewModelUtils.getReactDirtyFlag(this.dirtyFlag, this.customDiscardStayResult);
         const reactProps = {
             ...args,
             db: this.activeDatabase()

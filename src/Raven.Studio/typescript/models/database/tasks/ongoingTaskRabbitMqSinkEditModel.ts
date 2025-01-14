@@ -1,5 +1,5 @@
 ﻿/// <reference path="../../../../typings/tsd.d.ts"/>
-import ongoingTaskQueueSinkEditModel from "models/database/tasks/ongoingTaskQueueSinkEditModel";
+import ongoingTaskQueueSinkEditModel = require("models/database/tasks/ongoingTaskQueueSinkEditModel");
 
 class ongoingTaskRabbitMqSinkEditModel extends ongoingTaskQueueSinkEditModel {
 

@@ -3,7 +3,7 @@ import distributeSecretCommand = require("commands/database/secrets/distributeSe
 import copyToClipboard = require("common/copyToClipboard");
 import fileDownloader = require("common/fileDownloader");
 import moment = require("moment");
-import { QRCode } from "qrcodejs";
+import qrcodejs = require("qrcodejs");
 
 abstract class setupEncryptionKey {
 
@@ -67,13 +67,13 @@ abstract class setupEncryptionKey {
 
         if (isKeyValid) {
             if (!this.qrCode) {
-                this.qrCode = new QRCode(qrContainer, {
+                this.qrCode = new qrcodejs.QRCode(qrContainer, {
                     text: key,
                     width: 256,
                     height: 256,
                     colorDark: "#000000",
                     colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.Q
+                    correctLevel: qrcodejs.QRCode.CorrectLevel.Q
                 });
             } else {
                 this.qrCode.clear();

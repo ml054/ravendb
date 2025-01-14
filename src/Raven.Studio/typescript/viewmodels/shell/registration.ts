@@ -8,8 +8,8 @@ import messagePublisher = require("common/messagePublisher");
 import forceLicenseUpdateCommand = require("commands/licensing/forceLicenseUpdateCommand");
 import renewLicenseCommand = require("commands/licensing/renewLicenseCommand");
 import getServerCertificateSetupModeCommand = require("commands/auth/getServerCertificateSetupModeCommand");
-import popoverUtils from "common/popoverUtils";
-import getConnectivityToLicenseServerCommand from "commands/licensing/getConnectivityToLicenseServerCommand";
+import popoverUtils = require("common/popoverUtils");
+import getConnectivityToLicenseServerCommand = require("commands/licensing/getConnectivityToLicenseServerCommand");
 
 class licenseKeyModel {
 

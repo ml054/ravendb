@@ -2,10 +2,10 @@
 
 import genUtils = require("common/generalUtils");
 import moment = require("moment");
-import { parseRql } from "../../languageService/src/parser";
-import { TokenStreamRewriter } from "antlr4ts";
-import { CollectionByIndexContext, CollectionByNameContext } from "../../languageService/src/generated/BaseRqlParser";
-import { QuoteUtils } from "../../languageService/src/quoteUtils";
+import parser = require("../../languageService/src/parser");
+import antlr4ts = require("antlr4ts");
+import BaseRqlParser = require("../../languageService/src/generated/BaseRqlParser");
+import quoteUtils = require("../../languageService/src/quoteUtils");
 
 class queryUtil {
 
@@ -93,9 +93,9 @@ class queryUtil {
             throw new Error("Query is required.");
         }
         
-        const parsedRql = parseRql(query);
+        const parsedRql = parser.parseRql(query);
 
-        const rewriter = new TokenStreamRewriter(parsedRql.tokenStream);
+        const rewriter = new antlr4ts.TokenStreamRewriter(parsedRql.tokenStream);
         
         const select = parsedRql.parseTree.selectStatement();
         if (select) {
@@ -125,17 +125,17 @@ class queryUtil {
             return [undefined, "unknown"];
         }
         
-        const parsedRql = parseRql(query);
+        const parsedRql = parser.parseRql(query);
         
         try {
             const fromStmt = parsedRql.parseTree.fromStatement();
-            if (fromStmt instanceof CollectionByIndexContext) {
+            if (fromStmt instanceof BaseRqlParser.CollectionByIndexContext) {
                 const indexName = fromStmt.indexName().text;
-                return [QuoteUtils.unquote(indexName), "index"];
+                return [quoteUtils.QuoteUtils.unquote(indexName), "index"];
             }
-            if (fromStmt instanceof CollectionByNameContext) {
+            if (fromStmt instanceof BaseRqlParser.CollectionByNameContext) {
                 const collectionName = fromStmt.collectionName().text;
-                return [QuoteUtils.unquote(collectionName), "collection"];
+                return [quoteUtils.QuoteUtils.unquote(collectionName), "collection"];
             }
             return [undefined, "unknown"];
         } catch {
@@ -147,10 +147,10 @@ class queryUtil {
         if (!query) {
             return true;
         }
-        const parsedRql = parseRql(query);
+        const parsedRql = parser.parseRql(query);
         try {
             const fromStmt = parsedRql.parseTree.fromStatement();
-            const fromIndex = fromStmt instanceof CollectionByIndexContext;
+            const fromIndex = fromStmt instanceof BaseRqlParser.CollectionByIndexContext;
             return !fromIndex;
         } catch {
             return true;

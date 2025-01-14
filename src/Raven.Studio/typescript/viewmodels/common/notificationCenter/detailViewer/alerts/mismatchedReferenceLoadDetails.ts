@@ -7,7 +7,7 @@ import alert = require("common/notifications/models/alert");
 import columnPreviewPlugin = require("widgets/virtualGrid/columnPreviewPlugin");
 import abstractAlertDetails = require("viewmodels/common/notificationCenter/detailViewer/alerts/abstractAlertDetails");
 import MismatchedReferencesLoadWarning = Raven.Server.NotificationCenter.Notifications.Details.MismatchedReferencesLoadWarning;
-import genUtils from "common/generalUtils";
+import genUtils = require("common/generalUtils");
 
 interface WarningItem {
     actualCollection: string;

@@ -18,7 +18,7 @@ import license = require("models/auth/licenseModel");
 import eventsCollector = require("common/eventsCollector");
 import accessManager = require("common/shell/accessManager");
 import generalUtils = require("common/generalUtils");
-import { sumBy } from "common/typeUtils";
+import typeUtils = require("common/typeUtils");
 
 class cluster extends viewModelBase {
 
@@ -114,7 +114,7 @@ class cluster extends viewModelBase {
 
         this.utilizedCores = ko.pureComputed(() => {
             const nodes = this.topology().nodes();
-            const utilizedCores = sumBy(nodes, x => !x.utilizedCores() ? 0 : x.utilizedCores());
+            const utilizedCores = typeUtils.sumBy(nodes, x => !x.utilizedCores() ? 0 : x.utilizedCores());
             return utilizedCores;
         });
 
@@ -129,7 +129,7 @@ class cluster extends viewModelBase {
 
         this.totalServersCores = ko.pureComputed(() => {
             const nodes = this.topology().nodes();
-            const numberOfCores = sumBy(nodes, x => !x.numberOfCores() || x.numberOfCores() === -1 ? 0 : x.numberOfCores());
+            const numberOfCores = typeUtils.sumBy(nodes, x => !x.numberOfCores() || x.numberOfCores() === -1 ? 0 : x.numberOfCores());
             return numberOfCores;
         });
     }
@@ -228,7 +228,7 @@ class cluster extends viewModelBase {
     }
 
     assignCores(node: clusterNode) {
-        const utilizedCores = sumBy(this.topology().nodes(), x => x.utilizedCores());
+        const utilizedCores = typeUtils.sumBy(this.topology().nodes(), x => x.utilizedCores());
         const availableCores = license.licenseStatus().MaxCores - utilizedCores;
         const assignCoresView = new assignCores(node.tag(), node.utilizedCores(), node.maxUtilizedCores(), availableCores, node.numberOfCores());
         app.showBootstrapDialog(assignCoresView);

@@ -3,8 +3,8 @@
 import d3 = require("d3");
 import clusterNode = require("models/database/cluster/clusterNode");
 import graphHelper = require("common/helpers/graph/graphHelper");
-import icomoonHelpers from "common/helpers/view/icomoonHelpers";
-import _ from 'lodash';
+import icomoonHelpers = require("common/helpers/view/icomoonHelpers");
+import _ = require("lodash");
 
 interface clusterNodeWithLayout extends clusterNode {
     x: number;

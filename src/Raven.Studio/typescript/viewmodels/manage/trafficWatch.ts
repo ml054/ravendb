@@ -15,10 +15,10 @@ import queryCriteria = require("models/database/query/queryCriteria");
 import databasesManager = require("common/shell/databasesManager");
 import accessManager = require("common/shell/accessManager");
 import TrafficWatchHttpChange = Raven.Client.Documents.Changes.TrafficWatchHttpChange;
-import trafficWatchQueriesDialog from "viewmodels/manage/trafficWatchQueriesDialog";
+import trafficWatchQueriesDialog = require("viewmodels/manage/trafficWatchQueriesDialog");
 import app = require("durandal/app");
 import appUrl = require("common/appUrl");
-import queryTimingsDialog from "viewmodels/manage/queryTimingsDialog";
+import queryTimingsDialog = require("viewmodels/manage/queryTimingsDialog");
 
 type trafficChangeType =
     Raven.Client.Documents.Changes.TrafficWatchChangeType

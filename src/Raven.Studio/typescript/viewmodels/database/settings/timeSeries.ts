@@ -8,9 +8,9 @@ import collectionsTracker = require("common/helpers/database/collectionsTracker"
 import getTimeSeriesConfigurationCommand = require("commands/database/documents/timeSeries/getTimeSeriesConfigurationCommand");
 import timeSeriesConfigurationEntry = require("models/database/documents/timeSeriesConfigurationEntry");
 import popoverUtils = require("common/popoverUtils");
-import shardViewModelBase from "viewmodels/shardViewModelBase";
-import licenseModel from "models/auth/licenseModel";
-import { TimeSeriesInfoHub } from "viewmodels/database/settings/TimeSeriesInfoHub";
+import shardViewModelBase = require("viewmodels/shardViewModelBase");
+import licenseModel = require("models/auth/licenseModel");
+import TimeSeriesInfoHub = require("viewmodels/database/settings/TimeSeriesInfoHub");
 
 class timeSeries extends shardViewModelBase {
 
@@ -32,7 +32,7 @@ class timeSeries extends shardViewModelBase {
     };
 
     hasTimeSeriesRollupsAndRetention = licenseModel.getStatusValue("HasTimeSeriesRollupsAndRetention");
-    infoHubView: ReactInKnockout<typeof TimeSeriesInfoHub>;
+    infoHubView: ReactInKnockout<typeof TimeSeriesInfoHub.TimeSeriesInfoHub>;
 
     constructor(db: database) {
         super(db);
@@ -45,7 +45,7 @@ class timeSeries extends shardViewModelBase {
         this.initObservables();
 
         this.infoHubView = ko.pureComputed(() => ({
-            component: TimeSeriesInfoHub
+            component: TimeSeriesInfoHub.TimeSeriesInfoHub
         }))
     }
 

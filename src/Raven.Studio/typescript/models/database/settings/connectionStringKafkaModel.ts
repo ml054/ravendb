@@ -2,7 +2,7 @@
 import database = require("models/resources/database");
 import connectionStringModel = require("models/database/settings/connectionStringModel");
 import saveConnectionStringCommand_OLD = require("commands/database/settings/saveConnectionStringCommand_OLD");
-import testKafkaServerConnectionCommand from "commands/database/cluster/testKafkaServerConnectionCommand";
+import testKafkaServerConnectionCommand = require("commands/database/cluster/testKafkaServerConnectionCommand");
 import accessManager = require("common/shell/accessManager");
 import jsonUtil = require("common/jsonUtil");
 

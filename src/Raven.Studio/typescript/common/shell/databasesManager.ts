@@ -9,12 +9,12 @@ import starredDocumentsStorage = require("common/storage/starredDocumentsStorage
 import clusterTopologyManager = require("common/shell/clusterTopologyManager");
 import savedPatchesStorage = require("common/storage/savedPatchesStorage");
 import generalUtils = require("common/generalUtils");
-import mergedIndexesStorage from "common/storage/mergedIndexesStorage";
-import shardedDatabase from "models/resources/shardedDatabase";
-import nonShardedDatabase from "models/resources/nonShardedDatabase";
-import DatabaseUtils from "components/utils/DatabaseUtils";
-import getDatabasesForStudioCommand from "commands/resources/getDatabasesForStudioCommand";
-import getDatabaseForStudioCommand from "commands/resources/getDatabaseForStudioCommand";
+import mergedIndexesStorage = require("common/storage/mergedIndexesStorage");
+import shardedDatabase = require("models/resources/shardedDatabase");
+import nonShardedDatabase = require("models/resources/nonShardedDatabase");
+import DatabaseUtils = require("components/utils/DatabaseUtils");
+import getDatabasesForStudioCommand = require("commands/resources/getDatabasesForStudioCommand");
+import getDatabaseForStudioCommand = require("commands/resources/getDatabaseForStudioCommand");
 import StudioDatabaseInfo = Raven.Server.Web.System.Processors.Studio.StudioDatabasesHandlerForGetDatabases.StudioDatabaseInfo;
 import convertedIndexesToStaticStorage = require("common/storage/convertedIndexesToStaticStorage");
 
@@ -49,9 +49,9 @@ class databasesManager {
             return null;
         }
         
-        const singleShard = DatabaseUtils.isSharded(name);
+        const singleShard = DatabaseUtils.default.isSharded(name);
         if (singleShard) {
-            const groupName = DatabaseUtils.shardGroupKey(name);
+            const groupName = DatabaseUtils.default.shardGroupKey(name);
             const sharded = this.getDatabaseByName(groupName) as shardedDatabase;
             if (sharded) {
                 return sharded.shards().find(x => x.name.toLowerCase() === name.toLowerCase());
@@ -259,7 +259,7 @@ class databasesManager {
     }
 
     updateDatabaseInfo(db: database, databaseName: string): JQueryPromise<StudioDatabaseInfo> {
-        const rootDatabaseName = DatabaseUtils.shardGroupKey(databaseName);
+        const rootDatabaseName = DatabaseUtils.default.shardGroupKey(databaseName);
         
         return new getDatabaseForStudioCommand(rootDatabaseName)
             .execute()

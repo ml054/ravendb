@@ -3,7 +3,7 @@ import abstractNotification = require("common/notifications/models/abstractNotif
 import notificationCenter = require("common/notifications/notificationCenter");
 import recentError = require("common/notifications/models/recentError");
 import dialogViewModelBase = require("viewmodels/dialogViewModelBase");
-import copyToClipboard from "common/copyToClipboard";
+import copyToClipboard = require("common/copyToClipboard");
 
 class recentErrorDetails extends dialogViewModelBase {
 

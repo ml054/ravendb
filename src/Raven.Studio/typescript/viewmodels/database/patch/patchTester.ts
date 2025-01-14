@@ -12,7 +12,7 @@ import validationHelpers = require("viewmodels/common/validationHelpers");
 import documentPreviewer = require("models/database/documents/documentPreviewer");
 import queryUtil = require("common/queryUtil");
 import getIndexesDefinitionsCommand = require("commands/database/index/getIndexesDefinitionsCommand");
-import patchDebugActions from "viewmodels/database/patch/patchDebugActions";
+import patchDebugActions = require("viewmodels/database/patch/patchDebugActions");
 
 type testTabType = "preview" | "loaded" | "modified" | "deleted" | "output";
 

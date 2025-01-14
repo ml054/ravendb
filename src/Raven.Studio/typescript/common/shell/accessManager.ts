@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../../typings/tsd.d.ts"/>
 import database = require("models/resources/database");
-import DatabaseUtils from "components/utils/DatabaseUtils";
+import DatabaseUtils = require("components/utils/DatabaseUtils");
 
 class accessManager {
 
@@ -212,7 +212,7 @@ class accessManager {
             return null;
         }
 
-        return accessManager.databasesAccess[DatabaseUtils.shardGroupKey(name)];
+        return accessManager.databasesAccess[DatabaseUtils.default.shardGroupKey(name)];
     }
 
 }

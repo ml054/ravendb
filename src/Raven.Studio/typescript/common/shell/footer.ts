@@ -6,11 +6,11 @@ import changesContext = require("common/changesContext");
 import changeSubscription = require("common/changeSubscription");
 import appUrl = require("common/appUrl");
 import license = require("models/auth/licenseModel");
-import forgotTwoFactorSecretCommand from "commands/auth/forgotTwoFactorSecretCommand";
+import forgotTwoFactorSecretCommand = require("commands/auth/forgotTwoFactorSecretCommand");
 import endpoints = require("endpoints");
 import moment = require("moment");
-import clientCertificateModel from "models/auth/clientCertificateModel";
-import viewHelpers from "common/helpers/view/viewHelpers";
+import clientCertificateModel = require("models/auth/clientCertificateModel");
+import viewHelpers = require("common/helpers/view/viewHelpers");
 
 class footerStats {
     countOfDocuments = ko.observable<number>();
