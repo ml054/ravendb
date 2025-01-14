@@ -46,7 +46,7 @@ import moment = require("moment");
 import shardViewModelBase = require("viewmodels/shardViewModelBase");
 import shard = require("models/resources/shard");
 import shardedDatabase = require("models/resources/shardedDatabase");
-import assertUnreachable from "components/utils/assertUnreachable";
+import assertUnreachable = require("components/utils/assertUnreachable");
 
 class editDocument extends shardViewModelBase {
 
@@ -1218,7 +1218,7 @@ class editDocument extends shardViewModelBase {
                         break;
                     }
                     default:
-                        assertUnreachable(direction);
+                        assertUnreachable.default(direction);
                 }
                 break;
             }
@@ -1235,12 +1235,12 @@ class editDocument extends shardViewModelBase {
                         break;
                     }
                     default:
-                        assertUnreachable(direction);
+                        assertUnreachable.default(direction);
                 }
                 break;
             }
             default:
-                assertUnreachable(tab);
+                assertUnreachable.default(tab);
         }
         
     }
@@ -1264,7 +1264,7 @@ class editDocument extends shardViewModelBase {
                             return currentRevisionIndex < this.revisionsToCompare().length - 1;
                         }
                         default:
-                            return assertUnreachable(direction);
+                            return assertUnreachable.default(direction);
                     }
                 }
                 case "left": {
@@ -1281,12 +1281,12 @@ class editDocument extends shardViewModelBase {
                         case "older":
                             return currentRevisionIndex < this.revisionsToCompare().length - 1;
                         default:
-                            return assertUnreachable(direction);
+                            return assertUnreachable.default(direction);
                     }
                 }
 
                 default:
-                    return assertUnreachable(tab);
+                    return assertUnreachable.default(tab);
             }
         });
     }

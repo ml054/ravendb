@@ -230,9 +230,9 @@ class extensions {
             update: function (element, valueAccessor) {
                 const options = ko.unwrap(valueAccessor());
 
-                const root: Root = $(element).data("root");
+                const root: reactDomClient.Root = $(element).data("root");
                 if (!root) {
-                    const newRoot = createRoot(element);
+                    const newRoot = reactDomClient.createRoot(element);
                     $(element).data("root", newRoot);
                 }
 

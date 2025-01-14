@@ -60,7 +60,7 @@ import UpgradeModal = require("./shell/UpgradeModal");
 import getStudioBootstrapCommand = require("commands/resources/getStudioBootstrapCommand");
 import serverSettings = require("common/settings/serverSettings");
 import getLatestVersionInfoCommand = require("commands/version/getLatestVersionInfoCommand");
-import StudioSearchWithDatabaseSwitcher from "components/shell/studioSearchWithDatabaseSelector/StudioSearchWithDatabaseSwitcher";
+import StudioSearchWithDatabaseSwitcher = require("components/shell/studioSearchWithDatabaseSelector/StudioSearchWithDatabaseSwitcher");
 
 class shell extends viewModelBase {
 
@@ -130,7 +130,7 @@ class shell extends viewModelBase {
     upgradeModalView: ReactInKnockout<typeof UpgradeModal>;
     isUpgradeModalVisible = ko.observable<boolean>(false);
 
-    studioSearchWithDatabaseSwitcherView: ReactInKnockout<typeof StudioSearchWithDatabaseSwitcher>;
+    studioSearchWithDatabaseSwitcherView: ReactInKnockout<typeof StudioSearchWithDatabaseSwitcher.default>;
     
     constructor() {
         super();
@@ -235,7 +235,7 @@ class shell extends viewModelBase {
         
         this.studioSearchWithDatabaseSwitcherView = ko.computed(() => {
             return {
-                component: StudioSearchWithDatabaseSwitcher,
+                component: StudioSearchWithDatabaseSwitcher.default,
                 props: {
                     menuItems: this.mainMenu.items(),
                 },

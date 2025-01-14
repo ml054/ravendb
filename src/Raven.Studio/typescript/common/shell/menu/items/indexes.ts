@@ -42,7 +42,7 @@ function getIndexesMenuItem(appUrls: computedAppUrls) {
             nav: false,
             shardingMode: "allShards",
             route: "databases/indexes",
-            moduleId: bridgeToReact(IndexesPage, "shardedView"),
+            moduleId: reactUtils.bridgeToReact(IndexesPage.IndexesPage, "shardedView"),
             css: 'icon-index-import',
             itemRouteToHighlight: 'databases/indexes',
             dynamicHash: appUrls.indexes(null, false, true),

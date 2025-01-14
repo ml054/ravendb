@@ -20,11 +20,11 @@ import documentMetadata = require("models/database/documents/documentMetadata");
 import getDocumentWithMetadataCommand = require("commands/database/documents/getDocumentWithMetadataCommand");
 import testQueueEtlCommand = require("commands/database/tasks/testQueueEtlCommand");
 import document = require("models/database/documents/document");
-import { highlight, languages } from "prismjs";
-import licenseModel from "models/auth/licenseModel";
-import { EditAzureQueueStorageEtlInfoHub } from "viewmodels/database/tasks/EditAzureQueueStorageEtlInfoHub";
-import ongoingTaskAzureQueueStorageEtlEditModel from "models/database/tasks/ongoingTaskAzureQueueStorageEtlEditModel";
-import connectionStringAzureQueueStorageModel from "models/database/settings/connectionStringAzureQueueStorageModel";
+import prismjs = require("prismjs");
+import licenseModel = require("models/auth/licenseModel");
+import EditAzureQueueStorageEtlInfoHub = require("viewmodels/database/tasks/EditAzureQueueStorageEtlInfoHub");
+import ongoingTaskAzureQueueStorageEtlEditModel = require("models/database/tasks/ongoingTaskAzureQueueStorageEtlEditModel");
+import connectionStringAzureQueueStorageModel = require("models/database/settings/connectionStringAzureQueueStorageModel");
 import popoverUtils = require("common/popoverUtils");
 
 class azureQueueStorageTaskTestMode {
@@ -110,7 +110,7 @@ class azureQueueStorageTaskTestMode {
                             const metaDto = docDto["@metadata"];
                             documentMetadata.filterMetadata(metaDto);
                             const text = JSON.stringify(docDto, null, 4);
-                            this.loadedDocument(highlight(text, languages.javascript, "js"));
+                            this.loadedDocument(prismjs.highlight(text, prismjs.languages.javascript, "js"));
                             this.loadedDocumentId(doc.getId());
 
                             $('.test-container a[href="#documentPreview"]').tab('show');
@@ -200,7 +200,7 @@ class editAzureQueueStorageEtlTask extends viewModelBase {
     });
 
     hasQueueEtl = licenseModel.getStatusValue("HasQueueEtl");
-    infoHubView: ReactInKnockout<typeof EditAzureQueueStorageEtlInfoHub>;
+    infoHubView: ReactInKnockout<typeof EditAzureQueueStorageEtlInfoHub.EditAzureQueueStorageEtlInfoHub>;
 
     constructor() {
         super();
@@ -210,7 +210,7 @@ class editAzureQueueStorageEtlTask extends viewModelBase {
             "cancelEditedTransformation", "saveEditedTransformation", "syntaxHelp",
             "toggleTestArea", "toggleAdvancedArea", "setState");
         this.infoHubView = ko.pureComputed(() => ({
-            component: EditAzureQueueStorageEtlInfoHub
+            component: EditAzureQueueStorageEtlInfoHub.EditAzureQueueStorageEtlInfoHub
         }))
     }
 

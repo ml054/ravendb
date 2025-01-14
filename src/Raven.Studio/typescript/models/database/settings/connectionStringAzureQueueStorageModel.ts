@@ -3,9 +3,8 @@ import database = require("models/resources/database");
 import connectionStringModel = require("models/database/settings/connectionStringModel");
 import saveConnectionStringCommand_OLD = require("commands/database/settings/saveConnectionStringCommand_OLD");
 import jsonUtil = require("common/jsonUtil");
-import testAzureQueueStorageServerConnectionCommand
-    from "commands/database/cluster/testAzureQueueStorageServerConnectionCommand";
-import assertUnreachable from "components/utils/assertUnreachable";
+import testAzureQueueStorageServerConnectionCommand = require("commands/database/cluster/testAzureQueueStorageServerConnectionCommand");
+import assertUnreachable = require("components/utils/assertUnreachable");
 
 class AzureQueueStorageConnectionStringModel {
     connectionString = ko.observable<string>();
@@ -174,7 +173,7 @@ class connectionStringAzureQueueStorageModel extends connectionStringModel {
             case "passwordless":
                 return "Passwordless";
             default:
-                assertUnreachable(authenticationType);
+                assertUnreachable.default(authenticationType);
         }
     }
     
@@ -245,7 +244,7 @@ class connectionStringAzureQueueStorageModel extends connectionStringModel {
             case "passwordless":
                 return this.passwordlessModel.toDto();
             default:
-                assertUnreachable(authenticationType);
+                assertUnreachable.default(authenticationType);
         }
     }
     

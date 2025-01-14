@@ -7,7 +7,7 @@ import connectionStringOlapEtlModel = require("models/database/settings/connecti
 import connectionStringElasticSearchEtlModel = require("models/database/settings/connectionStringElasticSearchEtlModel");
 import connectionStringKafkaModel = require("models/database/settings/connectionStringKafkaModel");
 import connectionStringRabbitMqModel = require("models/database/settings/connectionStringRabbitMqModel");
-import connectionStringAzureQueueStorageModel from "models/database/settings/connectionStringAzureQueueStorageModel";
+import connectionStringAzureQueueStorageModel = require("models/database/settings/connectionStringAzureQueueStorageModel");
 
 class saveConnectionStringCommand_OLD extends commandBase {
 
