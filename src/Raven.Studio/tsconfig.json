@@ -86,6 +86,9 @@
             "node-forge": [
                 "typings/custom_node-forge.d.ts"
             ],
+            "d3v7": [
+                "node_modules/@types/d3v7/index.d.ts"
+            ],
             "hooks/*": [
                 "typescript/components/hooks/*"
             ]

@@ -343,6 +343,7 @@ module.exports = (env, args) => {
                 Content: path.resolve(__dirname, 'wwwroot/Content/'),
                 wwwroot: path.resolve(__dirname, 'wwwroot/'),
                 d3: path.resolve(__dirname, 'wwwroot/Content/custom_d3'),
+                d3v7: path.resolve(__dirname, 'node_modules/d3'),
                 qrcodejs: path.resolve(__dirname, 'wwwroot/Content/custom_qrcode'),
                 ["google.analytics"]: path.resolve(__dirname, 'wwwroot/Content/custom_ga'),
                 

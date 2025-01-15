@@ -1,8 +1,11 @@
 import viewModelBase = require("viewmodels/viewModelBase");
 import getSystemStorageReportCommand = require("commands/resources/getSystemStorageReportCommand");
 import generalUtils = require("common/generalUtils");
-import storageReportItem = require("models/database/status/storageReportItem");
-import d3 = require("d3");
+import serverStorageReportItem = require("models/database/status/serverStorageReportItem");
+import { select, Selection, pointer } from 'd3-selection';
+import { descending } from "d3-array";
+import "d3-transition";
+import { treemap, hierarchy, HierarchyNode, HierarchyRectangularNode } from "d3-hierarchy";
 
 type positionAndSizes = {
     dx: number,
@@ -11,23 +14,20 @@ type positionAndSizes = {
     y: number
 }
 
-class storageReport extends viewModelBase {
+
+//TODO: avoid any in this file
+export class storageReport extends viewModelBase {
 
     view = require("views/manage/storageReport.html");
 
     static readonly animationLength = 200;
 
     private rawData: detailedSystemStorageReportItemDto;
-
-    private currentPath: KnockoutComputed<Array<storageReportItem>>;
-
-    private x: d3.scale.Linear<number, number>;
-    private y: d3.scale.Linear<number, number>;
-    private root: storageReportItem;
-    private node = ko.observable<storageReportItem>();
-    private treemap: d3.layout.Treemap<any>;
-    private svg: d3.Selection<any>;
-    private tooltip: d3.Selection<any>;
+    private currentPath = ko.observable<serverStorageReportItem[]>();
+    private root: serverStorageReportItem;
+    private node = ko.observable<serverStorageReportItem>();
+    private svg: Selection<any, unknown, HTMLElement, any>;
+    private tooltip: Selection<null, unknown, HTMLElement, any>;
 
     private w: number;
     private h: number;
@@ -63,32 +63,25 @@ class storageReport extends viewModelBase {
     }
 
     private initObservables() {
-        this.currentPath = ko.pureComputed(() => {
-            const node = this.node();
-
-            const items: storageReportItem[] = [];
-
-            let currentItem = node;
-            while (currentItem) {
-                items.unshift(currentItem);
-                currentItem = currentItem.parent;
-            }
-
-            return items;
-        });
 
         this.showEntriesColumn = ko.pureComputed(() => {
             const node = this.node();
+            if (!node) {
+                return false;
+            }
             return !!node.internalChildren.find(x => x.type === "table" || x.type === "tree");
         });
 
         this.showPagesColumn = ko.pureComputed(() => {
             const node = this.node();
+            if (!node) {
+                return false;
+            }
             return !!node.internalChildren.find(x => x.type === "tree");
         });
         
         this.showTempFiles = ko.pureComputed(() => {
-            return this.node() == this.root;
+            return this.node() === this.root;
         })
     }
 
@@ -96,37 +89,35 @@ class storageReport extends viewModelBase {
         const data = this.rawData;
         this.root = this.mapReport(data);
         this.sortBySize(this.root);
-
-        this.node(this.root);
     }
 
-    private sortBySize(node: storageReportItem) {
+    private sortBySize(node: serverStorageReportItem) {  //TODO: this can be done via hierarchy
         if (node.internalChildren && node.internalChildren.length) {
             node.internalChildren.forEach(x => this.sortBySize(x));
 
-            node.internalChildren.sort((a, b) => d3.descending(a.size, b.size));
+            node.internalChildren.sort((a, b) => descending(a.size, b.size));
         }
     }
 
-    private mapReport(reportItem: detailedSystemStorageReportItemDto): storageReportItem {
+    private mapReport(reportItem: detailedSystemStorageReportItemDto): serverStorageReportItem {
         const dataFile = this.mapDataFile(reportItem.Report);
         const journals = this.mapJournals(reportItem.Report);
         const tempFiles = this.mapTempFiles(reportItem.Report);
 
-        return new storageReportItem(reportItem.Environment,
+        return new serverStorageReportItem(reportItem.Environment,
             reportItem.Type.toLowerCase(),
             true,
             dataFile.size + journals.size + tempFiles.size,
             [dataFile, journals, tempFiles]);
     }
 
-    private mapDataFile(report: Voron.Debugging.DetailedStorageReport): storageReportItem {
+    private mapDataFile(report: Voron.Debugging.DetailedStorageReport): serverStorageReportItem {
         const dataFile = report.DataFile;
 
-        const d = new storageReportItem("Datafile", "data", false, dataFile.AllocatedSpaceInBytes);
+        const d = new serverStorageReportItem("Datafile", "data", false, dataFile.AllocatedSpaceInBytes);
         const tables = this.mapTables(report.Tables);
         const trees = this.mapTrees(report.Trees, "Trees");
-        const freeSpace = new storageReportItem("Free", "free", false, report.DataFile.FreeSpaceInBytes, []);
+        const freeSpace = new serverStorageReportItem("Free", "free", false, report.DataFile.FreeSpaceInBytes, []);
         const preallocatedBuffers = this.mapPreAllocatedBuffers(report.PreAllocatedBuffers);
 
         d.internalChildren = [tables, trees, freeSpace, preallocatedBuffers];
@@ -134,12 +125,12 @@ class storageReport extends viewModelBase {
         return d;
     }
 
-    private mapPreAllocatedBuffers(buffersReport: Voron.Debugging.PreAllocatedBuffersReport): storageReportItem {
+    private mapPreAllocatedBuffers(buffersReport: Voron.Debugging.PreAllocatedBuffersReport): serverStorageReportItem {
         const allocationTree = this.mapTree(buffersReport.AllocationTree);
-        const buffersSpace = new storageReportItem("Pre Allocated Buffers Space", "reserved", false, buffersReport.PreAllocatedBuffersSpaceInBytes);
+        const buffersSpace = new serverStorageReportItem("Pre Allocated Buffers Space", "reserved", false, buffersReport.PreAllocatedBuffersSpaceInBytes);
         buffersSpace.pageCount = buffersReport.NumberOfPreAllocatedPages;
 
-        const preAllocatedBuffers = new storageReportItem("Pre Allocated Buffers", "reserved", false, buffersReport.AllocatedSpaceInBytes, [allocationTree, buffersSpace]);
+        const preAllocatedBuffers = new serverStorageReportItem("Pre Allocated Buffers", "reserved", false, buffersReport.AllocatedSpaceInBytes, [allocationTree, buffersSpace]);
         preAllocatedBuffers.customSizeProvider = (header: boolean) => {
             const allocatedSizeFormatted = generalUtils.formatBytesToSize(buffersReport.AllocatedSpaceInBytes);
             if (header) {
@@ -151,23 +142,23 @@ class storageReport extends viewModelBase {
         return preAllocatedBuffers;
     }
 
-    private mapTables(tables: Voron.Data.Tables.TableReport[]): storageReportItem {
+    private mapTables(tables: Voron.Data.Tables.TableReport[]): serverStorageReportItem {
         const mappedTables = tables.map(x => this.mapTable(x));
 
-        return new storageReportItem("Tables", "tables", false, mappedTables.reduce((p, c) => p + c.size, 0), mappedTables);
+        return new serverStorageReportItem("Tables", "tables", false, mappedTables.reduce((p, c) => p + c.size, 0), mappedTables);
     }
 
-    private mapTable(table: Voron.Data.Tables.TableReport): storageReportItem {
+    private mapTable(table: Voron.Data.Tables.TableReport): serverStorageReportItem {
         const structure = this.mapTrees(table.Structure, "Structure");
 
-        const data = new storageReportItem("Table Data", "table_data", false, table.DataSizeInBytes, []);
+        const data = new serverStorageReportItem("Table Data", "table_data", false, table.DataSizeInBytes, []);
         const indexes = this.mapTrees(table.Indexes, "Indexes");
 
         const preallocatedBuffers = this.mapPreAllocatedBuffers(table.PreAllocatedBuffers);
 
         const totalSize = table.AllocatedSpaceInBytes;
 
-        const tableItem = new storageReportItem(table.Name, "table", true, totalSize, [
+        const tableItem = new serverStorageReportItem(table.Name, "table", true, totalSize, [
             structure,
             data,
             indexes,
@@ -179,20 +170,20 @@ class storageReport extends viewModelBase {
         return tableItem;
     }
 
-    private mapTrees(trees: Voron.Debugging.TreeReport[], name: string): storageReportItem {
-        return new storageReportItem(name, name.toLowerCase(), false, trees.reduce((p, c) => p + c.AllocatedSpaceInBytes, 0), trees.map(x => this.mapTree(x)));
+    private mapTrees(trees: Voron.Debugging.TreeReport[], name: string): serverStorageReportItem {
+        return new serverStorageReportItem(name, name.toLowerCase(), false, trees.reduce((p, c) => p + c.AllocatedSpaceInBytes, 0), trees.map(x => this.mapTree(x)));
     }
 
-    private mapTree(tree: Voron.Debugging.TreeReport): storageReportItem {
+    private mapTree(tree: Voron.Debugging.TreeReport): serverStorageReportItem {
         const children = (tree.Streams && tree.Streams.Streams) ? tree.Streams.Streams.map(x => this.mapStream(x)) : [];
-        const item = new storageReportItem(tree.Name, "tree", true, tree.AllocatedSpaceInBytes, children);
+        const item = new serverStorageReportItem(tree.Name, "tree", true, tree.AllocatedSpaceInBytes, children);
         item.pageCount = tree.PageCount;
         item.numberOfEntries = tree.NumberOfEntries;
         return item;
     }
 
-    private mapStream(stream: Voron.Debugging.StreamDetails): storageReportItem {
-        const item = new storageReportItem(stream.Name, "stream", false, stream.AllocatedSpaceInBytes, []);
+    private mapStream(stream: Voron.Debugging.StreamDetails): serverStorageReportItem {
+        const item = new serverStorageReportItem(stream.Name, "stream", false, stream.AllocatedSpaceInBytes, []);
 
         item.customSizeProvider = (header: boolean) => {
             const allocatedSizeFormatted = generalUtils.formatBytesToSize(stream.AllocatedSpaceInBytes);
@@ -206,11 +197,11 @@ class storageReport extends viewModelBase {
         return item;
     }
 
-    private mapJournals(report: Voron.Debugging.DetailedStorageReport): storageReportItem {
+    private mapJournals(report: Voron.Debugging.DetailedStorageReport): serverStorageReportItem {
         const journals = report.Journals.Journals;
 
         const mappedJournals = journals.map(journal => 
-            new storageReportItem(
+            new serverStorageReportItem(
                 "Journal #" + journal.Number,
                 "journal",
                 false,
@@ -218,14 +209,14 @@ class storageReport extends viewModelBase {
                 []
             ));
 
-        return new storageReportItem("Journals", "journals", false, mappedJournals.reduce((p, c) => p + c.size, 0), mappedJournals);
+        return new serverStorageReportItem("Journals", "journals", false, mappedJournals.reduce((p, c) => p + c.size, 0), mappedJournals);
     }
     
-    private mapTempFiles(report: Voron.Debugging.DetailedStorageReport): storageReportItem {
+    private mapTempFiles(report: Voron.Debugging.DetailedStorageReport): serverStorageReportItem {
         const tempFiles = report.TempBuffers;
 
         const mappedTemps = tempFiles.map(temp => {
-            const item = new storageReportItem(
+            const item = new serverStorageReportItem(
                 temp.Name,
                 "temp",
                 false,
@@ -238,15 +229,13 @@ class storageReport extends viewModelBase {
             return item;
         });
 
-        return new storageReportItem("Temporary Files", "tempFiles", false, mappedTemps.reduce((p, c) => p + c.size, 0), mappedTemps);
+        return new serverStorageReportItem("Temporary Files", "tempFiles", false, mappedTemps.reduce((p, c) => p + c.size, 0), mappedTemps);
     }
 
     private initGraph() {
         this.detectContainerSize();
-        this.x = d3.scale.linear().range([0, this.w]);
-        this.y = d3.scale.linear().range([0, this.h]);
-
-        this.svg = d3.select("#storage-report-container .chart")
+        
+        this.svg = select("#storage-report-container .chart")
             .append("svg:svg")
             .attr("width", this.w)
             .attr("height", this.h)
@@ -261,7 +250,7 @@ class storageReport extends viewModelBase {
         this.h = $chartNode.height();
     }
 
-    private addHashing() {
+    private addHashing() { //TODO: do we need it?
         const defs = this.svg.append('defs');
         const g = defs.append("pattern")
             .attr('id', 'hash')
@@ -275,30 +264,46 @@ class storageReport extends viewModelBase {
         g.append("path").attr("d", "M10,0 l-10,10");
     }
 
-    private getChildren(node: storageReportItem, depth: number) {
-        return depth === 0 ? node.internalChildren : [];
-    }
-
     private draw(goingIn: boolean) {
         const levelDown = goingIn === true;
         const levelUp = goingIn === false;
-
-        this.treemap = d3.layout.treemap<any>()
-            .children((n, depth) => this.getChildren(n, depth))
-            .value(d => d.size)
+        
+        const node = this.node() ?? this.root;
+        
+        //TODO: do we need to recompute hierarchy here?
+        const tree = hierarchy<serverStorageReportItem>(this.root, d => d.internalChildren)
+            .eachBefore(d => {
+                // we don't use sum here, as the values are already summed-up - instead update readonly property 'value'
+                (d.value as number) = d.data.size;
+            });
+        
+        const layoutTree = treemap<serverStorageReportItem>()
             .size([this.w, this.h]);
+        
+        const treeToLayout = tree.find(x => x.data === node);
+        this.currentPath(treeToLayout.ancestors().map(x => x.data));
+        
+        const currentRoot = layoutTree(treeToLayout.copy());
+        
+        if (!this.node()) {
+            this.node(treeToLayout.data);
+        }
+        
+        this.tooltip = select(".chart-tooltip");
 
-        this.tooltip = d3.select(".chart-tooltip");
-
-        const oldLocation: positionAndSizes = {
-            dx: this.node().dx,
-            dy: this.node().dy,
-            x: this.node().x,
-            y: this.node().y
+        const oldNode = this.node();
+        const oldLocation: positionAndSizes = { //TODO: store aside
+            dx: 50,
+            dy: 20,
+            x :50, 
+            y: 20
+            // TODO: dx: oldNode.x1 - oldNode.x0,
+            // dy: oldNode.y1 - oldNode.y0,
+            // x: oldNode.x0,
+            // y: oldNode.y0,
         };
 
-        const nodes = this.treemap.nodes(this.node())
-            .filter(n => !n.children);
+        const nodes = currentRoot.children; //TODO: .filter(n => !n.children);
 
         if (levelDown) {
             this.animateZoomIn(nodes, oldLocation);
@@ -314,7 +319,7 @@ class storageReport extends viewModelBase {
         }
     }
 
-    private animateZoomIn(nodes: storageReportItem[], oldLocation: positionAndSizes) {
+    private animateZoomIn(nodes: HierarchyRectangularNode<serverStorageReportItem>[], oldLocation: positionAndSizes) {
         this.transitioning = true;
 
         const oldContainer = this.svg.select(".treemap");
@@ -337,21 +342,21 @@ class storageReport extends viewModelBase {
             .transition()
             .duration(storageReport.animationLength)
             .attr("transform", "translate(" + transX + "," + transY + ")scale(" + scaleX + "," + scaleY + ")")
-            .each("end", () => {
+            .on("end", () => {
                 const newCells = this.drawNewTreeMap(nodes, newGroup);
                 newCells
                     .style('opacity', 0)
                     .transition()
                     .duration(storageReport.animationLength)
                     .style('opacity', 1)
-                    .each("end", () => {
+                    .on("end", () => {
                         oldContainer.remove();
                         this.transitioning = false;
                     });
             });
     }
 
-    private animateZoomOut(nodes: storageReportItem[]) {
+    private animateZoomOut(nodes: HierarchyRectangularNode<serverStorageReportItem>[]) {
         this.transitioning = true;
 
         const oldContainer = this.svg.select(".treemap");
@@ -366,63 +371,65 @@ class storageReport extends viewModelBase {
             .transition()
             .duration(storageReport.animationLength)
             .style('opacity', 1)
-            .each("end", () => {
+            .on("end", () => {
                 oldContainer.remove();
                 this.transitioning = false;
             });
     }
 
-    private drawNewTreeMap(nodes: storageReportItem[], container: d3.Selection<any>) {
+    private drawNewTreeMap(nodes: HierarchyRectangularNode<serverStorageReportItem>[], container: Selection<any, any, HTMLElement, any>) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const self = this;
         const showTypeOffset = 7;
-        const showTypePredicate = (d: storageReportItem) => d.showType && d.dy > 22 && d.dx > 20;
+        const showTypePredicate = (d: HierarchyRectangularNode<serverStorageReportItem>) => d.data.showType && (d.y1 - d.y0) > 22 && (d.x1 - d.x0) > 20;
 
         const cell = container.selectAll("g.cell-no-such") // we always select non-existing nodes to draw from scratch - we don't update elements here
             .data(nodes)
-            .enter().append("svg:g")
-            .attr("class", d => "cell " + d.type)
-            .attr("transform", d => "translate(" + d.x + "," + d.y + ")")
-            .on("click", d => this.onClick(d, true))
-            .on("mouseover", d => this.onMouseOver(d))
+            .enter()
+            .append("svg:g")
+            .attr("class", d => "cell " + d.data.type)
+            .attr("transform", d => "translate(" + d.x0 + "," + d.y0 + ")")
+            .on("click", (event: PointerEvent, d) => this.onClick(event, d.data, true))
+            .on("mouseover", (event, data) => this.onMouseOver(event, data.data))
             .on("mouseout", () => this.onMouseOut())
-            .on("mousemove", () => this.onMouseMove());
+            .on("mousemove", (e) => this.onMouseMove(e));
 
         const rectangles = cell.append("svg:rect")
-            .attr("width", d => Math.max(0, d.dx - 1))
-            .attr("height", d => Math.max(0, d.dy - 1));
+            .attr("width", d => Math.max(0, (d.x1 - d.x0) - 1))
+            .attr("height", d => Math.max(0, (d.y1 - d.y0) - 1));
 
         rectangles
-            .filter(x => x.hasChildren())
+            .filter(x => x.data.hasChildren())
             .style('cursor', 'pointer');
 
+        
         cell.append("svg:text")
-            .filter(d => d.dx > 20 && d.dy > 8)
-            .attr("x", d => d.dx / 2)
-            .attr("y", d => showTypePredicate(d) ? d.dy / 2 - showTypeOffset : d.dy / 2)
+            .filter(d => (d.x1 - d.x0) > 20 && (d.y1 - d.y0) > 8)
+            .attr("x", d => (d.x1 - d.x0) / 2)
+            .attr("y", d => showTypePredicate(d) ? (d.y1 - d.y0) / 2 - showTypeOffset : (d.y1 - d.y0) / 2)
             .attr("dy", ".35em")
             .attr("text-anchor", "middle")
-            .text(d => d.name)
+            .text(d => d.data.name)
             .each(function (d) {
-                self.wrap(this, d.dx);
+                self.wrap(this, (d.x1 - d.x0));
             });
 
         cell.filter(d => showTypePredicate(d))
             .append("svg:text")
-            .attr("x", d => d.dx / 2)
-            .attr("y", d => showTypePredicate(d) ? d.dy / 2 + showTypeOffset : d.dy / 2)
+            .attr("x", d => (d.x1 - d.x0) / 2)
+            .attr("y", d => showTypePredicate(d) ? (d.y1 - d.y0) / 2 + showTypeOffset : (d.y1 - d.y0) / 2)
             .attr("dy", ".35em")
             .attr("text-anchor", "middle")
-            .text(d => _.upperFirst(d.type))
+            .text(d => _.upperFirst(d.data.type))
             .each(function (d) {
-                self.wrap(this, d.dx);
+                self.wrap(this, (d.x1 - d.x0));
             });
 
         return cell;
     }
 
     wrap($self: any, width: number) {
-        const self = d3.select($self);
+        const self = select($self);
         let textLength = (self.node() as any).getComputedTextLength();
         let text = self.text();
         while (textLength > (width - 6) && text.length > 0) {
@@ -432,12 +439,8 @@ class storageReport extends viewModelBase {
         }
     } 
 
-    onClick(d: storageReportItem, goingIn: boolean) {
+    onClick(event: PointerEvent, d: serverStorageReportItem, goingIn: boolean) {
         if (this.transitioning || this.node() === d) {
-            return;
-        }
-
-        if (!d.internalChildren || !d.internalChildren.length) {
             return;
         }
 
@@ -446,8 +449,8 @@ class storageReport extends viewModelBase {
 
         this.updateTooltips();
         
-        if (d3.event) {
-            (d3.event as any).stopPropagation();
+        if (event) {
+            event.stopPropagation();
         }
     }
     
@@ -455,9 +458,9 @@ class storageReport extends viewModelBase {
         $('#storage-report [data-toggle="tooltip"]').tooltip();
     }
 
-    private onMouseMove() {
+    private onMouseMove(e: any) {
         // eslint-disable-next-line prefer-const
-        let [x, y] = d3.mouse(this.svg.node());
+        let [x, y] = pointer(e, this.svg.node());
 
         const tooltipWidth = $(".chart-tooltip").width() + 20;
 
@@ -468,7 +471,7 @@ class storageReport extends viewModelBase {
             .style("top", (y + 10) + "px");
     }
 
-    private onMouseOver(d: storageReportItem) {
+    private onMouseOver(event: any, d: serverStorageReportItem) {
         this.tooltip.transition()
             .duration(200)
             .style("opacity", 1);
@@ -482,10 +485,10 @@ class storageReport extends viewModelBase {
         html += "<span class='size'>Size: <strong>" + generalUtils.formatBytesToSize(d.size) + "</strong></span>";
 
         this.tooltip.html(html);
-        this.onMouseMove();
+        this.onMouseMove(event);
     }
 
-    private shouldDisplayNumberOfEntries(d: storageReportItem) {
+    private shouldDisplayNumberOfEntries(d: serverStorageReportItem) {
         return d.type === "tree" || d.type === "table";
     }
 
@@ -495,5 +498,3 @@ class storageReport extends viewModelBase {
             .style("opacity", 0);
     }
 }
-
-export = storageReport;
