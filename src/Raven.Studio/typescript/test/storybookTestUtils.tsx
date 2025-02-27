@@ -6,6 +6,7 @@ import { mockHooks } from "test/mocks/hooks/MockHooks";
 import { DirtyFlagProvider } from "components/hooks/useDirtyFlag";
 import { ConfirmDialogProvider } from "components/common/ConfirmDialog";
 import { StoryFn } from "@storybook/react";
+import { DialogProvider } from "components/common/Dialog";
 
 export function storybookContainerPublicContainer(Story: StoryFn) {
     return (
@@ -32,9 +33,11 @@ export function withStorybookContexts(storyFn: any) {
     return (
         <DirtyFlagProvider setIsDirty={mockHooks.useDirtyFlag.mock}>
             <ConfirmDialogProvider>
-                <ServiceProvider services={mockServices.context}>
-                    <ChangesProvider changes={mockHooks.useChanges.mock}>{storyFn()}</ChangesProvider>
-                </ServiceProvider>
+                <DialogProvider>
+                    <ServiceProvider services={mockServices.context}>
+                        <ChangesProvider changes={mockHooks.useChanges.mock}>{storyFn()}</ChangesProvider>
+                    </ServiceProvider>
+                </DialogProvider>
             </ConfirmDialogProvider>
         </DirtyFlagProvider>
     );
